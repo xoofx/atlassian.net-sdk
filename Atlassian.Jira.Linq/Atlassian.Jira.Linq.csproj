@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D122F4E0-8737-431E-9212-4A662C25B72D}</ProjectGuid>
+    <ProjectGuid>{3709B271-989E-45E2-BA01-780AE2CE5DE5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Atlassian.Linq.Test</RootNamespace>
-    <AssemblyName>Atlassian.Linq.Test</AssemblyName>
+    <RootNamespace>Atlassian.Jira.Linq</RootNamespace>
+    <AssemblyName>Atlassian.Jira.Linq</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -38,23 +38,26 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="xunit">
-      <HintPath>..\AssemblyReferences\xunit\xunit.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JiraInstance.cs" />
+    <Compile Include="JiraQueryable.cs" />
+    <Compile Include="JiraQueryProvider.cs" />
+    <Compile Include="JqlExpressionTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SomeClassTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Atlassian.Linq\Atlassian.Linq.csproj">
-      <Project>{DC7A8CC7-E068-45DB-8A8B-6300E885FCA8}</Project>
-      <Name>Atlassian.Linq</Name>
+    <ProjectReference Include="..\Atlassian.Jira\Atlassian.Jira.csproj">
+      <Project>{438EB0CF-D781-4F1B-9BD3-B33638AA8D1D}</Project>
+      <Name>Atlassian.Jira</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <UsingTask AssemblyFile="..\AssemblyReferences\xunit\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
-  <Target Name="AfterBuild">
-	<xunit Assembly="$(OutputPath)\Atlassian.Linq.Test.dll" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
   </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>

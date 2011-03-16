@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Atlassian.Linq")]
+[assembly: AssemblyTitle("Atlassian.Jira")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("Atlassian.Linq")]
+[assembly: AssemblyProduct("Atlassian.Jira")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("c5ad9f31-14c4-4052-a766-d56e980db047")]
+[assembly: Guid("8487de75-9f74-4407-95f4-1c9af80ffdcb")]
 
 // Version information for an assembly consists of the following four values:
 //
