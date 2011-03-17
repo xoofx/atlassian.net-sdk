@@ -5,7 +5,7 @@ using System.Text;
 using Atlassian.Jira.Linq;
 using Atlassian.Jira;
 
-namespace ConsoleTest
+namespace ConsoleSample
 {
     class TestRemoteService: IJiraRemoteService
     {

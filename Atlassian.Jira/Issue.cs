@@ -30,9 +30,9 @@ namespace Atlassian.Jira
         /*
          * Not supported yet
          */
-        public DateTime CreatedDate { get; set; }
+        public DateTime Created { get; set; }
         public DateTime DueDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
+        public DateTime Updated { get; set; }
 
     }
 }

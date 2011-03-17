@@ -269,5 +269,57 @@ namespace Atlassian.Jira.Test
 
             Assert.Equal("Priority = 1", _translator.Jql);
         }
+
+        [Fact]
+        public void TranslateOrderBy()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Priority == 1
+                          orderby i.Created
+                          select i).ToArray();
+
+            Assert.Equal("Priority = 1 order by Created", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateOrderByDescending()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Priority == 1
+                          orderby i.Created descending
+                          select i).ToArray();
+
+            Assert.Equal("Priority = 1 order by Created desc", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateMultipleOrderBys()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Priority == 1
+                          orderby i.Created, i.DueDate
+                          select i).ToArray();
+
+            Assert.Equal("Priority = 1 order by Created, DueDate", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateMultipleOrderByDescending()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Priority == 1
+                          orderby i.Created, i.DueDate descending
+                          select i).ToArray();
+
+            Assert.Equal("Priority = 1 order by Created, DueDate desc", _translator.Jql);
+        }
     }
 }

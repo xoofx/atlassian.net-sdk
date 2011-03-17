@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Atlassian.Jira.Linq
 {
-    public class JiraQueryable<T>: IQueryable<T>
+    public class JiraQueryable<T>: IOrderedQueryable<T>, IQueryable<T>
     {
         private readonly JiraQueryProvider _provider;
         private readonly Expression _expression;

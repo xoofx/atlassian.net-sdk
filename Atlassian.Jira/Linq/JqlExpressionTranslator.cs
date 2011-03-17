@@ -9,21 +9,24 @@ namespace Atlassian.Jira.Linq
 {
     public class JqlExpressionTranslator: ExpressionVisitor, IJqlExpressionTranslator
     {
-        private StringBuilder _jql;
+        private StringBuilder _jqlWhere;
+        private StringBuilder _jqlOrderBy;
 
         public string Jql 
         { 
             get
             {
-                return _jql.ToString();
+                return _jqlWhere.ToString() + _jqlOrderBy.ToString();
             } 
         }
 
         public string Translate(Expression expression)
         {
-            _jql = new StringBuilder();
+            _jqlWhere = new StringBuilder();
+            _jqlOrderBy = new StringBuilder();
+
             this.Visit(expression);
-            return _jql.ToString();
+            return Jql;
         }
 
         private Tuple<PropertyInfo, object> DecomposeConstantOperatorExpression(BinaryExpression expression)
@@ -36,6 +39,7 @@ namespace Atlassian.Jira.Linq
                 if (propertyInfo != null)
                 {
                     var constant = expression.Right as ConstantExpression;
+                    
                     if (constant != null)
                     {
                         return Tuple.Create<PropertyInfo, object>(propertyInfo, constant.Value);
@@ -53,10 +57,10 @@ namespace Atlassian.Jira.Linq
             var tuple = DecomposeConstantOperatorExpression(expression);
 
             // field
-            _jql.Append(tuple.Item1.Name);
+            _jqlWhere.Append(tuple.Item1.Name);
 
             // operator
-            _jql.Append(String.Format(" {0} ", operatorString));
+            _jqlWhere.Append(String.Format(" {0} ", operatorString));
 
             // value
             ProcessConstant(tuple.Item2);
@@ -67,15 +71,15 @@ namespace Atlassian.Jira.Linq
             var tuple = DecomposeConstantOperatorExpression(expression);
 
             // field
-            _jql.Append(tuple.Item1.Name);
+            _jqlWhere.Append(tuple.Item1.Name);
 
             // special cases for empty/null string
             if (tuple.Item2 == null || tuple.Item2.Equals(""))
             {
-                _jql.Append(" ");
-                _jql.Append(equal? Operators.IS : Operators.ISNOT);
-                _jql.Append(" ");
-                _jql.Append(tuple.Item2 == null? "null" : "empty");
+                _jqlWhere.Append(" ");
+                _jqlWhere.Append(equal? Operators.IS : Operators.ISNOT);
+                _jqlWhere.Append(" ");
+                _jqlWhere.Append(tuple.Item2 == null? "null" : "empty");
                 return;
             }
 
@@ -89,7 +93,7 @@ namespace Atlassian.Jira.Linq
             {
                 operatorString = equal? Operators.EQUALS: Operators.NOTEQUALS;
             }
-            _jql.Append(String.Format(" {0} ", operatorString));
+            _jqlWhere.Append(String.Format(" {0} ", operatorString));
 
             // value
             ProcessConstant(tuple.Item2);
@@ -101,23 +105,63 @@ namespace Atlassian.Jira.Linq
             if (valueType == typeof(String)
                 || valueType == typeof(ComparableTextField))
             {
-                _jql.Append(String.Format("\"{0}\"", value));
+                _jqlWhere.Append(String.Format("\"{0}\"", value));
             }
             else
             {
-                _jql.Append(value);
+                _jqlWhere.Append(value);
             }
         }
 
         private void ProcessUnionOperator(BinaryExpression expression, string operatorString)
         {
-            _jql.Append("(");
+            _jqlWhere.Append("(");
             Visit(expression.Left);
-            _jql.Append(operatorString);
+            _jqlWhere.Append(operatorString);
             Visit(expression.Right);
-            _jql.Append(")");
+            _jqlWhere.Append(")");
         }
 
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            if (node.Method.Name == "OrderBy" 
+                || node.Method.Name == "OrderByDescending"
+                || node.Method.Name == "ThenBy"
+                || node.Method.Name == "ThenByDescending")
+            {
+                ProcessOrderBy(node);
+            }
+
+            return base.VisitMethodCall(node) ;
+        }
+
+        private void ProcessOrderBy(MethodCallExpression node)
+        {
+            var firstOrderBy = _jqlOrderBy.Length == 0;
+            if (firstOrderBy)
+            {
+                _jqlOrderBy.Append(" order by ");
+            }
+           
+            var member = ((LambdaExpression)((UnaryExpression)node.Arguments[1]).Operand).Body as MemberExpression;
+            if (member != null)
+            {
+                if (firstOrderBy)
+                {
+                    _jqlOrderBy.Append(member.Member.Name);
+                }
+                else
+                {
+                    _jqlOrderBy.Insert(10, member.Member.Name + ", ");
+                }
+            }
+
+            if (node.Method.Name == "OrderByDescending"
+                || node.Method.Name == "ThenByDescending")
+            {
+                _jqlOrderBy.Append(" desc");
+            }
+        }
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
