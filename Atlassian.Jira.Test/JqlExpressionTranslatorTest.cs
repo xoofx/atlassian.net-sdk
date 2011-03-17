@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Atlassian.Jira.Linq;
+using Moq;
 
 namespace Atlassian.Jira.Test
 {
@@ -19,7 +20,8 @@ namespace Atlassian.Jira.Test
         private JiraInstance CreateJiraInstance()
         {
             _translator = new JqlExpressionTranslator();
-            var provider = new JiraQueryProvider(_translator);
+            var remoteService = new Mock<IJiraRemoteService>();
+            var provider = new JiraQueryProvider(_translator, remoteService.Object);
 
             return new JiraInstance(provider);
 

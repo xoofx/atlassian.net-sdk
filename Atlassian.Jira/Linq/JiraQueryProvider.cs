@@ -9,10 +9,12 @@ namespace Atlassian.Jira.Linq
     public class JiraQueryProvider: IQueryProvider
     {
         private readonly JqlExpressionTranslator _translator;
+        private readonly IJiraRemoteService _remoteService;
 
-        public JiraQueryProvider(JqlExpressionTranslator translator)
+        public JiraQueryProvider(JqlExpressionTranslator translator, IJiraRemoteService remoteService)
         {
             _translator = translator;
+            _remoteService = remoteService;
         }
 
         public IQueryable<T> CreateQuery<T>(Expression expression)
@@ -33,7 +35,8 @@ namespace Atlassian.Jira.Linq
         public object Execute(Expression expression)
         {
             _translator.Visit(expression);
-            return new List<Issue>();
+
+            return _remoteService.GetIssuesFromJql(_translator.Jql);
         }
     }
 }

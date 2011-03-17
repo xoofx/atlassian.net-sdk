@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,9 +43,11 @@
   <ItemGroup>
     <Compile Include="Issue.cs" />
     <Compile Include="JiraInstance.cs" />
-    <Compile Include="Linq\JiraInstance.cs" />
+    <Compile Include="Linq\IJiraRemoteService.cs" />
     <Compile Include="Linq\JiraQueryable.cs" />
     <Compile Include="Linq\JiraQueryProvider.cs" />
+    <Compile Include="Linq\JiraRemoteService.cs" />
+    <Compile Include="Linq\JiraSoapService.cs" />
     <Compile Include="Linq\JqlExpressionTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
