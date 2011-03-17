@@ -54,12 +54,14 @@
     <Compile Include="Linq\Operators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="NuGet\Package.nuspec">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
   <Target Name="AfterBuild">
+    <Copy SourceFiles="$(OutputPath)Atlassian.Jira.dll;$(OutputPath)Atlassian.Jira.pdb" DestinationFolder="$(OutputPath)NuGet\lib" />
+    <Exec WorkingDirectory="$(OutputPath)NuGet" Command="&quot;$(MSBuildProjectDirectory)\Tools\NuGet.exe&quot; pack Package.nuspec" />
   </Target>
-  -->
 </Project>
