@@ -41,6 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Issue.cs" />
+    <Compile Include="JiraInstance.cs" />
+    <Compile Include="Linq\JiraInstance.cs" />
+    <Compile Include="Linq\JiraQueryable.cs" />
+    <Compile Include="Linq\JiraQueryProvider.cs" />
+    <Compile Include="Linq\JqlExpressionTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -32,7 +32,7 @@ namespace Atlassian.Jira.Linq
 
         public object Execute(Expression expression)
         {
-            _translator.ProcessExpression(expression);
+            _translator.Visit(expression);
             return new List<Issue>();
         }
     }

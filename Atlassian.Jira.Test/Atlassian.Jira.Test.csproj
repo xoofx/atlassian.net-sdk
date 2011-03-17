@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3709B271-989E-45E2-BA01-780AE2CE5DE5}</ProjectGuid>
+    <ProjectGuid>{DF544F47-7EE3-469A-B68E-18D3096B3362}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Atlassian.Jira.Linq</RootNamespace>
-    <AssemblyName>Atlassian.Jira.Linq</AssemblyName>
+    <RootNamespace>Atlassian.Jira.Test</RootNamespace>
+    <AssemblyName>Atlassian.Jira.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -38,12 +38,12 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="xunit">
+      <HintPath>..\AssemblyReferences\xunit\xunit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JiraInstance.cs" />
-    <Compile Include="JiraQueryable.cs" />
-    <Compile Include="JiraQueryProvider.cs" />
-    <Compile Include="JqlExpressionTranslator.cs" />
+    <Compile Include="JqlExpressionTranslatorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
