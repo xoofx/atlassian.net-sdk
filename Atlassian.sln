@@ -7,6 +7,28 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Test", "Atla
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleSample", "ConsoleSample\ConsoleSample.csproj", "{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}"
 EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "WebSample", "WebSample\", "{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		ProjectReferences = "{438EB0CF-D781-4F1B-9BD3-B33638AA8D1D}|Atlassian.Jira.dll;"
+		Debug.AspNetCompiler.VirtualPath = "/WebSample"
+		Debug.AspNetCompiler.PhysicalPath = "WebSample\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\WebSample\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/WebSample"
+		Release.AspNetCompiler.PhysicalPath = "WebSample\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\WebSample\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "51634"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +69,16 @@ Global
 		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Release|Mixed Platforms.Build.0 = Release|x86
 		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Release|x86.ActiveCfg = Release|x86
 		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Release|x86.Build.0 = Release|x86
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Release|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Release|x86.ActiveCfg = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

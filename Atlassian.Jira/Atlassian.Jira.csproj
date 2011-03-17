@@ -33,7 +33,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -54,12 +56,14 @@
     <Compile Include="Linq\JqlExpressionTranslator.cs" />
     <Compile Include="Linq\Operators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebForms\IssuesGridView.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NuGet\Package.nuspec">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
     <Copy SourceFiles="$(OutputPath)Atlassian.Jira.dll;$(OutputPath)Atlassian.Jira.pdb" DestinationFolder="$(OutputPath)NuGet\lib" />

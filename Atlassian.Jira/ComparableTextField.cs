@@ -14,7 +14,6 @@ namespace Atlassian.Jira
         {
         }
 
-
         public ComparableTextField(string value)
         {
             this.Value = value;
@@ -88,6 +87,11 @@ namespace Atlassian.Jira
         public override bool Equals(object obj)
         {
             return base.Equals(obj);
+        }
+
+        public override string ToString()
+        {
+            return this.Value.ToString();
         }
     }
 }
