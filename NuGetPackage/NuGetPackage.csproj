@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{438EB0CF-D781-4F1B-9BD3-B33638AA8D1D}</ProjectGuid>
+    <ProjectGuid>{86925955-A822-4F35-B493-87DBC2CB9292}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Atlassian.Jira</RootNamespace>
-    <AssemblyName>Atlassian.Jira</AssemblyName>
+    <RootNamespace>NuGetPackage</RootNamespace>
+    <AssemblyName>NuGetPackage</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -33,7 +33,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,20 +40,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComparableTextField.cs" />
-    <Compile Include="ContainsEqualityAttribute.cs" />
-    <Compile Include="Issue.cs" />
-    <Compile Include="JiraInstance.cs" />
-    <Compile Include="Linq\IJiraRemoteService.cs" />
-    <Compile Include="Linq\IJqlExpressionTranslator.cs" />
-    <Compile Include="Linq\JiraQueryable.cs" />
-    <Compile Include="Linq\JiraQueryProvider.cs" />
-    <Compile Include="Linq\JiraRemoteService.cs" />
-    <Compile Include="Linq\JiraSoapService.cs" />
-    <Compile Include="Linq\JqlExpressionTranslator.cs" />
-    <Compile Include="Linq\Operators.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Package.nuspec">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Atlassian.Jira.Web\Atlassian.Jira.Web.csproj">
+      <Project>{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}</Project>
+      <Name>Atlassian.Jira.Web</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Atlassian.Jira\Atlassian.Jira.csproj">
+      <Project>{438EB0CF-D781-4F1B-9BD3-B33638AA8D1D}</Project>
+      <Name>Atlassian.Jira</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterBuild">
+    <Move SourceFiles="$(OutputPath)Atlassian.Jira.dll;$(OutputPath)Atlassian.Jira.Web.dll" DestinationFolder="$(OutputPath)lib" />
+    <Delete Files="$(OutputPath)NuGetPackage.dll;$(OutputPath)NuGetPackage.pdb;$(OutputPath)Atlassian.Jira.pdb;$(OutputPath)Atlassian.Jira.Web.pdb" />
+    <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(MSBuildProjectDirectory)\..\Tools\NuGet.exe&quot; pack Package.nuspec" />
+  </Target>
 </Project>

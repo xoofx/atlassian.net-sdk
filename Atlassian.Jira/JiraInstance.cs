@@ -14,7 +14,7 @@ namespace Atlassian.Jira
         {
             this._provider = new JiraQueryProvider(
                 new JqlExpressionTranslator(),
-                new JiraRemoteService(url, username, password));
+                new JiraRemoteService(new Uri(url), username, password));
         }
 
         public JiraInstance(JiraQueryProvider provider)

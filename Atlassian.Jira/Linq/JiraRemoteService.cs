@@ -8,15 +8,15 @@ namespace Atlassian.Jira.Linq
 {
     public class JiraRemoteService: IJiraRemoteService
     {
-        private readonly string _url;
+        private readonly Uri _url;
         private readonly string _username;
         private readonly string _password;
 
         private string _token = null;
 
-        public JiraRemoteService(string url, string username, string password)
+        public JiraRemoteService(Uri url, string username, string password)
         {
-            _url = url;
+            _url = new Uri(url, "/rpc/soap/jirasoapservice-v2");
             _username = username;
             _password = password;
         }

@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Atlassian.Jira.Test")]
-[assembly: AssemblyDescription("UnitTests for Atlassian.Jira assembly")]
+[assembly: AssemblyTitle("Atlassian.Jira.Web")]
+[assembly: AssemblyDescription("Web controls and helpers for interacting with Atlassian products.")]
 [assembly: AssemblyCompany("Atlassian")]
-[assembly: AssemblyProduct("Atlassian.Jira.Test")]
+[assembly: AssemblyProduct("Atlassian.Jira.Web")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9849a9ff-6e9c-412e-8762-c38d10e585d2")]
+[assembly: Guid("31fe6a13-7d54-457d-b70c-74ebb090668f")]
 
 // Version information for an assembly consists of the following four values:
 //

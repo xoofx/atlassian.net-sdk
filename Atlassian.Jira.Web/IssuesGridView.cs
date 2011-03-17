@@ -5,7 +5,7 @@ using System.Text;
 using System.Web.UI.WebControls;
 using System.Drawing;
 
-namespace Atlassian.Jira.WebForms
+namespace Atlassian.Jira.Web
 {
     public class IssuesGridView: GridView
     {
