@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComparableTextField.cs" />
+    <Compile Include="ContainsEqualityAttribute.cs" />
     <Compile Include="Issue.cs" />
     <Compile Include="JiraInstance.cs" />
     <Compile Include="Linq\IJiraRemoteService.cs" />
@@ -49,6 +51,7 @@
     <Compile Include="Linq\JiraRemoteService.cs" />
     <Compile Include="Linq\JiraSoapService.cs" />
     <Compile Include="Linq\JqlExpressionTranslator.cs" />
+    <Compile Include="Linq\Operators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -14,19 +14,22 @@ namespace ConsoleTest
         static void Main(string[] args)
         {
             var translator = new JqlExpressionTranslator();
-            var remoteService = new JiraRemoteService();
+            var remoteService = new TestRemoteService();
             var provider = new JiraQueryProvider(translator, remoteService);
 
             var jira = new JiraInstance(provider);
 
             var issues = from i in jira.IssueSearch()
-                          where i.Summary == "first bug"
+                          where i.Priority > "admin"
                           select i;
 
             foreach (var i in issues)
             {
                 Console.WriteLine(i.Summary);
+                Console.WriteLine(i.Votes);
             }
+
+            Console.ReadKey();
         }
     }
 }

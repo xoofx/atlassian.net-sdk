@@ -36,6 +36,8 @@ namespace Atlassian.Jira.Linq
         {
             _translator.Visit(expression);
 
+            Console.WriteLine(_translator.Jql);
+
             return _remoteService.GetIssuesFromJql(_translator.Jql);
         }
     }

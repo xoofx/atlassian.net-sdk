@@ -9,6 +9,7 @@ namespace Atlassian.Jira.Linq
 {
     public class JqlExpressionTranslator: ExpressionVisitor
     {
+       
         private readonly StringBuilder _jql;
 
         public JqlExpressionTranslator()
@@ -51,52 +52,61 @@ namespace Atlassian.Jira.Linq
         {
             var tuple = DecomposeConstantOperatorExpression(expression);
 
+            // field
             _jql.Append(tuple.Item1.Name);
-            _jql.Append(operatorString);
-            _jql.Append(tuple.Item2);
+
+            // operator
+            _jql.Append(String.Format(" {0} ", operatorString));
+
+            // value
+            ProcessConstant(tuple.Item2);
         }
 
-        private void ProcessEqualityOperator(BinaryExpression expression, string stringOperator, string normalOperator, string isOperator)
+        private void ProcessEqualityOperator(BinaryExpression expression, bool equal)
         {
             var tuple = DecomposeConstantOperatorExpression(expression);
 
             // field
             _jql.Append(tuple.Item1.Name);
 
-            // special case for empty string
-            if (tuple.Item2 == null)
+            // special cases for empty/null string
+            if (tuple.Item2 == null || tuple.Item2.Equals(""))
             {
-                _jql.Append(isOperator + "null");
-                return;
-            }
-            else if(tuple.Item2.Equals(""))
-            {
-                _jql.Append(isOperator + "empty");
+                _jql.Append(" ");
+                _jql.Append(equal? Operators.IS : Operators.ISNOT);
+                _jql.Append(" ");
+                _jql.Append(tuple.Item2 == null? "null" : "empty");
                 return;
             }
 
             // operator
-            if(tuple.Item1.PropertyType == typeof(String))
+            var operatorString = String.Empty;
+            if(tuple.Item1.GetCustomAttributes(typeof(ContainsEqualityAttribute), true).Count() > 0)
             {
-                
-                // special case for empty
-                _jql.Append(stringOperator);
+                operatorString = equal? Operators.CONTAINS: Operators.NOTCONTAINS;
             }
             else
             {
-                _jql.Append(normalOperator);
+                operatorString = equal? Operators.EQUALS: Operators.NOTEQUALS;
             }
+            _jql.Append(String.Format(" {0} ", operatorString));
 
             // value
-            if (tuple.Item2.GetType() == typeof(String))
+            ProcessConstant(tuple.Item2);
+        }
+
+        private void ProcessConstant(object value)
+        {
+            var valueType = value.GetType();
+            if (valueType == typeof(String)
+                || valueType == typeof(ComparableTextField))
             {
-                _jql.Append(String.Format("\"{0}\"", tuple.Item2));
+                _jql.Append(String.Format("\"{0}\"", value));
             }
             else
             {
-                _jql.Append(tuple.Item2);
+                _jql.Append(value);
             }
-
         }
 
         private void ProcessUnionOperator(BinaryExpression expression, string operatorString)
@@ -114,27 +124,27 @@ namespace Atlassian.Jira.Linq
             switch (node.NodeType)
             {
                 case ExpressionType.GreaterThan:
-                    ProcessNumbericOperatorExpression(node, " > ");
+                    ProcessNumbericOperatorExpression(node, Operators.GREATERTHAN);
                     break;
 
                 case ExpressionType.GreaterThanOrEqual:
-                    ProcessNumbericOperatorExpression(node, " >= ");
+                    ProcessNumbericOperatorExpression(node, Operators.GREATERTHANOREQUALS);
                     break;
 
                 case ExpressionType.LessThan:
-                    ProcessNumbericOperatorExpression(node, " < ");
+                    ProcessNumbericOperatorExpression(node, Operators.LESSTHAN);
                     break;
 
                 case ExpressionType.LessThanOrEqual:
-                    ProcessNumbericOperatorExpression(node, " <= ");
+                    ProcessNumbericOperatorExpression(node, Operators.LESSTHANOREQUALS);
                     break;
 
                 case ExpressionType.Equal:
-                    ProcessEqualityOperator(node, " ~ ", " = ", " is ");
+                    ProcessEqualityOperator(node, true);
                     break;
 
                 case ExpressionType.NotEqual:
-                    ProcessEqualityOperator(node, " !~ ", " != ", " is not ");
+                    ProcessEqualityOperator(node, false);
                     break;
 
                 case ExpressionType.AndAlso:

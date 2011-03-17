@@ -8,11 +8,6 @@ using Moq;
 
 namespace Atlassian.Jira.Test
 {
-
-    /*
-     * if its a text field it should use ~ operator instead of =, and !~ instead of != 
-     * 
-     * */
     public class JqlExpressionTranslatorTest
     {
         private JqlExpressionTranslator _translator;
@@ -21,6 +16,7 @@ namespace Atlassian.Jira.Test
         {
             _translator = new JqlExpressionTranslator();
             var remoteService = new Mock<IJiraRemoteService>();
+            remoteService.Setup(r => r.GetIssuesFromJql(It.IsAny<string>())).Returns(new List<Issue>());
             var provider = new JiraQueryProvider(_translator, remoteService.Object);
 
             return new JiraInstance(provider);
@@ -41,7 +37,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateEqualsOperatorForString()
+        public void TranslateEqualsOperatorForStringWithFuzzyEquality()
         {
             var jira = CreateJiraInstance();
 
@@ -52,6 +48,21 @@ namespace Atlassian.Jira.Test
 
             Assert.Equal("Summary ~ \"Foo\"", _translator.Jql);
         }
+
+        [Fact]
+        public void TranslateEqualsOperatorForString()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Assignee == "Foo"
+                          select i).ToArray();
+
+
+            Assert.Equal("Assignee = \"Foo\"", _translator.Jql);
+        }
+
+
 
         [Fact]
         public void TranslateNotEqualsOperatorForNonString()
@@ -67,7 +78,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateNotEqualsOperatorForString()
+        public void TranslateNotEqualsOperatorForStringWithFuzzyEquality()
         {
             var jira = CreateJiraInstance();
 
@@ -75,8 +86,19 @@ namespace Atlassian.Jira.Test
                           where i.Summary != "Foo"
                           select i).ToArray();
 
-
             Assert.Equal("Summary !~ \"Foo\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateNotEqualsOperatorForString()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Assignee != "Foo"
+                          select i).ToArray();
+
+            Assert.Equal("Assignee != \"Foo\"", _translator.Jql);
         }
 
         [Fact]
@@ -198,6 +220,54 @@ namespace Atlassian.Jira.Test
                           select i).ToArray();
 
             Assert.Equal("Summary is null", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateGreaterThanOperatorWhenUsingComparableFieldWithString()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Priority > "foo"
+                          select i).ToArray();
+
+            Assert.Equal("Priority > \"foo\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateEqualsOperatorWhenUsingComparableFieldWithString()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Priority == "foo"
+                          select i).ToArray();
+
+            Assert.Equal("Priority = \"foo\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateGreaterThanOperatorWhenUsingComparableFieldWithInt()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Priority > 1
+                          select i).ToArray();
+
+            Assert.Equal("Priority > 1", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateEqualsOperatorWhenUsingComparableFieldWithInt()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Priority == 1
+                          select i).ToArray();
+
+            Assert.Equal("Priority = 1", _translator.Jql);
         }
     }
 }
