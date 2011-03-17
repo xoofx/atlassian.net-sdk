@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using System.Diagnostics;
 
 namespace Atlassian.Jira.Linq
 {
     public class JiraQueryProvider: IQueryProvider
     {
-        private readonly JqlExpressionTranslator _translator;
+        private readonly IJqlExpressionTranslator _translator;
         private readonly IJiraRemoteService _remoteService;
 
-        public JiraQueryProvider(JqlExpressionTranslator translator, IJiraRemoteService remoteService)
+        public JiraQueryProvider(IJqlExpressionTranslator translator, IJiraRemoteService remoteService)
         {
             _translator = translator;
             _remoteService = remoteService;
@@ -34,11 +35,11 @@ namespace Atlassian.Jira.Linq
 
         public object Execute(Expression expression)
         {
-            _translator.Visit(expression);
+            var jql = _translator.Translate(expression);
 
-            Console.WriteLine(_translator.Jql);
+            Debug.WriteLine(jql);
 
-            return _remoteService.GetIssuesFromJql(_translator.Jql);
+            return _remoteService.GetIssuesFromJql(jql);
         }
     }
 }

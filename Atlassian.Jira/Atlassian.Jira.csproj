@@ -46,6 +46,7 @@
     <Compile Include="Issue.cs" />
     <Compile Include="JiraInstance.cs" />
     <Compile Include="Linq\IJiraRemoteService.cs" />
+    <Compile Include="Linq\IJqlExpressionTranslator.cs" />
     <Compile Include="Linq\JiraQueryable.cs" />
     <Compile Include="Linq\JiraQueryProvider.cs" />
     <Compile Include="Linq\JiraRemoteService.cs" />

@@ -8,7 +8,14 @@ namespace Atlassian.Jira
 {
     public class JiraInstance
     {
-        private JiraQueryProvider _provider;
+        private readonly JiraQueryProvider _provider;
+
+        public JiraInstance(string url, string username, string password)
+        {
+            this._provider = new JiraQueryProvider(
+                new JqlExpressionTranslator(),
+                new JiraRemoteService(url, username, password));
+        }
 
         public JiraInstance(JiraQueryProvider provider)
         {

@@ -7,16 +7,9 @@ using System.Reflection;
 
 namespace Atlassian.Jira.Linq
 {
-    public class JqlExpressionTranslator: ExpressionVisitor
+    public class JqlExpressionTranslator: ExpressionVisitor, IJqlExpressionTranslator
     {
-       
-        private readonly StringBuilder _jql;
-
-        public JqlExpressionTranslator()
-        {
-            _jql = new StringBuilder();
-        }
-
+        private StringBuilder _jql;
 
         public string Jql 
         { 
@@ -24,6 +17,13 @@ namespace Atlassian.Jira.Linq
             {
                 return _jql.ToString();
             } 
+        }
+
+        public string Translate(Expression expression)
+        {
+            _jql = new StringBuilder();
+            this.Visit(expression);
+            return _jql.ToString();
         }
 
         private Tuple<PropertyInfo, object> DecomposeConstantOperatorExpression(BinaryExpression expression)

@@ -8,6 +8,19 @@ namespace Atlassian.Jira.Linq
 {
     public class JiraRemoteService: IJiraRemoteService
     {
+        private readonly string _url;
+        private readonly string _username;
+        private readonly string _password;
+
+        private string _token = null;
+
+        public JiraRemoteService(string url, string username, string password)
+        {
+            _url = url;
+            _username = username;
+            _password = password;
+        }
+
         public IList<Issue> GetIssuesFromJql(string jql)
         {
             var binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
@@ -15,14 +28,17 @@ namespace Atlassian.Jira.Linq
             binding.UseDefaultWebProxy = true;
             binding.Security.Message.ClientCredentialType = BasicHttpMessageCredentialType.UserName;
 
-            var endpoint = new EndpointAddress("http://farmas-pc:8080/rpc/soap/jirasoapservice-v2");
+            var endpoint = new EndpointAddress(_url);
 
             var client = new JiraSoapServiceClient(binding, endpoint);
 
-            var token = client.login("admin", "admin");
+            if (_token == null)
+            {
+                _token = client.login(_username, _password);
+            }
 
             IList<Issue> issues = new List<Issue>();
-            foreach (RemoteIssue i in client.getIssuesFromJqlSearch(token, jql, 10))
+            foreach (RemoteIssue i in client.getIssuesFromJqlSearch(_token, jql, 10))
             {
                 issues.Add(new Issue()
                 {
@@ -38,8 +54,6 @@ namespace Atlassian.Jira.Linq
                     Status = i.status,
                     Type = i.type,
                     Votes = i.votes.Value
-                    
-
                 });
             }
 

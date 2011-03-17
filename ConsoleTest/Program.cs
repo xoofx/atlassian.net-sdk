@@ -13,20 +13,18 @@ namespace ConsoleTest
 
         static void Main(string[] args)
         {
-            var translator = new JqlExpressionTranslator();
-            var remoteService = new TestRemoteService();
-            var provider = new JiraQueryProvider(translator, remoteService);
-
-            var jira = new JiraInstance(provider);
+            var jira = new JiraInstance(
+                "http://localhost:8080/rpc/soap/jirasoapservice-v2",
+                "admin",
+                "admin");
 
             var issues = from i in jira.IssueSearch()
-                          where i.Priority > "admin"
+                          where i.Assignee == "admin"
                           select i;
 
             foreach (var i in issues)
             {
                 Console.WriteLine(i.Summary);
-                Console.WriteLine(i.Votes);
             }
 
             Console.ReadKey();
