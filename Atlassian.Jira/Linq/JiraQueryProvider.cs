@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
-using System.Diagnostics;
 
 namespace Atlassian.Jira.Linq
 {
@@ -11,6 +10,7 @@ namespace Atlassian.Jira.Linq
     {
         private readonly IJqlExpressionTranslator _translator;
         private readonly IJiraRemoteService _remoteService;
+        public bool Debug { get; set; }
 
         public JiraQueryProvider(IJqlExpressionTranslator translator, IJiraRemoteService remoteService)
         {
@@ -37,7 +37,10 @@ namespace Atlassian.Jira.Linq
         {
             var jql = _translator.Translate(expression);
 
-            Debug.WriteLine(jql);
+            if (this.Debug)
+            {
+                Console.WriteLine("JQL: " + jql);
+            }
 
             return _remoteService.GetIssuesFromJql(jql);
         }

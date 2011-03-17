@@ -9,7 +9,7 @@ namespace Atlassian.Jira
     public class JiraInstance
     {
         private readonly JiraQueryProvider _provider;
-
+        
         public JiraInstance(string url, string username, string password)
         {
             this._provider = new JiraQueryProvider(
@@ -26,5 +26,18 @@ namespace Atlassian.Jira
         {
             return new JiraQueryable<Issue>(_provider);
         }
+
+        public bool Debug
+        {
+            get
+            {
+                return _provider.Debug;
+            }
+            set
+            {
+                _provider.Debug = value;
+            }
+        }
+
     }
 }
