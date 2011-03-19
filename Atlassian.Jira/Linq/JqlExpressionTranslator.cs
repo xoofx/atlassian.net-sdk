@@ -29,63 +29,83 @@ namespace Atlassian.Jira.Linq
             return Jql;
         }
 
-        private Tuple<PropertyInfo, object> DecomposeConstantOperatorExpression(BinaryExpression expression)
+        private PropertyInfo GetFieldFromBinaryExpression(BinaryExpression expression)
         {
-            
             var memberExpression = expression.Left as MemberExpression;
             if (memberExpression != null)
             {
                 var propertyInfo = memberExpression.Member as PropertyInfo;
                 if (propertyInfo != null)
                 {
-                    var constant = expression.Right as ConstantExpression;
-                    
-                    if (constant != null)
-                    {
-                        return Tuple.Create<PropertyInfo, object>(propertyInfo, constant.Value);
-                    }
+                    return propertyInfo;
                 }
             }
 
             throw new NotSupportedException(String.Format(
-                   "Operator '{0}' can only be applied on fields with constant values.",
+                   "Operator '{0}' can only be applied on property member fields.",
                    expression.NodeType));
         }
 
-        private void ProcessNumbericOperatorExpression(BinaryExpression expression, string operatorString)
+        private object GetValueFromBinaryExpression(BinaryExpression expression)
         {
-            var tuple = DecomposeConstantOperatorExpression(expression);
+            if (expression.Right.NodeType == ExpressionType.Constant)
+            {
+                return ((ConstantExpression)expression.Right).Value;
+            }
+            else if (expression.Right.NodeType == ExpressionType.New)
+            {
+                var newExpression = (NewExpression)expression.Right;
+                var args = new List<object>();
+
+                foreach (ConstantExpression e in newExpression.Arguments)
+                {
+                    args.Add(e.Value);
+                }
+
+                return newExpression.Constructor.Invoke(args.ToArray());
+            }
+
+            throw new NotSupportedException(String.Format(
+                   "Operator '{0}' can only be used with constant values.",
+                   expression.NodeType));
+        }
+
+        private void ProcessGreaterAndLessThanOperator(BinaryExpression expression, string operatorString)
+        {
+            var field = GetFieldFromBinaryExpression(expression);
+            var value = GetValueFromBinaryExpression(expression);
 
             // field
-            _jqlWhere.Append(tuple.Item1.Name);
+            _jqlWhere.Append(field.Name);
 
             // operator
             _jqlWhere.Append(String.Format(" {0} ", operatorString));
 
             // value
-            ProcessConstant(tuple.Item2);
+            ProcessConstant(value);
         }
 
         private void ProcessEqualityOperator(BinaryExpression expression, bool equal)
         {
-            var tuple = DecomposeConstantOperatorExpression(expression);
+            var field = GetFieldFromBinaryExpression(expression);
+            var value = GetValueFromBinaryExpression(expression);
 
             // field
-            _jqlWhere.Append(tuple.Item1.Name);
+            _jqlWhere.Append(field.Name);
 
             // special cases for empty/null string
-            if (tuple.Item2 == null || tuple.Item2.Equals(""))
+            if (value == null || value.Equals(""))
             {
                 _jqlWhere.Append(" ");
                 _jqlWhere.Append(equal? Operators.IS : Operators.ISNOT);
                 _jqlWhere.Append(" ");
-                _jqlWhere.Append(tuple.Item2 == null? "null" : "empty");
+                _jqlWhere.Append(value == null ? "null" : "empty");
                 return;
             }
 
             // operator
             var operatorString = String.Empty;
-            if(tuple.Item1.GetCustomAttributes(typeof(ContainsEqualityAttribute), true).Count() > 0)
+            if(field.GetCustomAttributes(typeof(ContainsEqualityAttribute), true).Count() > 0)
             {
                 operatorString = equal? Operators.CONTAINS: Operators.NOTCONTAINS;
             }
@@ -96,7 +116,7 @@ namespace Atlassian.Jira.Linq
             _jqlWhere.Append(String.Format(" {0} ", operatorString));
 
             // value
-            ProcessConstant(tuple.Item2);
+            ProcessConstant(value);
         }
 
         private void ProcessConstant(object value)
@@ -106,6 +126,11 @@ namespace Atlassian.Jira.Linq
                 || valueType == typeof(ComparableTextField))
             {
                 _jqlWhere.Append(String.Format("\"{0}\"", value));
+            }
+            else if (valueType == typeof(DateTime))
+            {
+                _jqlWhere.Append(String.Format("\"{0}\"", ((DateTime)value).ToString("yyyy/MM/dd")));
+
             }
             else
             {
@@ -168,19 +193,19 @@ namespace Atlassian.Jira.Linq
             switch (node.NodeType)
             {
                 case ExpressionType.GreaterThan:
-                    ProcessNumbericOperatorExpression(node, Operators.GREATERTHAN);
+                    ProcessGreaterAndLessThanOperator(node, Operators.GREATERTHAN);
                     break;
 
                 case ExpressionType.GreaterThanOrEqual:
-                    ProcessNumbericOperatorExpression(node, Operators.GREATERTHANOREQUALS);
+                    ProcessGreaterAndLessThanOperator(node, Operators.GREATERTHANOREQUALS);
                     break;
 
                 case ExpressionType.LessThan:
-                    ProcessNumbericOperatorExpression(node, Operators.LESSTHAN);
+                    ProcessGreaterAndLessThanOperator(node, Operators.LESSTHAN);
                     break;
 
                 case ExpressionType.LessThanOrEqual:
-                    ProcessNumbericOperatorExpression(node, Operators.LESSTHANOREQUALS);
+                    ProcessGreaterAndLessThanOperator(node, Operators.LESSTHANOREQUALS);
                     break;
 
                 case ExpressionType.Equal:

@@ -321,5 +321,29 @@ namespace Atlassian.Jira.Test
 
             Assert.Equal("Priority = 1 order by Created, DueDate desc", _translator.Jql);
         }
+
+        [Fact]
+        public void TranslateNewDateTime()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Created > new DateTime(2011,1,1)
+                          select i).ToArray();
+
+            Assert.Equal("Created > \"2011/01/01\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateMultipleDateTimes()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Created > new DateTime(2011, 1, 1) && i.Created < new DateTime(2012,1,1) 
+                          select i).ToArray();
+
+            Assert.Equal("(Created > \"2011/01/01\" and Created < \"2012/01/01\")", _translator.Jql);
+        }
     }
 }
