@@ -345,5 +345,31 @@ namespace Atlassian.Jira.Test
 
             Assert.Equal("(Created > \"2011/01/01\" and Created < \"2012/01/01\")", _translator.Jql);
         }
+
+        [Fact]
+        public void TranslateLocalStringVariables()
+        {
+            var jira = CreateJiraInstance();
+            var user = "farmas";
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Assignee == user
+                          select i).ToArray();
+
+            Assert.Equal("Assignee = \"farmas\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void TranslateLocalDateVariables()
+        {
+            var jira = CreateJiraInstance();
+            var date = new DateTime(2011, 1, 1);
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Created >  date
+                          select i).ToArray();
+
+            Assert.Equal("Created > \"2011/01/01\"", _translator.Jql);
+        }
     }
 }

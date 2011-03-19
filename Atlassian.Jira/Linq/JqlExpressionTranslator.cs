@@ -22,6 +22,7 @@ namespace Atlassian.Jira.Linq
 
         public string Translate(Expression expression)
         {
+            expression = ExpressionEvaluator.PartialEval(expression);
             _jqlWhere = new StringBuilder();
             _jqlOrderBy = new StringBuilder();
 
