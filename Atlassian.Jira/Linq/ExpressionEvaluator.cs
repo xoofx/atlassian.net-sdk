@@ -6,6 +6,13 @@ using System.Linq.Expressions;
 
 namespace Atlassian.Jira.Linq
 {
+    /// <summary>
+    /// Evaluates subtrees that contain local variables.
+    /// </summary>
+    /// <remarks>
+    /// Thanks to http://blogs.msdn.com/b/mattwar/archive/2007/08/01/linq-building-an-iqueryable-provider-part-iii.aspx
+    /// for providing the source for this class
+    /// </remarks>
     public static class ExpressionEvaluator
     {
         /// <summary>
