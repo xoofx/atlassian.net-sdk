@@ -371,5 +371,18 @@ namespace Atlassian.Jira.Test
 
             Assert.Equal("Created > \"2011/01/01\"", _translator.Jql);
         }
+
+        [Fact]
+        public void TranslateDateTimeNow()
+        {
+            var jira = CreateJiraInstance();
+            var date = new DateTime(2011, 1, 1);
+
+            var issues = (from i in jira.IssueSearch()
+                          where i.Created > DateTime.Now
+                          select i).ToArray();
+
+            Assert.Equal("Created > \"" + DateTime.Now.ToString("yyyy/MM/dd") + "\"", _translator.Jql);
+        }
     }
 }

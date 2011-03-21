@@ -27,9 +27,6 @@ namespace Atlassian.Jira
 
         public long Votes { get; set; }
 
-        /*
-         * Not supported yet
-         */
         public DateTime Created { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime Updated { get; set; }
