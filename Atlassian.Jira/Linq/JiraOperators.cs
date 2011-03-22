@@ -5,7 +5,10 @@ using System.Text;
 
 namespace Atlassian.Jira.Linq
 {
-    public class Operators
+    /// <summary>
+    /// Container for the supported JIRA operator strings.
+    /// </summary>
+    public class JiraOperators
     {
         public const string EQUALS = "=";
         public const string NOTEQUALS = "!=";

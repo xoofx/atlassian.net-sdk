@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Atlassian.Jira
 {
+    /// <summary>
+    /// Type that represents a JIRA text field that can be compared with less than and greater than operators.
+    /// </summary>
     public class ComparableTextField
     {
         public int? Id { get; set; }

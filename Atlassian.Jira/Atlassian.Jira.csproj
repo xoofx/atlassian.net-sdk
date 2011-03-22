@@ -47,7 +47,7 @@
     <Compile Include="ComparableTextField.cs" />
     <Compile Include="ContainsEqualityAttribute.cs" />
     <Compile Include="Issue.cs" />
-    <Compile Include="JiraInstance.cs" />
+    <Compile Include="Jira.cs" />
     <Compile Include="Linq\ExpressionEvaluator.cs" />
     <Compile Include="Linq\IJiraRemoteService.cs" />
     <Compile Include="Linq\IJqlExpressionTranslator.cs" />
@@ -56,7 +56,7 @@
     <Compile Include="Linq\JiraRemoteService.cs" />
     <Compile Include="Linq\JiraSoapService.cs" />
     <Compile Include="Linq\JqlExpressionTranslator.cs" />
-    <Compile Include="Linq\Operators.cs" />
+    <Compile Include="Linq\JiraOperators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

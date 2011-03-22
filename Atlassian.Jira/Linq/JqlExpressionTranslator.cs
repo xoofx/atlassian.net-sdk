@@ -98,7 +98,7 @@ namespace Atlassian.Jira.Linq
             if (value == null || value.Equals(""))
             {
                 _jqlWhere.Append(" ");
-                _jqlWhere.Append(equal? Operators.IS : Operators.ISNOT);
+                _jqlWhere.Append(equal? JiraOperators.IS : JiraOperators.ISNOT);
                 _jqlWhere.Append(" ");
                 _jqlWhere.Append(value == null ? "null" : "empty");
                 return;
@@ -108,11 +108,11 @@ namespace Atlassian.Jira.Linq
             var operatorString = String.Empty;
             if(field.GetCustomAttributes(typeof(ContainsEqualityAttribute), true).Count() > 0)
             {
-                operatorString = equal? Operators.CONTAINS: Operators.NOTCONTAINS;
+                operatorString = equal? JiraOperators.CONTAINS: JiraOperators.NOTCONTAINS;
             }
             else
             {
-                operatorString = equal? Operators.EQUALS: Operators.NOTEQUALS;
+                operatorString = equal? JiraOperators.EQUALS: JiraOperators.NOTEQUALS;
             }
             _jqlWhere.Append(String.Format(" {0} ", operatorString));
 
@@ -194,19 +194,19 @@ namespace Atlassian.Jira.Linq
             switch (node.NodeType)
             {
                 case ExpressionType.GreaterThan:
-                    ProcessGreaterAndLessThanOperator(node, Operators.GREATERTHAN);
+                    ProcessGreaterAndLessThanOperator(node, JiraOperators.GREATERTHAN);
                     break;
 
                 case ExpressionType.GreaterThanOrEqual:
-                    ProcessGreaterAndLessThanOperator(node, Operators.GREATERTHANOREQUALS);
+                    ProcessGreaterAndLessThanOperator(node, JiraOperators.GREATERTHANOREQUALS);
                     break;
 
                 case ExpressionType.LessThan:
-                    ProcessGreaterAndLessThanOperator(node, Operators.LESSTHAN);
+                    ProcessGreaterAndLessThanOperator(node, JiraOperators.LESSTHAN);
                     break;
 
                 case ExpressionType.LessThanOrEqual:
-                    ProcessGreaterAndLessThanOperator(node, Operators.LESSTHANOREQUALS);
+                    ProcessGreaterAndLessThanOperator(node, JiraOperators.LESSTHANOREQUALS);
                     break;
 
                 case ExpressionType.Equal:

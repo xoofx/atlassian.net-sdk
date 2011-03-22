@@ -13,14 +13,11 @@ namespace ConsoleSample
         {
             
             var translator = new JqlExpressionTranslator();
-            var remoteService = new TestRemoteService();
-            var provider = new JiraQueryProvider(translator, remoteService);
 
-            var jira = new JiraInstance(provider);
-            
+            var jira = new Jira(translator, new TestRemoteService());
 
             //var jira = new JiraInstance(
-            //   "http://localhost:8080/rpc/soap/jirasoapservice-v2",
+            //   "http://localhost:8080",
             //   "admin",
             //   "admin");
 
