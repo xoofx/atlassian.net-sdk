@@ -8,8 +8,8 @@
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        var jira = new JiraInstance(
-           "http://localhost:8080/rpc/soap/jirasoapservice-v2",
+        var jira = new Jira(
+           "http://localhost:8080",
            "admin",
            "admin");
 

@@ -12,14 +12,13 @@ namespace Atlassian.Jira.Test
     {
         private JqlExpressionTranslator _translator;
 
-        private JiraInstance CreateJiraInstance()
+        private Jira CreateJiraInstance()
         {
             _translator = new JqlExpressionTranslator();
             var remoteService = new Mock<IJiraRemoteService>();
             remoteService.Setup(r => r.GetIssuesFromJql(It.IsAny<string>())).Returns(new List<Issue>());
-            var provider = new JiraQueryProvider(_translator, remoteService.Object);
 
-            return new JiraInstance(provider);
+            return new Jira(_translator, remoteService.Object);
 
         }
 

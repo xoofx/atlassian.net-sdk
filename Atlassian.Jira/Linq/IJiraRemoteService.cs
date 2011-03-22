@@ -5,8 +5,16 @@ using System.Text;
 
 namespace Atlassian.Jira.Linq
 {
+    /// <summary>
+    /// Abstracts calling the remote JIRA server
+    /// </summary>
     public interface IJiraRemoteService
     {
-        IList<Issue> GetIssuesFromJql(string p);
+        /// <summary>
+        /// Invokes the getIssuesFromJql RPC call
+        /// </summary>
+        /// <param name="jql">JQL statement to execute</param>
+        /// <returns>List of Issues</returns>
+        IList<Issue> GetIssuesFromJql(string jql);
     }
 }
