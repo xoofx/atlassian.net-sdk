@@ -58,7 +58,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="AfterBuild">
+  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release'">
     <Move SourceFiles="$(OutputPath)Atlassian.Jira.dll;$(OutputPath)Atlassian.Jira.Web.dll;$(OutputPath)Atlassian.Jira.pdb;$(OutputPath)Atlassian.Jira.Web.pdb;$(OutputPath)Atlassian.Jira.xml;" DestinationFolder="$(OutputPath)lib" />
     <Delete Files="$(OutputPath)NuGetPackage.dll;$(OutputPath)NuGetPackage.pdb;" />
     <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(MSBuildProjectDirectory)\..\Tools\NuGet.exe&quot; pack Package.nuspec" />
