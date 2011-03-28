@@ -42,6 +42,7 @@
   <ItemGroup>
     <None Include="Package.nuspec">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -15,11 +15,14 @@ namespace Atlassian.Jira.Test
         private Jira CreateJiraInstance()
         {
             _translator = new JqlExpressionTranslator();
-            var remoteService = new Mock<IJiraRemoteService>();
-            remoteService.Setup(r => r.GetIssuesFromJql(It.IsAny<string>())).Returns(new List<Issue>());
+            var soapClient = new Mock<IJiraSoapServiceClient>();
 
-            return new Jira(_translator, remoteService.Object);
+            soapClient.Setup(r => r.GetIssuesFromJqlSearch(
+                                        It.IsAny<string>(),
+                                        It.IsAny<string>(),
+                                        It.IsAny<int>())).Returns(new RemoteIssue[0]);
 
+            return new Jira(_translator, soapClient.Object, "username", "password");
         }
 
         [Fact]

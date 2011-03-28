@@ -49,12 +49,12 @@
     <Compile Include="Issue.cs" />
     <Compile Include="Jira.cs" />
     <Compile Include="Linq\ExpressionEvaluator.cs" />
-    <Compile Include="Linq\IJiraRemoteService.cs" />
+    <Compile Include="Linq\IJiraSoapServiceClient.cs" />
     <Compile Include="Linq\IJqlExpressionTranslator.cs" />
     <Compile Include="Linq\JiraQueryable.cs" />
     <Compile Include="Linq\JiraQueryProvider.cs" />
-    <Compile Include="Linq\JiraRemoteService.cs" />
     <Compile Include="Linq\JiraSoapService.cs" />
+    <Compile Include="Linq\JiraSoapServiceClientWrapper.cs" />
     <Compile Include="Linq\JqlExpressionTranslator.cs" />
     <Compile Include="Linq\JiraOperators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -11,20 +11,12 @@ namespace ConsoleSample
     {
         static void Main(string[] args)
         {
-            
-            var translator = new JqlExpressionTranslator();
-
-            var jira = new Jira(translator, new TestRemoteService());
-
-            //var jira = new JiraInstance(
-            //   "http://localhost:8080",
-            //   "admin",
-            //   "admin");
+            var jira = new Jira("http://jira.atlassian.com");
 
             jira.Debug = true;
 
             var issues = from i in jira.IssueSearch()
-                         where i.Summary == "foo"
+                         where i.Summary == "custom field"
                          orderby i.Created, i.DueDate descending
                          select i;
 
