@@ -7,10 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Test", "Atla
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleSample", "ConsoleSample\ConsoleSample.csproj", "{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "WebSample", "WebSample", "{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "WebSample", "WebSample\", "{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
-		ProjectReferences = "{438EB0CF-D781-4F1B-9BD3-B33638AA8D1D}|Atlassian.Jira.dll;{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}|Atlassian.Jira.Web.dll;"
+		ProjectReferences = "{438EB0CF-D781-4F1B-9BD3-B33638AA8D1D}|Atlassian.Jira.dll;"
 		Debug.AspNetCompiler.VirtualPath = "/WebSample"
 		Debug.AspNetCompiler.PhysicalPath = "WebSample\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\WebSample\"
@@ -31,7 +31,7 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "WebSample", "WebSample", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGetPackage", "NuGetPackage\NuGetPackage.csproj", "{86925955-A822-4F35-B493-87DBC2CB9292}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Web", "Atlassian.Jira.Web\Atlassian.Jira.Web.csproj", "{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Test.Integration", "Atlassian.Jira.Test.Integration\Atlassian.Jira.Test.Integration.csproj", "{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -92,16 +92,16 @@ Global
 		{86925955-A822-4F35-B493-87DBC2CB9292}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{86925955-A822-4F35-B493-87DBC2CB9292}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{86925955-A822-4F35-B493-87DBC2CB9292}.Release|x86.ActiveCfg = Release|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}.Release|x86.ActiveCfg = Release|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

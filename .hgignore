@@ -1,4 +1,4 @@
-# Ignore file for Visual Studio 2008 
+# Ignore file for Visual Studio 2008
 
 # use glob syntax
 syntax: glob
@@ -32,3 +32,4 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 [Bb]uild[Ll]og.*
 *.[Pp]ublish.xml
+glob:Atlassian.Jira.Test.Integration/amps-standalone/*

@@ -1,0 +1,1 @@
+atlas-run-standalone --product jira

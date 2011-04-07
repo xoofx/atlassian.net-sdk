@@ -46,10 +46,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Atlassian.Jira.Web\Atlassian.Jira.Web.csproj">
-      <Project>{5985D78D-F4F3-40ED-AF4F-B50EE89DC29F}</Project>
-      <Name>Atlassian.Jira.Web</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Atlassian.Jira\Atlassian.Jira.csproj">
       <Project>{438EB0CF-D781-4F1B-9BD3-B33638AA8D1D}</Project>
       <Name>Atlassian.Jira</Name>
