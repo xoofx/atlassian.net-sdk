@@ -143,7 +143,7 @@ namespace Atlassian.Jira.Linq
         {
             _jqlWhere.Append("(");
             Visit(expression.Left);
-            _jqlWhere.Append(operatorString);
+            _jqlWhere.Append(" " + operatorString + " ");
             Visit(expression.Right);
             _jqlWhere.Append(")");
         }
@@ -218,11 +218,11 @@ namespace Atlassian.Jira.Linq
                     break;
 
                 case ExpressionType.AndAlso:
-                    ProcessUnionOperator(node, " and ");
+                    ProcessUnionOperator(node, JiraOperators.AND);
                     break;
 
                 case ExpressionType.OrElse:
-                    ProcessUnionOperator(node, " or ");
+                    ProcessUnionOperator(node, JiraOperators.OR);
                     break;
 
                 default:

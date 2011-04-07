@@ -24,6 +24,9 @@ namespace Atlassian.Jira.Linq
 
         public const string GREATERTHANOREQUALS = ">=";
         public const string LESSTHANOREQUALS = "<=";
+
+        public const string OR = "or";
+        public const string AND = "and";
         
 
     }
