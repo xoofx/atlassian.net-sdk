@@ -13,6 +13,13 @@ namespace Atlassian.Jira.Test.Integration
         {
             var jira = new Jira("http://localhost:2990/jira", "admin", "admin");
 
+            jira.Debug = true;
+
+            var issues = from i in jira.IssueSearch()
+                         where i.Assignee == "admin"
+                         select i;
+
+            Assert.Equal(0, issues.Count());
         }
     }
 }

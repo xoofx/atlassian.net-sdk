@@ -35,7 +35,7 @@ namespace Atlassian.Jira
         /// <param name="username">username to use to authenticate</param>
         /// <param name="password">passowrd to use to authenticate</param>
         public Jira(string url, string username, string password)
-            :this(new JiraSoapServiceClientWrapper(new Uri(url)), username, password)
+            :this(new JiraSoapServiceClientWrapper(url), username, password)
         {
         }
 
