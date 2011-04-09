@@ -32,4 +32,4 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 [Bb]uild[Ll]og.*
 *.[Pp]ublish.xml
-glob:Atlassian.Jira.Test.Integration/amps-standalone/*
+glob:amps-standalone/*
