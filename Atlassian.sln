@@ -35,8 +35,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Test.Integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Test.Integration.Setup", "Atlassian.Jira.Test.Integration.Setup\Atlassian.Jira.Test.Integration.Setup.csproj", "{59EF77DF-1A5D-48AC-BC98-523C6BBAC288}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Web.Testing.Lightweight", "..\Microsoft.Web.Testing.Lightweight\Framework\Microsoft.Web.Testing.Lightweight.csproj", "{BA956AB4-78FA-47CE-9861-95ECA91103BE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -116,18 +114,6 @@ Global
 		{59EF77DF-1A5D-48AC-BC98-523C6BBAC288}.Release|Mixed Platforms.Build.0 = Release|x86
 		{59EF77DF-1A5D-48AC-BC98-523C6BBAC288}.Release|x86.ActiveCfg = Release|x86
 		{59EF77DF-1A5D-48AC-BC98-523C6BBAC288}.Release|x86.Build.0 = Release|x86
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Debug|x86.ActiveCfg = Debug|x86
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Debug|x86.Build.0 = Debug|x86
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Release|Mixed Platforms.Build.0 = Release|x86
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Release|x86.ActiveCfg = Release|x86
-		{BA956AB4-78FA-47CE-9861-95ECA91103BE}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
