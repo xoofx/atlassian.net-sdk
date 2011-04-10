@@ -29,14 +29,33 @@ namespace Atlassian.Jira.Linq
 
         public T Execute<T>(Expression expression)
         {
-            return (T)this.Execute(expression);
+            bool isEnumerable = (typeof(T).Name == "IEnumerable`1");
+
+            return (T)this.Execute(expression, isEnumerable);
         }
 
         public object Execute(Expression expression)
         {
+            return Execute(expression, true);
+        }
+
+        private object Execute(Expression expression, bool isEnumerable)
+        {
             var jql = _translator.Translate(expression);
 
-            return _jiraServer.GetIssuesFromJql(jql);
+            IQueryable<Issue> issues = _jiraServer.GetIssuesFromJql(jql).AsQueryable();
+
+            var treeCopier = new ExpressionTreeModifier(issues);
+            Expression newExpressionTree = treeCopier.Visit(expression);
+
+            if (isEnumerable)
+            {
+                return issues;
+            }
+            else
+            {
+                return issues.Provider.Execute(newExpressionTree);
+            }
         }
     }
 }

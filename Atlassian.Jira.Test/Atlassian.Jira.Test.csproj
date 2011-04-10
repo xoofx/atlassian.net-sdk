@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComparableTextFieldTest.cs" />
+    <Compile Include="LinqQueryProviderTest.cs" />
     <Compile Include="JqlExpressionTranslatorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -59,6 +60,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask AssemblyFile="..\AssemblyReferences\xunit\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
   <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release'">
- 	<xunit Assembly="$(OutputPath)\Atlassian.Jira.Test.dll" />
+    <xunit Assembly="$(OutputPath)\Atlassian.Jira.Test.dll" />
   </Target>
 </Project>
