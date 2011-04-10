@@ -1,1 +1,1 @@
-atlas-run-standalone --product jira --version 4.3 --lib-plugins com.atlassian.jira.plugins:atlassian-jira-rpc-plugin:4.3
+"%~dp0..\Atlassian.Jira.Test.Integration.Setup\bin\Debug\JiraSetup.exe"

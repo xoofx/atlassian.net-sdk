@@ -45,15 +45,15 @@ namespace Atlassian.Jira.Linq
 
             IQueryable<Issue> issues = _jiraServer.GetIssuesFromJql(jql).AsQueryable();
 
-            var treeCopier = new ExpressionTreeModifier(issues);
-            Expression newExpressionTree = treeCopier.Visit(expression);
-
             if (isEnumerable)
             {
                 return issues;
             }
             else
             {
+				var treeCopier = new ExpressionTreeModifier(issues);
+				Expression newExpressionTree = treeCopier.Visit(expression);
+			
                 return issues.Provider.Execute(newExpressionTree);
             }
         }

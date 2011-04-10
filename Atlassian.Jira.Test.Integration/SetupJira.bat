@@ -1,1 +1,0 @@
-"%~dp0..\Atlassian.Jira.Test.Integration.Setup\bin\Debug\SetupJira.exe"

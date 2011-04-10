@@ -3,10 +3,7 @@
 
 2. Start Jira Server
 	Run "StartJira.bat" from an elevated command prompt
-	Wait until "jira started successfully and available at http://localhost:2990/jira" appears on the command
+	A JIRA server will start on a separate window
+	When JIRA is up test data will be loaded
 
-3. Setup Jira Server
-	Run "SetupJira.bat" from an elevated command prompt
-	Wait until "JIRA Setup Complete" appears on the command line
-
-4. Run the unit tests in this project
+3. Run the unit tests in this project
