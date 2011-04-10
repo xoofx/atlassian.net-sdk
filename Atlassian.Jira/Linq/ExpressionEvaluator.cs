@@ -13,7 +13,7 @@ namespace Atlassian.Jira.Linq
     /// Thanks to http://blogs.msdn.com/b/mattwar/archive/2007/08/01/linq-building-an-iqueryable-provider-part-iii.aspx
     /// for providing the source for this class
     /// </remarks>
-    public static class ExpressionEvaluator
+    internal static class ExpressionEvaluator
     {
         /// <summary>
         /// Performs evaluation & replacement of independent sub-trees

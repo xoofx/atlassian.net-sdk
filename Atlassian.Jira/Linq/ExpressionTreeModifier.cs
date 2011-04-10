@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Atlassian.Jira.Linq
 {
-    public class ExpressionTreeModifier: ExpressionVisitor
+    internal class ExpressionTreeModifier: ExpressionVisitor
     {
         private readonly IQueryable<Issue> _queryableIssues;
 
