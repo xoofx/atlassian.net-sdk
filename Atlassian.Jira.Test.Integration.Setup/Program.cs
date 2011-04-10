@@ -11,6 +11,10 @@ namespace Atlassian.Jira.Test.Integration.Setup
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("-------------------------------------------------------");
+            Console.WriteLine("Seting up JIRA.");
+            Console.WriteLine("-------------------------------------------------------");
+
             HtmlPage page = new HtmlPage(new Uri("http://localhost:2990/jira/"));
 
             page.Navigate("login.jsp");
