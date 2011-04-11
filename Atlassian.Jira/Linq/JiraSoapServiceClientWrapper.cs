@@ -41,5 +41,10 @@ namespace Atlassian.Jira.Linq
         {
             return _client.getIssuesFromJqlSearch(token, jqlSearch, maxNumResults);
         }
+
+        public RemoteIssue createIssue(string token, RemoteIssue newIssue)
+        {
+            return _client.createIssue(token, newIssue);
+        }
     }
 }

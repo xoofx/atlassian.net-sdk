@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Atlassian.Jira.Linq;
 
 namespace Atlassian.Jira
 {
@@ -10,6 +11,41 @@ namespace Atlassian.Jira
     /// </summary>
     public class Issue
     {
+        /// <summary>
+        /// Create a new Issue from a RemoteIssue
+        /// </summary>
+        internal static Issue FromRemote(RemoteIssue remoteIssue)
+        {
+            return new Issue()
+            {
+                Summary = remoteIssue.summary,
+                Assignee = remoteIssue.assignee,
+                Description = remoteIssue.description,
+                Environment = remoteIssue.environment,
+                Key = new ComparableTextField(remoteIssue.key),
+                Priority = new ComparableTextField(remoteIssue.priority),
+                Project = remoteIssue.project,
+                Reporter = remoteIssue.reporter,
+                Resolution = new ComparableTextField(remoteIssue.resolution),
+                Status = remoteIssue.status,
+                Type = remoteIssue.type,
+                Votes = remoteIssue.votes.Value
+            };
+        }
+
+        /// <summary>
+        /// Create a new RemoteIssue based on the information in this issue
+        /// </summary>
+        internal RemoteIssue ToRemote()
+        {
+           return new RemoteIssue()
+            {
+                summary = this.Summary,
+                project = this.Project,
+                type = this.Type
+            };
+        }
+
         /// <summary>
         /// Brief one-line summary of the issue
         /// </summary>

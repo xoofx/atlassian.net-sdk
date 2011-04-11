@@ -23,5 +23,11 @@ namespace ConsoleSample
         {
             return new RemoteIssue[0];
         }
+
+
+        public RemoteIssue createIssue(string token, RemoteIssue newIssue)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

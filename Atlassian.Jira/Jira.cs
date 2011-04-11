@@ -80,6 +80,16 @@ namespace Atlassian.Jira
         /// </summary>
         public bool Debug { get; set; }
 
+        private string GetAuthenticationToken()
+        {
+            if (_username != null && _password != null && String.IsNullOrEmpty(_token))
+            {
+                _token = _jiraSoapService.Login(_username, _password);
+            }
+
+            return _token;
+        }
+
         /// <summary>
         /// Execute a specific JQL query and return the resulting issues
         /// </summary>
@@ -92,32 +102,31 @@ namespace Atlassian.Jira
                 Console.WriteLine("JQL: " + jql);
             }
 
-            if (_username != null && _password != null && String.IsNullOrEmpty(_token))
-            {
-                _token = _jiraSoapService.Login(_username, _password);
-            }
+            var token = GetAuthenticationToken();
 
             IList<Issue> issues = new List<Issue>();
-            foreach (RemoteIssue i in _jiraSoapService.GetIssuesFromJqlSearch(_token, jql, 20))
+            foreach (RemoteIssue i in _jiraSoapService.GetIssuesFromJqlSearch(token, jql, 20))
             {
-                issues.Add(new Issue()
-                {
-                    Summary = i.summary,
-                    Assignee = i.assignee,
-                    Description = i.description,
-                    Environment = i.environment,
-                    Key = new ComparableTextField(i.key),
-                    Priority = new ComparableTextField(i.priority),
-                    Project = i.project,
-                    Reporter = i.reporter,
-                    Resolution = new ComparableTextField(i.resolution),
-                    Status = i.status,
-                    Type = i.type,
-                    Votes = i.votes.Value
-                });
+                issues.Add(Issue.FromRemote(i));
             }
 
             return issues;
+        }
+
+        /// <summary>
+        /// Create a new issue on the server
+        /// </summary>
+        /// <param name="newIssue">New Issue to create</param>
+        /// <returns>Created issue with values propulated from server</returns>
+        public Issue CreateIssue(Issue newIssue)
+        {
+            var token = GetAuthenticationToken();
+
+            var remoteIssue = newIssue.ToRemote();
+            
+            remoteIssue = _jiraSoapService.createIssue(_token, remoteIssue);
+
+            return Issue.FromRemote(remoteIssue);
         }
     }
 }

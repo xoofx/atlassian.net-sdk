@@ -12,5 +12,6 @@ namespace Atlassian.Jira.Linq
     {
         string Login(string username, string password);
         RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults);
+        RemoteIssue createIssue(string token, RemoteIssue newIssue);
     }
 }
