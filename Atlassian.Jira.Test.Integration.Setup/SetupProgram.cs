@@ -12,41 +12,36 @@ namespace Atlassian.Jira.Test.Integration.Setup
 {
     class SetupProgram
     {
-        private static bool _jiraStarted = false;
-        private static Process _jira;
-        private static string _currentDir;
-
         static void Main(string[] args)
         {
-            _currentDir = Path.GetDirectoryName(typeof(SetupProgram).Assembly.Location);
+            var currentDir = Path.GetDirectoryName(typeof(SetupProgram).Assembly.Location);
+            Environment.CurrentDirectory = currentDir;
 
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("Starting JIRA.");
-            Console.WriteLine("-------------------------------------------------------");
-            
-            _jira = StartJira();
-
-            while (!IsJiraReady())
+            if (args.Length > 0)
             {
-                Thread.Sleep(1000);
+                switch (args[0].ToLowerInvariant())
+                {
+                    case "start":
+                        StartJira(currentDir);
+                        break;
+                    case "setup":
+                        SetupTestData(currentDir);
+                        break;
+                    default:
+                        throw new ArgumentException(String.Format("Unknwon command '{0}'", args[0]));
+                }
             }
-
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("Restoring test data.");
-            Console.WriteLine("-------------------------------------------------------");
-
-            SetupTestData();
-
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("JIRA Setup Complete.");
-            Console.WriteLine("-------------------------------------------------------");
-
+            else
+            {
+                StartJira(currentDir);
+                SetupTestData(currentDir);                
+            }
         }
 
-        private static bool IsJiraReady()
+        private static bool IsJiraReady(int seconds)
         {
             Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("Checking if JIRA is up.");
+            Console.WriteLine(String.Format("Checking if JIRA is up (wait time: {0} seconds).", seconds));
             Console.WriteLine("-------------------------------------------------------");
 
             HtmlPage page = new HtmlPage(new Uri("http://localhost:2990/jira/"));
@@ -63,11 +58,20 @@ namespace Atlassian.Jira.Test.Integration.Setup
             return false;
         }
 
-      
 
-        private static void SetupTestData()
+
+        private static void SetupTestData(string currentDir)
         {
-            var currentDir = typeof(SetupProgram).Assembly.Location;
+            int seconds = 0;
+            while (!IsJiraReady(seconds))
+            {
+                Thread.Sleep(1000);
+                seconds++;
+            }
+
+            Console.WriteLine("-------------------------------------------------------");
+            Console.WriteLine("Restoring test data.");
+            Console.WriteLine("-------------------------------------------------------");
 
 
             HtmlPage page = new HtmlPage(new Uri("http://localhost:2990/jira/"));
@@ -92,22 +96,28 @@ namespace Atlassian.Jira.Test.Integration.Setup
             // Restore TestData
             page.Navigate("secure/admin/XmlRestore!default.jspa");
             File.Copy(
-                Path.Combine(_currentDir, "TestData.zip"), 
-                Path.Combine(_currentDir, @"amps-standalone\target\jira\home\import\TestData.zip"), 
+                Path.Combine(currentDir, "TestData.zip"),
+                Path.Combine(currentDir, @"amps-standalone\target\jira\home\import\TestData.zip"), 
                 true);
 
             page.Elements.Find("filename", MatchMethod.Literal).SetText("TestData.zip");
             page.Elements.Find("restore_submit").Click();
+
+            Console.WriteLine("-------------------------------------------------------");
+            Console.WriteLine("JIRA Setup Complete.");
+            Console.WriteLine("-------------------------------------------------------");
         }
 
 
-        private static Process StartJira()
+        private static void StartJira(string currentDir)
         {
-            var process = new Process();
-            process.StartInfo.FileName = Path.Combine(_currentDir, "StartJira.bat");
-            process.Start();
+            Console.WriteLine("-------------------------------------------------------");
+            Console.WriteLine("Starting JIRA.");
+            Console.WriteLine("-------------------------------------------------------");
 
-            return process;
+            var process = new Process();
+            process.StartInfo.FileName = Path.Combine(currentDir, "StartJira.bat");
+            process.Start();
         }
 
     }

@@ -56,7 +56,7 @@
     <Content Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="StartJira.bat" />
+    <None Include="JiraStartAndSetup.bat" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -11,19 +11,16 @@ namespace ConsoleSample
     {
         static void Main(string[] args)
         {
-            var jira = new Jira("http://jira.atlassian.com");
+            var jira = new Jira("http://localhost:8080", "admin", "admin");
 
-            jira.Debug = true;
+            var issue = new Issue() 
+            { 
+                Summary = "Sample issue", 
+                Project = "TST",
+                Type = "1"
+            };
 
-            var issues = from i in jira.IssueSearch()
-                         where i.Summary == "custom field"
-                         orderby i.Created, i.DueDate descending
-                         select i;
-
-            foreach (var i in issues)
-            {
-                Console.WriteLine(i.Summary);
-            }
+            jira.CreateIssue(issue);
 
             Console.ReadKey();
         }
