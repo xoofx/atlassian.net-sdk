@@ -18,7 +18,6 @@ namespace Atlassian.Jira
         {
             return new Issue()
             {
-                Summary = remoteIssue.summary,
                 Assignee = remoteIssue.assignee,
                 Description = remoteIssue.description,
                 Environment = remoteIssue.environment,
@@ -28,6 +27,7 @@ namespace Atlassian.Jira
                 Reporter = remoteIssue.reporter,
                 Resolution = new ComparableTextField(remoteIssue.resolution),
                 Status = remoteIssue.status,
+                Summary = remoteIssue.summary,
                 Type = remoteIssue.type,
                 Votes = remoteIssue.votes.Value
             };
@@ -40,9 +40,17 @@ namespace Atlassian.Jira
         {
            return new RemoteIssue()
             {
-                summary = this.Summary,
+                assignee = this.Assignee,
+                description = this.Description,
+                environment = this.Environment,
+                priority = this.Priority.Value,
                 project = this.Project,
-                type = this.Type
+                reporter = this.Reporter,
+                resolution = this.Resolution.Value,
+                status = this.Status,
+                summary = this.Summary,
+                type = this.Type,
+                votes = this.Votes
             };
         }
 
