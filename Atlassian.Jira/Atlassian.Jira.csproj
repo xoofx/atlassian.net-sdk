@@ -50,6 +50,7 @@
     <Compile Include="Jira.cs" />
     <Compile Include="Linq\ExpressionEvaluator.cs" />
     <Compile Include="Linq\ExpressionTreeModifier.cs" />
+    <Compile Include="Linq\ExtensionMethods.cs" />
     <Compile Include="Linq\IJiraSoapServiceClient.cs" />
     <Compile Include="Linq\IJqlExpressionTranslator.cs" />
     <Compile Include="Linq\JiraQueryable.cs" />

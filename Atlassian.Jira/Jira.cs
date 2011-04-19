@@ -107,7 +107,7 @@ namespace Atlassian.Jira
             IList<Issue> issues = new List<Issue>();
             foreach (RemoteIssue i in _jiraSoapService.GetIssuesFromJqlSearch(token, jql, 20))
             {
-                issues.Add(Issue.FromRemote(i));
+                issues.Add(i.ToLocal());
             }
 
             return issues;
@@ -126,7 +126,20 @@ namespace Atlassian.Jira
             
             remoteIssue = _jiraSoapService.createIssue(_token, remoteIssue);
 
-            return Issue.FromRemote(remoteIssue);
+            return remoteIssue.ToLocal();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="issue"></param>
+        /// <returns></returns>
+        public void UpdateIssue(Issue issue)
+        {
+            var token = GetAuthenticationToken();
+
+            var remoteIssue = issue.ToRemote();
+            
         }
     }
 }

@@ -11,47 +11,11 @@ namespace Atlassian.Jira
     /// </summary>
     public class Issue
     {
-        /// <summary>
-        /// Create a new Issue from a RemoteIssue
-        /// </summary>
-        internal static Issue FromRemote(RemoteIssue remoteIssue)
+        public Issue()
         {
-            return new Issue()
-            {
-                Assignee = remoteIssue.assignee,
-                Description = remoteIssue.description,
-                Environment = remoteIssue.environment,
-                Key = new ComparableTextField(remoteIssue.key),
-                Priority = new ComparableTextField(remoteIssue.priority),
-                Project = remoteIssue.project,
-                Reporter = remoteIssue.reporter,
-                Resolution = new ComparableTextField(remoteIssue.resolution),
-                Status = remoteIssue.status,
-                Summary = remoteIssue.summary,
-                Type = remoteIssue.type,
-                Votes = remoteIssue.votes.Value
-            };
+            this.Key = new ComparableTextField();
         }
-
-        /// <summary>
-        /// Create a new RemoteIssue based on the information in this issue
-        /// </summary>
-        internal RemoteIssue ToRemote()
-        {
-           return new RemoteIssue()
-            {
-                assignee = this.Assignee,
-                description = this.Description,
-                environment = this.Environment,
-                project = this.Project,
-                reporter = this.Reporter,
-                status = this.Status,
-                summary = this.Summary,
-                type = this.Type,
-                votes = this.Votes
-            };
-        }
-
+       
         /// <summary>
         /// Brief one-line summary of the issue
         /// </summary>

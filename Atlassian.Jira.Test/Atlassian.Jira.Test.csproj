@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComparableTextFieldTest.cs" />
+    <Compile Include="IssueTest.cs" />
     <Compile Include="LinqQueryProviderTest.cs" />
     <Compile Include="JqlExpressionTranslatorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

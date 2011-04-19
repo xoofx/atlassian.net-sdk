@@ -13,13 +13,18 @@ namespace Atlassian.Jira
         public int? Id { get; set; }
         public string Value { get; set; }
 
-        public ComparableTextField(): this(String.Empty)
+        public ComparableTextField()
         {
         }
 
         public ComparableTextField(string value)
         {
             this.Value = value;
+        }
+
+        public static implicit operator ComparableTextField(string value)
+        {
+            return new ComparableTextField(value);
         }
 
         public static bool operator ==(ComparableTextField field, string value)
