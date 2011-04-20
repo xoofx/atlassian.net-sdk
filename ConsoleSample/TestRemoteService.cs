@@ -25,7 +25,13 @@ namespace ConsoleSample
         }
 
 
-        public RemoteIssue createIssue(string token, RemoteIssue newIssue)
+        public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public RemoteIssue UpdateIssue(string token, string key, RemoteFieldValue[] fields)
         {
             throw new NotImplementedException();
         }

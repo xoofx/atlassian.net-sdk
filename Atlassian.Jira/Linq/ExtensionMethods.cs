@@ -12,23 +12,7 @@ namespace Atlassian.Jira.Linq
         /// </summary>
         public static RemoteIssue ToRemote(this Issue issue)
         {
-            var remote = new RemoteIssue()
-            {
-                assignee = issue.Assignee,
-                description = issue.Description,
-                environment = issue.Environment,
-                project = issue.Project,
-                reporter = issue.Reporter,
-                key = issue.Key.Value,
-                status = issue.Status,
-                summary = issue.Summary,
-                type = issue.Type,
-                votes = issue.Votes
-            };
-
-            //remote.key = issue.Key != null ?  issue.Key.Value: null;
-
-            return remote;
+            return issue.ToRemote();
         }
 
         /// <summary>
@@ -36,21 +20,15 @@ namespace Atlassian.Jira.Linq
         /// </summary>
         public static Issue ToLocal(this RemoteIssue remoteIssue)
         {
-            return new Issue()
-            {
-                Assignee = remoteIssue.assignee,
-                Description = remoteIssue.description,
-                Environment = remoteIssue.environment,
-                Key = new ComparableTextField(remoteIssue.key),
-                Priority = new ComparableTextField(remoteIssue.priority),
-                Project = remoteIssue.project,
-                Reporter = remoteIssue.reporter,
-                Resolution = new ComparableTextField(remoteIssue.resolution),
-                Status = remoteIssue.status,
-                Summary = remoteIssue.summary,
-                Type = remoteIssue.type,
-                Votes = remoteIssue.votes.Value
-            };
+            return new Issue(remoteIssue);
+        }
+
+        /// <summary>
+        /// Gets the RemoteFieldValues representing the fields that where updated
+        /// </summary>
+        public static RemoteFieldValue[] GetUpdatedFields(this Issue issue)
+        {
+            return issue.GetUpdatedFields();
         }
     }
 }

@@ -11,17 +11,17 @@ namespace ConsoleSample
     {
         static void Main(string[] args)
         {
-            var jira = new Jira("http://localhost:8080", "admin", "admin");
+            var jira = new Jira("http://localhost:2990/streams", "admin", "admin");
 
-            var issue = new Issue() 
-            { 
-                Summary = "Sample issue", 
-                Project = "TST",
-                Type = "1"
-            };
+            var issue = (from i in jira.IssueSearch()
+                         where i.Key == "ONE-1"
+                         select i).ToArray()[0];
 
-            jira.CreateIssue(issue);
+            issue.Summary += "(Updated)";
 
+            jira.UpdateIssue(issue);
+
+            Console.WriteLine("Done!");
             Console.ReadKey();
         }
     }

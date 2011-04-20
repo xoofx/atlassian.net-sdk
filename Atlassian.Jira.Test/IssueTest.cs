@@ -18,11 +18,45 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void ToRemote_IfKeyNotSet_ShouldNotPopulateKey()
+        public void ToRemote_IfPriorityIsSet_ShouldPopulate()
+        {
+            var issue = new Issue() { Priority = "High" };
+
+            Assert.Equal("High", issue.ToRemote().priority);
+        }
+
+        [Fact]
+        public void ToRemote_IfResolutionIsSet_ShouldPopulate()
+        {
+            var issue = new Issue() { Resolution = "Fixed" };
+
+            Assert.Equal("Fixed", issue.ToRemote().resolution);
+        }
+
+        [Fact]
+        public void ToRemote_IfNothingSet_ShouldNotPopulate()
         {
             var issue = new Issue();
 
             Assert.Null(issue.ToRemote().key);
+            Assert.Null(issue.ToRemote().priority);
+        }
+
+        [Fact]
+        public void GetUpdatedFields_ReturnEmptyIfNothingChanged()
+        {
+            var issue = new Issue();
+
+            Assert.Equal(0, issue.GetUpdatedFields().Length);
+        }
+
+        [Fact]
+        public void GetUpdatedFields_ReturnFieldThatChanged()
+        {
+            var issue = new Issue();
+            issue.Summary = "foo";
+
+            Assert.Equal(1, issue.GetUpdatedFields().Length);
         }
     }
 }

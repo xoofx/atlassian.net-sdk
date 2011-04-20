@@ -11,9 +11,61 @@ namespace Atlassian.Jira
     /// </summary>
     public class Issue
     {
-        public Issue()
+        private readonly RemoteIssue _originalIssue;
+
+        public Issue(): this(new RemoteIssue())
         {
-            this.Key = new ComparableTextField();
+        }
+
+        internal Issue(RemoteIssue remoteIssue)
+        {
+            _originalIssue = remoteIssue;
+
+            Assignee = remoteIssue.assignee;
+            Description = remoteIssue.description;
+            Environment = remoteIssue.environment;
+            Key = new ComparableTextField(remoteIssue.key);
+            Priority = new ComparableTextField(remoteIssue.priority);
+            Project = remoteIssue.project;
+            Reporter = remoteIssue.reporter;
+            Resolution = new ComparableTextField(remoteIssue.resolution);
+            Status = remoteIssue.status;
+            Summary = remoteIssue.summary;
+            Type = remoteIssue.type;
+            Votes = remoteIssue.votes;
+        }
+
+        internal RemoteIssue ToRemote()
+        {
+            var remote = new RemoteIssue()
+            {
+                assignee = this.Assignee,
+                description = this.Description,
+                environment = this.Environment,
+                project = this.Project,
+                reporter = this.Reporter,
+                key = this.Key.Value,
+                priority = this.Priority.Value,
+                resolution = this.Resolution.Value,
+                status = this.Status,
+                summary = this.Summary,
+                type = this.Type,
+                votes = this.Votes
+            };
+
+            return remote;
+        }
+
+        internal RemoteFieldValue[] GetUpdatedFields()
+        {
+            var fields = new List<RemoteFieldValue>();
+
+            if (!String.Equals(this.Summary, _originalIssue.summary, StringComparison.Ordinal))
+            {
+                fields.Add(new RemoteFieldValue() { id = "summary", values = new string[1] { this.Summary } });
+            }
+
+            return fields.ToArray();
         }
        
         /// <summary>
@@ -77,7 +129,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Number of votes the issue has
         /// </summary>
-        public long Votes { get; set; }
+        public long? Votes { get; set; }
 
         /// <summary>
         /// Time and date on which this issue was entered into JIRA
