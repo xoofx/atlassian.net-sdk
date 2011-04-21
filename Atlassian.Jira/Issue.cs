@@ -60,9 +60,19 @@ namespace Atlassian.Jira
         {
             var fields = new List<RemoteFieldValue>();
 
-            if (!String.Equals(this.Summary, _originalIssue.summary, StringComparison.Ordinal))
+            var remoteFields = typeof(RemoteIssue).GetProperties();
+            foreach (var localProperty in typeof(Issue).GetProperties())
             {
-                fields.Add(new RemoteFieldValue() { id = "summary", values = new string[1] { this.Summary } });
+                var remoteProperty = remoteFields.First(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
+                var remoteValue = remoteProperty.GetValue(_originalIssue, null);
+                var localValue = localProperty.GetValue(this, null);
+
+
+                if (localProperty.PropertyType == typeof(string) && remoteValue != localValue)
+                {
+                    var localStringValue = localValue != null ? localValue.ToString() : (string) null;
+                    fields.Add(new RemoteFieldValue() { id = remoteProperty.Name, values = new string[1] { localStringValue } });
+                }
             }
 
             return fields.ToArray();

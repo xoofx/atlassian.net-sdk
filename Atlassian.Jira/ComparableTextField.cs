@@ -99,7 +99,7 @@ namespace Atlassian.Jira
 
         public override string ToString()
         {
-            return this.Value.ToString();
+            return this.Value?? String.Empty;
         }
     }
 }

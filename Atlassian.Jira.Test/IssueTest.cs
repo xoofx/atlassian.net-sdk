@@ -51,12 +51,28 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void GetUpdatedFields_ReturnFieldThatChanged()
+        public void GetUpdatedFields_IfOneSet_ReturnOneFieldThatChanged()
         {
             var issue = new Issue();
             issue.Summary = "foo";
 
             Assert.Equal(1, issue.GetUpdatedFields().Length);
+        }
+
+        [Fact]
+        public void GetUpdatedFields_IfAllStringSet_ReturnFieldsThatChanged()
+        {
+            var issue = new Issue();
+            issue.Summary = "foo";
+            issue.Description = "foo";
+            issue.Assignee = "foo";
+            issue.Environment = "foo";
+            issue.Project = "foo";
+            issue.Reporter = "foo";
+            issue.Status = "foo";
+            issue.Type = "foo";
+
+            Assert.Equal(8, issue.GetUpdatedFields().Length);
         }
     }
 }
