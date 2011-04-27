@@ -24,7 +24,14 @@ namespace Atlassian.Jira
 
         public static implicit operator ComparableTextField(string value)
         {
-            return new ComparableTextField(value);
+            if (value != null)
+            {
+                return new ComparableTextField(value);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public static bool operator ==(ComparableTextField field, string value)
@@ -99,7 +106,7 @@ namespace Atlassian.Jira
 
         public override string ToString()
         {
-            return this.Value?? String.Empty;
+            return this.Value;
         }
     }
 }

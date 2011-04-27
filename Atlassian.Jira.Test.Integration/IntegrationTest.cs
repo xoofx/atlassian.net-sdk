@@ -75,7 +75,7 @@ namespace Atlassian.Jira.Test.Integration
             {
                 Assignee = "admin",
                 Description = "Test Description",
-                DueDate = new DateTime(2011, 12, 12),
+               // DueDate = new DateTime(2011, 12, 12),
                 Environment = "Test Environment",
                 Project = "TST",
                 Reporter = "admin",

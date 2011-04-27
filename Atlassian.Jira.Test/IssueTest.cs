@@ -10,36 +10,64 @@ namespace Atlassian.Jira.Test
     public class IssueTest
     {
         [Fact]
-        public void ToRemote_IfKeyIsSet_ShouldPopulateKey()
+        public void ToLocal_IfFieldsSet_ShouldPopulateFields()
         {
-            var issue = new Issue() { Key = "key1" };
+            var remoteIssue = new RemoteIssue()
+            {
+                created = new DateTime(2011, 1, 1),
+                updated = new DateTime(2011, 2, 2),
+                duedate = new DateTime(2011, 3, 3),
+                priority = "High",
+                resolution = "Open",
+                key = "key1"
+            };
 
-            Assert.Equal("key1", issue.ToRemote().key);
+            var issue = remoteIssue.ToLocal();
+
+            Assert.Equal(new DateTime(2011, 1, 1), issue.Created);
+            Assert.Equal(new DateTime(2011, 2, 2), issue.Updated);
+            Assert.Equal(new DateTime(2011, 3, 3), issue.DueDate);
+            Assert.Equal("High", issue.Priority.Value);
+            Assert.Equal("Open", issue.Resolution.Value);
+            Assert.Equal("key1", issue.Key.Value);
         }
 
         [Fact]
-        public void ToRemote_IfPriorityIsSet_ShouldPopulate()
+        public void ToLocal_IfFieldsNotSet_ShouldNotPopulateFields()
         {
-            var issue = new Issue() { Priority = "High" };
+            var remoteIssue = new RemoteIssue();
 
-            Assert.Equal("High", issue.ToRemote().priority);
+            var issue = remoteIssue.ToLocal();
+
+            Assert.Null(issue.Created);
+            Assert.Null(issue.Updated);
+            Assert.Null(issue.DueDate);
+            Assert.Null(issue.Priority);
+            Assert.Null(issue.Resolution);
+            Assert.Null(issue.Key);
         }
 
         [Fact]
-        public void ToRemote_IfResolutionIsSet_ShouldPopulate()
+        public void ToRemote_IfFieldsSet_ShouldPopulateFields()
         {
-            var issue = new Issue() { Resolution = "Fixed" };
+            var remoteIssue = new RemoteIssue()
+            {
+                created = new DateTime(2011, 1, 1),
+                updated = new DateTime(2011, 2, 2),
+                duedate = new DateTime(2011, 3, 3),
+                priority = "High",
+                resolution = "Open",
+                key = "key1"
+            };
 
-            Assert.Equal("Fixed", issue.ToRemote().resolution);
-        }
+            var newRemoteIssue = remoteIssue.ToLocal().ToRemote();
 
-        [Fact]
-        public void ToRemote_IfNothingSet_ShouldNotPopulate()
-        {
-            var issue = new Issue();
-
-            Assert.Null(issue.ToRemote().key);
-            Assert.Null(issue.ToRemote().priority);
+            Assert.Null(newRemoteIssue.created);
+            Assert.Null(newRemoteIssue.updated);
+            Assert.Null(newRemoteIssue.duedate);
+            Assert.Equal("High", newRemoteIssue.priority);
+            Assert.Equal("Open", newRemoteIssue.resolution);
+            Assert.Equal("key1", newRemoteIssue.key);
         }
 
         [Fact]
@@ -51,7 +79,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void GetUpdatedFields_IfOneSet_ReturnOneFieldThatChanged()
+        public void GetUpdatedFields_IfString_ReturnOneFieldThatChanged()
         {
             var issue = new Issue();
             issue.Summary = "foo";
@@ -60,7 +88,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void GetUpdatedFields_IfAllStringSet_ReturnFieldsThatChanged()
+        public void GetUpdatedFields_IfString_ReturnAllFieldsThatChanged()
         {
             var issue = new Issue();
             issue.Summary = "foo";
@@ -74,5 +102,49 @@ namespace Atlassian.Jira.Test
 
             Assert.Equal(8, issue.GetUpdatedFields().Length);
         }
+
+        [Fact]
+        public void GetUpdateFields_IfStringEqual_ReturnNoFieldsThatChanged()
+        {
+            var remoteIssue = new RemoteIssue()
+            {
+                summary = "Summary"
+            };
+
+            var issue = remoteIssue.ToLocal();
+
+            issue.Summary = "Summary";
+            issue.Status = null;
+
+            Assert.Equal(0, issue.GetUpdatedFields().Length);
+        }
+
+        [Fact]
+        public void GetUpdateFields_IfComparableEqual_ReturnNoFieldsThatChanged()
+        {
+            var remoteIssue = new RemoteIssue()
+            {
+                priority = "High",
+            };
+
+            var issue = remoteIssue.ToLocal();
+
+            issue.Priority = "High";
+            issue.Resolution = null;
+
+            Assert.Equal(0, issue.GetUpdatedFields().Length);
+        }
+
+        [Fact]
+        public void GetUpdateFields_IfComparable_ReturnsFieldsThatChanged()
+        {
+            var issue = new Issue();
+            issue.Priority = "High";
+
+            Assert.Equal(1, issue.GetUpdatedFields().Length);
+            
+        }
+
+
     }
 }

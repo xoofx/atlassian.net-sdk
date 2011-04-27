@@ -12,6 +12,9 @@ namespace Atlassian.Jira
     public class Issue
     {
         private readonly RemoteIssue _originalIssue;
+        private DateTime? _createDate;
+        private DateTime? _updateDate;
+        private DateTime? _dueDate;
 
         public Issue(): this(new RemoteIssue())
         {
@@ -24,15 +27,22 @@ namespace Atlassian.Jira
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
             Environment = remoteIssue.environment;
-            Key = new ComparableTextField(remoteIssue.key);
-            Priority = new ComparableTextField(remoteIssue.priority);
             Project = remoteIssue.project;
             Reporter = remoteIssue.reporter;
-            Resolution = new ComparableTextField(remoteIssue.resolution);
             Status = remoteIssue.status;
             Summary = remoteIssue.summary;
             Type = remoteIssue.type;
             Votes = remoteIssue.votes;
+
+            _createDate = remoteIssue.created;
+            _dueDate = remoteIssue.duedate;
+            _updateDate = remoteIssue.updated;
+
+            Key = remoteIssue.key;
+            Priority = remoteIssue.priority;
+            Resolution = remoteIssue.resolution;
+            
+
         }
 
         internal RemoteIssue ToRemote()
@@ -66,12 +76,19 @@ namespace Atlassian.Jira
                 var remoteProperty = remoteFields.First(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
                 var remoteValue = remoteProperty.GetValue(_originalIssue, null);
                 var localValue = localProperty.GetValue(this, null);
-
-
-                if (localProperty.PropertyType == typeof(string) && remoteValue != localValue)
+                
+                if (localProperty.PropertyType == typeof(string) 
+                    || localProperty.PropertyType == typeof(ComparableTextField))
                 {
                     var localStringValue = localValue != null ? localValue.ToString() : (string) null;
-                    fields.Add(new RemoteFieldValue() { id = remoteProperty.Name, values = new string[1] { localStringValue } });
+                    var remoteStringValue = remoteValue != null ? remoteValue.ToString() : (string) null;
+
+                    if (remoteStringValue != localStringValue)
+                    {
+                        fields.Add(new RemoteFieldValue() { 
+                            id = remoteProperty.Name, 
+                            values = new string[1] { localStringValue }});
+                    }
                 }
             }
 
@@ -144,17 +161,35 @@ namespace Atlassian.Jira
         /// <summary>
         /// Time and date on which this issue was entered into JIRA
         /// </summary>
-        public DateTime Created { get; set; }
+        public DateTime? Created 
+        {
+            get
+            {
+                return _createDate;
+            }
+        }
 
         /// <summary>
         /// Date by which this issue is scheduled to be completed
         /// </summary>
-        public DateTime DueDate { get; set; }
+        public DateTime? DueDate 
+        {
+            get
+            {
+                return _dueDate;
+            }
+        }
 
         /// <summary>
         /// Time and date on which this issue was last edited
         /// </summary>
-        public DateTime Updated { get; set; }
+        public DateTime? Updated 
+        {
+            get
+            {
+                return _updateDate;
+            }
+        }
 
     }
 }
