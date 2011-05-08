@@ -54,14 +54,15 @@ namespace Atlassian.Jira
                 environment = this.Environment,
                 project = this.Project,
                 reporter = this.Reporter,
-                key = this.Key.Value,
-                priority = this.Priority.Value,
-                resolution = this.Resolution.Value,
                 status = this.Status,
                 summary = this.Summary,
                 type = this.Type,
                 votes = this.Votes
             };
+
+            remote.key = this.Key != null ? this.Key.Value : null;
+            remote.priority = this.Priority != null? this.Priority.Value : null;
+            remote.resolution = this.Resolution != null ? this.Resolution.Value : null;
 
             return remote;
         }
@@ -177,6 +178,10 @@ namespace Atlassian.Jira
             get
             {
                 return _dueDate;
+            }
+            set
+            {
+                _dueDate = value;
             }
         }
 

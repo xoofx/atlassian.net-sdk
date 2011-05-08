@@ -36,12 +36,26 @@ namespace Atlassian.Jira
 
         public static bool operator ==(ComparableTextField field, string value)
         {
-            return field.Value == value;
+            if ((object) field == null)
+            {
+                return value == null;
+            }
+            else
+            {
+                return field.Value == value;
+            }
         }
 
         public static bool operator !=(ComparableTextField field, string value)
         {
-            return field.Value != value;
+            if ((object) field == null)
+            {
+                return value != null;
+            }
+            else
+            {
+                return field.Value != value;
+            }
         }
 
         public static bool operator >(ComparableTextField field, string value)

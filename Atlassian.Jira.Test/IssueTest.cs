@@ -48,6 +48,23 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void ToRemote_IfFieldsNotSet_ShouldLeaveFieldsNull()
+        {
+            var issue = new Issue()
+            {
+                Project = "TST",
+                Type = "1",
+                Summary = "Summary"
+            };
+
+            var remoteIssue = issue.ToRemote();
+
+            Assert.Null(remoteIssue.priority);
+            Assert.Null(remoteIssue.key);
+            Assert.Null(remoteIssue.resolution);
+        }
+
+        [Fact]
         public void ToRemote_IfFieldsSet_ShouldPopulateFields()
         {
             var remoteIssue = new RemoteIssue()

@@ -9,6 +9,14 @@ namespace Atlassian.Jira.Test
     public class ComparableTextFieldTest
     {
         [Fact]
+        public void RefereceIsNull_EqualsOperators()
+        {
+            ComparableTextField field = null;
+            Assert.True(field == null);
+            Assert.False(field != null);
+        }
+
+        [Fact]
         public void StringEqualsOperator()
         {
             var field = new ComparableTextField();

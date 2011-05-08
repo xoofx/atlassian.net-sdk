@@ -29,18 +29,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void TestQueryWithOneResult()
-        {
-            var issues = (from i in _jira.IssueSearch()
-                         where i.Reporter == "admin"
-                         select i).ToList();
-
-            Assert.Equal(1, issues.Count);
-            Assert.Equal("Sample bug in Test Project", issues[0].Summary);
-        }
-
-        [Fact]
-        public void TestCreateNewIssueWithMinimumFieldsSet()
+        public void TestCreateAndQueryForIssueWithMinimumFieldsSet()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
 
@@ -66,8 +55,8 @@ namespace Atlassian.Jira.Test.Integration
         }
 
 
-        //[Fact]
-        public void TestCreateNewIssueWithAllFieldsSet()
+        [Fact]
+        public void TestCreateAndQueryIssueWithAllFieldsSet()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
 
@@ -75,7 +64,7 @@ namespace Atlassian.Jira.Test.Integration
             {
                 Assignee = "admin",
                 Description = "Test Description",
-               // DueDate = new DateTime(2011, 12, 12),
+                DueDate = new DateTime(2011, 12, 12),
                 Environment = "Test Environment",
                 Project = "TST",
                 Reporter = "admin",
@@ -86,11 +75,11 @@ namespace Atlassian.Jira.Test.Integration
             issue = _jira.CreateIssue(issue);
 
 
-            var queriedIssue = (from i in _jira.IssueSearch()
+            var queriedIssues = (from i in _jira.IssueSearch()
                           where i.Key == issue.Key
-                          select i).First();
+                          select i).ToArray();
 
-            Assert.Equal(summaryValue, queriedIssue.Summary);
+            Assert.Equal(summaryValue, queriedIssues[0].Summary);
         }
     }
 }
