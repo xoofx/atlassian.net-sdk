@@ -30,7 +30,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                          where i.Votes == 5
                          select i).ToArray();
 
@@ -43,7 +43,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Summary == "Foo"
                           select i).ToArray();
 
@@ -56,7 +56,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Assignee == "Foo"
                           select i).ToArray();
 
@@ -71,7 +71,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Votes != 5
                           select i).ToArray();
 
@@ -84,7 +84,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Summary != "Foo"
                           select i).ToArray();
 
@@ -96,7 +96,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Assignee != "Foo"
                           select i).ToArray();
 
@@ -108,7 +108,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Votes > 5
                           select i).ToArray();
 
@@ -121,7 +121,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Votes >= 5
                           select i).ToArray();
 
@@ -133,7 +133,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Votes < 5
                           select i).ToArray();
 
@@ -145,7 +145,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Votes <= 5
                           select i).ToArray();
 
@@ -157,7 +157,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Votes > 5 && i.Votes < 10 
                           select i).ToArray();
 
@@ -169,7 +169,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Votes > 5 || i.Votes < 10
                           select i).ToArray();
 
@@ -181,7 +181,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Votes > 5 && (i.Votes < 10 || i.Votes == 20)
                           select i).ToArray();
 
@@ -193,7 +193,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Summary == ""
                           select i).ToArray();
 
@@ -205,7 +205,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Summary != ""
                           select i).ToArray();
 
@@ -217,7 +217,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Summary == null
                           select i).ToArray();
 
@@ -229,7 +229,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Priority > "foo"
                           select i).ToArray();
 
@@ -241,7 +241,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Priority == "foo"
                           select i).ToArray();
 
@@ -253,7 +253,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Priority > 1
                           select i).ToArray();
 
@@ -265,7 +265,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Priority == 1
                           select i).ToArray();
 
@@ -277,7 +277,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Priority == 1
                           orderby i.Created
                           select i).ToArray();
@@ -290,7 +290,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Priority == 1
                           orderby i.Created descending
                           select i).ToArray();
@@ -303,7 +303,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Priority == 1
                           orderby i.Created, i.DueDate
                           select i).ToArray();
@@ -316,7 +316,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Priority == 1
                           orderby i.Created, i.DueDate descending
                           select i).ToArray();
@@ -329,7 +329,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Created > new DateTime(2011,1,1)
                           select i).ToArray();
 
@@ -341,7 +341,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Created > new DateTime(2011, 1, 1) && i.Created < new DateTime(2012,1,1) 
                           select i).ToArray();
 
@@ -354,7 +354,7 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
             var user = "farmas";
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Assignee == user
                           select i).ToArray();
 
@@ -367,7 +367,7 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
             var date = new DateTime(2011, 1, 1);
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Created >  date
                           select i).ToArray();
 
@@ -380,7 +380,7 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
             var date = new DateTime(2011, 1, 1);
 
-            var issues = (from i in jira.IssueSearch()
+            var issues = (from i in jira.Issues
                           where i.Created > DateTime.Now
                           select i).ToArray();
 

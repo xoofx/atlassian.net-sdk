@@ -21,7 +21,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void TestQueryWithZeroResults()
         {
-            var issues = from i in _jira.IssueSearch()
+            var issues = from i in _jira.Issues
                          where i.Created == new DateTime(2010,1,1)
                          select i;
 
@@ -43,7 +43,7 @@ namespace Atlassian.Jira.Test.Integration
             issue = _jira.CreateIssue(issue);
 
 
-            var issues = (from i in _jira.IssueSearch()
+            var issues = (from i in _jira.Issues
                                 where i.Key == issue.Key
                                 select i).ToArray();
 
@@ -75,7 +75,7 @@ namespace Atlassian.Jira.Test.Integration
             issue = _jira.CreateIssue(issue);
 
 
-            var queriedIssues = (from i in _jira.IssueSearch()
+            var queriedIssues = (from i in _jira.Issues
                           where i.Key == issue.Key
                           select i).ToArray();
 

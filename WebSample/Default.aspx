@@ -13,7 +13,7 @@
            "admin",
            "admin");
 
-        var issues = from i in jira.IssueSearch()
+        var issues = from i in jira.Issues
                      where i.Assignee == "admin"
                      select i;
 

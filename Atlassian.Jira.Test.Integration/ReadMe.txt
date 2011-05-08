@@ -2,7 +2,7 @@
 	Follow instructions here: http://confluence.atlassian.com/display/DEVNET/Setting+up+your+Plugin+Development+Environment
 
 2. Start Jira Server
-	Run "JiraStartAndSetup.bat" from an elevated command prompt
+	Run "Atlassian.Jira.Test.Integration.Setup\bin\Debug\JiraSetup.exe" from an elevated command prompt
 	A JIRA server will start on a separate window
 	When JIRA is up test data will be loaded
 

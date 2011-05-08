@@ -27,7 +27,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
 
-            var issues = from i in jira.IssueSearch()
+            var issues = from i in jira.Issues
                          where i.Votes == 5
                          select i;
 

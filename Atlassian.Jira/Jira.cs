@@ -70,9 +70,12 @@ namespace Atlassian.Jira
         /// Query the issues database
         /// </summary>
         /// <returns>IQueryable of Issue</returns>
-        public JiraQueryable<Issue> IssueSearch()
+        public JiraQueryable<Issue> Issues
         {
-            return new JiraQueryable<Issue>(_provider);
+            get
+            {
+                return new JiraQueryable<Issue>(_provider);
+            }
         }
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace ConsoleSample
         {
             var jira = new Jira("http://localhost:2990/streams", "admin", "admin");
 
-            var issue = (from i in jira.IssueSearch()
+            var issue = (from i in jira.Issues
                          where i.Key == "ONE-1"
                          select i).ToArray()[0];
 
