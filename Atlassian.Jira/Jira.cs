@@ -85,7 +85,8 @@ namespace Atlassian.Jira
 
         private string GetAuthenticationToken()
         {
-            if (_username != null && _password != null && String.IsNullOrEmpty(_token))
+            if (!String.IsNullOrEmpty(_username) 
+                && !String.IsNullOrEmpty(_password) && String.IsNullOrEmpty(_token))
             {
                 _token = _jiraSoapService.Login(_username, _password);
             }
