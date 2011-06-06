@@ -15,19 +15,28 @@ namespace Atlassian.Jira.Linq
 
         public JiraSoapServiceClientWrapper(string url)
         {
-            var binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
-            binding.TransferMode = TransferMode.Buffered;
-            binding.UseDefaultWebProxy = true;
-            binding.MaxReceivedMessageSize = 2147483647;
-            binding.Security.Message.ClientCredentialType = BasicHttpMessageCredentialType.UserName;
-
             if (!url.EndsWith("/"))
             {
                 url += "/";
             }
 
+            var endPointUri = new Uri(url + "rpc/soap/jirasoapservice-v2");
 
-            var endpoint = new EndpointAddress(new Uri(url + "rpc/soap/jirasoapservice-v2"));
+            BasicHttpBinding binding = null;
+            if (endPointUri.Scheme == "https")
+            {
+                binding = new BasicHttpBinding(BasicHttpSecurityMode.Transport);
+            }
+            else
+            {
+                binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
+            }
+            binding.TransferMode = TransferMode.Buffered;
+            binding.UseDefaultWebProxy = true;
+            binding.MaxReceivedMessageSize = 2147483647;
+            binding.Security.Message.ClientCredentialType = BasicHttpMessageCredentialType.UserName;
+
+            var endpoint = new EndpointAddress(endPointUri);
 
             _client = new JiraSoapServiceClient(binding, endpoint);
         }
