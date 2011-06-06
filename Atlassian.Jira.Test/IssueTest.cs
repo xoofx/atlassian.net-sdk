@@ -10,6 +10,14 @@ namespace Atlassian.Jira.Test
     public class IssueTest
     {
         [Fact]
+        public void Constructor_ShouldSetDefaultValues()
+        {
+            var issue = new Issue();
+
+            Assert.Null(issue.DueDate);
+        }
+
+        [Fact]
         public void ToLocal_IfFieldsSet_ShouldPopulateFields()
         {
             var remoteIssue = new RemoteIssue()
@@ -162,6 +170,13 @@ namespace Atlassian.Jira.Test
             
         }
 
+        [Fact]
+        public void GetUpdateFields_IfDateTime_ReturnsFieldsThatChanged()
+        {
+            var issue = new Issue(){ DueDate = new DateTime(2011,1,1) };
 
+            Assert.Equal(1, issue.GetUpdatedFields().Length);
+            
+        }
     }
 }
