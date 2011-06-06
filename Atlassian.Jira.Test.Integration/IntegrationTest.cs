@@ -81,5 +81,45 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Equal(summaryValue, queriedIssues[0].Summary);
         }
+
+        [Fact]
+        public void TestUpdateWithAllFieldsSet()
+        {
+            // arrange, create an issue to test.
+            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var issue = new Issue()
+            {
+                Assignee = "admin",
+                Description = "Test Description",
+                DueDate = new DateTime(2011, 12, 12),
+                Environment = "Test Environment",
+                Project = "TST",
+                Reporter = "admin",
+                Type = "1",
+                Summary = summaryValue
+            };
+            issue = _jira.CreateIssue(issue);
+
+
+            // act, get an issue and update it
+            var serverIssue = (from i in _jira.Issues
+                                 where i.Key == issue.Key
+                                 select i).ToArray().First();
+
+            serverIssue.Description = "Updated Description";
+            serverIssue.DueDate = new DateTime(2011, 10, 10);
+            serverIssue.Environment = "Updated Environment";
+            serverIssue.Summary = "Updated " + summaryValue;
+            _jira.UpdateIssue(serverIssue);
+
+            // assert, get the issue again and verify
+            var newServerIssue = (from i in _jira.Issues
+                               where i.Key == issue.Key
+                               select i).ToArray().First();
+
+            Assert.Equal("Updated " + summaryValue, newServerIssue.Summary);
+            Assert.Equal("Updated Description", newServerIssue.Description);
+            Assert.Equal("Updated Environment", newServerIssue.Environment);
+        }
     }
 }

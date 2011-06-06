@@ -104,7 +104,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
             page.Elements.Find("restore_submit").Click();
 
             Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("JIRA Setup Complete.");
+            Console.WriteLine("JIRA Setup Complete. You can now run the integration tests.");
             Console.WriteLine("-------------------------------------------------------");
         }
 

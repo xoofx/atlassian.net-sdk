@@ -134,10 +134,10 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// 
+        /// Updates an issue
         /// </summary>
-        /// <param name="issue"></param>
-        /// <returns></returns>
+        /// <param name="issue">Issue to update</param>
+        /// <returns>Updated issues with values populated from server</returns>
         public Issue UpdateIssue(Issue issue)
         {
             var token = GetAuthenticationToken();
