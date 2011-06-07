@@ -48,8 +48,6 @@
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="CoreCompile" />
   <Target Name="NugetBuild" Condition="'$(Configuration)' == 'Release'">
 	<MSBuild Projects="$(MSBuildProjectDirectory)\..\Atlassian.Jira\Atlassian.Jira.csproj" Properties="Configuration=Release" />
     <Move SourceFiles="$(MSBuildProjectDirectory)\..\Atlassian.Jira\bin\Release\Atlassian.Jira.dll;$(MSBuildProjectDirectory)\..\Atlassian.Jira\bin\Release\Atlassian.Jira.pdb;$(MSBuildProjectDirectory)\..\Atlassian.Jira\bin\Release\Atlassian.Jira.xml;" DestinationFolder="$(OutputPath)lib" />
