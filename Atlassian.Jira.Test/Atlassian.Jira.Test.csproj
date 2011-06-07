@@ -46,10 +46,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttachmentCollectionTest.cs" />
     <Compile Include="ComparableTextFieldTest.cs" />
     <Compile Include="IssueTest.cs" />
-    <Compile Include="LinqQueryProviderTest.cs" />
-    <Compile Include="JqlExpressionTranslatorTest.cs" />
+    <Compile Include="Linq\LinqQueryProviderTest.cs" />
+    <Compile Include="Linq\JqlExpressionTranslatorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

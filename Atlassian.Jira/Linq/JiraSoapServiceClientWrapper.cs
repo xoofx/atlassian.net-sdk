@@ -61,5 +61,10 @@ namespace Atlassian.Jira.Linq
         {
             return _client.updateIssue(token, key, fields);
         }
+
+        public RemoteAttachment[] GetAttachmentsFromIssue(string token, string key)
+        {
+            return _client.getAttachmentsFromIssue(token, key);
+        }
     }
 }

@@ -18,9 +18,9 @@ namespace Atlassian.Jira.Linq
         /// <summary>
         /// Create a new Issue from a RemoteIssue
         /// </summary>
-        public static Issue ToLocal(this RemoteIssue remoteIssue)
+        public static Issue ToLocal(this RemoteIssue remoteIssue, Jira jira = null)
         {
-            return new Issue(remoteIssue);
+            return new Issue(jira, remoteIssue);
         }
 
         /// <summary>

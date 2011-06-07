@@ -14,5 +14,6 @@ namespace Atlassian.Jira.Linq
         RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults);
         RemoteIssue CreateIssue(string token, RemoteIssue newIssue);
         RemoteIssue UpdateIssue(string token, string key, RemoteFieldValue[] fields);
+        RemoteAttachment[] GetAttachmentsFromIssue(string token, string key);
     }
 }

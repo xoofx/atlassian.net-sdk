@@ -13,17 +13,22 @@ namespace Atlassian.Jira
     public class Issue
     {
         private readonly RemoteIssue _originalIssue;
+        private readonly Jira _jira;
+        private readonly AttachmentCollection _attachments;
+
         private DateTime? _createDate;
         private DateTime? _updateDate;
         private DateTime? _dueDate;
 
-        public Issue(): this(new RemoteIssue())
+        public Issue(): this(null, new RemoteIssue())
         {
         }
 
-        internal Issue(RemoteIssue remoteIssue)
+        internal Issue(Jira jira, RemoteIssue remoteIssue)
         {
             _originalIssue = remoteIssue;
+            _jira = jira;
+            _attachments = new AttachmentCollection(jira, remoteIssue.key);
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -42,7 +47,6 @@ namespace Atlassian.Jira
             Key = remoteIssue.key;
             Priority = remoteIssue.priority;
             Resolution = remoteIssue.resolution;
-            
 
         }
 
@@ -90,7 +94,11 @@ namespace Atlassian.Jira
             var remoteFields = typeof(RemoteIssue).GetProperties();
             foreach (var localProperty in typeof(Issue).GetProperties())
             {
-                var remoteProperty = remoteFields.First(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
+                var remoteProperty = remoteFields.FirstOrDefault(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
+                if (remoteProperty == null)
+                {
+                    continue;
+                }
 
                 var localStringValue = GetStringValueForProperty(this, localProperty);
                 var remoteStringValue = GetStringValueForProperty(_originalIssue, remoteProperty);
@@ -208,5 +216,15 @@ namespace Atlassian.Jira
             }
         }
 
+        /// <summary>
+        /// TODO
+        /// </summary>
+        public AttachmentCollection Attachments 
+        {
+            get
+            {
+                return _attachments;
+            }
+        }
     }
 }

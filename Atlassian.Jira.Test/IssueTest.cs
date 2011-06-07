@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Atlassian.Jira.Linq;
+using Moq;
 
 namespace Atlassian.Jira.Test
 {
@@ -15,6 +16,7 @@ namespace Atlassian.Jira.Test
             var issue = new Issue();
 
             Assert.Null(issue.DueDate);
+            Assert.Equal(0, issue.Attachments.Count());
         }
 
         [Fact]

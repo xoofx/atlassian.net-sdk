@@ -5,30 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira", "Atlassian
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Test", "Atlassian.Jira.Test\Atlassian.Jira.Test.csproj", "{DF544F47-7EE3-469A-B68E-18D3096B3362}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleSample", "ConsoleSample\ConsoleSample.csproj", "{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}"
-EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "WebSample", "WebSample\", "{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}"
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
-		ProjectReferences = "{438EB0CF-D781-4F1B-9BD3-B33638AA8D1D}|Atlassian.Jira.dll;"
-		Debug.AspNetCompiler.VirtualPath = "/WebSample"
-		Debug.AspNetCompiler.PhysicalPath = "WebSample\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\WebSample\"
-		Debug.AspNetCompiler.Updateable = "true"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/WebSample"
-		Release.AspNetCompiler.PhysicalPath = "WebSample\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\WebSample\"
-		Release.AspNetCompiler.Updateable = "true"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
-		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "52048"
-		DefaultWebSiteLanguage = "Visual C#"
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGetPackage", "NuGetPackage\NuGetPackage.csproj", "{86925955-A822-4F35-B493-87DBC2CB9292}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Test.Integration", "Atlassian.Jira.Test.Integration\Atlassian.Jira.Test.Integration.csproj", "{9F922D1C-0EDA-493F-8E05-F9B90EAC0A3C}"
@@ -65,24 +41,6 @@ Global
 		{DF544F47-7EE3-469A-B68E-18D3096B3362}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{DF544F47-7EE3-469A-B68E-18D3096B3362}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{DF544F47-7EE3-469A-B68E-18D3096B3362}.Release|x86.ActiveCfg = Release|Any CPU
-		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Debug|x86.ActiveCfg = Debug|x86
-		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Debug|x86.Build.0 = Debug|x86
-		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Release|Any CPU.ActiveCfg = Release|x86
-		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Release|x86.ActiveCfg = Release|x86
-		{16DD23F0-2FF1-41A9-A6A0-31E1DDCBE656}.Release|x86.Build.0 = Release|x86
-		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{4EF120E0-37F4-4E63-909E-8082FDEAAB3B}.Release|x86.ActiveCfg = Debug|Any CPU
 		{86925955-A822-4F35-B493-87DBC2CB9292}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{86925955-A822-4F35-B493-87DBC2CB9292}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86925955-A822-4F35-B493-87DBC2CB9292}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

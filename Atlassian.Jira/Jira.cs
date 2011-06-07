@@ -109,9 +109,9 @@ namespace Atlassian.Jira
             var token = GetAuthenticationToken();
 
             IList<Issue> issues = new List<Issue>();
-            foreach (RemoteIssue i in _jiraSoapService.GetIssuesFromJqlSearch(token, jql, 20))
+            foreach (RemoteIssue remoteIssue in _jiraSoapService.GetIssuesFromJqlSearch(token, jql, 20))
             {
-                issues.Add(new Issue(i));
+                issues.Add(new Issue(this, remoteIssue));
             }
 
             return issues;
@@ -130,7 +130,7 @@ namespace Atlassian.Jira
             
             remoteIssue = _jiraSoapService.CreateIssue(_token, remoteIssue);
 
-            return new Issue(remoteIssue);
+            return new Issue(this, remoteIssue);
         }
 
         /// <summary>
@@ -146,7 +146,25 @@ namespace Atlassian.Jira
 
             var remoteIssue = _jiraSoapService.UpdateIssue(token, issue.Key.Value, fields);
 
-            return new Issue(remoteIssue);
+            return new Issue(this, remoteIssue);
+        }
+
+        /// <summary>
+        /// Retrieves a list of attachments from a known issue key
+        /// </summary>
+        /// <param name="issueKey">Issue key</param>
+        /// <returns>List of attachments</returns>
+        public IList<Attachment> GetAttachmentsForIssue(string issueKey)
+        {
+            var token = GetAuthenticationToken();
+
+            var attachments = new List<Attachment>();
+            foreach (var remoteAttachment in _jiraSoapService.GetAttachmentsFromIssue(token, issueKey))
+            {
+                attachments.Add(new Attachment(remoteAttachment));
+            }
+
+            return attachments;
         }
     }
 }

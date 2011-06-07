@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
+using System.IO;
 
 namespace Atlassian.Jira.Test.Integration
 {
@@ -123,6 +124,18 @@ namespace Atlassian.Jira.Test.Integration
 
             // Note: Dates returned from JIRA are UTC
             Assert.Equal(new DateTime(2011, 10, 10).ToUniversalTime(), newServerIssue.DueDate);
+        }
+
+        [Fact]
+        public void TestRetrievalOfAttachments()
+        {
+            var issue = (from i in _jira.Issues
+                         where i.Key == "TST-1"
+                         select i).ToArray().First();
+
+            Assert.Equal(2, issue.Attachments.Count());
+            Assert.True(issue.Attachments.Any(a => a.FileName.Equals("SampleImage.png")));
+            Assert.True(issue.Attachments.Any(a => a.FileName.Equals("SampleTextFile.txt")));
         }
     }
 }
