@@ -12,6 +12,7 @@ namespace Atlassian.Jira.Linq
     internal class JiraSoapServiceClientWrapper: IJiraSoapServiceClient
     {
         private readonly JiraSoapServiceClient _client;
+        private readonly string _url;
 
         public JiraSoapServiceClientWrapper(string url)
         {
@@ -19,6 +20,8 @@ namespace Atlassian.Jira.Linq
             {
                 url += "/";
             }
+
+            _url = url;
 
             var endPointUri = new Uri(url + "rpc/soap/jirasoapservice-v2");
 
@@ -65,6 +68,14 @@ namespace Atlassian.Jira.Linq
         public RemoteAttachment[] GetAttachmentsFromIssue(string token, string key)
         {
             return _client.getAttachmentsFromIssue(token, key);
+        }
+
+        public string Url
+        {
+            get 
+            {
+                return _url;
+            }
         }
     }
 }

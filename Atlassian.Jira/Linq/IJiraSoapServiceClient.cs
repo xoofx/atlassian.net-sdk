@@ -10,6 +10,7 @@ namespace Atlassian.Jira.Linq
     /// </summary>
     public interface IJiraSoapServiceClient
     {
+        string Url { get; }
         string Login(string username, string password);
         RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults);
         RemoteIssue CreateIssue(string token, RemoteIssue newIssue);

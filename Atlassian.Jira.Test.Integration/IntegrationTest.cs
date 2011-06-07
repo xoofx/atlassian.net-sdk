@@ -127,7 +127,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void TestRetrievalOfAttachments()
+        public void TestRetrievalOfAttachmentData()
         {
             var issue = (from i in _jira.Issues
                          where i.Key == "TST-1"
@@ -136,6 +136,19 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(2, issue.Attachments.Count());
             Assert.True(issue.Attachments.Any(a => a.FileName.Equals("SampleImage.png")));
             Assert.True(issue.Attachments.Any(a => a.FileName.Equals("SampleTextFile.txt")));
+        }
+
+        [Fact]
+        public void TestDownloadOfAttachment()
+        {
+            var issue = (from i in _jira.Issues
+                         where i.Key == "TST-1"
+                         select i).ToArray().First();
+
+            var tempFile = Path.GetTempFileName();
+            issue.Attachments.First(a => a.FileName.Equals("SampleTextFile.txt")).Download(tempFile);
+
+            Assert.Equal("Sample text", File.ReadAllText(tempFile));
         }
     }
 }

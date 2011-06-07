@@ -49,6 +49,7 @@
     <Compile Include="ComparableTextField.cs" />
     <Compile Include="ContainsEqualityAttribute.cs" />
     <Compile Include="Issue.cs" />
+    <Compile Include="IWebClient.cs" />
     <Compile Include="Jira.cs" />
     <Compile Include="Linq\ExpressionEvaluator.cs" />
     <Compile Include="Linq\ExpressionTreeModifier.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Linq\JqlExpressionTranslator.cs" />
     <Compile Include="Linq\JiraOperators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebClientWrapper.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

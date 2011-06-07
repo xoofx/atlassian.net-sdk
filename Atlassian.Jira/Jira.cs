@@ -67,6 +67,42 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Whether to print the translated JQL to console
+        /// </summary>
+        public bool Debug 
+        { 
+            get; 
+            set; 
+        }
+
+        /// <summary>
+        /// Url to the JIRA server
+        /// </summary>
+        public string Url
+        {
+            get
+            {
+                return _jiraSoapService.Url;
+            }
+        }
+
+        internal string UserName
+        {
+            get 
+            { 
+                return _username; 
+            }
+        }
+
+        internal string Password
+        {
+            get 
+            { 
+                return _password; 
+            }
+        } 
+
+        /// <summary>
         /// Query the issues database
         /// </summary>
         /// <returns>IQueryable of Issue</returns>
@@ -77,12 +113,7 @@ namespace Atlassian.Jira
                 return new JiraQueryable<Issue>(_provider);
             }
         }
-
-        /// <summary>
-        /// Whether to print the translated JQL to console
-        /// </summary>
-        public bool Debug { get; set; }
-
+        
         private string GetAuthenticationToken()
         {
             if (!String.IsNullOrEmpty(_username) 
@@ -161,10 +192,11 @@ namespace Atlassian.Jira
             var attachments = new List<Attachment>();
             foreach (var remoteAttachment in _jiraSoapService.GetAttachmentsFromIssue(token, issueKey))
             {
-                attachments.Add(new Attachment(remoteAttachment));
+                attachments.Add(new Attachment(this, remoteAttachment));
             }
 
             return attachments;
         }
+
     }
 }

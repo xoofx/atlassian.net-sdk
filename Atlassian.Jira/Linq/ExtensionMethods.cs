@@ -24,6 +24,14 @@ namespace Atlassian.Jira.Linq
         }
 
         /// <summary>
+        /// Create a new Attachment from a RemoteAttachment
+        /// </summary>
+        public static Attachment ToLocal(this RemoteAttachment remoteAttachment, Jira jira)
+        {
+            return new Attachment(jira, remoteAttachment);
+        }
+
+        /// <summary>
         /// Gets the RemoteFieldValues representing the fields that where updated
         /// </summary>
         public static RemoteFieldValue[] GetUpdatedFields(this Issue issue)
