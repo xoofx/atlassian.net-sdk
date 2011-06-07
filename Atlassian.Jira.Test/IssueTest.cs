@@ -171,12 +171,25 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void GetUpdateFields_IfDateTime_ReturnsFieldsThatChanged()
+        public void GetUpdateFields_IfDateTimeChanged_ReturnsFieldsThatChanged()
         {
-            var issue = new Issue(){ DueDate = new DateTime(2011,1,1) };
+            var issue = new Issue(){ DueDate = new DateTime(2011,10,10) };
 
-            Assert.Equal(1, issue.GetUpdatedFields().Length);
-            
+            var fields = issue.GetUpdatedFields();
+            Assert.Equal(1, fields.Length);
+            Assert.Equal("10/Oct/11", fields[0].values[0]);
+        }
+
+        [Fact]
+        public void GetUpdateFields_IfDateTimeUnChangd_ShouldNotIncludeItInFieldsThatChanged()
+        {
+            var remoteIssue = new RemoteIssue()
+            {
+                duedate = new DateTime(2011,1,1)
+            };
+
+            var issue = remoteIssue.ToLocal();
+            Assert.Equal(0, issue.GetUpdatedFields().Length);
         }
     }
 }

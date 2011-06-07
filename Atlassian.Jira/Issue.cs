@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Atlassian.Jira.Linq;
+using System.Reflection;
 
 namespace Atlassian.Jira
 {
@@ -67,6 +68,21 @@ namespace Atlassian.Jira
             return remote;
         }
 
+        private string GetStringValueForProperty(object container, PropertyInfo property)
+        {
+            var value = property.GetValue(container, null);
+
+            if (property.PropertyType == typeof(DateTime?))
+            {
+                var dateValue = (DateTime?)value;
+                return dateValue.HasValue ? dateValue.Value.ToString("d/MMM/yy") : null;
+            }
+            else
+            {
+                return value != null ? value.ToString() : null;
+            }
+        }
+
         internal RemoteFieldValue[] GetUpdatedFields()
         {
             var fields = new List<RemoteFieldValue>();
@@ -75,21 +91,17 @@ namespace Atlassian.Jira
             foreach (var localProperty in typeof(Issue).GetProperties())
             {
                 var remoteProperty = remoteFields.First(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
-                var remoteValue = remoteProperty.GetValue(_originalIssue, null);
-                var localValue = localProperty.GetValue(this, null);
-                
-                if (localProperty.PropertyType == typeof(string) 
-                    || localProperty.PropertyType == typeof(ComparableTextField))
-                {
-                    var localStringValue = localValue != null ? localValue.ToString() : (string) null;
-                    var remoteStringValue = remoteValue != null ? remoteValue.ToString() : (string) null;
 
-                    if (remoteStringValue != localStringValue)
+                var localStringValue = GetStringValueForProperty(this, localProperty);
+                var remoteStringValue = GetStringValueForProperty(_originalIssue, remoteProperty);
+
+                if (remoteStringValue != localStringValue)
+                {
+                    fields.Add(new RemoteFieldValue()
                     {
-                        fields.Add(new RemoteFieldValue() { 
-                            id = remoteProperty.Name, 
-                            values = new string[1] { localStringValue }});
-                    }
+                        id = remoteProperty.Name,
+                        values = new string[1] { localStringValue }
+                    });
                 }
             }
 

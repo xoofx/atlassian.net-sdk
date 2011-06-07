@@ -120,6 +120,9 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Updated " + summaryValue, newServerIssue.Summary);
             Assert.Equal("Updated Description", newServerIssue.Description);
             Assert.Equal("Updated Environment", newServerIssue.Environment);
+
+            // Note: Dates returned from JIRA are UTC
+            Assert.Equal(new DateTime(2011, 10, 10).ToUniversalTime(), newServerIssue.DueDate);
         }
     }
 }
