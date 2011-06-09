@@ -246,6 +246,7 @@ namespace Atlassian.Jira.Test
             issue.UploadAttachments("foo.txt");
 
             //assert
+            // TODO: Ugly assert, should use a proper mock to increase readability
             mockJiraService.Verify(j => j.addBase64EncodedAttachmentsToIssue(
                                                 "token",
                                                 "key",
