@@ -222,7 +222,7 @@ namespace Atlassian.Jira
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
-                throw new InvalidOperationException("Unable retrieve attachments from server, issue has not been created.");
+                throw new InvalidOperationException("Unable to retrieve attachments from server, issue has not been created.");
             }
 
             return new List<Attachment>(_jira.GetAttachmentsForIssue(_originalIssue.key)).AsReadOnly();
@@ -236,7 +236,7 @@ namespace Atlassian.Jira
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
-                throw new InvalidOperationException("Unable upload attachments to server, issue has not been created.");
+                throw new InvalidOperationException("Unable to upload attachments to server, issue has not been created.");
             }
 
             if (paths.Length > 0)
