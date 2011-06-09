@@ -18,8 +18,9 @@ namespace Atlassian.Jira
         private readonly long? _fileSize;
         private readonly string _id;
         private readonly Jira _jira;
+        private readonly IWebClient _webClient;
 
-        internal Attachment(Jira jira, RemoteAttachment remoteAttachment)
+        internal Attachment(Jira jira, IWebClient webClient, RemoteAttachment remoteAttachment)
         {
             _jira = jira;
             _author = remoteAttachment.author;
@@ -28,6 +29,7 @@ namespace Atlassian.Jira
             _mimeType = remoteAttachment.mimetype;
             _fileSize = remoteAttachment.filesize;
             _id = remoteAttachment.id;
+            _webClient = webClient;
         }
 
         /// <summary>
@@ -84,27 +86,15 @@ namespace Atlassian.Jira
         /// <param name="fullFileName">Full file name where attachment will be downloaded</param>
         public void Download(string fullFileName)
         {
-            Download(new WebClientWrapper(), fullFileName);
-        }
-
-        /// <summary>
-        /// Downloads attachment to specified file
-        /// </summary>
-        /// <param name="webClient">Implementation of IWebClient used to download.</param>
-        /// <param name="fullFileName">Full file name where attachment will be downloaded</param>
-        public void Download(IWebClient webClient, string fullFileName)
-        {
-            webClient.AddQueryString("os_username", _jira.UserName);
-            webClient.AddQueryString("os_password", _jira.Password);
+            _webClient.AddQueryString("os_username", _jira.UserName);
+            _webClient.AddQueryString("os_password", _jira.Password);
 
             var url = String.Format("{0}secure/attachment/{1}/{2}",
-                _jira.Url.EndsWith("/")? _jira.Url: _jira.Url + "/",
+                _jira.Url.EndsWith("/") ? _jira.Url : _jira.Url + "/",
                 this.Id,
                 this.FileName);
 
-            webClient.Download(url, fullFileName);
+            _webClient.Download(url, fullFileName);
         }
-
-        
     }
 }

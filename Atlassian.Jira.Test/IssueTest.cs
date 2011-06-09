@@ -16,7 +16,6 @@ namespace Atlassian.Jira.Test
             var issue = new Issue();
 
             Assert.Null(issue.DueDate);
-            Assert.Equal(0, issue.Attachments.Count());
         }
 
         [Fact]
@@ -192,6 +191,66 @@ namespace Atlassian.Jira.Test
 
             var issue = remoteIssue.ToLocal();
             Assert.Equal(0, issue.GetUpdatedFields().Length);
+        }
+
+        [Fact]
+        public void GetAttachments_IfIssueNotCreated_ShouldThrowException()
+        {
+            var issue = new Issue();
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.GetAttachments());
+            
+        }
+
+        [Fact]
+        public void GetAttachments_IfIssueIsCreatedAndHasAttachments_ShouldLoadAttachments()
+        {
+            //arrange
+            var mockJiraService = new Mock<IJiraSoapServiceClient>();
+            mockJiraService.Setup(j => j.Login("user", "pass")).Returns("thetoken");
+            mockJiraService.Setup(j => j.GetAttachmentsFromIssue("thetoken", "key"))
+                .Returns(new RemoteAttachment[1] { new RemoteAttachment() { filename = "attach.txt" } });
+            
+            var jira = new Jira(mockJiraService.Object, "user", "pass");
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            var attachments = issue.GetAttachments();
+
+            //assert
+            Assert.Equal(1, attachments.Count);
+            Assert.Equal("attach.txt", attachments[0].FileName);
+        }
+
+        [Fact]
+        public void UploadAttachment_IfIssueNotCreated_ShouldThrowAnException()
+        {
+            var issue = new Issue();
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.UploadAttachments("foo"));
+        }
+
+        [Fact]
+        public void Upload_IfIssueCreated_ShouldUpload()
+        {
+            //arrange
+            var mockJiraService = new Mock<IJiraSoapServiceClient>();
+            mockJiraService.Setup(j => j.Login("user", "pass")).Returns("token");
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(f => f.FileReadAllBytes("foo.txt")).Returns(new byte[] { 1, 2, 3 });
+
+            var jira = new Jira(null, mockJiraService.Object, mockFileSystem.Object, "user", "pass");
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            issue.UploadAttachments("foo.txt");
+
+            //assert
+            mockJiraService.Verify(j => j.addBase64EncodedAttachmentsToIssue(
+                                                "token",
+                                                "key",
+                                                new string[] { "foo.txt" },
+                                                new string[] { "AQID" }));
         }
     }
 }

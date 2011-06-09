@@ -44,9 +44,6 @@ namespace Atlassian.Jira.Linq
             _client = new JiraSoapServiceClient(binding, endpoint);
         }
 
-        /// <summary>
-        /// TODO
-        /// </summary>
         public string Url
         {
             get

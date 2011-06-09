@@ -127,28 +127,32 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void TestRetrievalOfAttachmentData()
+        public void TestUploadAndDownloadOfAttachments()
         {
-            var issue = (from i in _jira.Issues
-                         where i.Key == "TST-1"
-                         select i).ToArray().First();
+            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var issue = new Issue()
+            {
+                Project = "TST",
+                Type = "1",
+                Summary = summaryValue
+            };
 
-            Assert.Equal(2, issue.Attachments.Count());
-            Assert.True(issue.Attachments.Any(a => a.FileName.Equals("SampleImage.png")));
-            Assert.True(issue.Attachments.Any(a => a.FileName.Equals("SampleTextFile.txt")));
-        }
+            // create an issue, verify no attachments
+            issue = _jira.CreateIssue(issue);
+            Assert.Equal(0, issue.GetAttachments().Count);
 
-        [Fact]
-        public void TestDownloadOfAttachment()
-        {
-            var issue = (from i in _jira.Issues
-                         where i.Key == "TST-1"
-                         select i).ToArray().First();
+            // upload an attachment
+            File.WriteAllText("testfile.txt", "Test File Content");
+            issue.UploadAttachments("testfile.txt");
 
+            var attachments = issue.GetAttachments();
+            Assert.Equal(1, attachments.Count);
+            Assert.Equal("testfile.txt", attachments[0].FileName);
+
+            // download an attachment
             var tempFile = Path.GetTempFileName();
-            issue.Attachments.First(a => a.FileName.Equals("SampleTextFile.txt")).Download(tempFile);
-
-            Assert.Equal("Sample text", File.ReadAllText(tempFile));
+            attachments[0].Download(tempFile);
+            Assert.Equal("Test File Content", File.ReadAllText(tempFile));
         }
     }
 }

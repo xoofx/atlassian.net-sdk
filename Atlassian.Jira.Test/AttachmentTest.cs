@@ -24,10 +24,10 @@ namespace Atlassian.Jira.Test
             {
                 id = "attachID",
                 filename = "attach.txt"
-            }).ToLocal(jira);
+            }).ToLocal(jira, mockWebClient.Object);
 
             //act
-            attachment.Download(mockWebClient.Object, "C:\\foo\\bar.txt");
+            attachment.Download("C:\\foo\\bar.txt");
 
             //assert
             mockWebClient.Verify(c => c.AddQueryString("os_username", "user"));
@@ -49,10 +49,10 @@ namespace Atlassian.Jira.Test
             {
                 id = "attachID",
                 filename = "attach.txt"
-            }).ToLocal(jira);
+            }).ToLocal(jira, mockWebClient.Object);
 
             //act
-            attachment.Download(mockWebClient.Object, "C:\\foo\\bar.txt");
+            attachment.Download("C:\\foo\\bar.txt");
 
             //assert
             mockWebClient.Verify(c => c.Download("http://foo:2990/jira/secure/attachment/attachID/attach.txt", "C:\\foo\\bar.txt"));

@@ -15,6 +15,7 @@ namespace Atlassian.Jira
         private readonly JiraQueryProvider _provider;
 
         private readonly IJiraSoapServiceClient _jiraSoapService;
+        private readonly IFileSystem _fileSystem;
         private readonly string _username = null;
         private readonly string _password = null;
         private string _token = String.Empty;
@@ -46,22 +47,23 @@ namespace Atlassian.Jira
         /// <param name="username">username to use to authenticate</param>
         /// <param name="password">passowrd to use to authenticate</param>
         public Jira(IJiraSoapServiceClient jiraSoapService, string username, string password)
-            : this(new JqlExpressionTranslator(), jiraSoapService, username, password)
+            : this(new JqlExpressionTranslator(), jiraSoapService, new FileSystem(), username, password)
         {
         }
 
         /// <summary>
-        /// Create a connection to a JIRA server using the provided translator and jiraserver
+        /// Create a connection to a JIRA server
         /// </summary>
-        /// <param name="translator">The JqlExpressionTranslation to use</param>
-        /// <param name="jiraSoapService">Soap client proxy that can connect to Jira instance</param>
-        /// <param name="username">username to use to authenticate</param>
-        /// <param name="password">passowrd to use to authenticate</param>
-        public Jira(IJqlExpressionTranslator translator, IJiraSoapServiceClient jiraSoapService, string username, string password)
+        public Jira(IJqlExpressionTranslator translator, 
+                    IJiraSoapServiceClient jiraSoapService, 
+                    IFileSystem fileSystem,
+                    string username, 
+                    string password)
         {
             _username = username;
             _password = password;
             _jiraSoapService = jiraSoapService;
+            _fileSystem = fileSystem;
 
             this._provider = new JiraQueryProvider(translator, this);
         }
@@ -80,26 +82,22 @@ namespace Atlassian.Jira
         /// </summary>
         public string Url
         {
-            get
-            {
-                return _jiraSoapService.Url;
-            }
+            get { return _jiraSoapService.Url; }
         }
 
         internal string UserName
         {
-            get 
-            { 
-                return _username; 
-            }
+            get { return _username; }
         }
 
         internal string Password
         {
-            get 
-            { 
-                return _password; 
-            }
+            get { return _password; }
+        }
+
+        internal IFileSystem FileSystem
+        {
+            get { return _fileSystem; }
         } 
 
         /// <summary>
@@ -187,7 +185,7 @@ namespace Atlassian.Jira
             var attachments = new List<Attachment>();
             foreach (var remoteAttachment in _jiraSoapService.GetAttachmentsFromIssue(token, issueKey))
             {
-                attachments.Add(new Attachment(this, remoteAttachment));
+                attachments.Add(new Attachment(this, new WebClientWrapper(), remoteAttachment));
             }
 
             return attachments;

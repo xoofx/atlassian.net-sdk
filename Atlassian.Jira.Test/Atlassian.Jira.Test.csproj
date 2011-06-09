@@ -46,7 +46,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AttachmentCollectionTest.cs" />
     <Compile Include="AttachmentTest.cs">
       <SubType>Code</SubType>
     </Compile>

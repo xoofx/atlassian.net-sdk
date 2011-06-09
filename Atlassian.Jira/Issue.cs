@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Atlassian.Jira.Linq;
 using System.Reflection;
+using System.IO;
 
 namespace Atlassian.Jira
 {
@@ -15,7 +16,6 @@ namespace Atlassian.Jira
         private readonly RemoteIssue _originalIssue;
         private readonly Jira _jira;
         
-        private AttachmentCollection _attachments;
         private DateTime? _createDate;
         private DateTime? _updateDate;
         private DateTime? _dueDate;
@@ -216,18 +216,42 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// TODO
+        /// Retrieve attachment data from server for this issue
         /// </summary>
-        public AttachmentCollection Attachments 
+        public IList<Attachment> GetAttachments()
         {
-            get
+            if (String.IsNullOrEmpty(_originalIssue.key))
             {
-                if (_attachments == null)
+                throw new InvalidOperationException("Unable retrieve attachments from server, issue has not been created.");
+            }
+
+            return new List<Attachment>(_jira.GetAttachmentsForIssue(_originalIssue.key)).AsReadOnly();
+        }
+
+        /// <summary>
+        /// Upload attachment(s) to server for this issue
+        /// </summary>
+        /// <param name="paths">Full paths to files to upload</param>
+        public void UploadAttachments(params string[] paths)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable upload attachments to server, issue has not been created.");
+            }
+
+            if (paths.Length > 0)
+            {
+                List<string> fileNames = new List<string>();
+                List<string> fileContents = new List<string>();
+
+                foreach (string path in paths)
                 {
-                    _attachments = new AttachmentCollection(_jira, new FileSystem(), _originalIssue.key);
+                    fileNames.Add(Path.GetFileName(path));
+                    fileContents.Add(Convert.ToBase64String(_jira.FileSystem.FileReadAllBytes(path)));
                 }
-                return _attachments;
+                _jira.AddAttachmentsToIssue(_originalIssue.key, fileNames.ToArray(), fileContents.ToArray());
             }
         }
+      
     }
 }

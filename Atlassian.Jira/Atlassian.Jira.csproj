@@ -45,7 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attachment.cs" />
-    <Compile Include="AttachmentCollection.cs" />
     <Compile Include="ComparableTextField.cs" />
     <Compile Include="ContainsEqualityAttribute.cs" />
     <Compile Include="FileSystem.cs" />
