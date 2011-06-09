@@ -14,8 +14,8 @@ namespace Atlassian.Jira
     {
         private readonly RemoteIssue _originalIssue;
         private readonly Jira _jira;
-        private readonly AttachmentCollection _attachments;
-
+        
+        private AttachmentCollection _attachments;
         private DateTime? _createDate;
         private DateTime? _updateDate;
         private DateTime? _dueDate;
@@ -28,7 +28,6 @@ namespace Atlassian.Jira
         {
             _originalIssue = remoteIssue;
             _jira = jira;
-            _attachments = new AttachmentCollection(jira, remoteIssue.key);
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -223,6 +222,10 @@ namespace Atlassian.Jira
         {
             get
             {
+                if (_attachments == null)
+                {
+                    _attachments = new AttachmentCollection(_jira, new FileSystem(), _originalIssue.key);
+                }
                 return _attachments;
             }
         }

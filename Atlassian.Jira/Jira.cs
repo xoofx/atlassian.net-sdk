@@ -180,12 +180,7 @@ namespace Atlassian.Jira
             return new Issue(this, remoteIssue);
         }
 
-        /// <summary>
-        /// Retrieves a list of attachments from a known issue key
-        /// </summary>
-        /// <param name="issueKey">Issue key</param>
-        /// <returns>List of attachments</returns>
-        public IList<Attachment> GetAttachmentsForIssue(string issueKey)
+        internal IList<Attachment> GetAttachmentsForIssue(string issueKey)
         {
             var token = GetAuthenticationToken();
 
@@ -198,5 +193,11 @@ namespace Atlassian.Jira
             return attachments;
         }
 
+        internal bool AddAttachmentsToIssue(string issueKey, string[] fileNames, string[] base64EncodedAttachmentData)
+        {
+            var token = GetAuthenticationToken();
+
+            return _jiraSoapService.addBase64EncodedAttachmentsToIssue(token, issueKey, fileNames, base64EncodedAttachmentData);
+        }
     }
 }

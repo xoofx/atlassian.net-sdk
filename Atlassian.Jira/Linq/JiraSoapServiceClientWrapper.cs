@@ -44,6 +44,18 @@ namespace Atlassian.Jira.Linq
             _client = new JiraSoapServiceClient(binding, endpoint);
         }
 
+        /// <summary>
+        /// TODO
+        /// </summary>
+        public string Url
+        {
+            get
+            {
+                return _url;
+            }
+        }
+
+
         public string Login(string username, string password)
         {
             return _client.login(username, password);
@@ -70,12 +82,9 @@ namespace Atlassian.Jira.Linq
             return _client.getAttachmentsFromIssue(token, key);
         }
 
-        public string Url
+        public bool addBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData)
         {
-            get 
-            {
-                return _url;
-            }
+            return _client.addBase64EncodedAttachmentsToIssue(token, key, fileNames, base64EncodedAttachmentData);
         }
     }
 }

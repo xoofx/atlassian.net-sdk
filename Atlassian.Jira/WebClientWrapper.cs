@@ -6,7 +6,7 @@ using System.Net;
 
 namespace Atlassian.Jira
 {
-    public class WebClientWrapper: IWebClient
+    internal class WebClientWrapper: IWebClient
     {
         private readonly WebClient _webClient;
 

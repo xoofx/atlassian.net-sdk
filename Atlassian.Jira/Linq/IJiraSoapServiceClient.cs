@@ -16,5 +16,6 @@ namespace Atlassian.Jira.Linq
         RemoteIssue CreateIssue(string token, RemoteIssue newIssue);
         RemoteIssue UpdateIssue(string token, string key, RemoteFieldValue[] fields);
         RemoteAttachment[] GetAttachmentsFromIssue(string token, string key);
+        bool addBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData);
     }
 }
