@@ -12,6 +12,7 @@ namespace Atlassian.Jira.Test
     {
         private Jira CreateJiraInstance()
         {
+            var translator = new Mock<IJqlExpressionTranslator>();
             var soapClient = new Mock<IJiraSoapServiceClient>();
 
             soapClient.Setup(r => r.GetIssuesFromJqlSearch(
@@ -19,7 +20,7 @@ namespace Atlassian.Jira.Test
                                         It.IsAny<string>(),
                                         It.IsAny<int>())).Returns(new RemoteIssue[0]);
 
-            return new Jira(soapClient.Object, "username", "password");
+            return new Jira(translator.Object, soapClient.Object, null, "username", "password");
         }
 
         [Fact]

@@ -211,7 +211,7 @@ namespace Atlassian.Jira.Test
             mockJiraService.Setup(j => j.GetAttachmentsFromIssue("thetoken", "key"))
                 .Returns(new RemoteAttachment[1] { new RemoteAttachment() { filename = "attach.txt" } });
             
-            var jira = new Jira(mockJiraService.Object, "user", "pass");
+            var jira = new Jira(null, mockJiraService.Object, null, "user", "pass");
             var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
             //act

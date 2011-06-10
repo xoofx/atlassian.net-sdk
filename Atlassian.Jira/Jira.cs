@@ -36,18 +36,11 @@ namespace Atlassian.Jira
         /// <param name="username">username to use to authenticate</param>
         /// <param name="password">passowrd to use to authenticate</param>
         public Jira(string url, string username, string password)
-            :this(new JiraSoapServiceClientWrapper(url), username, password)
-        {
-        }
-
-        /// <summary>
-        /// Create a connection to a JIRA server using provided JiraSoapService implementation and provided credentials
-        /// </summary>
-        /// <param name="jiraSoapService">Soap client proxy that can connect to Jira instance</param>
-        /// <param name="username">username to use to authenticate</param>
-        /// <param name="password">passowrd to use to authenticate</param>
-        public Jira(IJiraSoapServiceClient jiraSoapService, string username, string password)
-            : this(new JqlExpressionTranslator(), jiraSoapService, new FileSystem(), username, password)
+            :this(new JqlExpressionTranslator(),
+                  new JiraSoapServiceClientWrapper(url),
+                  new FileSystem(),
+                  username, 
+                  password)
         {
         }
 
