@@ -229,10 +229,10 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Upload attachment(s) to server for this issue
+        /// Add attachment(s) to server for this issue
         /// </summary>
-        /// <param name="paths">Full paths to files to upload</param>
-        public void UploadAttachments(params string[] paths)
+        /// <param name="paths">Full path to file to upload</param>
+        public void AddAttachments(params string[] paths)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
@@ -252,6 +252,26 @@ namespace Atlassian.Jira
                 _jira.AddAttachmentsToIssue(_originalIssue.key, fileNames.ToArray(), fileContents.ToArray());
             }
         }
-      
+
+
+        public IList<Comment> GetComments()
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve comments from server, issue has not been created.");
+            }
+            return new List<Comment>(_jira.GetCommentsForIssue(_originalIssue.key)).AsReadOnly();
+        }
+
+        public void AddComment(string comment)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to add comment to issue, issue has not been created.");
+            }
+
+            var newComment = new Comment() { Author = _jira.UserName, Body = comment };
+            _jira.AddCommentToIssue(_originalIssue.key, newComment);
+        }
     }
 }

@@ -143,7 +143,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // upload an attachment
             File.WriteAllText("testfile.txt", "Test File Content");
-            issue.UploadAttachments("testfile.txt");
+            issue.AddAttachments("testfile.txt");
 
             var attachments = issue.GetAttachments();
             Assert.Equal(1, attachments.Count);
@@ -153,6 +153,30 @@ namespace Atlassian.Jira.Test.Integration
             var tempFile = Path.GetTempFileName();
             attachments[0].Download(tempFile);
             Assert.Equal("Test File Content", File.ReadAllText(tempFile));
+        }
+
+        [Fact]
+        public void TestAddingAndRetrievingComments()
+        {
+            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var issue = new Issue()
+            {
+                Project = "TST",
+                Type = "1",
+                Summary = summaryValue
+            };
+
+            // create an issue, verify no comments
+            issue = _jira.CreateIssue(issue);
+            Assert.Equal(0, issue.GetComments().Count);
+
+            // Add a comment
+            issue.AddComment("new comment");
+
+            var comments = issue.GetComments();
+            Assert.Equal(1, comments.Count);
+            Assert.Equal("new comment", comments[0].Body);
+
         }
     }
 }

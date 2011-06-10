@@ -188,7 +188,27 @@ namespace Atlassian.Jira
         {
             var token = GetAuthenticationToken();
 
-            return _jiraSoapService.addBase64EncodedAttachmentsToIssue(token, issueKey, fileNames, base64EncodedAttachmentData);
+            return _jiraSoapService.AddBase64EncodedAttachmentsToIssue(token, issueKey, fileNames, base64EncodedAttachmentData);
+        }
+
+        internal IList<Comment> GetCommentsForIssue(string issueKey)
+        {
+            var token = GetAuthenticationToken();
+
+            var comments = new List<Comment>();
+            foreach(var remote in _jiraSoapService.GetCommentsFromIssue(token, issueKey))
+            {
+                comments.Add(new Comment(remote));
+            }
+
+            return comments;
+        }
+
+        internal void AddCommentToIssue(string issueKey, Comment comment)
+        {
+            var token = GetAuthenticationToken();
+
+            _jiraSoapService.AddComment(token, issueKey, comment.toRemote());
         }
     }
 }

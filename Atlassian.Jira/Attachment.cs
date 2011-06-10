@@ -51,7 +51,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Date of creation
         /// </summary>
-        public DateTime? Created
+        public DateTime? CreatedDate
         {
             get { return _created; }
         }

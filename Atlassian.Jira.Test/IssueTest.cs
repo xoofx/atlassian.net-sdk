@@ -199,11 +199,10 @@ namespace Atlassian.Jira.Test
             var issue = new Issue();
 
             Assert.Throws(typeof(InvalidOperationException), () => issue.GetAttachments());
-            
         }
 
         [Fact]
-        public void GetAttachments_IfIssueIsCreatedAndHasAttachments_ShouldLoadAttachments()
+        public void GetAttachments_IfIssueIsCreated_ShouldLoadAttachments()
         {
             //arrange
             var mockJiraService = new Mock<IJiraSoapServiceClient>();
@@ -223,15 +222,15 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void UploadAttachment_IfIssueNotCreated_ShouldThrowAnException()
+        public void AddAttachment_IfIssueNotCreated_ShouldThrowAnException()
         {
             var issue = new Issue();
 
-            Assert.Throws(typeof(InvalidOperationException), () => issue.UploadAttachments("foo"));
+            Assert.Throws(typeof(InvalidOperationException), () => issue.AddAttachments("foo"));
         }
 
         [Fact]
-        public void Upload_IfIssueCreated_ShouldUpload()
+        public void AddAttachmet_IfIssueCreated_ShouldUpload()
         {
             //arrange
             var mockJiraService = new Mock<IJiraSoapServiceClient>();
@@ -243,15 +242,72 @@ namespace Atlassian.Jira.Test
             var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
             //act
-            issue.UploadAttachments("foo.txt");
+            issue.AddAttachments("foo.txt");
 
             //assert
-            // TODO: Ugly assert, should use a proper mock to increase readability
-            mockJiraService.Verify(j => j.addBase64EncodedAttachmentsToIssue(
+            // TODO: Need to modify this obscure assertion.
+            mockJiraService.Verify(j => j.AddBase64EncodedAttachmentsToIssue(
                                                 "token",
                                                 "key",
                                                 new string[] { "foo.txt" },
                                                 new string[] { "AQID" }));
+        }
+
+        [Fact]
+        public void GetComments_IfIssueNotCreated_ShouldThrowException()
+        {
+            var issue = new Issue();
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.GetComments());
+        }
+
+        [Fact]
+        public void GetAttachments_IfIssueIsCreated_ShouldLoadComments()
+        {
+            //arrange
+            var mockJiraService = new Mock<IJiraSoapServiceClient>();
+            mockJiraService.Setup(j => j.Login("user", "pass")).Returns("thetoken");
+            mockJiraService.Setup(j => j.GetCommentsFromIssue("thetoken", "key"))
+                .Returns(new RemoteComment[1] { new RemoteComment() { body = "the comment" } });
+
+            var jira = new Jira(null, mockJiraService.Object, null, "user", "pass");
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            var comments = issue.GetComments();
+
+            //assert
+            Assert.Equal(1, comments.Count);
+            Assert.Equal("the comment", comments[0].Body);
+        }
+
+        [Fact]
+        public void AddComment_IfIssueNotCreated_ShouldThrowAnException()
+        {
+            var issue = new Issue();
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.AddComment("foo"));
+        }
+
+        [Fact]
+        public void AddComment_IfIssueCreated_ShouldUpload()
+        {
+            //arrange
+            var mockJiraService = new Mock<IJiraSoapServiceClient>();
+            mockJiraService.Setup(j => j.Login("user", "pass")).Returns("token");
+
+            var jira = new Jira(null, mockJiraService.Object, null, "user", "pass");
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            issue.AddComment("the comment");
+
+            //assert
+            // TODO: Need to modify this obscure assertion.
+            mockJiraService.Verify(j => j.AddComment(
+                                                "token",
+                                                "key",
+                                                It.Is<RemoteComment>(r => r.body == "the comment" && r.author == "user")));
         }
     }
 }

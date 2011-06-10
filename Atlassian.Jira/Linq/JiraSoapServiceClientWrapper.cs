@@ -79,9 +79,21 @@ namespace Atlassian.Jira.Linq
             return _client.getAttachmentsFromIssue(token, key);
         }
 
-        public bool addBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData)
+        public bool AddBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData)
         {
             return _client.addBase64EncodedAttachmentsToIssue(token, key, fileNames, base64EncodedAttachmentData);
+        }
+
+
+        public RemoteComment[] GetCommentsFromIssue(string token, string key)
+        {
+            return _client.getComments(token, key);
+        }
+
+
+        public void AddComment(string token, string key, RemoteComment comment)
+        {
+            _client.addComment(token, key, comment);
         }
     }
 }
