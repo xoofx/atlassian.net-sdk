@@ -7,10 +7,11 @@ using System.Reflection;
 
 namespace Atlassian.Jira.Linq
 {
-    public class JqlExpressionTranslator: ExpressionVisitor, IJqlExpressionTranslator
+    public class JqlExpressionVisitor: ExpressionVisitor, IJqlExpressionVisitor
     {
         private StringBuilder _jqlWhere;
         private StringBuilder _jqlOrderBy;
+        private int? _numberOfResults;
 
         public string Jql 
         { 
@@ -20,14 +21,22 @@ namespace Atlassian.Jira.Linq
             } 
         }
 
-        public string Translate(Expression expression)
+        public int? NumberOfResults
+        {
+            get
+            {
+                return _numberOfResults;
+            }
+        }
+
+        public JqlData Process(Expression expression)
         {
             expression = ExpressionEvaluator.PartialEval(expression);
             _jqlWhere = new StringBuilder();
             _jqlOrderBy = new StringBuilder();
 
             this.Visit(expression);
-            return Jql;
+            return new JqlData { Expression = Jql, NumberOfResults = _numberOfResults };
         }
 
         private PropertyInfo GetFieldFromBinaryExpression(BinaryExpression expression)
@@ -157,8 +166,17 @@ namespace Atlassian.Jira.Linq
             {
                 ProcessOrderBy(node);
             }
+            else if (node.Method.Name == "Take")
+            {
+                ProcessTake(node);
+            }
 
             return base.VisitMethodCall(node) ;
+        }
+
+        private void ProcessTake(MethodCallExpression node)
+        {
+            _numberOfResults = int.Parse(((ConstantExpression)node.Arguments[1]).Value.ToString());
         }
 
         private void ProcessOrderBy(MethodCallExpression node)

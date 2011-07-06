@@ -10,11 +10,11 @@ namespace Atlassian.Jira.Test
 {
     public class JqlExpressionTranslatorTest
     {
-        private JqlExpressionTranslator _translator;
+        private JqlExpressionVisitor _translator;
 
         private Jira CreateJiraInstance()
         {
-            _translator = new JqlExpressionTranslator();
+            _translator = new JqlExpressionVisitor();
             var soapClient = new Mock<IJiraSoapServiceClient>();
 
             soapClient.Setup(r => r.GetIssuesFromJqlSearch(
@@ -26,7 +26,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateEqualsOperatorForNonString()
+        public void EqualsOperatorForNonString()
         {
             var jira = CreateJiraInstance();
 
@@ -39,7 +39,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateEqualsOperatorForStringWithFuzzyEquality()
+        public void EqualsOperatorForStringWithFuzzyEquality()
         {
             var jira = CreateJiraInstance();
 
@@ -52,7 +52,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateEqualsOperatorForString()
+        public void EqualsOperatorForString()
         {
             var jira = CreateJiraInstance();
 
@@ -67,7 +67,7 @@ namespace Atlassian.Jira.Test
 
 
         [Fact]
-        public void TranslateNotEqualsOperatorForNonString()
+        public void NotEqualsOperatorForNonString()
         {
             var jira = CreateJiraInstance();
 
@@ -80,7 +80,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateNotEqualsOperatorForStringWithFuzzyEquality()
+        public void NotEqualsOperatorForStringWithFuzzyEquality()
         {
             var jira = CreateJiraInstance();
 
@@ -92,7 +92,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateNotEqualsOperatorForString()
+        public void NotEqualsOperatorForString()
         {
             var jira = CreateJiraInstance();
 
@@ -104,7 +104,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateGreaterThanOperator()
+        public void GreaterThanOperator()
         {
             var jira = CreateJiraInstance();
 
@@ -117,7 +117,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateGreaterThanEqualsOperator()
+        public void GreaterThanEqualsOperator()
         {
             var jira = CreateJiraInstance();
 
@@ -129,7 +129,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateLessThanOperator()
+        public void LessThanOperator()
         {
             var jira = CreateJiraInstance();
 
@@ -141,7 +141,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateLessThanOrEqualsOperator()
+        public void LessThanOrEqualsOperator()
         {
             var jira = CreateJiraInstance();
 
@@ -153,7 +153,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateAndKeyWord()
+        public void AndKeyWord()
         {
             var jira = CreateJiraInstance();
 
@@ -165,7 +165,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateOrKeyWord()
+        public void OrKeyWord()
         {
             var jira = CreateJiraInstance();
 
@@ -177,7 +177,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateAssociativeGrouping()
+        public void AssociativeGrouping()
         {
             var jira = CreateJiraInstance();
 
@@ -189,7 +189,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateIsOperatorForEmptyString()
+        public void IsOperatorForEmptyString()
         {
             var jira = CreateJiraInstance();
 
@@ -201,7 +201,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateIsNotOperatorForEmptyString()
+        public void IsNotOperatorForEmptyString()
         {
             var jira = CreateJiraInstance();
 
@@ -213,7 +213,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateIsOperatorForNull()
+        public void IsOperatorForNull()
         {
             var jira = CreateJiraInstance();
 
@@ -225,7 +225,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateGreaterThanOperatorWhenUsingComparableFieldWithString()
+        public void GreaterThanOperatorWhenUsingComparableFieldWithString()
         {
             var jira = CreateJiraInstance();
 
@@ -237,7 +237,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateEqualsOperatorWhenUsingComparableFieldWithString()
+        public void EqualsOperatorWhenUsingComparableFieldWithString()
         {
             var jira = CreateJiraInstance();
 
@@ -249,7 +249,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateGreaterThanOperatorWhenUsingComparableFieldWithInt()
+        public void GreaterThanOperatorWhenUsingComparableFieldWithInt()
         {
             var jira = CreateJiraInstance();
 
@@ -261,7 +261,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateEqualsOperatorWhenUsingComparableFieldWithInt()
+        public void EqualsOperatorWhenUsingComparableFieldWithInt()
         {
             var jira = CreateJiraInstance();
 
@@ -273,7 +273,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateOrderBy()
+        public void OrderBy()
         {
             var jira = CreateJiraInstance();
 
@@ -286,7 +286,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateOrderByDescending()
+        public void OrderByDescending()
         {
             var jira = CreateJiraInstance();
 
@@ -299,7 +299,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateMultipleOrderBys()
+        public void MultipleOrderBys()
         {
             var jira = CreateJiraInstance();
 
@@ -312,7 +312,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateMultipleOrderByDescending()
+        public void MultipleOrderByDescending()
         {
             var jira = CreateJiraInstance();
 
@@ -325,7 +325,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateNewDateTime()
+        public void NewDateTime()
         {
             var jira = CreateJiraInstance();
 
@@ -337,7 +337,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateMultipleDateTimes()
+        public void MultipleDateTimes()
         {
             var jira = CreateJiraInstance();
 
@@ -349,7 +349,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateLocalStringVariables()
+        public void LocalStringVariables()
         {
             var jira = CreateJiraInstance();
             var user = "farmas";
@@ -362,7 +362,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateLocalDateVariables()
+        public void LocalDateVariables()
         {
             var jira = CreateJiraInstance();
             var date = new DateTime(2011, 1, 1);
@@ -375,7 +375,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void TranslateDateTimeNow()
+        public void DateTimeNow()
         {
             var jira = CreateJiraInstance();
             var date = new DateTime(2011, 1, 1);
@@ -385,6 +385,31 @@ namespace Atlassian.Jira.Test
                           select i).ToArray();
 
             Assert.Equal("Created > \"" + DateTime.Now.ToString("yyyy/MM/dd") + "\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void TakeWithConstant()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.Issues
+                          where i.Assignee == "foo"
+                          select i).Take(50).ToArray();
+
+            Assert.Equal(50, _translator.NumberOfResults);
+        }
+
+        [Fact]
+        public void TakeWithLocalVariable()
+        {
+            var jira = CreateJiraInstance();
+            var take = 100;
+
+            var issues = (from i in jira.Issues
+                          where i.Assignee == "foo"
+                          select i).Take(take).ToArray();
+
+            Assert.Equal(100, _translator.NumberOfResults);
         }
     }
 }

@@ -12,6 +12,8 @@ namespace Atlassian.Jira
     /// </summary>
     public class Jira
     {
+        private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
+
         private readonly JiraQueryProvider _provider;
 
         private readonly IJiraSoapServiceClient _jiraSoapService;
@@ -36,7 +38,7 @@ namespace Atlassian.Jira
         /// <param name="username">username to use to authenticate</param>
         /// <param name="password">passowrd to use to authenticate</param>
         public Jira(string url, string username, string password)
-            :this(new JqlExpressionTranslator(),
+            :this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
                   new FileSystem(),
                   username, 
@@ -47,7 +49,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Create a connection to a JIRA server
         /// </summary>
-        public Jira(IJqlExpressionTranslator translator, 
+        public Jira(IJqlExpressionVisitor translator, 
                     IJiraSoapServiceClient jiraSoapService, 
                     IFileSystem fileSystem,
                     string username, 
@@ -57,6 +59,7 @@ namespace Atlassian.Jira
             _password = password;
             _jiraSoapService = jiraSoapService;
             _fileSystem = fileSystem;
+            this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
 
             this._provider = new JiraQueryProvider(translator, this);
         }
@@ -69,6 +72,11 @@ namespace Atlassian.Jira
             get; 
             set; 
         }
+
+        /// <summary>
+        /// Maximum number of issues per request
+        /// </summary>
+        public int MaxIssuesPerRequest { get; set; }
 
         /// <summary>
         /// Url to the JIRA server
@@ -123,6 +131,17 @@ namespace Atlassian.Jira
         /// <returns>List of Issues that match the search query</returns>
         public IList<Issue> GetIssuesFromJql(string jql)
         {
+            return GetIssuesFromJql(jql, null);
+        }
+
+        /// <summary>
+        /// Execute a specific JQL query and return the resulting issues
+        /// </summary>
+        /// <param name="jql">JQL search query</param>
+        /// <param name="maxIssues">Maximum number of issues to return</param>
+        /// <returns>List of Issues that match the search query</returns>
+        public IList<Issue> GetIssuesFromJql(string jql, int? maxIssues)
+        {
             if (this.Debug)
             {
                 Console.WriteLine("JQL: " + jql);
@@ -131,7 +150,8 @@ namespace Atlassian.Jira
             var token = GetAuthenticationToken();
 
             IList<Issue> issues = new List<Issue>();
-            foreach (RemoteIssue remoteIssue in _jiraSoapService.GetIssuesFromJqlSearch(token, jql, 20))
+
+            foreach (RemoteIssue remoteIssue in _jiraSoapService.GetIssuesFromJqlSearch(token, jql, maxIssues?? MaxIssuesPerRequest))
             {
                 issues.Add(new Issue(this, remoteIssue));
             }

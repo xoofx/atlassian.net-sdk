@@ -8,10 +8,10 @@ namespace Atlassian.Jira.Linq
 {
     public class JiraQueryProvider: IQueryProvider
     {
-        private readonly IJqlExpressionTranslator _translator;
+        private readonly IJqlExpressionVisitor _translator;
         private readonly Jira _jiraServer;
 
-        public JiraQueryProvider(IJqlExpressionTranslator translator, Jira jiraInstance)
+        public JiraQueryProvider(IJqlExpressionVisitor translator, Jira jiraInstance)
         {
             _translator = translator;
             _jiraServer = jiraInstance;
@@ -41,9 +41,10 @@ namespace Atlassian.Jira.Linq
 
         private object Execute(Expression expression, bool isEnumerable)
         {
-            var jql = _translator.Translate(expression);
+            var jql = _translator.Process(expression);
 
-            IQueryable<Issue> issues = _jiraServer.GetIssuesFromJql(jql).AsQueryable();
+
+            IQueryable<Issue> issues = _jiraServer.GetIssuesFromJql(jql.Expression, jql.NumberOfResults).AsQueryable();
 
             if (isEnumerable)
             {

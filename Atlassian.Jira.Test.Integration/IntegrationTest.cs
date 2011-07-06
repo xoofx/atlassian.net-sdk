@@ -20,7 +20,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void TestQueryWithZeroResults()
+        public void QueryWithZeroResults()
         {
             var issues = from i in _jira.Issues
                          where i.Created == new DateTime(2010,1,1)
@@ -30,7 +30,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void TestCreateAndQueryForIssueWithMinimumFieldsSet()
+        public void CreateAndQueryForIssueWithMinimumFieldsSet()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
 
@@ -57,7 +57,7 @@ namespace Atlassian.Jira.Test.Integration
 
 
         [Fact]
-        public void TestCreateAndQueryIssueWithAllFieldsSet()
+        public void CreateAndQueryIssueWithAllFieldsSet()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
 
@@ -84,7 +84,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void TestUpdateWithAllFieldsSet()
+        public void UpdateWithAllFieldsSet()
         {
             // arrange, create an issue to test.
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
@@ -127,7 +127,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void TestUploadAndDownloadOfAttachments()
+        public void UploadAndDownloadOfAttachments()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
             var issue = new Issue()
@@ -156,7 +156,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void TestAddingAndRetrievingComments()
+        public void AddingAndRetrievingComments()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
             var issue = new Issue()
@@ -178,5 +178,46 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("new comment", comments[0].Body);
 
         }
+
+        [Fact]
+        public void MaximumNumberOfIssuesPerRequest()
+        {
+            // create 2 issues with same summary
+            var jira = new Jira("http://localhost:2990/jira", "admin", "admin");
+            jira.Debug = true;
+
+            var randomNumber = _random.Next(int.MaxValue);
+            jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
+            jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber }); 
+
+            //set maximum issues and query
+            jira.MaxIssuesPerRequest = 1;
+            var issues = from i in jira.Issues
+                         where i.Summary == randomNumber.ToString()
+                         select i;
+
+            Assert.Equal(1, issues.Count());
+
+        }
+
+        [Fact]
+        public void QueryIssuesWithTakeExpression()
+        {
+            // create 2 issues with same summary
+            var jira = new Jira("http://localhost:2990/jira", "admin", "admin");
+            jira.Debug = true;
+
+            var randomNumber = _random.Next(int.MaxValue);
+            jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
+            jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
+
+            // query with take method to only return 1
+            var issues = (from i in jira.Issues
+                         where i.Summary == randomNumber.ToString()
+                         select i).Take(1);
+
+            Assert.Equal(1, issues.Count());
+        }
+
     }
 }
