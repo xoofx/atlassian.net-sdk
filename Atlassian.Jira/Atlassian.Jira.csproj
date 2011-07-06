@@ -57,7 +57,7 @@
     <Compile Include="Linq\ExpressionTreeModifier.cs" />
     <Compile Include="Linq\ExtensionMethods.cs" />
     <Compile Include="Linq\IJiraSoapServiceClient.cs" />
-    <Compile Include="Linq\IJqlExpressionTranslator.cs" />
+    <Compile Include="Linq\IJqlExpressionVisitor.cs" />
     <Compile Include="Linq\JiraQueryable.cs" />
     <Compile Include="Linq\JiraQueryProvider.cs" />
     <Compile Include="Linq\JiraSoapService.cs" />
