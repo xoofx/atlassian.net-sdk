@@ -5,6 +5,7 @@ using System.Text;
 using Xunit;
 using Atlassian.Jira.Linq;
 using Moq;
+using System.Linq.Expressions;
 
 namespace Atlassian.Jira.Test
 {
@@ -12,13 +13,14 @@ namespace Atlassian.Jira.Test
     {
         private Jira CreateJiraInstance()
         {
-            var translator = new Mock<IJqlExpressionTranslator>();
+            var translator = new Mock<IJqlExpressionVisitor>();
             var soapClient = new Mock<IJiraSoapServiceClient>();
 
+            translator.Setup(t => t.Process(It.IsAny<Expression>())).Returns(new JqlData() { Expression = "dummy expression" });
             soapClient.Setup(r => r.GetIssuesFromJqlSearch(
                                         It.IsAny<string>(),
                                         It.IsAny<string>(),
-                                        It.IsAny<int>())).Returns(new RemoteIssue[0]);
+                                        It.IsAny<int>())).Returns(new RemoteIssue[1] { new RemoteIssue() });
 
             return new Jira(translator.Object, soapClient.Object, null, "username", "password");
         }
@@ -32,7 +34,7 @@ namespace Atlassian.Jira.Test
                          where i.Votes == 5
                          select i;
 
-            Assert.Equal(0, issues.Count());
+            Assert.Equal(1, issues.Count());
         }
     }
 }

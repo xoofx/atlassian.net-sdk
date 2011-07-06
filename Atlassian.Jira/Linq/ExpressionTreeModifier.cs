@@ -27,5 +27,20 @@ namespace Atlassian.Jira.Linq
             }
         }
 
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            if (node.Method.Name == "Where"
+                || node.Method.Name == "Take"
+                || node.Method.Name == "OrderBy" 
+                || node.Method.Name == "OrderByDescending"
+                || node.Method.Name == "ThenBy"
+                || node.Method.Name == "ThenByDescending")
+            {
+                return Expression.Constant(_queryableIssues);
+            }
+
+            return base.VisitMethodCall(node);
+        }
+
     }
 }
