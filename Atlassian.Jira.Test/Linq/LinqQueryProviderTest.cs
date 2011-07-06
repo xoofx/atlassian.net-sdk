@@ -11,30 +11,44 @@ namespace Atlassian.Jira.Test
 {
     public class LinqQueryProviderTest
     {
+        private Mock<IJiraSoapServiceClient> _soapClient;
+
         private Jira CreateJiraInstance()
         {
             var translator = new Mock<IJqlExpressionVisitor>();
-            var soapClient = new Mock<IJiraSoapServiceClient>();
+            _soapClient = new Mock<IJiraSoapServiceClient>();
 
             translator.Setup(t => t.Process(It.IsAny<Expression>())).Returns(new JqlData() { Expression = "dummy expression" });
-            soapClient.Setup(r => r.GetIssuesFromJqlSearch(
+            
+            return new Jira(translator.Object, _soapClient.Object, null, "username", "password");
+        }
+
+        [Fact]
+        public void Count()
+        {
+            var jira = CreateJiraInstance();
+            _soapClient.Setup(r => r.GetIssuesFromJqlSearch(
                                         It.IsAny<string>(),
                                         It.IsAny<string>(),
                                         It.IsAny<int>())).Returns(new RemoteIssue[1] { new RemoteIssue() });
 
-            return new Jira(translator.Object, soapClient.Object, null, "username", "password");
+            Assert.Equal(1, jira.Issues.Count());
         }
 
         [Fact]
-        public void HandleNonQueriableMethods()
+        public void First()
         {
             var jira = CreateJiraInstance();
+            _soapClient.Setup(r => r.GetIssuesFromJqlSearch(
+                                        It.IsAny<string>(),
+                                        It.IsAny<string>(),
+                                        It.IsAny<int>())).Returns(new RemoteIssue[] 
+                                        { 
+                                            new RemoteIssue() { summary = "foo"}, 
+                                            new RemoteIssue() 
+                                        });
 
-            var issues = from i in jira.Issues
-                         where i.Votes == 5
-                         select i;
-
-            Assert.Equal(1, issues.Count());
+            Assert.Equal("foo", jira.Issues.First().Summary);
         }
     }
 }
