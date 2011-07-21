@@ -95,5 +95,18 @@ namespace Atlassian.Jira.Linq
         {
             _client.addComment(token, key, comment);
         }
+
+
+        public RemoteIssueType[] GetIssueTypes(string token, string projectKey)
+        {
+            if (String.IsNullOrEmpty(null))
+            {
+                return _client.getIssueTypes(token);
+            }
+            else
+            {
+                return _client.getIssueTypesForProject(token, projectKey);
+            }
+        }
     }
 }

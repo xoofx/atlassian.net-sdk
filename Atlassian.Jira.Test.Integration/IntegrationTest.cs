@@ -219,5 +219,15 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(1, issues.Count());
         }
 
+        [Fact]
+        public void RetrieveIssueTypesForProject()
+        {
+            var jira = new Jira("http://localhost:2990/jira", "admin", "admin");
+
+            var issueTypes = jira.GetIssueTypes("TST");
+
+            Assert.Equal(4, issueTypes.Count());
+            Assert.True(issueTypes.Any(i => i.Name == "Bug"));
+        }
     }
 }

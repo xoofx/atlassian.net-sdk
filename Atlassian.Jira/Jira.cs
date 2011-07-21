@@ -191,6 +191,25 @@ namespace Atlassian.Jira
             return new Issue(this, remoteIssue);
         }
 
+        /// <summary>
+        /// Returns all the issue types within JIRA
+        /// </summary>
+        /// <param name="projectKey">If provided, returns issue types only for given project</param>
+        /// <returns>Collection of jira issue types</returns>
+        public IEnumerable<JiraNamedEntity> GetIssueTypes(string projectKey = null)
+        {
+            var token = GetAuthenticationToken();
+            List<JiraNamedEntity> issueTypes = new List<JiraNamedEntity>();
+
+            foreach (var remoteIssueType in _jiraSoapService.GetIssueTypes(token, projectKey))
+            {
+                issueTypes.Add(new JiraNamedEntity(remoteIssueType));
+            }
+
+            return issueTypes;
+        }
+
+
         internal IList<Attachment> GetAttachmentsForIssue(string issueKey)
         {
             var token = GetAuthenticationToken();

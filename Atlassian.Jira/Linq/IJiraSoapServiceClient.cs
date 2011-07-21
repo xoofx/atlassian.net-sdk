@@ -19,5 +19,7 @@ namespace Atlassian.Jira.Linq
         bool AddBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData);
         RemoteComment[] GetCommentsFromIssue(string token, string key);
         void AddComment(string token, string key, RemoteComment comment);
+        RemoteIssueType[] GetIssueTypes(string token, string projectKey);
+        
     }
 }
