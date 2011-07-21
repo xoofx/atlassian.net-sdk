@@ -108,5 +108,20 @@ namespace Atlassian.Jira.Linq
                 return _client.getIssueTypesForProject(token, projectKey);
             }
         }
+
+        public RemotePriority[] GetPriorities(string token)
+        {
+            return _client.getPriorities(token);
+        }
+
+        public RemoteResolution[] GetResolutions(string token)
+        {
+            return _client.getResolutions(token);
+        }
+
+        public RemoteStatus[] GetStatuses(string token)
+        {
+            return _client.getStatuses(token);
+        }
     }
 }

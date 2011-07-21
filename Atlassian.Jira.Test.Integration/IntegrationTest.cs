@@ -183,16 +183,13 @@ namespace Atlassian.Jira.Test.Integration
         public void MaximumNumberOfIssuesPerRequest()
         {
             // create 2 issues with same summary
-            var jira = new Jira("http://localhost:2990/jira", "admin", "admin");
-            jira.Debug = true;
-
             var randomNumber = _random.Next(int.MaxValue);
-            jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
-            jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber }); 
+            _jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
+            _jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber }); 
 
             //set maximum issues and query
-            jira.MaxIssuesPerRequest = 1;
-            var issues = from i in jira.Issues
+            _jira.MaxIssuesPerRequest = 1;
+            var issues = from i in _jira.Issues
                          where i.Summary == randomNumber.ToString()
                          select i;
 
@@ -204,15 +201,12 @@ namespace Atlassian.Jira.Test.Integration
         public void QueryIssuesWithTakeExpression()
         {
             // create 2 issues with same summary
-            var jira = new Jira("http://localhost:2990/jira", "admin", "admin");
-            jira.Debug = true;
-
             var randomNumber = _random.Next(int.MaxValue);
-            jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
-            jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
+            _jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
+            _jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
 
             // query with take method to only return 1
-            var issues = (from i in jira.Issues
+            var issues = (from i in _jira.Issues
                          where i.Summary == randomNumber.ToString()
                          select i).Take(1);
 
@@ -222,12 +216,34 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void RetrieveIssueTypesForProject()
         {
-            var jira = new Jira("http://localhost:2990/jira", "admin", "admin");
-
-            var issueTypes = jira.GetIssueTypes("TST");
+            var issueTypes = _jira.GetIssueTypes("TST");
 
             Assert.Equal(4, issueTypes.Count());
             Assert.True(issueTypes.Any(i => i.Name == "Bug"));
+        }
+
+        [Fact]
+        public void RetrievesIssuePriorities()
+        {
+            var priorities = _jira.GetIssuePriorities();
+
+            Assert.True(priorities.Any(i => i.Name == "Blocker"));
+        }
+
+        [Fact]
+        public void RetrievesIssueResolutions()
+        {
+            var resolutions = _jira.GetIssueResolutions();
+
+            Assert.True(resolutions.Any(i => i.Name == "Fixed"));
+        }
+
+        [Fact]
+        public void RetrievesIssueStatuses()
+        {
+            var statuses = _jira.GetIssueStatuses();
+
+            Assert.True(statuses.Any(i => i.Name == "Open"));
         }
     }
 }

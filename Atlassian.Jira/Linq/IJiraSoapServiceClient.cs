@@ -20,6 +20,8 @@ namespace Atlassian.Jira.Linq
         RemoteComment[] GetCommentsFromIssue(string token, string key);
         void AddComment(string token, string key, RemoteComment comment);
         RemoteIssueType[] GetIssueTypes(string token, string projectKey);
-        
+        RemotePriority[] GetPriorities(string token);
+        RemoteResolution[] GetResolutions(string token);
+        RemoteStatus[] GetStatuses(string token);
     }
 }

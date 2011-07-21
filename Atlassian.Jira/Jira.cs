@@ -209,6 +209,56 @@ namespace Atlassian.Jira
             return issueTypes;
         }
 
+        /// <summary>
+        /// Returns all the issue priorities within JIRA
+        /// </summary>
+        /// <returns>Collection of jira issue priorities</returns>
+        public IEnumerable<JiraNamedEntity> GetIssuePriorities()
+        {
+            var token = GetAuthenticationToken();
+            List<JiraNamedEntity> entities = new List<JiraNamedEntity>();
+
+            foreach (var remote in _jiraSoapService.GetPriorities(token))
+            {
+                entities.Add(new JiraNamedEntity(remote));
+            }
+
+            return entities; 
+        }
+
+        /// <summary>
+        /// Returns all the issue statuses within JIRA
+        /// </summary>
+        /// <returns>Collection of jira issue statuses</returns>
+        public IEnumerable<JiraNamedEntity> GetIssueStatuses()
+        {
+            var token = GetAuthenticationToken();
+            List<JiraNamedEntity> entities = new List<JiraNamedEntity>();
+
+            foreach (var remote in _jiraSoapService.GetStatuses(token))
+            {
+                entities.Add(new JiraNamedEntity(remote));
+            }
+
+            return entities;
+        }
+
+        /// <summary>
+        /// Returns all the issue resolutions within JIRA
+        /// </summary>
+        /// <returns>Collection of jira issue resolutions</returns>
+        public IEnumerable<JiraNamedEntity> GetIssueResolutions()
+        {
+            var token = GetAuthenticationToken();
+            List<JiraNamedEntity> entities = new List<JiraNamedEntity>();
+
+            foreach (var remote in _jiraSoapService.GetResolutions(token))
+            {
+                entities.Add(new JiraNamedEntity(remote));
+            }
+
+            return entities;
+        }
 
         internal IList<Attachment> GetAttachmentsForIssue(string issueKey)
         {
