@@ -128,8 +128,8 @@ namespace Atlassian.Jira
         /// Execute a specific JQL query and return the resulting issues
         /// </summary>
         /// <param name="jql">JQL search query</param>
-        /// <returns>List of Issues that match the search query</returns>
-        public IList<Issue> GetIssuesFromJql(string jql)
+        /// <returns>Collection of Issues that match the search query</returns>
+        public IEnumerable<Issue> GetIssuesFromJql(string jql)
         {
             return GetIssuesFromJql(jql, null);
         }
