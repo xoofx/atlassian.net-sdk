@@ -216,7 +216,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Retrieve attachment data from server for this issue
+        /// Retrieve attachment metadata from server for this issue
         /// </summary>
         public IList<Attachment> GetAttachments()
         {
@@ -229,31 +229,34 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Add attachment(s) to server for this issue
+        /// Add attachment to this issue
         /// </summary>
-        /// <param name="paths">Full path to file to upload</param>
-        public void AddAttachments(params string[] paths)
+        /// <param name="filePath">Full path of file to upload</param>
+        public void AddAttachment(string filePath)
+        {
+            this.AddAttachment(Path.GetFileName(filePath), _jira.FileSystem.FileReadAllBytes(filePath));
+        }
+
+        /// <summary>
+        /// Add attachment to this issue
+        /// </summary>
+        /// <param name="name">Attachment name with extension of </param>
+        /// <param name="data">Attachment data</param>
+        public void AddAttachment(string name, byte[] data)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to upload attachments to server, issue has not been created.");
             }
 
-            if (paths.Length > 0)
-            {
-                List<string> fileNames = new List<string>();
-                List<string> fileContents = new List<string>();
+            string content = Convert.ToBase64String(data);
 
-                foreach (string path in paths)
-                {
-                    fileNames.Add(Path.GetFileName(path));
-                    fileContents.Add(Convert.ToBase64String(_jira.FileSystem.FileReadAllBytes(path)));
-                }
-                _jira.AddAttachmentsToIssue(_originalIssue.key, fileNames.ToArray(), fileContents.ToArray());
-            }
+            _jira.AddAttachmentsToIssue(_originalIssue.key, new string[] { name }, new string[]{ content });
         }
 
-
+        /// <summary>
+        /// Retrieve comments from server for this issue
+        /// </summary>
         public IList<Comment> GetComments()
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
@@ -263,6 +266,10 @@ namespace Atlassian.Jira
             return new List<Comment>(_jira.GetCommentsForIssue(_originalIssue.key)).AsReadOnly();
         }
 
+        /// <summary>
+        /// Add a comment to this issue
+        /// </summary>
+        /// <param name="comment">Comment text to add</param>
         public void AddComment(string comment)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))

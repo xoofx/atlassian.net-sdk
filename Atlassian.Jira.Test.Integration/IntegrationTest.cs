@@ -143,7 +143,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // upload an attachment
             File.WriteAllText("testfile.txt", "Test File Content");
-            issue.AddAttachments("testfile.txt");
+            issue.AddAttachment("testfile.txt");
 
             var attachments = issue.GetAttachments();
             Assert.Equal(1, attachments.Count);

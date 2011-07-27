@@ -226,7 +226,7 @@ namespace Atlassian.Jira.Test
         {
             var issue = new Issue();
 
-            Assert.Throws(typeof(InvalidOperationException), () => issue.AddAttachments("foo"));
+            Assert.Throws(typeof(InvalidOperationException), () => issue.AddAttachment("foo", new byte[] { 1 } ));
         }
 
         [Fact]
@@ -242,7 +242,7 @@ namespace Atlassian.Jira.Test
             var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
             //act
-            issue.AddAttachments("foo.txt");
+            issue.AddAttachment("foo.txt");
 
             //assert
             // TODO: Need to modify this obscure assertion.
