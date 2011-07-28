@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ServiceModel;
+using System.Xml;
 
 namespace Atlassian.Jira.Linq
 {
@@ -37,6 +38,7 @@ namespace Atlassian.Jira.Linq
             binding.TransferMode = TransferMode.Buffered;
             binding.UseDefaultWebProxy = true;
             binding.MaxReceivedMessageSize = 2147483647;
+            binding.ReaderQuotas = new XmlDictionaryReaderQuotas() { MaxStringContentLength = 2147483647 } ;
             binding.Security.Message.ClientCredentialType = BasicHttpMessageCredentialType.UserName;
 
             var endpoint = new EndpointAddress(endPointUri);
