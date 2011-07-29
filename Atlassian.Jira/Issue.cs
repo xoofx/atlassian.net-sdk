@@ -240,7 +240,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Add attachment to this issue
         /// </summary>
-        /// <param name="name">Attachment name with extension of </param>
+        /// <param name="name">Attachment name with extension</param>
         /// <param name="data">Attachment data</param>
         public void AddAttachment(string name, byte[] data)
         {
