@@ -20,7 +20,8 @@ namespace Atlassian.Jira
         private DateTime? _createDate;
         private DateTime? _updateDate;
         private DateTime? _dueDate;
-        private List<JiraNamedEntity> _affectsVersions = null;
+        private List<Version> _affectsVersions = null;
+        private List<Version> _fixVersions = null;
 
         public Issue(): this(null, new RemoteIssue())
         {
@@ -173,24 +174,46 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// TODO
+        /// The versions that are affected by this issue
         /// </summary>
-        public IList<JiraNamedEntity> AffectsVersions
+        public IList<Version> AffectsVersions
         {
             get
             {
                 if (_affectsVersions == null)
                 {
-                    _affectsVersions = new List<JiraNamedEntity>();
+                    _affectsVersions = new List<Version>();
                     if (_originalIssue.affectsVersions != null)
                     {
                         foreach (var version in _originalIssue.affectsVersions)
                         {
-                            _affectsVersions.Add(new JiraNamedEntity(version));
+                            _affectsVersions.Add(new Version(version));
                         }
                     }
                 }
                 return _affectsVersions;
+            }
+        }
+
+        /// <summary>
+        /// The versions in which this issue is fixed
+        /// </summary>
+        public IList<Version> FixVersions
+        {
+            get
+            {
+                if (_fixVersions == null)
+                {
+                    _fixVersions = new List<Version>();
+                    if (_originalIssue.fixVersions != null)
+                    {
+                        foreach (var version in _originalIssue.fixVersions)
+                        {
+                            _fixVersions.Add(new Version(version));
+                        }
+                    }
+                }
+                return _fixVersions;
             }
         }
 
@@ -288,7 +311,7 @@ namespace Atlassian.Jira
                     continue;
                 }
 
-                if (!typeof(IList<JiraNamedEntity>).IsAssignableFrom(localProperty.PropertyType))
+                if (!typeof(IList<Version>).IsAssignableFrom(localProperty.PropertyType))
                 {
                     var localStringValue = GetStringValueForProperty(this, localProperty);
                     var remoteStringValue = GetStringValueForProperty(_originalIssue, remoteProperty);

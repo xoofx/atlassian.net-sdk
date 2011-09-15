@@ -264,5 +264,41 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Contains("Second stack trace:", serverIssue.Description);
         }
+
+        [Fact]
+        public void RetrievesAffectsVersions()
+        {
+            var issues = from i in _jira.Issues
+                         where i.Key == "TST-1"
+                         select i;
+
+            var versions = issues.First().AffectsVersions;
+            Assert.Equal(2, versions.Count);
+            Assert.True(versions.Any(v => v.Name == "1.0"));
+            Assert.True(versions.Any(v => v.Name == "2.0"));
+
+            var v1 = versions.First(v => v.Name == "1.0");
+            Assert.False(v1.IsArchived);
+            Assert.True(v1.IsReleased);
+            Assert.Equal(new DateTime(2011, 9, 01).ToUniversalTime(), v1.ReleasedDate);
+        }
+
+        [Fact]
+        public void RetrievesFixVersions()
+        {
+            var issues = from i in _jira.Issues
+                         where i.Key == "TST-1"
+                         select i;
+
+            var versions = issues.First().FixVersions;
+            Assert.Equal(2, versions.Count);
+            Assert.True(versions.Any(v => v.Name == "1.0"));
+            Assert.True(versions.Any(v => v.Name == "3.0"));
+
+            var v1 = versions.First(v => v.Name == "1.0");
+            Assert.False(v1.IsArchived);
+            Assert.True(v1.IsReleased);
+            Assert.Equal(new DateTime(2011, 9, 01).ToUniversalTime(), v1.ReleasedDate);
+        }
     }
 }

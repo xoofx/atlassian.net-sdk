@@ -12,11 +12,13 @@ namespace Atlassian.Jira
     /// <remarks>http://docs.atlassian.com/rpc-jira-plugin/latest/com/atlassian/jira/rpc/soap/beans/AbstractNamedRemoteEntity.html</remarks>
     public class JiraNamedEntity
     {
+        private readonly AbstractNamedRemoteEntity _remoteEntity;
         public string Id { get; set; }
         public string Name { get; set; }
 
         internal JiraNamedEntity(AbstractNamedRemoteEntity remoteEntity)
         {
+            _remoteEntity = remoteEntity;
             this.Id = remoteEntity.id;
             this.Name = remoteEntity.name;
         }

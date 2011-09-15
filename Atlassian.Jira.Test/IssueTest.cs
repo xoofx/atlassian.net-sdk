@@ -311,24 +311,49 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void AffectsVersions_IfIssueNotCreated_ShouldReturnEmptyList()
+        public void Versions_IfIssueNotCreated_ShouldReturnEmptyList()
         {
             var issue = new Issue();
 
             Assert.Equal(0, issue.AffectsVersions.Count);
+            Assert.Equal(0, issue.FixVersions.Count);
         }
 
         [Fact]
-        public void AffectsVersions_IfIssueCreated_ShouldReturnVersions()
+        public void Versions_IfIssueCreated_ShouldReturnVersions()
         {
             var remoteIssue = new RemoteIssue();
-            remoteIssue.affectsVersions = new RemoteVersion[] { new RemoteVersion() { id = "1", name = "1.0" } };
+            remoteIssue.affectsVersions = new RemoteVersion[] { new RemoteVersion() 
+                                                                    { id = "1", 
+                                                                      name = "1.0",
+                                                                      archived = true,
+                                                                      released = true,
+                                                                      releaseDate = new DateTime(2011,1,1)
+                                                                    } };
+            remoteIssue.fixVersions = new RemoteVersion[] { new RemoteVersion() 
+                                                                    { id = "2", 
+                                                                      name = "2.0",
+                                                                      archived = true,
+                                                                      released = true,
+                                                                      releaseDate = new DateTime(2011,1,1)
+                                                                    } };
 
             var issue = remoteIssue.ToLocal();
 
             Assert.Equal(1, issue.AffectsVersions.Count);
             Assert.Equal("1", issue.AffectsVersions[0].Id);
             Assert.Equal("1.0", issue.AffectsVersions[0].Name);
+            Assert.True(issue.AffectsVersions[0].IsArchived);
+            Assert.True(issue.AffectsVersions[0].IsReleased);
+            Assert.Equal(new DateTime(2011, 1, 1), issue.AffectsVersions[0].ReleasedDate);
+
+            Assert.Equal(1, issue.FixVersions.Count);
+            Assert.Equal("2", issue.FixVersions[0].Id);
+            Assert.Equal("2.0", issue.FixVersions[0].Name);
+            Assert.True(issue.FixVersions[0].IsArchived);
+            Assert.True(issue.FixVersions[0].IsReleased);
+            Assert.Equal(new DateTime(2011, 1, 1), issue.FixVersions[0].ReleasedDate);
         }
+
     }
 }
