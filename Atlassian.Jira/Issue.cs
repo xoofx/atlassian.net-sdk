@@ -23,7 +23,8 @@ namespace Atlassian.Jira
         private List<Version> _affectsVersions = null;
         private List<Version> _fixVersions = null;
 
-        public Issue(): this(null, new RemoteIssue())
+        public Issue()
+            :this(null, new RemoteIssue())
         {
         }
 
@@ -51,26 +52,12 @@ namespace Atlassian.Jira
             Resolution = remoteIssue.resolution;
         }
 
-        internal RemoteIssue ToRemote()
+        internal RemoteIssue OriginalRemoteIssue
         {
-            var remote = new RemoteIssue()
+            get
             {
-                assignee = this.Assignee,
-                description = this.Description,
-                environment = this.Environment,
-                project = this.Project,
-                reporter = this.Reporter,
-                status = this.Status,
-                summary = this.Summary,
-                type = this.Type,
-                votes = this.Votes
-            };
-
-            remote.key = this.Key != null ? this.Key.Value : null;
-            remote.priority = this.Priority != null? this.Priority.Value : null;
-            remote.resolution = this.Resolution != null ? this.Resolution.Value : null;
-
-            return remote;
+                return _originalIssue;
+            }
         }
        
         /// <summary>
@@ -281,53 +268,6 @@ namespace Atlassian.Jira
 
             var newComment = new Comment() { Author = _jira.UserName, Body = comment };
             _jira.AddCommentToIssue(_originalIssue.key, newComment);
-        }
-
-        private string GetStringValueForProperty(object container, PropertyInfo property)
-        {
-            var value = property.GetValue(container, null);
-
-            if (property.PropertyType == typeof(DateTime?))
-            {
-                var dateValue = (DateTime?)value;
-                return dateValue.HasValue ? dateValue.Value.ToString("d/MMM/yy") : null;
-            }
-            else
-            {
-                return value != null ? value.ToString() : null;
-            }
-        }
-
-        internal RemoteFieldValue[] GetUpdatedFields()
-        {
-            var fields = new List<RemoteFieldValue>();
-
-            var remoteFields = typeof(RemoteIssue).GetProperties();
-            foreach (var localProperty in typeof(Issue).GetProperties())
-            {
-                var remoteProperty = remoteFields.FirstOrDefault(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
-                if (remoteProperty == null)
-                {
-                    continue;
-                }
-
-                if (!typeof(IList<Version>).IsAssignableFrom(localProperty.PropertyType))
-                {
-                    var localStringValue = GetStringValueForProperty(this, localProperty);
-                    var remoteStringValue = GetStringValueForProperty(_originalIssue, remoteProperty);
-
-                    if (remoteStringValue != localStringValue)
-                    {
-                        fields.Add(new RemoteFieldValue()
-                        {
-                            id = remoteProperty.Name,
-                            values = new string[1] { localStringValue }
-                        });
-                    }
-                }
-            }
-
-            return fields.ToArray();
         }
     }
 }

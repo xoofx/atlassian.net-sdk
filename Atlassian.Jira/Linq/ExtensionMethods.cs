@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 
 namespace Atlassian.Jira.Linq
 {
@@ -12,7 +13,24 @@ namespace Atlassian.Jira.Linq
         /// </summary>
         public static RemoteIssue ToRemote(this Issue issue)
         {
-            return issue.ToRemote();
+            var remote = new RemoteIssue()
+            {
+                assignee = issue.Assignee,
+                description = issue.Description,
+                environment = issue.Environment,
+                project = issue.Project,
+                reporter = issue.Reporter,
+                status = issue.Status,
+                summary = issue.Summary,
+                type = issue.Type,
+                votes = issue.Votes
+            };
+
+            remote.key = issue.Key != null ? issue.Key.Value : null;
+            remote.priority = issue.Priority != null ? issue.Priority.Value : null;
+            remote.resolution = issue.Resolution != null ? issue.Resolution.Value : null;
+
+            return remote;
         }
 
         /// <summary>
@@ -36,7 +54,49 @@ namespace Atlassian.Jira.Linq
         /// </summary>
         public static RemoteFieldValue[] GetUpdatedFields(this Issue issue)
         {
-            return issue.GetUpdatedFields();
+            var fields = new List<RemoteFieldValue>();
+
+            var remoteFields = typeof(RemoteIssue).GetProperties();
+            foreach (var localProperty in typeof(Issue).GetProperties())
+            {
+                var remoteProperty = remoteFields.FirstOrDefault(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
+                if (remoteProperty == null)
+                {
+                    continue;
+                }
+
+                if (!typeof(IList<Version>).IsAssignableFrom(localProperty.PropertyType))
+                {
+                    var localStringValue = GetStringValueForProperty(issue, localProperty);
+                    var remoteStringValue = GetStringValueForProperty(issue.OriginalRemoteIssue, remoteProperty);
+
+                    if (remoteStringValue != localStringValue)
+                    {
+                        fields.Add(new RemoteFieldValue()
+                        {
+                            id = remoteProperty.Name,
+                            values = new string[1] { localStringValue }
+                        });
+                    }
+                }
+            }
+
+            return fields.ToArray();
+        }
+
+        private static string GetStringValueForProperty(object container, PropertyInfo property)
+        {
+            var value = property.GetValue(container, null);
+
+            if (property.PropertyType == typeof(DateTime?))
+            {
+                var dateValue = (DateTime?)value;
+                return dateValue.HasValue ? dateValue.Value.ToString("d/MMM/yy") : null;
+            }
+            else
+            {
+                return value != null ? value.ToString() : null;
+            }
         }
     }
 }
