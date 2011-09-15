@@ -6,6 +6,9 @@ using Atlassian.Jira.Linq;
 
 namespace Atlassian.Jira
 {
+    /// <summary>
+    /// A comment associated with an issue
+    /// </summary>
     public class Comment
     {
         private readonly RemoteComment _remoteComment;

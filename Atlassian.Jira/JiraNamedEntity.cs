@@ -7,19 +7,18 @@ using Atlassian.Jira.Linq;
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// Represents a named entity within JIRA. Abstracts the IssueType, Priority, Resolution and Status used on issues
+    /// Represents a named entity within JIRA. Abstracts the Version and Component used on issues
     /// </summary>
+    /// <remarks>http://docs.atlassian.com/rpc-jira-plugin/latest/com/atlassian/jira/rpc/soap/beans/AbstractNamedRemoteEntity.html</remarks>
     public class JiraNamedEntity
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
 
-        internal JiraNamedEntity(AbstractRemoteConstant remoteConstant)
+        internal JiraNamedEntity(AbstractNamedRemoteEntity remoteEntity)
         {
-            this.Id = remoteConstant.id;
-            this.Name = remoteConstant.name;
-            this.Description = remoteConstant.description;
+            this.Id = remoteEntity.id;
+            this.Name = remoteEntity.name;
         }
     }
 }

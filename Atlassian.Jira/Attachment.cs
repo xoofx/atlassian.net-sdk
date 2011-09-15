@@ -7,7 +7,7 @@ using Atlassian.Jira.Linq;
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// An issue file attachment 
+    /// An attachment associated with an issue
     /// </summary>
     public class Attachment
     {

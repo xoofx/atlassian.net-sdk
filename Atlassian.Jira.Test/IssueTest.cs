@@ -309,5 +309,26 @@ namespace Atlassian.Jira.Test
                                                 "key",
                                                 It.Is<RemoteComment>(r => r.body == "the comment" && r.author == "user")));
         }
+
+        [Fact]
+        public void AffectsVersions_IfIssueNotCreated_ShouldReturnEmptyList()
+        {
+            var issue = new Issue();
+
+            Assert.Equal(0, issue.AffectsVersions.Count);
+        }
+
+        [Fact]
+        public void AffectsVersions_IfIssueCreated_ShouldReturnVersions()
+        {
+            var remoteIssue = new RemoteIssue();
+            remoteIssue.affectsVersions = new RemoteVersion[] { new RemoteVersion() { id = "1", name = "1.0" } };
+
+            var issue = remoteIssue.ToLocal();
+
+            Assert.Equal(1, issue.AffectsVersions.Count);
+            Assert.Equal("1", issue.AffectsVersions[0].Id);
+            Assert.Equal("1.0", issue.AffectsVersions[0].Name);
+        }
     }
 }
