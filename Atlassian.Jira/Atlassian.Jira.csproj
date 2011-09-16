@@ -69,8 +69,10 @@
     <Compile Include="Linq\JqlExpressionVisitor.cs" />
     <Compile Include="Linq\JiraOperators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReadOnlyCollection.cs" />
     <Compile Include="Version.cs" />
+    <Compile Include="VersionList.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="WebClientWrapper.cs" />
   </ItemGroup>
   <ItemGroup />

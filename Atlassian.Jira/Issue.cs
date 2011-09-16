@@ -6,6 +6,7 @@ using Atlassian.Jira.Linq;
 using System.Reflection;
 using System.IO;
 using System.Collections;
+using System.Collections.ObjectModel;
 
 namespace Atlassian.Jira
 {
@@ -20,8 +21,8 @@ namespace Atlassian.Jira
         private DateTime? _createDate;
         private DateTime? _updateDate;
         private DateTime? _dueDate;
-        private List<Version> _affectsVersions = null;
-        private List<Version> _fixVersions = null;
+        private VersionList _affectsVersions = null;
+        private VersionList _fixVersions = null;
 
         public Issue()
             :this(null, new RemoteIssue())
@@ -163,20 +164,21 @@ namespace Atlassian.Jira
         /// <summary>
         /// The versions that are affected by this issue
         /// </summary>
-        public IEnumerable<Version> AffectsVersions
+        public VersionList AffectsVersions
         {
             get
             {
                 if (_affectsVersions == null)
                 {
-                    _affectsVersions = new List<Version>();
+                    List<Version> remoteVersions = new List<Version>();
+                    
                     if (_originalIssue.affectsVersions != null)
                     {
-                        foreach (var version in _originalIssue.affectsVersions)
-                        {
-                            _affectsVersions.Add(new Version(version));
-                        }
+                        remoteVersions.AddRange(_originalIssue.affectsVersions.Select(v => new Version(v)));
                     }
+                    
+                    _affectsVersions = new VersionList(_jira, this.Project, remoteVersions);
+
                 }
                 return _affectsVersions;
             }
@@ -185,20 +187,20 @@ namespace Atlassian.Jira
         /// <summary>
         /// The versions in which this issue is fixed
         /// </summary>
-        public IEnumerable<Version> FixVersions
+        public VersionList FixVersions
         {
             get
             {
                 if (_fixVersions == null)
                 {
-                    _fixVersions = new List<Version>();
+                    List<Version> remoteVersions = new List<Version>();
+
                     if (_originalIssue.fixVersions != null)
                     {
-                        foreach (var version in _originalIssue.fixVersions)
-                        {
-                            _fixVersions.Add(new Version(version));
-                        }
+                        remoteVersions.AddRange(_originalIssue.fixVersions.Select(v => new Version(v)));
                     }
+
+                    _fixVersions = new VersionList(_jira, this.Project, remoteVersions);
                 }
                 return _fixVersions;
             }
@@ -241,6 +243,15 @@ namespace Atlassian.Jira
             string content = Convert.ToBase64String(data);
 
             _jira.AddAttachmentsToIssue(_originalIssue.key, new string[] { name }, new string[]{ content });
+        }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="versionName"></param>
+        public void AddFixVersion(string versionName)
+        {
+
         }
 
         /// <summary>

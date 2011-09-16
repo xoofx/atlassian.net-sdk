@@ -230,7 +230,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void AddAttachmet_IfIssueCreated_ShouldUpload()
+        public void AddAttachment_IfIssueCreated_ShouldUpload()
         {
             //arrange
             var mockJiraService = new Mock<IJiraSoapServiceClient>();
@@ -251,6 +251,12 @@ namespace Atlassian.Jira.Test
                                                 "key",
                                                 new string[] { "foo.txt" },
                                                 new string[] { "AQID" }));
+        }
+
+        [Fact]
+        public void AddFixVersion_IfIssueNotCreated_ShouldThrowAnException()
+        {
+
         }
 
         [Fact]
