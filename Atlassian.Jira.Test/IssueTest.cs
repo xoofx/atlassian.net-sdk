@@ -315,8 +315,8 @@ namespace Atlassian.Jira.Test
         {
             var issue = new Issue();
 
-            Assert.Equal(0, issue.AffectsVersions.Count);
-            Assert.Equal(0, issue.FixVersions.Count);
+            Assert.Equal(0, issue.AffectsVersions.Count());
+            Assert.Equal(0, issue.FixVersions.Count());
         }
 
         [Fact]
@@ -340,19 +340,19 @@ namespace Atlassian.Jira.Test
 
             var issue = remoteIssue.ToLocal();
 
-            Assert.Equal(1, issue.AffectsVersions.Count);
-            Assert.Equal("1", issue.AffectsVersions[0].Id);
-            Assert.Equal("1.0", issue.AffectsVersions[0].Name);
-            Assert.True(issue.AffectsVersions[0].IsArchived);
-            Assert.True(issue.AffectsVersions[0].IsReleased);
-            Assert.Equal(new DateTime(2011, 1, 1), issue.AffectsVersions[0].ReleasedDate);
+            Assert.Equal(1, issue.AffectsVersions.Count());
+            Assert.Equal("1", issue.AffectsVersions.ElementAt(0).Id);
+            Assert.Equal("1.0", issue.AffectsVersions.ElementAt(0).Name);
+            Assert.True(issue.AffectsVersions.ElementAt(0).IsArchived);
+            Assert.True(issue.AffectsVersions.ElementAt(0).IsReleased);
+            Assert.Equal(new DateTime(2011, 1, 1), issue.AffectsVersions.ElementAt(0).ReleasedDate);
 
-            Assert.Equal(1, issue.FixVersions.Count);
-            Assert.Equal("2", issue.FixVersions[0].Id);
-            Assert.Equal("2.0", issue.FixVersions[0].Name);
-            Assert.True(issue.FixVersions[0].IsArchived);
-            Assert.True(issue.FixVersions[0].IsReleased);
-            Assert.Equal(new DateTime(2011, 1, 1), issue.FixVersions[0].ReleasedDate);
+            Assert.Equal(1, issue.FixVersions.Count());
+            Assert.Equal("2", issue.FixVersions.ElementAt(0).Id);
+            Assert.Equal("2.0", issue.FixVersions.ElementAt(0).Name);
+            Assert.True(issue.FixVersions.ElementAt(0).IsArchived);
+            Assert.True(issue.FixVersions.ElementAt(0).IsReleased);
+            Assert.Equal(new DateTime(2011, 1, 1), issue.FixVersions.ElementAt(0).ReleasedDate);
         }
 
     }

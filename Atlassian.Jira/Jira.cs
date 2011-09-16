@@ -210,7 +210,7 @@ namespace Atlassian.Jira
         public IEnumerable<Version> GetVersions(string projectKey)
         {
             var token = GetAuthenticationToken();
-            return _jiraSoapService.GetVersions(token, projectKey).Select(v => new Version(v));
+            return _jiraSoapService.GetVersions(token, projectKey).Select(v => new Version(v)).ToList().AsReadOnly();
         }
 
         /// <summary>

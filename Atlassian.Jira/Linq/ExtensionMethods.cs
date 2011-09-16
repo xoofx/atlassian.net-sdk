@@ -65,7 +65,7 @@ namespace Atlassian.Jira.Linq
                     continue;
                 }
 
-                if (!typeof(IList<Version>).IsAssignableFrom(localProperty.PropertyType))
+                if (!typeof(IEnumerable<Version>).IsAssignableFrom(localProperty.PropertyType))
                 {
                     var localStringValue = GetStringValueForProperty(issue, localProperty);
                     var remoteStringValue = GetStringValueForProperty(issue.OriginalRemoteIssue, remoteProperty);

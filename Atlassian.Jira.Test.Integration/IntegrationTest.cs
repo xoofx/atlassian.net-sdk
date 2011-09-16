@@ -273,7 +273,7 @@ namespace Atlassian.Jira.Test.Integration
                          select i;
 
             var versions = issues.First().AffectsVersions;
-            Assert.Equal(2, versions.Count);
+            Assert.Equal(2, versions.Count());
             Assert.True(versions.Any(v => v.Name == "1.0"));
             Assert.True(versions.Any(v => v.Name == "2.0"));
 
@@ -291,7 +291,7 @@ namespace Atlassian.Jira.Test.Integration
                          select i;
 
             var versions = issues.First().FixVersions;
-            Assert.Equal(2, versions.Count);
+            Assert.Equal(2, versions.Count());
             Assert.True(versions.Any(v => v.Name == "1.0"));
             Assert.True(versions.Any(v => v.Name == "3.0"));
 
@@ -309,6 +309,23 @@ namespace Atlassian.Jira.Test.Integration
             Assert.True(versions.Any(v => v.Name == "1.0"));
             Assert.True(versions.Any(v => v.Name == "2.0"));
             Assert.True(versions.Any(v => v.Name == "3.0"));
+        }
+
+        [Fact]
+        public void CreateAnIssueWithVersions()
+        {
+            var summaryValue = "Test Issue With Versions " + _random.Next(int.MaxValue);
+
+            var issue = new Issue()
+            {
+                Project = "TST",
+                Type = "1",
+                Summary = summaryValue
+            };
+
+            issue = _jira.CreateIssue(issue);
+
+
         }
     }
 }

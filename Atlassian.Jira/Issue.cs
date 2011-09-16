@@ -163,7 +163,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The versions that are affected by this issue
         /// </summary>
-        public IList<Version> AffectsVersions
+        public IEnumerable<Version> AffectsVersions
         {
             get
             {
@@ -185,7 +185,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The versions in which this issue is fixed
         /// </summary>
-        public IList<Version> FixVersions
+        public IEnumerable<Version> FixVersions
         {
             get
             {
@@ -207,14 +207,14 @@ namespace Atlassian.Jira
         /// <summary>
         /// Retrieve attachment metadata from server for this issue
         /// </summary>
-        public IList<Attachment> GetAttachments()
+        public ReadOnlyCollection<Attachment> GetAttachments()
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to retrieve attachments from server, issue has not been created.");
             }
 
-            return new List<Attachment>(_jira.GetAttachmentsForIssue(_originalIssue.key)).AsReadOnly();
+            return _jira.GetAttachmentsForIssue(_originalIssue.key).ToList().AsReadOnly();
         }
 
         /// <summary>
@@ -246,13 +246,13 @@ namespace Atlassian.Jira
         /// <summary>
         /// Retrieve comments from server for this issue
         /// </summary>
-        public IList<Comment> GetComments()
+        public ReadOnlyCollection<Comment> GetComments()
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to retrieve comments from server, issue has not been created.");
             }
-            return new List<Comment>(_jira.GetCommentsForIssue(_originalIssue.key)).AsReadOnly();
+            return _jira.GetCommentsForIssue(_originalIssue.key).ToList().AsReadOnly();
         }
 
         /// <summary>
