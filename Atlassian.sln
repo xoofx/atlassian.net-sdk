@@ -11,6 +11,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Test.Integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atlassian.Jira.Test.Integration.Setup", "Atlassian.Jira.Test.Integration.Setup\Atlassian.Jira.Test.Integration.Setup.csproj", "{59EF77DF-1A5D-48AC-BC98-523C6BBAC288}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{680E73AB-49DF-4A17-B7EB-107F273A2E0E}"
+	ProjectSection(SolutionItems) = preProject
+		build-release.bat = build-release.bat
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
