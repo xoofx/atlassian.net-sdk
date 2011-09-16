@@ -312,9 +312,9 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void CreateAnIssueWithVersions()
+        public void UpdateVersionsOfIssue()
         {
-            var summaryValue = "Test Issue With Versions " + _random.Next(int.MaxValue);
+            var summaryValue = "Test issue with versions " + _random.Next(int.MaxValue);
 
             var issue = new Issue()
             {
@@ -325,7 +325,20 @@ namespace Atlassian.Jira.Test.Integration
 
             issue = _jira.CreateIssue(issue);
 
+            var versions = _jira.GetVersions("TST");
+
+            issue.FixVersions.Add(versions.First(v => v.Name == "2.0"));
+            issue.AffectsVersions.Add(versions.First(v => v.Name == "1.0"));
+
+            var newIssue = _jira.UpdateIssue(issue);
+
+            Assert.Equal(1, newIssue.FixVersions.Count);
+            Assert.Equal("2.0", newIssue.FixVersions[0].Name);
+
+            Assert.Equal(1, newIssue.AffectsVersions.Count);
+            Assert.Equal("1.0", newIssue.AffectsVersions[0].Name);
 
         }
+
     }
 }
