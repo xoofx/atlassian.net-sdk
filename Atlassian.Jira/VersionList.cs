@@ -11,22 +11,33 @@ namespace Atlassian.Jira
     /// </summary>
     public class VersionList: ReadOnlyCollection<Version>
     {
-        private readonly Func<string, Version> _versionProvider;
-        
-        public VersionList(IList<Version> list, Func<string, Version> versionProvider)
+        private List<Version> _newVersions = new List<Version>();
+        private readonly string _issueKey;
+
+        internal VersionList(string issueKey, IList<Version> list)
             : base(list)
         {
-            _versionProvider = versionProvider;
+            _issueKey = issueKey;
         }
 
         /// <summary>
         /// TODO
         /// </summary>
-        /// <param name="versionName"></param>
-        public void Add(string versionName)
+        /// <param name="version"></param>
+        public void Add(Version version)
         {
-            this.Items.Add(_versionProvider.Invoke(versionName));
+            if (String.IsNullOrEmpty(_issueKey))
+            {
+                throw new InvalidOperationException("Unable to add version, issue has not been created.");
+            }
+
+            this.Items.Add(version);
+            this._newVersions.Add(version);
         }
 
+        internal IList<Version> GetNewVersions()
+        {
+            return _newVersions;
+        }
     }
 }

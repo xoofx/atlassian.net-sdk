@@ -50,53 +50,12 @@ namespace Atlassian.Jira.Linq
         }
 
         /// <summary>
-        /// Gets the RemoteFieldValues representing the fields that where updated
+        /// Creates a new Version from RemoteVersion
         /// </summary>
-        public static RemoteFieldValue[] GetUpdatedFields(this Issue issue)
+        public static Version ToLocal(this RemoteVersion remoteVersion)
         {
-            var fields = new List<RemoteFieldValue>();
-
-            var remoteFields = typeof(RemoteIssue).GetProperties();
-            foreach (var localProperty in typeof(Issue).GetProperties())
-            {
-                var remoteProperty = remoteFields.FirstOrDefault(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
-                if (remoteProperty == null)
-                {
-                    continue;
-                }
-
-                if (!typeof(IEnumerable<Version>).IsAssignableFrom(localProperty.PropertyType))
-                {
-                    var localStringValue = GetStringValueForProperty(issue, localProperty);
-                    var remoteStringValue = GetStringValueForProperty(issue.OriginalRemoteIssue, remoteProperty);
-
-                    if (remoteStringValue != localStringValue)
-                    {
-                        fields.Add(new RemoteFieldValue()
-                        {
-                            id = remoteProperty.Name,
-                            values = new string[1] { localStringValue }
-                        });
-                    }
-                }
-            }
-
-            return fields.ToArray();
+            return new Version(remoteVersion);
         }
 
-        private static string GetStringValueForProperty(object container, PropertyInfo property)
-        {
-            var value = property.GetValue(container, null);
-
-            if (property.PropertyType == typeof(DateTime?))
-            {
-                var dateValue = (DateTime?)value;
-                return dateValue.HasValue ? dateValue.Value.ToString("d/MMM/yy") : null;
-            }
-            else
-            {
-                return value != null ? value.ToString() : null;
-            }
-        }
     }
 }

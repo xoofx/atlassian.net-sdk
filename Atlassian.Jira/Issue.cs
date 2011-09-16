@@ -13,7 +13,7 @@ namespace Atlassian.Jira
     /// <summary>
     /// A JIRA issue
     /// </summary>
-    public class Issue
+    public class Issue: IRemoteFieldProvider
     {
         private readonly RemoteIssue _originalIssue;
         private readonly Jira _jira;
@@ -177,7 +177,7 @@ namespace Atlassian.Jira
                         remoteVersions.AddRange(_originalIssue.affectsVersions.Select(v => new Version(v)));
                     }
                     
-                    _affectsVersions = new VersionList(_jira, this.Project, remoteVersions);
+                    _affectsVersions = new VersionList(_originalIssue.key, remoteVersions);
 
                 }
                 return _affectsVersions;
@@ -200,7 +200,7 @@ namespace Atlassian.Jira
                         remoteVersions.AddRange(_originalIssue.fixVersions.Select(v => new Version(v)));
                     }
 
-                    _fixVersions = new VersionList(_jira, this.Project, remoteVersions);
+                    _fixVersions = new VersionList(_originalIssue.key, remoteVersions);
                 }
                 return _fixVersions;
             }
@@ -279,6 +279,68 @@ namespace Atlassian.Jira
 
             var newComment = new Comment() { Author = _jira.UserName, Body = comment };
             _jira.AddCommentToIssue(_originalIssue.key, newComment);
+        }
+
+        /// <summary>
+        /// Gets the RemoteFields representing the fields that were updated
+        /// </summary>
+        RemoteFieldValue[] IRemoteFieldProvider.GetRemoteFields()
+        {
+            var fields = new List<RemoteFieldValue>();
+
+            var remoteFields = typeof(RemoteIssue).GetProperties();
+            foreach (var localProperty in typeof(Issue).GetProperties())
+            {
+                var remoteProperty = remoteFields.FirstOrDefault(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
+                if (remoteProperty == null)
+                {
+                    continue;
+                }
+
+                if (typeof(VersionList).IsAssignableFrom(localProperty.PropertyType))
+                {
+                    var versions = (VersionList)localProperty.GetValue(this, null);
+
+                    fields.AddRange(from v in versions.GetNewVersions()
+                                    select new RemoteFieldValue()
+                                            {
+                                                //https://jira.atlassian.com/browse/JRA-12300
+                                                id = remoteProperty.Name == "affectsVersions"? "versions" : remoteProperty.Name,
+                                                values = new string[1] { v.Id }
+                                            });
+                }
+                else
+                {
+                    var localStringValue = GetStringValueForProperty(this, localProperty);
+                    var remoteStringValue = GetStringValueForProperty(_originalIssue, remoteProperty);
+
+                    if (remoteStringValue != localStringValue)
+                    {
+                        fields.Add(new RemoteFieldValue()
+                        {
+                            id = remoteProperty.Name,
+                            values = new string[1] { localStringValue }
+                        });
+                    }
+                }
+            }
+
+            return fields.ToArray();
+        }
+
+        private static string GetStringValueForProperty(object container, PropertyInfo property)
+        {
+            var value = property.GetValue(container, null);
+
+            if (property.PropertyType == typeof(DateTime?))
+            {
+                var dateValue = (DateTime?)value;
+                return dateValue.HasValue ? dateValue.Value.ToString("d/MMM/yy") : null;
+            }
+            else
+            {
+                return value != null ? value.ToString() : null;
+            }
         }
     }
 }

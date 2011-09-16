@@ -125,6 +125,18 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets an issue from the JIRA server
+        /// </summary>
+        /// <param name="key">The key of the issue</param>
+        /// <returns></returns>
+        public Issue GetIssue(string key)
+        {
+            return (from i in Issues
+                    where i.Key == key
+                    select i).First();
+        }
+
+        /// <summary>
         /// Execute a specific JQL query and return the resulting issues
         /// </summary>
         /// <param name="jql">JQL search query</param>
@@ -184,12 +196,13 @@ namespace Atlassian.Jira
         {
             var token = GetAuthenticationToken();
 
-            var fields = issue.GetUpdatedFields();
+            var fields = ((IRemoteFieldProvider)issue).GetRemoteFields();
 
             var remoteIssue = _jiraSoapService.UpdateIssue(token, issue.Key.Value, fields);
 
             return new Issue(this, remoteIssue);
         }
+    
 
         /// <summary>
         /// Returns all the issue types within JIRA
