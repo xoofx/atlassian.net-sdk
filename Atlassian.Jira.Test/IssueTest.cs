@@ -262,7 +262,7 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void GetAttachments_IfIssueIsCreated_ShouldLoadComments()
+        public void GetComments_IfIssueIsCreated_ShouldLoadComments()
         {
             //arrange
             var mockJiraService = new Mock<IJiraSoapServiceClient>();
