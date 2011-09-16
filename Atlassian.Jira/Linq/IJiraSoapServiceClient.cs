@@ -23,5 +23,6 @@ namespace Atlassian.Jira.Linq
         RemotePriority[] GetPriorities(string token);
         RemoteResolution[] GetResolutions(string token);
         RemoteStatus[] GetStatuses(string token);
+        RemoteVersion[] GetVersions(string token, string projectKey);
     }
 }

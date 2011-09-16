@@ -195,88 +195,63 @@ namespace Atlassian.Jira
         /// Returns all the issue types within JIRA
         /// </summary>
         /// <param name="projectKey">If provided, returns issue types only for given project</param>
-        /// <returns>Collection of jira issue types</returns>
+        /// <returns>Collection of JIRA issue types</returns>
         public IEnumerable<JiraNamedEntity> GetIssueTypes(string projectKey = null)
         {
             var token = GetAuthenticationToken();
-            List<JiraNamedEntity> issueTypes = new List<JiraNamedEntity>();
+            return _jiraSoapService.GetIssueTypes(token, projectKey).Select(t => new JiraNamedEntity(t));
+        }
 
-            foreach (var remoteIssueType in _jiraSoapService.GetIssueTypes(token, projectKey))
-            {
-                issueTypes.Add(new JiraNamedEntity(remoteIssueType));
-            }
-
-            return issueTypes;
+        /// <summary>
+        /// Returns all versions defined on a JIRA project
+        /// </summary>
+        /// <param name="projectKey">The project to retrieve the versions from</param>
+        /// <returns>Collection of JIRA versions.</returns>
+        public IEnumerable<Version> GetVersions(string projectKey)
+        {
+            var token = GetAuthenticationToken();
+            return _jiraSoapService.GetVersions(token, projectKey).Select(v => new Version(v));
         }
 
         /// <summary>
         /// Returns all the issue priorities within JIRA
         /// </summary>
-        /// <returns>Collection of jira issue priorities</returns>
+        /// <returns>Collection of JIRA issue priorities</returns>
         public IEnumerable<JiraNamedEntity> GetIssuePriorities()
         {
             var token = GetAuthenticationToken();
-            List<JiraNamedEntity> entities = new List<JiraNamedEntity>();
-
-            foreach (var remote in _jiraSoapService.GetPriorities(token))
-            {
-                entities.Add(new JiraNamedEntity(remote));
-            }
-
-            return entities; 
+            return _jiraSoapService.GetPriorities(token).Select(p => new JiraNamedEntity(p));
         }
 
         /// <summary>
         /// Returns all the issue statuses within JIRA
         /// </summary>
-        /// <returns>Collection of jira issue statuses</returns>
+        /// <returns>Collection of JIRA issue statuses</returns>
         public IEnumerable<JiraNamedEntity> GetIssueStatuses()
         {
             var token = GetAuthenticationToken();
-            List<JiraNamedEntity> entities = new List<JiraNamedEntity>();
-
-            foreach (var remote in _jiraSoapService.GetStatuses(token))
-            {
-                entities.Add(new JiraNamedEntity(remote));
-            }
-
-            return entities;
+            return _jiraSoapService.GetStatuses(token).Select(s => new JiraNamedEntity(s));
         }
 
         /// <summary>
         /// Returns all the issue resolutions within JIRA
         /// </summary>
-        /// <returns>Collection of jira issue resolutions</returns>
+        /// <returns>Collection of JIRA issue resolutions</returns>
         public IEnumerable<JiraNamedEntity> GetIssueResolutions()
         {
             var token = GetAuthenticationToken();
-            List<JiraNamedEntity> entities = new List<JiraNamedEntity>();
-
-            foreach (var remote in _jiraSoapService.GetResolutions(token))
-            {
-                entities.Add(new JiraNamedEntity(remote));
-            }
-
-            return entities;
+            return _jiraSoapService.GetResolutions(token).Select(r => new JiraNamedEntity(r));
         }
 
         internal IList<Attachment> GetAttachmentsForIssue(string issueKey)
         {
             var token = GetAuthenticationToken();
-
-            var attachments = new List<Attachment>();
-            foreach (var remoteAttachment in _jiraSoapService.GetAttachmentsFromIssue(token, issueKey))
-            {
-                attachments.Add(new Attachment(this, new WebClientWrapper(), remoteAttachment));
-            }
-
-            return attachments;
+            return _jiraSoapService.GetAttachmentsFromIssue(token, issueKey).Select(a => new Attachment(this, new WebClientWrapper(), a)).ToList();
         }
 
         internal bool AddAttachmentsToIssue(string issueKey, string[] fileNames, string[] base64EncodedAttachmentData)
         {
             var token = GetAuthenticationToken();
-
             return _jiraSoapService.AddBase64EncodedAttachmentsToIssue(token, issueKey, fileNames, base64EncodedAttachmentData);
         }
 
@@ -284,13 +259,7 @@ namespace Atlassian.Jira
         {
             var token = GetAuthenticationToken();
 
-            var comments = new List<Comment>();
-            foreach(var remote in _jiraSoapService.GetCommentsFromIssue(token, issueKey))
-            {
-                comments.Add(new Comment(remote));
-            }
-
-            return comments;
+            return _jiraSoapService.GetCommentsFromIssue(token, issueKey).Select(c => new Comment(c)).ToList();
         }
 
         internal void AddCommentToIssue(string issueKey, Comment comment)

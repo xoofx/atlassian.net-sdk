@@ -125,5 +125,10 @@ namespace Atlassian.Jira.Linq
         {
             return _client.getStatuses(token);
         }
+
+        public RemoteVersion[] GetVersions(string token, string projectKey)
+        {
+            return _client.getVersions(token, projectKey);
+        }
     }
 }

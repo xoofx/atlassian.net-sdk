@@ -300,5 +300,15 @@ namespace Atlassian.Jira.Test.Integration
             Assert.True(v1.IsReleased);
             Assert.Equal(new DateTime(2011, 9, 01).ToUniversalTime(), v1.ReleasedDate);
         }
+
+        [Fact]
+        public void RetrievesAllVersions()
+        {
+            var versions = _jira.GetVersions("TST");
+            Assert.Equal(3, versions.Count());
+            Assert.True(versions.Any(v => v.Name == "1.0"));
+            Assert.True(versions.Any(v => v.Name == "2.0"));
+            Assert.True(versions.Any(v => v.Name == "3.0"));
+        }
     }
 }
