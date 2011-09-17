@@ -13,7 +13,7 @@ namespace Atlassian.Jira
     /// <summary>
     /// A JIRA issue
     /// </summary>
-    public class Issue: IRemoteFieldProvider
+    public class Issue: IRemoteIssueFieldProvider
     {
         private readonly RemoteIssue _originalIssue;
         private readonly Jira _jira;
@@ -246,15 +246,6 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// TODO
-        /// </summary>
-        /// <param name="versionName"></param>
-        public void AddFixVersion(string versionName)
-        {
-
-        }
-
-        /// <summary>
         /// Retrieve comments from server for this issue
         /// </summary>
         public ReadOnlyCollection<Comment> GetComments()
@@ -284,7 +275,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
-        RemoteFieldValue[] IRemoteFieldProvider.GetRemoteFields()
+        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
         {
             var fields = new List<RemoteFieldValue>();
 

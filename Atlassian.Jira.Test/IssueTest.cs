@@ -101,7 +101,7 @@ namespace Atlassian.Jira.Test
         {
             var issue = new Issue();
 
-            Assert.Equal(0, ((IRemoteFieldProvider)issue).GetRemoteFields().Length);
+            Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace Atlassian.Jira.Test
             var issue = new Issue();
             issue.Summary = "foo";
 
-            Assert.Equal(1, ((IRemoteFieldProvider)issue).GetRemoteFields().Length);
+            Assert.Equal(1, GetUpdatedFieldsForIssue(issue).Length);
         }
 
         [Fact]
@@ -126,7 +126,7 @@ namespace Atlassian.Jira.Test
             issue.Status = "foo";
             issue.Type = "foo";
 
-            Assert.Equal(8, ((IRemoteFieldProvider)issue).GetRemoteFields().Length);
+            Assert.Equal(8, GetUpdatedFieldsForIssue(issue).Length);
         }
 
         [Fact]
@@ -142,7 +142,7 @@ namespace Atlassian.Jira.Test
             issue.Summary = "Summary";
             issue.Status = null;
 
-            Assert.Equal(0, ((IRemoteFieldProvider)issue).GetRemoteFields().Length);
+            Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
         }
 
         [Fact]
@@ -158,7 +158,7 @@ namespace Atlassian.Jira.Test
             issue.Priority = "High";
             issue.Resolution = null;
 
-            Assert.Equal(0, ((IRemoteFieldProvider)issue).GetRemoteFields().Length);
+            Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
         }
 
         [Fact]
@@ -167,7 +167,7 @@ namespace Atlassian.Jira.Test
             var issue = new Issue();
             issue.Priority = "High";
 
-            Assert.Equal(1, ((IRemoteFieldProvider)issue).GetRemoteFields().Length);
+            Assert.Equal(1, GetUpdatedFieldsForIssue(issue).Length);
             
         }
 
@@ -176,7 +176,7 @@ namespace Atlassian.Jira.Test
         {
             var issue = new Issue(){ DueDate = new DateTime(2011,10,10) };
 
-            var fields = ((IRemoteFieldProvider)issue).GetRemoteFields();
+            var fields = GetUpdatedFieldsForIssue(issue);
             Assert.Equal(1, fields.Length);
             Assert.Equal("10/Oct/11", fields[0].values[0]);
         }
@@ -190,7 +190,7 @@ namespace Atlassian.Jira.Test
             };
 
             var issue = remoteIssue.ToLocal();
-            Assert.Equal(0, ((IRemoteFieldProvider)issue).GetRemoteFields().Length);
+            Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
         }
 
         [Fact]
@@ -251,12 +251,6 @@ namespace Atlassian.Jira.Test
                                                 "key",
                                                 new string[] { "foo.txt" },
                                                 new string[] { "AQID" }));
-        }
-
-        [Fact]
-        public void AddFixVersion_IfIssueNotCreated_ShouldThrowAnException()
-        {
-
         }
 
         [Fact]
@@ -377,7 +371,7 @@ namespace Atlassian.Jira.Test
             var version = new RemoteVersion() { id = "1", name = "1.0" };
             issue.FixVersions.Add(version.ToLocal());
 
-            var fields = ((IRemoteFieldProvider)issue).GetRemoteFields();
+            var fields = GetUpdatedFieldsForIssue(issue);
             Assert.Equal(1, fields.Length);
             Assert.Equal("fixVersions", fields[0].id);
             Assert.Equal("1", fields[0].values[0]);
@@ -390,10 +384,15 @@ namespace Atlassian.Jira.Test
             var version = new RemoteVersion() { id = "1", name = "1.0" };
             issue.AffectsVersions.Add(version.ToLocal());
 
-            var fields = ((IRemoteFieldProvider)issue).GetRemoteFields();
+            var fields = GetUpdatedFieldsForIssue(issue);
             Assert.Equal(1, fields.Length);
             Assert.Equal("versions", fields[0].id);
             Assert.Equal("1", fields[0].values[0]);
+        }
+
+        private RemoteFieldValue[] GetUpdatedFieldsForIssue(Issue issue)
+        {
+            return ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
         }
     }
 }

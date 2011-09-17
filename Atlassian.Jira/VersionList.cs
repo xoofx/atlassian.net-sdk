@@ -7,7 +7,7 @@ using System.Collections.ObjectModel;
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// TODO
+    /// Collection of project versions
     /// </summary>
     public class VersionList: ReadOnlyCollection<Version>
     {
@@ -21,9 +21,9 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// TODO
+        /// Register a new version for addition when the issue is updated
         /// </summary>
-        /// <param name="version"></param>
+        /// <param name="version">Version to add</param>
         public void Add(Version version)
         {
             if (String.IsNullOrEmpty(_issueKey))

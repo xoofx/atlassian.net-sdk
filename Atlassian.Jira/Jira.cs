@@ -196,7 +196,7 @@ namespace Atlassian.Jira
         {
             var token = GetAuthenticationToken();
 
-            var fields = ((IRemoteFieldProvider)issue).GetRemoteFields();
+            var fields = ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
 
             var remoteIssue = _jiraSoapService.UpdateIssue(token, issue.Key.Value, fields);
 
