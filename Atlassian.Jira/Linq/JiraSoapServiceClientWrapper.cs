@@ -15,35 +15,10 @@ namespace Atlassian.Jira.Linq
         private readonly JiraSoapServiceClient _client;
         private readonly string _url;
 
-        public JiraSoapServiceClientWrapper(string url)
+        public JiraSoapServiceClientWrapper(string jiraBaseUrl)
         {
-            if (!url.EndsWith("/"))
-            {
-                url += "/";
-            }
-
-            _url = url;
-
-            var endPointUri = new Uri(url + "rpc/soap/jirasoapservice-v2");
-
-            BasicHttpBinding binding = null;
-            if (endPointUri.Scheme == "https")
-            {
-                binding = new BasicHttpBinding(BasicHttpSecurityMode.Transport);
-            }
-            else
-            {
-                binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
-            }
-            binding.TransferMode = TransferMode.Buffered;
-            binding.UseDefaultWebProxy = true;
-            binding.MaxReceivedMessageSize = 2147483647;
-            binding.ReaderQuotas = new XmlDictionaryReaderQuotas() { MaxStringContentLength = 2147483647 } ;
-            binding.Security.Message.ClientCredentialType = BasicHttpMessageCredentialType.UserName;
-
-            var endpoint = new EndpointAddress(endPointUri);
-
-            _client = new JiraSoapServiceClient(binding, endpoint);
+            _client = JiraSoapServiceClientFactory.Create(jiraBaseUrl);
+            _url = _client.Endpoint.Address.Uri.ToString();
         }
 
         public string Url
@@ -53,7 +28,6 @@ namespace Atlassian.Jira.Linq
                 return _url;
             }
         }
-
 
         public string Login(string username, string password)
         {

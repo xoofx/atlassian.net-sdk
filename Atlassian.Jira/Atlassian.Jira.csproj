@@ -65,6 +65,7 @@
     <Compile Include="Linq\JiraQueryable.cs" />
     <Compile Include="Linq\JiraQueryProvider.cs" />
     <Compile Include="Linq\JiraSoapService.cs" />
+    <Compile Include="Linq\JiraSoapServiceClientFactory.cs" />
     <Compile Include="Linq\JiraSoapServiceClientWrapper.cs" />
     <Compile Include="Linq\JqlData.cs" />
     <Compile Include="Linq\JqlExpressionVisitor.cs" />
