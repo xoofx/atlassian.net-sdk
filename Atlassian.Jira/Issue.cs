@@ -64,19 +64,19 @@ namespace Atlassian.Jira
         /// <summary>
         /// Brief one-line summary of the issue
         /// </summary>
-        [ContainsEquality]
+        [JqlContainsEquality]
         public string Summary { get; set; }
 
         /// <summary>
         /// Detailed description of the issue
         /// </summary>
-        [ContainsEquality]
+        [JqlContainsEquality]
         public string Description { get; set; }
 
         /// <summary>
         /// Hardware or software environment to which the issue relates
         /// </summary>
-        [ContainsEquality]
+        [JqlContainsEquality]
         public string Environment { get; set; }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The versions that are affected by this issue
         /// </summary>
-        [JqlFieldNameAttribute("AffectedVersion")]
+        [JqlFieldName("AffectedVersion")]
         public VersionList AffectsVersions
         {
             get
@@ -188,7 +188,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The versions in which this issue is fixed
         /// </summary>
-        [JqlFieldNameAttribute("FixVersion")]
+        [JqlFieldName("FixVersion")]
         public VersionList FixVersions
         {
             get

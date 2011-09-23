@@ -48,7 +48,7 @@
     <Compile Include="Attachment.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableTextField.cs" />
-    <Compile Include="ContainsEqualityAttribute.cs" />
+    <Compile Include="Linq\JqlContainsEqualityAttribute.cs" />
     <Compile Include="FileSystem.cs" />
     <Compile Include="IFileSystem.cs" />
     <Compile Include="IRemoteFieldProvider.cs" />

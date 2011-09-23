@@ -128,7 +128,7 @@ namespace Atlassian.Jira.Linq
 
             // operator
             var operatorString = String.Empty;
-            if(field.GetCustomAttributes(typeof(ContainsEqualityAttribute), true).Count() > 0)
+            if(field.GetCustomAttributes(typeof(JqlContainsEqualityAttribute), true).Count() > 0)
             {
                 operatorString = equal? JiraOperators.CONTAINS: JiraOperators.NOTCONTAINS;
             }
