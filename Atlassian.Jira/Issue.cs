@@ -177,7 +177,7 @@ namespace Atlassian.Jira
                         remoteVersions.AddRange(_originalIssue.affectsVersions.Select(v => new Version(v)));
                     }
                     
-                    _affectsVersions = new VersionList(_originalIssue.key, remoteVersions);
+                    _affectsVersions = new VersionList(remoteVersions);
 
                 }
                 return _affectsVersions;
@@ -200,7 +200,7 @@ namespace Atlassian.Jira
                         remoteVersions.AddRange(_originalIssue.fixVersions.Select(v => new Version(v)));
                     }
 
-                    _fixVersions = new VersionList(_originalIssue.key, remoteVersions);
+                    _fixVersions = new VersionList(remoteVersions);
                 }
                 return _fixVersions;
             }
@@ -243,15 +243,6 @@ namespace Atlassian.Jira
             string content = Convert.ToBase64String(data);
 
             _jira.AddAttachmentsToIssue(_originalIssue.key, new string[] { name }, new string[]{ content });
-        }
-
-        /// <summary>
-        /// TODO
-        /// </summary>
-        /// <param name="versionName"></param>
-        public void AddFixVersion(string versionName)
-        {
-
         }
 
         /// <summary>

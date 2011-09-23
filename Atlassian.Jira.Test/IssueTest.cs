@@ -97,6 +97,24 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void ToRemote_IfVersionsAreSet_ShouldSetVersionsField()
+        {
+            var issue = new Issue();
+            var affectsVersion = new RemoteVersion();
+            var fixVersion = new RemoteVersion();
+
+            issue.AffectsVersions.Add(affectsVersion.ToLocal());
+            issue.FixVersions.Add(fixVersion.ToLocal());
+            
+            var remoteIssue = issue.ToRemote();
+            Assert.Equal(1, remoteIssue.affectsVersions.Length);
+            Assert.ReferenceEquals(affectsVersion, remoteIssue.affectsVersions[0]);
+
+            Assert.Equal(1, remoteIssue.fixVersions.Length);
+            Assert.ReferenceEquals(fixVersion, remoteIssue.fixVersions[0]);
+        }
+
+        [Fact]
         public void GetUpdatedFields_ReturnEmptyIfNothingChanged()
         {
             var issue = new Issue();
@@ -323,15 +341,6 @@ namespace Atlassian.Jira.Test
 
             Assert.Equal(0, issue.AffectsVersions.Count());
             Assert.Equal(0, issue.FixVersions.Count());
-        }
-
-        [Fact]
-        public void AddVersion_IfIssueNotCreated_ShouldThrowError()
-        {
-            var issue = new Issue();
-            var version = new RemoteVersion() { id = "1", name = "1.0" };
-
-            Assert.Throws(typeof(InvalidOperationException), () => issue.FixVersions.Add(version.ToLocal()));
         }
 
         [Fact]

@@ -7,30 +7,23 @@ using System.Collections.ObjectModel;
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// TODO
+    /// List of JIRA versions
     /// </summary>
     public class VersionList: ReadOnlyCollection<Version>
     {
         private List<Version> _newVersions = new List<Version>();
-        private readonly string _issueKey;
 
-        internal VersionList(string issueKey, IList<Version> list)
+        internal VersionList(IList<Version> list)
             : base(list)
         {
-            _issueKey = issueKey;
         }
 
         /// <summary>
-        /// TODO
+        /// Add a vesion to this issue
         /// </summary>
         /// <param name="version"></param>
         public void Add(Version version)
         {
-            if (String.IsNullOrEmpty(_issueKey))
-            {
-                throw new InvalidOperationException("Unable to add version, issue has not been created.");
-            }
-
             this.Items.Add(version);
             this._newVersions.Add(version);
         }

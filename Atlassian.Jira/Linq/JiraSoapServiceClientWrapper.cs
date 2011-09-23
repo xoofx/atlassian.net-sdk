@@ -18,7 +18,7 @@ namespace Atlassian.Jira.Linq
         public JiraSoapServiceClientWrapper(string jiraBaseUrl)
         {
             _client = JiraSoapServiceClientFactory.Create(jiraBaseUrl);
-            _url = _client.Endpoint.Address.Uri.ToString();
+            _url = jiraBaseUrl.EndsWith("/") ? jiraBaseUrl : jiraBaseUrl += "/";
         }
 
         public string Url

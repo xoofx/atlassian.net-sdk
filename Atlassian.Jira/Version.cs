@@ -19,6 +19,14 @@ namespace Atlassian.Jira
             _remoteVersion = remoteVersion;
         }
 
+        internal RemoteVersion RemoteVersion
+        {
+            get
+            {
+                return _remoteVersion;
+            }
+        }
+
         /// <summary>
         /// Whether this version has been archived
         /// </summary>
@@ -51,5 +59,6 @@ namespace Atlassian.Jira
                 return _remoteVersion.releaseDate;
             }
         }
+
     }
 }

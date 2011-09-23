@@ -30,6 +30,17 @@ namespace Atlassian.Jira.Linq
             remote.priority = issue.Priority != null ? issue.Priority.Value : null;
             remote.resolution = issue.Resolution != null ? issue.Resolution.Value : null;
 
+            if (issue.AffectsVersions.Count > 0)
+            {
+                remote.affectsVersions = issue.AffectsVersions.Select(v => v.RemoteVersion).ToArray();
+            }
+
+            if(issue.FixVersions.Count > 0)
+            {
+                remote.fixVersions = issue.FixVersions.Select(v => v.RemoteVersion).ToArray();
+
+            }
+
             return remote;
         }
 

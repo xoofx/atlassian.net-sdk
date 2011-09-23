@@ -8,14 +8,14 @@ using System.Xml;
 namespace Atlassian.Jira.Linq
 {
     /// <summary>
-    /// Factory for JiraSoapServiceClient
+    /// Factory for JiraSoapServiceClient proxy
     /// </summary>
     public static class JiraSoapServiceClientFactory
     {
         /// <summary>
         /// Creates and configures a JiraSoapServiceClient
         /// </summary>
-        /// <param name="jiraBaseUrl">Base URL to JIRA server</param>
+        /// <param name="jiraBaseUrl">Base url to JIRA server</param>
         /// <returns>JiraSoapServiceClient</returns>
         public static JiraSoapServiceClient Create(string jiraBaseUrl)
         {

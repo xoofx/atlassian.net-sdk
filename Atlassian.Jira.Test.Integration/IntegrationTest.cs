@@ -129,7 +129,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void UploadAndDownloadOfAttachments()
         {
-            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
             var issue = new Issue()
             {
                 Project = "TST",
@@ -314,7 +314,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void UpdateVersionsOfIssue()
         {
-            var summaryValue = "Test issue with versions " + _random.Next(int.MaxValue);
+            var summaryValue = "Test issue with versions (Updated)" + _random.Next(int.MaxValue);
 
             var issue = new Issue()
             {
@@ -340,5 +340,29 @@ namespace Atlassian.Jira.Test.Integration
 
         }
 
+        [Fact]
+        public void CreateIssueWithVersion()
+        {
+            var summaryValue = "Test issue with versions (Created)" + _random.Next(int.MaxValue);
+
+            var issue = new Issue()
+            {
+                Project = "TST",
+                Type = "1",
+                Summary = summaryValue
+            };
+
+            var versions = _jira.GetVersions("TST");
+            issue.AffectsVersions.Add(versions.First(v => v.Name == "1.0"));
+            issue.FixVersions.Add(versions.First(v => v.Name == "2.0"));
+
+            var newIssue = _jira.CreateIssue(issue);
+
+            Assert.Equal(1, newIssue.AffectsVersions.Count);
+            Assert.Equal("1.0", newIssue.AffectsVersions[0].Name);
+
+            Assert.Equal(1, newIssue.FixVersions.Count);
+            Assert.Equal("2.0", newIssue.FixVersions[0].Name);
+        }
     }
 }
