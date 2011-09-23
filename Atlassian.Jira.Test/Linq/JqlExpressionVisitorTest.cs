@@ -411,5 +411,27 @@ namespace Atlassian.Jira.Test
 
             Assert.Equal(100, _translator.NumberOfResults);
         }
+
+        [Fact]
+        public void VersionsEqual()
+        {
+            var jira = CreateJiraInstance();
+            var issues = (from i in jira.Issues
+                          where i.FixVersions == "1.0" && i.AffectsVersions == "2.0"
+                          select i).ToArray();
+
+            Assert.Equal("(FixVersion = \"1.0\" and AffectedVersion = \"2.0\")", _translator.Jql);
+        }
+
+        [Fact]
+        public void VersionsNotEqual()
+        {
+            var jira = CreateJiraInstance();
+            var issues = (from i in jira.Issues
+                          where i.FixVersions != "1.0" && i.AffectsVersions != "2.0"
+                          select i).ToArray();
+
+            Assert.Equal("(FixVersion != \"1.0\" and AffectedVersion != \"2.0\")", _translator.Jql);
+        }
     }
 }

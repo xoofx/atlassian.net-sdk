@@ -32,5 +32,15 @@ namespace Atlassian.Jira
         {
             return _newVersions;
         }
+
+        public static bool operator ==(VersionList list, string value)
+        {
+            return (object) list == null ? value == null : list.Any(v => v.Name == value);
+        }
+
+        public static bool operator !=(VersionList list, string value)
+        {
+            return (object)list == null ? value == null : !list.Any(v => v.Name == value);
+        }
     }
 }

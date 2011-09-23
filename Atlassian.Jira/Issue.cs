@@ -164,6 +164,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The versions that are affected by this issue
         /// </summary>
+        [JqlFieldNameAttribute("AffectedVersion")]
         public VersionList AffectsVersions
         {
             get
@@ -187,6 +188,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The versions in which this issue is fixed
         /// </summary>
+        [JqlFieldNameAttribute("FixVersion")]
         public VersionList FixVersions
         {
             get
@@ -292,13 +294,16 @@ namespace Atlassian.Jira
                 {
                     var versions = (VersionList)localProperty.GetValue(this, null);
 
-                    fields.AddRange(from v in versions.GetNewVersions()
-                                    select new RemoteFieldValue()
-                                            {
-                                                //https://jira.atlassian.com/browse/JRA-12300
-                                                id = remoteProperty.Name == "affectsVersions"? "versions" : remoteProperty.Name,
-                                                values = new string[1] { v.Id }
-                                            });
+                    if (versions != null)
+                    {
+                        fields.AddRange(from v in versions.GetNewVersions()
+                                        select new RemoteFieldValue()
+                                                {
+                                                    //https://jira.atlassian.com/browse/JRA-12300
+                                                    id = remoteProperty.Name == "affectsVersions" ? "versions" : remoteProperty.Name,
+                                                    values = new string[1] { v.Id }
+                                                });
+                    }
                 }
                 else
                 {

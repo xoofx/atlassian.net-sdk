@@ -39,6 +39,19 @@ namespace Atlassian.Jira.Linq
             return new JqlData { Expression = Jql, NumberOfResults = _numberOfResults };
         }
 
+        private string GetFieldName(PropertyInfo fieldInfo)
+        {
+            var attributes = fieldInfo.GetCustomAttributes(typeof(JqlFieldNameAttribute), true);
+            if (attributes.Count() > 0)
+            {
+                return ((JqlFieldNameAttribute)attributes[0]).Name;
+            }
+            else
+            {
+                return fieldInfo.Name;
+            }
+        }
+
         private PropertyInfo GetFieldFromBinaryExpression(BinaryExpression expression)
         {
             var memberExpression = expression.Left as MemberExpression;
@@ -101,7 +114,7 @@ namespace Atlassian.Jira.Linq
             var value = GetValueFromBinaryExpression(expression);
 
             // field
-            _jqlWhere.Append(field.Name);
+            _jqlWhere.Append(GetFieldName(field));
 
             // special cases for empty/null string
             if (value == null || value.Equals(""))
