@@ -13,7 +13,7 @@ namespace Atlassian.Jira
     /// <summary>
     /// A JIRA issue
     /// </summary>
-    public class Issue: IRemoteFieldProvider
+    public class Issue: IRemoteIssueFieldProvider
     {
         private readonly RemoteIssue _originalIssue;
         private readonly Jira _jira;
@@ -277,7 +277,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
-        RemoteFieldValue[] IRemoteFieldProvider.GetRemoteFields()
+        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
         {
             var fields = new List<RemoteFieldValue>();
 
