@@ -51,7 +51,7 @@
     <Compile Include="Linq\JqlContainsEqualityAttribute.cs" />
     <Compile Include="FileSystem.cs" />
     <Compile Include="IFileSystem.cs" />
-    <Compile Include="IRemoteFieldProvider.cs" />
+    <Compile Include="IRemoteIssueFieldProvider.cs" />
     <Compile Include="Issue.cs" />
     <Compile Include="IWebClient.cs" />
     <Compile Include="Jira.cs" />
