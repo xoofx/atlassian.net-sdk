@@ -42,5 +42,10 @@ namespace Atlassian.Jira
         {
             return (object)list == null ? value == null : !list.Any(v => v.Name == value);
         }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
     }
 }
