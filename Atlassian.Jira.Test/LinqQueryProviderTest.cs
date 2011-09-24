@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
 using Moq;
 using System.Linq.Expressions;
 

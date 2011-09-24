@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
 using System.ServiceModel;
 
 namespace Atlassian.Jira

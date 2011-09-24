@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 
-namespace Atlassian.Jira.Linq
+namespace Atlassian.Jira.Remote
 {
     public class JiraQueryProvider: IQueryProvider
     {
@@ -52,9 +52,9 @@ namespace Atlassian.Jira.Linq
             }
             else
             {
-				var treeCopier = new ExpressionTreeModifier(issues);
-				Expression newExpressionTree = treeCopier.Visit(expression);
-			
+                var treeCopier = new ExpressionTreeModifier(issues);
+                Expression newExpressionTree = treeCopier.Visit(expression);
+            
                 return issues.Provider.Execute(newExpressionTree);
             }
         }

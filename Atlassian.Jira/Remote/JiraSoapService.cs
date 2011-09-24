@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Atlassian.Jira.Linq
+namespace Atlassian.Jira.Remote
 {
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(Namespace = "http://jira.atlassian.com/rpc/soap/jirasoapservice-v2", ConfigurationName = "JiraSoapService")]

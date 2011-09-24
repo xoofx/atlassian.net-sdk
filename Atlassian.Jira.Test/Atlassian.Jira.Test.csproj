@@ -51,8 +51,8 @@
     </Compile>
     <Compile Include="ComparableTextFieldTest.cs" />
     <Compile Include="IssueTest.cs" />
-    <Compile Include="Linq\LinqQueryProviderTest.cs" />
-    <Compile Include="Linq\JqlExpressionVisitorTest.cs" />
+    <Compile Include="LinqQueryProviderTest.cs" />
+    <Compile Include="JqlExpressionVisitorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

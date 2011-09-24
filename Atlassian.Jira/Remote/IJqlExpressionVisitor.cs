@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Atlassian.Jira.Linq
+namespace Atlassian.Jira.Remote
 {
     /// <summary>
     /// Abstracts the translation of an Expression tree into JQL

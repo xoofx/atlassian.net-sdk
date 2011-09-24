@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Atlassian.Jira.Linq
+namespace Atlassian.Jira.Remote
 {
     /// <summary>
     /// Attribute that can be applied to properties to use a "Contains" rather than "Equals"

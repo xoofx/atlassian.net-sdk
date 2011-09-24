@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 
-namespace Atlassian.Jira.Linq
+namespace Atlassian.Jira.Remote
 {
     internal class ExpressionTreeModifier: ExpressionVisitor
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 
-namespace Atlassian.Jira.Linq
+namespace Atlassian.Jira.Remote
 {
     public class JiraQueryable<T>: IOrderedQueryable<T>, IQueryable<T>
     {

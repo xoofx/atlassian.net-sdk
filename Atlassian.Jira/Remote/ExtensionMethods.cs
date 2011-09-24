@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 
-namespace Atlassian.Jira.Linq
+namespace Atlassian.Jira.Remote
 {
     public static class ExtensionMethods
     {
