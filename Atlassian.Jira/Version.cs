@@ -7,7 +7,7 @@ using Atlassian.Jira.Linq;
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// A version associated to a project
+    /// A version associated with a project
     /// </summary>
     public class Version: JiraNamedEntity
     {

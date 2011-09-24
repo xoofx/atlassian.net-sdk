@@ -23,6 +23,7 @@ namespace Atlassian.Jira
         private DateTime? _dueDate;
         private VersionList _affectsVersions = null;
         private VersionList _fixVersions = null;
+        private ComponentList _components = null;
 
         public Issue()
             :this(null, new RemoteIssue())
@@ -51,14 +52,15 @@ namespace Atlassian.Jira
             Key = remoteIssue.key;
             Priority = remoteIssue.priority;
             Resolution = remoteIssue.resolution;
-        }
 
-        internal RemoteIssue OriginalRemoteIssue
-        {
-            get
-            {
-                return _originalIssue;
-            }
+            _affectsVersions = _originalIssue.affectsVersions == null? new VersionList()
+                                : new VersionList(_originalIssue.affectsVersions.Select(v => new Version(v)).ToList());
+
+            _fixVersions = _originalIssue.fixVersions == null ? new VersionList()
+                                : new VersionList(_originalIssue.fixVersions.Select(v => new Version(v)).ToList());
+
+            _components = _originalIssue.components == null ? new ComponentList()
+                                : new ComponentList(_originalIssue.components.Select(c => new Component(c)).ToList());
         }
        
         /// <summary>
@@ -162,6 +164,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// The components associated with this issue
+        /// </summary>
+        public ComponentList Components
+        {
+            get
+            {
+                return _components;
+            }
+        }
+
+        /// <summary>
         /// The versions that are affected by this issue
         /// </summary>
         [JqlFieldName("AffectedVersion")]
@@ -169,18 +182,6 @@ namespace Atlassian.Jira
         {
             get
             {
-                if (_affectsVersions == null)
-                {
-                    List<Version> remoteVersions = new List<Version>();
-                    
-                    if (_originalIssue.affectsVersions != null)
-                    {
-                        remoteVersions.AddRange(_originalIssue.affectsVersions.Select(v => new Version(v)));
-                    }
-                    
-                    _affectsVersions = new VersionList(remoteVersions);
-
-                }
                 return _affectsVersions;
             }
         }
@@ -193,17 +194,6 @@ namespace Atlassian.Jira
         {
             get
             {
-                if (_fixVersions == null)
-                {
-                    List<Version> remoteVersions = new List<Version>();
-
-                    if (_originalIssue.fixVersions != null)
-                    {
-                        remoteVersions.AddRange(_originalIssue.fixVersions.Select(v => new Version(v)));
-                    }
-
-                    _fixVersions = new VersionList(remoteVersions);
-                }
                 return _fixVersions;
             }
         }
@@ -277,7 +267,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
-        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
+        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields(string fieldName)
         {
             var fields = new List<RemoteFieldValue>();
 
@@ -290,19 +280,14 @@ namespace Atlassian.Jira
                     continue;
                 }
 
-                if (typeof(VersionList).IsAssignableFrom(localProperty.PropertyType))
+                if (typeof(IRemoteIssueFieldProvider).IsAssignableFrom(localProperty.PropertyType))
                 {
-                    var versions = (VersionList)localProperty.GetValue(this, null);
+                    var fieldsProvider = (IRemoteIssueFieldProvider)localProperty.GetValue(this, null);
 
-                    if (versions != null)
+                    if (fieldsProvider != null)
                     {
-                        fields.AddRange(from v in versions.GetNewVersions()
-                                        select new RemoteFieldValue()
-                                                {
-                                                    //https://jira.atlassian.com/browse/JRA-12300
-                                                    id = remoteProperty.Name == "affectsVersions" ? "versions" : remoteProperty.Name,
-                                                    values = new string[1] { v.Id }
-                                                });
+                        //https://jira.atlassian.com/browse/JRA-12300
+                        fields.AddRange(fieldsProvider.GetRemoteFields(remoteProperty.Name == "affectsVersions" ? "versions" : remoteProperty.Name));
                     }
                 }
                 else

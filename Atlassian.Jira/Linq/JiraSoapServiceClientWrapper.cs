@@ -104,5 +104,10 @@ namespace Atlassian.Jira.Linq
         {
             return _client.getVersions(token, projectKey);
         }
+
+        public RemoteComponent[] GetComponents(string token, string projectKey)
+        {
+            return _client.getComponents(token, projectKey);
+        }
     }
 }

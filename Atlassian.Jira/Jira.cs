@@ -196,7 +196,7 @@ namespace Atlassian.Jira
         {
             var token = GetAuthenticationToken();
 
-            var fields = ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
+            var fields = ((IRemoteIssueFieldProvider)issue).GetRemoteFields(null);
 
             var remoteIssue = _jiraSoapService.UpdateIssue(token, issue.Key.Value, fields);
 
@@ -224,6 +224,17 @@ namespace Atlassian.Jira
         {
             var token = GetAuthenticationToken();
             return _jiraSoapService.GetVersions(token, projectKey).Select(v => new Version(v)).ToList().AsReadOnly();
+        }
+
+        /// <summary>
+        /// Returns all components defined on a JIRA project
+        /// </summary>
+        /// <param name="projectKey">The project to retrieve the components from</param>
+        /// <returns>Collection of JIRA components</returns>
+        public IEnumerable<Component> GetComponents(string projectKey)
+        {
+            var token = GetAuthenticationToken();
+            return _jiraSoapService.GetComponents(token, projectKey).Select(c => new Component(c)).ToList().AsReadOnly();
         }
 
         /// <summary>

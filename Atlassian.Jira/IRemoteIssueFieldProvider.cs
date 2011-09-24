@@ -15,6 +15,6 @@ namespace Atlassian.Jira
     /// </remarks>
     public interface IRemoteIssueFieldProvider
     {
-        RemoteFieldValue[] GetRemoteFields();
+        RemoteFieldValue[] GetRemoteFields(string fieldName);
     }
 }

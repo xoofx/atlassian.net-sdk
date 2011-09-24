@@ -24,5 +24,6 @@ namespace Atlassian.Jira.Linq
         RemoteResolution[] GetResolutions(string token);
         RemoteStatus[] GetStatuses(string token);
         RemoteVersion[] GetVersions(string token, string projectKey);
+        RemoteComponent[] GetComponents(string token, string projectKey);
     }
 }

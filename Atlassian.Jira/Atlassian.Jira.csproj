@@ -48,6 +48,9 @@
     <Compile Include="Attachment.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableTextField.cs" />
+    <Compile Include="Component.cs" />
+    <Compile Include="ComponentList.cs" />
+    <Compile Include="JiraNamedEntityCollection.cs" />
     <Compile Include="Linq\JqlContainsEqualityAttribute.cs" />
     <Compile Include="FileSystem.cs" />
     <Compile Include="IFileSystem.cs" />

@@ -3,22 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
-using Atlassian.Jira.Linq;
 
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// Collection of project versions
+    /// Collection of project components
     /// </summary>
-    public class VersionList: JiraNamedEntityCollection<Version>    
+    public class ComponentList: JiraNamedEntityCollection<Component>
     {
-        internal VersionList()
+        internal ComponentList()
         {
         }
 
-        internal VersionList(IList<Version> list)
+        internal ComponentList(IList<Component> list)
             : base(list)
         {
         }
-    }
+   }
 }
