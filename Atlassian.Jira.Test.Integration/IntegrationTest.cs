@@ -266,52 +266,6 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void RetrievesAffectsVersions()
-        {
-            var issues = from i in _jira.Issues
-                         where i.Key == "TST-1"
-                         select i;
-
-            var versions = issues.First().AffectsVersions;
-            Assert.Equal(2, versions.Count());
-            Assert.True(versions.Any(v => v.Name == "1.0"));
-            Assert.True(versions.Any(v => v.Name == "2.0"));
-
-            var v1 = versions.First(v => v.Name == "1.0");
-            Assert.False(v1.IsArchived);
-            Assert.True(v1.IsReleased);
-            Assert.Equal(new DateTime(2011, 9, 01).ToUniversalTime(), v1.ReleasedDate);
-        }
-
-        [Fact]
-        public void RetrievesFixVersions()
-        {
-            var issues = from i in _jira.Issues
-                         where i.Key == "TST-1"
-                         select i;
-
-            var versions = issues.First().FixVersions;
-            Assert.Equal(2, versions.Count());
-            Assert.True(versions.Any(v => v.Name == "1.0"));
-            Assert.True(versions.Any(v => v.Name == "3.0"));
-
-            var v1 = versions.First(v => v.Name == "1.0");
-            Assert.False(v1.IsArchived);
-            Assert.True(v1.IsReleased);
-            Assert.Equal(new DateTime(2011, 9, 01).ToUniversalTime(), v1.ReleasedDate);
-        }
-
-        [Fact]
-        public void RetrievesAllVersions()
-        {
-            var versions = _jira.GetVersions("TST");
-            Assert.Equal(3, versions.Count());
-            Assert.True(versions.Any(v => v.Name == "1.0"));
-            Assert.True(versions.Any(v => v.Name == "2.0"));
-            Assert.True(versions.Any(v => v.Name == "3.0"));
-        }
-
-        [Fact]
         public void UpdateVersionsOfIssue()
         {
             var summaryValue = "Test issue with versions (Updated)" + _random.Next(int.MaxValue);
@@ -327,21 +281,26 @@ namespace Atlassian.Jira.Test.Integration
 
             var versions = _jira.GetVersions("TST");
 
-            issue.FixVersions.Add(versions.First(v => v.Name == "2.0"));
             issue.AffectsVersions.Add(versions.First(v => v.Name == "1.0"));
+            issue.AffectsVersions.Add(versions.First(v => v.Name == "2.0"));
+
+            issue.FixVersions.Add(versions.First(v => v.Name == "3.0"));
+            issue.FixVersions.Add(versions.First(v => v.Name == "2.0"));
 
             var newIssue = _jira.UpdateIssue(issue);
 
-            Assert.Equal(1, newIssue.FixVersions.Count);
-            Assert.Equal("2.0", newIssue.FixVersions[0].Name);
+            Assert.Equal(2, newIssue.AffectsVersions.Count);
+            Assert.True(newIssue.AffectsVersions.Any(v => v.Name == "1.0"));
+            Assert.True(newIssue.AffectsVersions.Any(v => v.Name == "2.0"));
 
-            Assert.Equal(1, newIssue.AffectsVersions.Count);
-            Assert.Equal("1.0", newIssue.AffectsVersions[0].Name);
+            Assert.Equal(2, newIssue.FixVersions.Count);
+            Assert.True(newIssue.FixVersions.Any(v => v.Name == "2.0"));
+            Assert.True(newIssue.FixVersions.Any(v => v.Name == "3.0"));
 
         }
 
         [Fact]
-        public void CreateIssueWithVersion()
+        public void CreateAndQueryIssueWithVersions()
         {
             var summaryValue = "Test issue with versions (Created)" + _random.Next(int.MaxValue);
 
@@ -354,15 +313,79 @@ namespace Atlassian.Jira.Test.Integration
 
             var versions = _jira.GetVersions("TST");
             issue.AffectsVersions.Add(versions.First(v => v.Name == "1.0"));
+            issue.AffectsVersions.Add(versions.First(v => v.Name == "2.0"));
+
+            issue.FixVersions.Add(versions.First(v => v.Name == "3.0"));
             issue.FixVersions.Add(versions.First(v => v.Name == "2.0"));
 
-            var newIssue = _jira.CreateIssue(issue);
+            _jira.CreateIssue(issue);
 
-            Assert.Equal(1, newIssue.AffectsVersions.Count);
-            Assert.Equal("1.0", newIssue.AffectsVersions[0].Name);
+            var newIssue = (from i in _jira.Issues
+                            where i.AffectsVersions == "1.0" && i.AffectsVersions == "2.0" 
+                                    && i.FixVersions == "2.0" && i.FixVersions == "3.0"
+                            select i).First();
 
-            Assert.Equal(1, newIssue.FixVersions.Count);
-            Assert.Equal("2.0", newIssue.FixVersions[0].Name);
+            Assert.Equal(2, newIssue.AffectsVersions.Count);
+            Assert.True(newIssue.AffectsVersions.Any(v => v.Name == "1.0"));
+            Assert.True(newIssue.AffectsVersions.Any(v => v.Name == "2.0"));
+
+            Assert.Equal(2, newIssue.FixVersions.Count);
+            Assert.True(newIssue.FixVersions.Any(v => v.Name == "2.0"));
+            Assert.True(newIssue.FixVersions.Any(v => v.Name == "3.0"));
+        }
+
+        [Fact]
+        public void CreateAndQueryIssueWithComponents()
+        {
+            var summaryValue = "Test issue with components (Created)" + _random.Next(int.MaxValue);
+
+            var issue = new Issue()
+            {
+                Project = "TST",
+                Type = "1",
+                Summary = summaryValue
+            };
+
+            var components = _jira.GetComponents("TST");
+
+            issue.Components.Add(components.First(c => c.Name == "Server"));
+            issue.Components.Add(components.First(c => c.Name == "Client"));
+
+            _jira.CreateIssue(issue);
+
+            var newIssue = (from i in _jira.Issues
+                            where i.Components == "Server" && i.Components == "Client"
+                            select i).First();
+
+            Assert.Equal(2, newIssue.Components.Count);
+            Assert.True(newIssue.Components.Any(c => c.Name == "Server"));
+            Assert.True(newIssue.Components.Any(c => c.Name == "Client"));
+        }
+
+        [Fact]
+        public void UpdateComponentsOfIssue()
+        {
+            var summaryValue = "Test issue with components (Updated)" + _random.Next(int.MaxValue);
+
+            var issue = new Issue()
+            {
+                Project = "TST",
+                Type = "1",
+                Summary = summaryValue
+            };
+
+            issue = _jira.CreateIssue(issue);
+
+            var components = _jira.GetComponents("TST");
+
+            issue.Components.Add(components.First(c => c.Name == "Server"));
+            issue.Components.Add(components.First(c => c.Name == "Client"));
+
+            var newIssue = _jira.UpdateIssue(issue);
+
+            Assert.Equal(2, newIssue.Components.Count);
+            Assert.True(newIssue.Components.Any(c => c.Name == "Server"));
+            Assert.True(newIssue.Components.Any(c => c.Name == "Client"));
         }
     }
 }

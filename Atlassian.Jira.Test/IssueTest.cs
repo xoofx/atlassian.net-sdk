@@ -329,12 +329,38 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void Components_IfIssueNotCreated_ShouldReturnEmptyList()
+        {
+            var issue = new Issue();
+
+            Assert.Equal(0, issue.Components.Count);
+        }
+
+        [Fact]
         public void Versions_IfIssueNotCreated_ShouldReturnEmptyList()
         {
             var issue = new Issue();
 
             Assert.Equal(0, issue.AffectsVersions.Count());
             Assert.Equal(0, issue.FixVersions.Count());
+        }
+
+        [Fact]
+        public void Components_IfIssueCreated_ShouldReturnComponents()
+        {
+            var remoteIssue = new RemoteIssue();
+            remoteIssue.components = new RemoteComponent[]{
+                new RemoteComponent(){
+                    id = "1",
+                    name = "Server"
+                }
+            };
+
+            var issue = remoteIssue.ToLocal();
+
+            Assert.Equal(1, issue.Components.Count);
+            Assert.Equal("1", issue.Components[0].Id);
+            Assert.Equal("Server", issue.Components[0].Name);
         }
 
         [Fact]
@@ -371,6 +397,19 @@ namespace Atlassian.Jira.Test
             Assert.True(issue.FixVersions.ElementAt(0).IsArchived);
             Assert.True(issue.FixVersions.ElementAt(0).IsReleased);
             Assert.Equal(new DateTime(2011, 1, 1), issue.FixVersions.ElementAt(0).ReleasedDate);
+        }
+
+        [Fact]
+        public void GetUpdatedFields_IfComponentsAdded_ReturnsFields()
+        {
+            var issue = new RemoteIssue() { key = "foo" }.ToLocal();
+            var component = new RemoteComponent() { id = "1", name = "1.0" };
+            issue.Components.Add(component.ToLocal());
+
+            var fields = GetUpdatedFieldsForIssue(issue);
+            Assert.Equal(1, fields.Length);
+            Assert.Equal("components", fields[0].id);
+            Assert.Equal("1", fields[0].values[0]);
         }
 
         [Fact]

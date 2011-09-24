@@ -424,6 +424,17 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void ComponentEqual()
+        {
+            var jira = CreateJiraInstance();
+            var issues = (from i in jira.Issues
+                          where i.Components == "foo"
+                          select i).ToArray();
+
+            Assert.Equal("component = \"foo\"", _translator.Jql);
+        }
+
+        [Fact]
         public void VersionsNotEqual()
         {
             var jira = CreateJiraInstance();
@@ -432,6 +443,17 @@ namespace Atlassian.Jira.Test
                           select i).ToArray();
 
             Assert.Equal("(FixVersion != \"1.0\" and AffectedVersion != \"2.0\")", _translator.Jql);
+        }
+
+        [Fact]
+        public void ComponentNotEqual()
+        {
+            var jira = CreateJiraInstance();
+            var issues = (from i in jira.Issues
+                          where i.Components != "foo"
+                          select i).ToArray();
+
+            Assert.Equal("component != \"foo\"", _translator.Jql);
         }
     }
 }

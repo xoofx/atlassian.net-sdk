@@ -68,5 +68,12 @@ namespace Atlassian.Jira.Linq
             return new Version(remoteVersion);
         }
 
+        /// <summary>
+        /// Creates a new Component from RemoteComponent
+        /// </summary>
+        public static Component ToLocal(this RemoteComponent remoteComponent)
+        {
+            return new Component(remoteComponent);
+        }
     }
 }

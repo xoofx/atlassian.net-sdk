@@ -166,6 +166,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The components associated with this issue
         /// </summary>
+        [JqlFieldName("component")]
         public ComponentList Components
         {
             get
