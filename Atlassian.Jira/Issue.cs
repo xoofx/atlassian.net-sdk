@@ -266,6 +266,27 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Add labels to this issue
+        /// </summary>
+        /// <param name="labels">Label(s) to add</param>
+        public void AddLabels(params string[] labels)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to add label to issue, issue has not been created.");
+            }
+
+            var fields = new RemoteFieldValue[] { 
+                            new RemoteFieldValue() { 
+                                id="labels",
+                                values = labels
+                            }
+                        };
+
+            _jira.UpdateIssue(_originalIssue.key, fields);
+        }
+
+        /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
         RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields(string fieldName)

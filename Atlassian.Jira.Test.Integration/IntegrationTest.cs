@@ -387,5 +387,22 @@ namespace Atlassian.Jira.Test.Integration
             Assert.True(newIssue.Components.Any(c => c.Name == "Server"));
             Assert.True(newIssue.Components.Any(c => c.Name == "Client"));
         }
+
+        [Fact]
+        public void AddLabelsToIssue()
+        {
+            var summaryValue = "Test issue with labels (Updated)" + _random.Next(int.MaxValue);
+
+            var issue = new Issue()
+            {
+                Project = "TST",
+                Type = "1",
+                Summary = summaryValue
+            };
+
+            issue = _jira.CreateIssue(issue);
+
+            issue.AddLabels("label1", "label2");
+        }
     }
 }

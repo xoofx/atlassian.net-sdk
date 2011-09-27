@@ -194,15 +194,25 @@ namespace Atlassian.Jira
         /// <returns>Updated issues with values populated from server</returns>
         public Issue UpdateIssue(Issue issue)
         {
-            var token = GetAuthenticationToken();
-
             var fields = ((IRemoteIssueFieldProvider)issue).GetRemoteFields(null);
 
-            var remoteIssue = _jiraSoapService.UpdateIssue(token, issue.Key.Value, fields);
+            return UpdateIssue(issue.Key.Value, fields);
+        }
+
+        /// <summary>
+        /// Updates an issue
+        /// </summary>
+        /// <param name="issueKey"></param>
+        /// <param name="remoteFields"></param>
+        /// <returns></returns>
+        internal Issue UpdateIssue(string issueKey, RemoteFieldValue[] remoteFields)
+        {
+            var token = GetAuthenticationToken();
+
+            var remoteIssue = _jiraSoapService.UpdateIssue(token, issueKey, remoteFields);
 
             return new Issue(this, remoteIssue);
         }
-    
 
         /// <summary>
         /// Returns all the issue types within JIRA

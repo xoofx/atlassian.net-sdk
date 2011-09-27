@@ -240,6 +240,13 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void AddLabels_IfIssueNotCreated_ShouldThrowAnException()
+        {
+            var issue = new Issue();
+            Assert.Throws(typeof(InvalidOperationException), () => issue.AddLabels());
+        }
+
+        [Fact]
         public void AddAttachment_IfIssueNotCreated_ShouldThrowAnException()
         {
             var issue = new Issue();
