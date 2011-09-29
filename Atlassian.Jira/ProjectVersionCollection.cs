@@ -10,13 +10,13 @@ namespace Atlassian.Jira
     /// <summary>
     /// Collection of project versions
     /// </summary>
-    public class VersionList: JiraNamedEntityCollection<Version>    
+    public class ProjectVersionCollection: JiraNamedEntityCollection<ProjectVersion>    
     {
-        internal VersionList()
+        internal ProjectVersionCollection()
         {
         }
 
-        internal VersionList(IList<Version> list)
+        internal ProjectVersionCollection(IList<ProjectVersion> list)
             : base(list)
         {
         }

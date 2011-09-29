@@ -21,9 +21,9 @@ namespace Atlassian.Jira
         private DateTime? _createDate;
         private DateTime? _updateDate;
         private DateTime? _dueDate;
-        private VersionList _affectsVersions = null;
-        private VersionList _fixVersions = null;
-        private ComponentList _components = null;
+        private ProjectVersionCollection _affectsVersions = null;
+        private ProjectVersionCollection _fixVersions = null;
+        private ProjectComponentCollection _components = null;
 
         public Issue()
             :this(null, new RemoteIssue())
@@ -53,14 +53,14 @@ namespace Atlassian.Jira
             Priority = remoteIssue.priority;
             Resolution = remoteIssue.resolution;
 
-            _affectsVersions = _originalIssue.affectsVersions == null? new VersionList()
-                                : new VersionList(_originalIssue.affectsVersions.Select(v => new Version(v)).ToList());
+            _affectsVersions = _originalIssue.affectsVersions == null? new ProjectVersionCollection()
+                                : new ProjectVersionCollection(_originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
 
-            _fixVersions = _originalIssue.fixVersions == null ? new VersionList()
-                                : new VersionList(_originalIssue.fixVersions.Select(v => new Version(v)).ToList());
+            _fixVersions = _originalIssue.fixVersions == null ? new ProjectVersionCollection()
+                                : new ProjectVersionCollection(_originalIssue.fixVersions.Select(v => new ProjectVersion(v)).ToList());
 
-            _components = _originalIssue.components == null ? new ComponentList()
-                                : new ComponentList(_originalIssue.components.Select(c => new Component(c)).ToList());
+            _components = _originalIssue.components == null ? new ProjectComponentCollection()
+                                : new ProjectComponentCollection(_originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
         }
        
         /// <summary>
@@ -167,7 +167,7 @@ namespace Atlassian.Jira
         /// The components associated with this issue
         /// </summary>
         [JqlFieldName("component")]
-        public ComponentList Components
+        public ProjectComponentCollection Components
         {
             get
             {
@@ -179,7 +179,7 @@ namespace Atlassian.Jira
         /// The versions that are affected by this issue
         /// </summary>
         [JqlFieldName("AffectedVersion")]
-        public VersionList AffectsVersions
+        public ProjectVersionCollection AffectsVersions
         {
             get
             {
@@ -191,7 +191,7 @@ namespace Atlassian.Jira
         /// The versions in which this issue is fixed
         /// </summary>
         [JqlFieldName("FixVersion")]
-        public VersionList FixVersions
+        public ProjectVersionCollection FixVersions
         {
             get
             {

@@ -9,11 +9,11 @@ namespace Atlassian.Jira
     /// <summary>
     /// A component associated with a project
     /// </summary>
-    public class Component: JiraNamedEntity
+    public class ProjectComponent: JiraNamedEntity
     {
         private readonly RemoteComponent _remoteComponent;
 
-        internal Component(RemoteComponent remoteComponent)
+        internal ProjectComponent(RemoteComponent remoteComponent)
             :base(remoteComponent)
         {
             _remoteComponent = remoteComponent;

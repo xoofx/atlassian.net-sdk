@@ -63,17 +63,17 @@ namespace Atlassian.Jira.Remote
         /// <summary>
         /// Creates a new Version from RemoteVersion
         /// </summary>
-        public static Version ToLocal(this RemoteVersion remoteVersion)
+        public static ProjectVersion ToLocal(this RemoteVersion remoteVersion)
         {
-            return new Version(remoteVersion);
+            return new ProjectVersion(remoteVersion);
         }
 
         /// <summary>
         /// Creates a new Component from RemoteComponent
         /// </summary>
-        public static Component ToLocal(this RemoteComponent remoteComponent)
+        public static ProjectComponent ToLocal(this RemoteComponent remoteComponent)
         {
-            return new Component(remoteComponent);
+            return new ProjectComponent(remoteComponent);
         }
     }
 }

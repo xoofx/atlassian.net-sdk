@@ -230,10 +230,10 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="projectKey">The project to retrieve the versions from</param>
         /// <returns>Collection of JIRA versions.</returns>
-        public IEnumerable<Version> GetVersions(string projectKey)
+        public IEnumerable<ProjectVersion> GetVersions(string projectKey)
         {
             var token = GetAuthenticationToken();
-            return _jiraSoapService.GetVersions(token, projectKey).Select(v => new Version(v)).ToList().AsReadOnly();
+            return _jiraSoapService.GetVersions(token, projectKey).Select(v => new ProjectVersion(v)).ToList().AsReadOnly();
         }
 
         /// <summary>
@@ -241,10 +241,10 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="projectKey">The project to retrieve the components from</param>
         /// <returns>Collection of JIRA components</returns>
-        public IEnumerable<Component> GetComponents(string projectKey)
+        public IEnumerable<ProjectComponent> GetComponents(string projectKey)
         {
             var token = GetAuthenticationToken();
-            return _jiraSoapService.GetComponents(token, projectKey).Select(c => new Component(c)).ToList().AsReadOnly();
+            return _jiraSoapService.GetComponents(token, projectKey).Select(c => new ProjectComponent(c)).ToList().AsReadOnly();
         }
 
         /// <summary>

@@ -9,13 +9,13 @@ namespace Atlassian.Jira
     /// <summary>
     /// Collection of project components
     /// </summary>
-    public class ComponentList: JiraNamedEntityCollection<Component>
+    public class ProjectComponentCollection: JiraNamedEntityCollection<ProjectComponent>
     {
-        internal ComponentList()
+        internal ProjectComponentCollection()
         {
         }
 
-        internal ComponentList(IList<Component> list)
+        internal ProjectComponentCollection(IList<ProjectComponent> list)
             : base(list)
         {
         }

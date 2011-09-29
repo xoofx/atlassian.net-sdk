@@ -9,11 +9,11 @@ namespace Atlassian.Jira
     /// <summary>
     /// A version associated with a project
     /// </summary>
-    public class Version: JiraNamedEntity
+    public class ProjectVersion: JiraNamedEntity
     {
         private readonly RemoteVersion _remoteVersion;
 
-        internal Version(RemoteVersion remoteVersion)
+        internal ProjectVersion(RemoteVersion remoteVersion)
             :base(remoteVersion)
         {
             _remoteVersion = remoteVersion;
