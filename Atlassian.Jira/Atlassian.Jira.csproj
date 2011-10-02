@@ -48,6 +48,8 @@
     <Compile Include="Attachment.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableTextField.cs" />
+    <Compile Include="CustomField.cs" />
+    <Compile Include="CustomFieldCollection.cs" />
     <Compile Include="ProjectComponent.cs" />
     <Compile Include="ProjectComponentCollection.cs" />
     <Compile Include="JiraNamedEntityCollection.cs" />

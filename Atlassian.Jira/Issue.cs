@@ -7,13 +7,14 @@ using System.Reflection;
 using System.IO;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.Dynamic;
 
 namespace Atlassian.Jira
 {
     /// <summary>
     /// A JIRA issue
     /// </summary>
-    public class Issue: IRemoteIssueFieldProvider
+    public class Issue : IRemoteIssueFieldProvider
     {
         private readonly RemoteIssue _originalIssue;
         private readonly Jira _jira;
@@ -24,7 +25,8 @@ namespace Atlassian.Jira
         private ProjectVersionCollection _affectsVersions = null;
         private ProjectVersionCollection _fixVersions = null;
         private ProjectComponentCollection _components = null;
-        private JiraNamedEntityCollection<JiraNamedEntity> _customFields = null;
+        private CustomFieldCollection _customFields = null;
+
 
         public Issue(Jira jira, string projectKey)
             : this(jira, new RemoteIssue() { project = projectKey })
@@ -201,7 +203,44 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// TODO
+        /// The custom fields associated with this issue
+        /// </summary>
+        public CustomFieldCollection CustomFields
+        {
+            get
+            {
+                if (_customFields == null)
+                {
+                    var fields = from v in _originalIssue.customFieldValues
+                                 join f in _jira.GetCustomFields() on v.customfieldId equals f.Id
+                                 select new CustomField(f.Id, f.Name) { Values = v.values };
+
+                    _customFields = new CustomFieldCollection(_jira, fields.ToList());
+                }
+
+                return _customFields;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the value of a custom field
+        /// </summary>
+        /// <param name="customFieldName">Custom field name</param>
+        /// <returns>Value of the custom field</returns>
+        public string this[string customFieldName]
+        {
+            get
+            {
+                return CustomFields.First(f => f.Name.Equals(customFieldName, StringComparison.OrdinalIgnoreCase)).Values[0];
+            }
+            set
+            {
+                CustomFields.First(f => f.Name.Equals(customFieldName, StringComparison.OrdinalIgnoreCase)).Values = new string[] { value };
+            }
+        }
+
+        /// <summary>
+        /// Saves field changes to server
         /// </summary>
         public Issue SaveChanges()
         {

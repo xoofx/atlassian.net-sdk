@@ -444,6 +444,35 @@ namespace Atlassian.Jira.Test
             Assert.Equal("1", fields[0].values[0]);
         }
 
+        [Fact]
+        public void CustomField_ShouldReturnRemoteValue()
+        {
+            //arrange
+            var soapClient = new Mock<IJiraSoapServiceClient>();
+            soapClient.Setup(c => c.GetCustomFields(It.IsAny<string>())).Returns(new RemoteField[] { 
+                new RemoteField(){ id="123", name= "CustomField" }});
+            var jira = new Jira(null, soapClient.Object, null, "user", "pass");
+
+            var issue = new RemoteIssue()
+            {
+                key = "foo",
+                customFieldValues = new RemoteCustomFieldValue[]{
+                                new RemoteCustomFieldValue(){
+                                    customfieldId = "123",
+                                    values = new string[] {"abc"}
+                                }
+                            }
+            }.ToLocal(jira);
+
+            //assert
+            Assert.Equal("abc", issue["CustomField"]);
+            Assert.Equal("123", issue.CustomFields["CustomField"].Id);
+
+            issue["customfield"] = "foobar";
+            Assert.Equal("foobar", issue["customfield"]);
+        }
+
+
         private Issue CreateIssue()
         {
             var translator = new Mock<IJqlExpressionVisitor>();
