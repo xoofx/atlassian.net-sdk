@@ -13,7 +13,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void Constructor_ShouldSetDefaultValues()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
 
             Assert.Null(issue.DueDate);
         }
@@ -59,7 +59,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void ToRemote_IfFieldsNotSet_ShouldLeaveFieldsNull()
         {
-            var issue = new Issue()
+            var issue = new Issue(CreateJiraInstance())
             {
                 Project = "TST",
                 Type = "1",
@@ -99,7 +99,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void ToRemote_IfVersionsAreSet_ShouldSetVersionsField()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
             var affectsVersion = new RemoteVersion();
             var fixVersion = new RemoteVersion();
 
@@ -117,7 +117,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GetUpdatedFields_ReturnEmptyIfNothingChanged()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
 
             Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
         }
@@ -125,7 +125,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GetUpdatedFields_IfString_ReturnOneFieldThatChanged()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
             issue.Summary = "foo";
 
             Assert.Equal(1, GetUpdatedFieldsForIssue(issue).Length);
@@ -134,7 +134,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GetUpdatedFields_IfString_ReturnAllFieldsThatChanged()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
             issue.Summary = "foo";
             issue.Description = "foo";
             issue.Assignee = "foo";
@@ -182,7 +182,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GetUpdateFields_IfComparable_ReturnsFieldsThatChanged()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
             issue.Priority = "High";
 
             Assert.Equal(1, GetUpdatedFieldsForIssue(issue).Length);
@@ -192,7 +192,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GetUpdateFields_IfDateTimeChanged_ReturnsFieldsThatChanged()
         {
-            var issue = new Issue(){ DueDate = new DateTime(2011,10,10) };
+            var issue = new Issue(CreateJiraInstance()){ DueDate = new DateTime(2011,10,10) };
 
             var fields = GetUpdatedFieldsForIssue(issue);
             Assert.Equal(1, fields.Length);
@@ -214,7 +214,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GetAttachments_IfIssueNotCreated_ShouldThrowException()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
 
             Assert.Throws(typeof(InvalidOperationException), () => issue.GetAttachments());
         }
@@ -242,14 +242,14 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void AddLabels_IfIssueNotCreated_ShouldThrowAnException()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
             Assert.Throws(typeof(InvalidOperationException), () => issue.AddLabels());
         }
 
         [Fact]
         public void AddAttachment_IfIssueNotCreated_ShouldThrowAnException()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
 
             Assert.Throws(typeof(InvalidOperationException), () => issue.AddAttachment("foo", new byte[] { 1 } ));
         }
@@ -281,7 +281,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GetComments_IfIssueNotCreated_ShouldThrowException()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
 
             Assert.Throws(typeof(InvalidOperationException), () => issue.GetComments());
         }
@@ -309,7 +309,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void AddComment_IfIssueNotCreated_ShouldThrowAnException()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
 
             Assert.Throws(typeof(InvalidOperationException), () => issue.AddComment("foo"));
         }
@@ -338,7 +338,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void Components_IfIssueNotCreated_ShouldReturnEmptyList()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
 
             Assert.Equal(0, issue.Components.Count);
         }
@@ -346,7 +346,7 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void Versions_IfIssueNotCreated_ShouldReturnEmptyList()
         {
-            var issue = new Issue();
+            var issue = new Issue(CreateJiraInstance());
 
             Assert.Equal(0, issue.AffectsVersions.Count());
             Assert.Equal(0, issue.FixVersions.Count());
@@ -443,6 +443,13 @@ namespace Atlassian.Jira.Test
             Assert.Equal(1, fields.Length);
             Assert.Equal("versions", fields[0].id);
             Assert.Equal("1", fields[0].values[0]);
+        }
+
+        private Jira CreateJiraInstance()
+        {
+            var translator = new Mock<IJqlExpressionVisitor>();
+            var soapClient = new Mock<IJiraSoapServiceClient>();
+            return new Jira(translator.Object, soapClient.Object, null, "username", "password");
         }
 
         private RemoteFieldValue[] GetUpdatedFieldsForIssue(Issue issue)

@@ -25,8 +25,8 @@ namespace Atlassian.Jira
         private ProjectVersionCollection _fixVersions = null;
         private ProjectComponentCollection _components = null;
 
-        public Issue()
-            :this(null, new RemoteIssue())
+        public Issue(Jira jira)
+            :this(jira, new RemoteIssue())
         {
         }
 
@@ -198,6 +198,22 @@ namespace Atlassian.Jira
                 return _fixVersions;
             }
         }
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        public Issue SaveChanges()
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                return _jira.CreateIssue(this);
+            }
+            else
+            {
+                return _jira.UpdateIssue(this);
+            }
+        }
+
 
         /// <summary>
         /// Retrieve attachment metadata from server for this issue

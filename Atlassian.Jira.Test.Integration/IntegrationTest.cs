@@ -34,15 +34,14 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
 
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Project = "TST",
                 Type = "1",
                 Summary = summaryValue
             };
 
-            issue = _jira.CreateIssue(issue);
-
+            issue = issue.SaveChanges();
 
             var issues = (from i in _jira.Issues
                                 where i.Key == issue.Key
@@ -61,7 +60,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
 
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Assignee = "admin",
                 Description = "Test Description",
@@ -73,7 +72,7 @@ namespace Atlassian.Jira.Test.Integration
                 Summary = summaryValue
             };
 
-            issue = _jira.CreateIssue(issue);
+            issue = issue.SaveChanges();
 
 
             var queriedIssues = (from i in _jira.Issues
@@ -88,7 +87,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             // arrange, create an issue to test.
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Assignee = "admin",
                 Description = "Test Description",
@@ -99,7 +98,7 @@ namespace Atlassian.Jira.Test.Integration
                 Type = "1",
                 Summary = summaryValue
             };
-            issue = _jira.CreateIssue(issue);
+            issue = issue.SaveChanges();
 
 
             // act, get an issue and update it
@@ -111,7 +110,7 @@ namespace Atlassian.Jira.Test.Integration
             serverIssue.DueDate = new DateTime(2011, 10, 10);
             serverIssue.Environment = "Updated Environment";
             serverIssue.Summary = "Updated " + summaryValue;
-            _jira.UpdateIssue(serverIssue);
+            serverIssue.SaveChanges();
 
             // assert, get the issue again and verify
             var newServerIssue = (from i in _jira.Issues
@@ -130,7 +129,7 @@ namespace Atlassian.Jira.Test.Integration
         public void UploadAndDownloadOfAttachments()
         {
             var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Project = "TST",
                 Type = "1",
@@ -138,7 +137,7 @@ namespace Atlassian.Jira.Test.Integration
             };
 
             // create an issue, verify no attachments
-            issue = _jira.CreateIssue(issue);
+            issue = issue.SaveChanges();
             Assert.Equal(0, issue.GetAttachments().Count);
 
             // upload an attachment
@@ -159,7 +158,7 @@ namespace Atlassian.Jira.Test.Integration
         public void AddingAndRetrievingComments()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Project = "TST",
                 Type = "1",
@@ -167,7 +166,7 @@ namespace Atlassian.Jira.Test.Integration
             };
 
             // create an issue, verify no comments
-            issue = _jira.CreateIssue(issue);
+            issue = issue.SaveChanges();
             Assert.Equal(0, issue.GetComments().Count);
 
             // Add a comment
@@ -184,8 +183,8 @@ namespace Atlassian.Jira.Test.Integration
         {
             // create 2 issues with same summary
             var randomNumber = _random.Next(int.MaxValue);
-            _jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
-            _jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber }); 
+            (new Issue(_jira) { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber }).SaveChanges();
+            (new Issue(_jira) { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber }).SaveChanges(); 
 
             //set maximum issues and query
             _jira.MaxIssuesPerRequest = 1;
@@ -202,8 +201,8 @@ namespace Atlassian.Jira.Test.Integration
         {
             // create 2 issues with same summary
             var randomNumber = _random.Next(int.MaxValue);
-            _jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
-            _jira.CreateIssue(new Issue() { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber });
+            (new Issue(_jira) { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber }).SaveChanges();
+            (new Issue(_jira) { Project = "TST", Type = "1", Summary = "Test Summary " + randomNumber }).SaveChanges();
 
             // query with take method to only return 1
             var issues = (from i in _jira.Issues
@@ -252,7 +251,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void HandleRetrievalOfMessagesWithLargeContentStrings()
         {
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Project = "TST",
                 Type = "1",
@@ -260,7 +259,7 @@ namespace Atlassian.Jira.Test.Integration
             };
 
             issue.Description = File.ReadAllText("LongIssueDescription.txt"); 
-            var serverIssue = _jira.CreateIssue(issue);
+            var serverIssue = issue.SaveChanges();
 
             Assert.Contains("Second stack trace:", serverIssue.Description);
         }
@@ -270,14 +269,14 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test issue with versions (Updated)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Project = "TST",
                 Type = "1",
                 Summary = summaryValue
             };
 
-            issue = _jira.CreateIssue(issue);
+            issue = issue.SaveChanges();
 
             var versions = _jira.GetVersions("TST");
 
@@ -287,7 +286,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.FixVersions.Add(versions.First(v => v.Name == "3.0"));
             issue.FixVersions.Add(versions.First(v => v.Name == "2.0"));
 
-            var newIssue = _jira.UpdateIssue(issue);
+            var newIssue = issue.SaveChanges();
 
             Assert.Equal(2, newIssue.AffectsVersions.Count);
             Assert.True(newIssue.AffectsVersions.Any(v => v.Name == "1.0"));
@@ -304,7 +303,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test issue with versions (Created)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Project = "TST",
                 Type = "1",
@@ -318,7 +317,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.FixVersions.Add(versions.First(v => v.Name == "3.0"));
             issue.FixVersions.Add(versions.First(v => v.Name == "2.0"));
 
-            _jira.CreateIssue(issue);
+            issue.SaveChanges();
 
             var newIssue = (from i in _jira.Issues
                             where i.AffectsVersions == "1.0" && i.AffectsVersions == "2.0" 
@@ -339,7 +338,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test issue with components (Created)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Project = "TST",
                 Type = "1",
@@ -351,7 +350,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.Components.Add(components.First(c => c.Name == "Server"));
             issue.Components.Add(components.First(c => c.Name == "Client"));
 
-            _jira.CreateIssue(issue);
+            issue.SaveChanges();
 
             var newIssue = (from i in _jira.Issues
                             where i.Components == "Server" && i.Components == "Client"
@@ -367,21 +366,21 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test issue with components (Updated)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Project = "TST",
                 Type = "1",
                 Summary = summaryValue
             };
 
-            issue = _jira.CreateIssue(issue);
+            issue = issue.SaveChanges();
 
             var components = _jira.GetComponents("TST");
 
             issue.Components.Add(components.First(c => c.Name == "Server"));
             issue.Components.Add(components.First(c => c.Name == "Client"));
 
-            var newIssue = _jira.UpdateIssue(issue);
+            var newIssue = issue.SaveChanges();
 
             Assert.Equal(2, newIssue.Components.Count);
             Assert.True(newIssue.Components.Any(c => c.Name == "Server"));
@@ -393,14 +392,14 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test issue with labels (Updated)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue()
+            var issue = new Issue(_jira)
             {
                 Project = "TST",
                 Type = "1",
                 Summary = summaryValue
             };
 
-            issue = _jira.CreateIssue(issue);
+            issue = issue.SaveChanges();
 
             issue.AddLabels("label1", "label2");
         }

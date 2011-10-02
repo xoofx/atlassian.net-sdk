@@ -172,11 +172,20 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// TODO
+        /// </summary>
+        /// <returns></returns>
+        public Issue CreateIssue()
+        {
+            return new Issue(this);
+        }
+
+        /// <summary>
         /// Create a new issue on the server
         /// </summary>
         /// <param name="newIssue">New Issue to create</param>
         /// <returns>Created issue with values propulated from server</returns>
-        public Issue CreateIssue(Issue newIssue)
+        internal Issue CreateIssue(Issue newIssue)
         {
             var token = GetAuthenticationToken();
 
@@ -192,7 +201,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="issue">Issue to update</param>
         /// <returns>Updated issues with values populated from server</returns>
-        public Issue UpdateIssue(Issue issue)
+        internal Issue UpdateIssue(Issue issue)
         {
             var fields = ((IRemoteIssueFieldProvider)issue).GetRemoteFields(null);
 
