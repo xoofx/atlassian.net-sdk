@@ -11,13 +11,24 @@ namespace Atlassian.Jira
     /// </summary>
     public class ProjectComponentCollection: JiraNamedEntityCollection<ProjectComponent>
     {
-        internal ProjectComponentCollection()
+
+        internal ProjectComponentCollection(Jira jira, string projectKey)
+            :base(jira, projectKey)
         {
         }
 
-        internal ProjectComponentCollection(IList<ProjectComponent> list)
-            : base(list)
+        internal ProjectComponentCollection(Jira jira, string projectKey, IList<ProjectComponent> list)
+            : base(jira, projectKey, list)
         {
+        }
+
+        /// <summary>
+        /// Add a component by name
+        /// </summary>
+        /// <param name="componentName">Component name</param>
+        public void Add(string componentName)
+        {
+            this.Add(_jira.GetProjectComponents(_projectKey).First(v => v.Name.Equals(componentName, StringComparison.OrdinalIgnoreCase)));
         }
    }
 }

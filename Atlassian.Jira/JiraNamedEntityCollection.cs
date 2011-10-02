@@ -9,16 +9,21 @@ namespace Atlassian.Jira
 {
     public class JiraNamedEntityCollection<T> : ReadOnlyCollection<T>, IRemoteIssueFieldProvider where T: JiraNamedEntity
     {
+        protected readonly Jira _jira;
+        protected readonly string _projectKey;
+
         private List<T> _newElements = new List<T>();
 
-        internal JiraNamedEntityCollection()
-            : base(new List<T>())
+        internal JiraNamedEntityCollection(Jira jira, string projectKey)
+            : this(jira, projectKey, new List<T>())
         {
         }
 
-        internal JiraNamedEntityCollection(IList<T> list)
+        internal JiraNamedEntityCollection(Jira jira, string projectKey, IList<T> list)
             : base(list)
         {
+            _jira = jira;
+            _projectKey = projectKey;
         }
 
         /// <summary>

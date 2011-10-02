@@ -24,9 +24,10 @@ namespace Atlassian.Jira
         private ProjectVersionCollection _affectsVersions = null;
         private ProjectVersionCollection _fixVersions = null;
         private ProjectComponentCollection _components = null;
+        private JiraNamedEntityCollection<JiraNamedEntity> _customFields = null;
 
-        public Issue(Jira jira)
-            :this(jira, new RemoteIssue())
+        public Issue(Jira jira, string projectKey)
+            : this(jira, new RemoteIssue() { project = projectKey })
         {
         }
 
@@ -53,14 +54,14 @@ namespace Atlassian.Jira
             Priority = remoteIssue.priority;
             Resolution = remoteIssue.resolution;
 
-            _affectsVersions = _originalIssue.affectsVersions == null? new ProjectVersionCollection()
-                                : new ProjectVersionCollection(_originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
+            _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection(jira, Project)
+                                : new ProjectVersionCollection(jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
 
-            _fixVersions = _originalIssue.fixVersions == null ? new ProjectVersionCollection()
-                                : new ProjectVersionCollection(_originalIssue.fixVersions.Select(v => new ProjectVersion(v)).ToList());
+            _fixVersions = _originalIssue.fixVersions == null ? new ProjectVersionCollection(jira, Project)
+                                : new ProjectVersionCollection(jira, Project, _originalIssue.fixVersions.Select(v => new ProjectVersion(v)).ToList());
 
-            _components = _originalIssue.components == null ? new ProjectComponentCollection()
-                                : new ProjectComponentCollection(_originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
+            _components = _originalIssue.components == null ? new ProjectComponentCollection(jira, Project)
+                                : new ProjectComponentCollection(jira, Project, _originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
         }
        
         /// <summary>

@@ -15,12 +15,16 @@ namespace Atlassian.Jira
         private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
 
         private readonly JiraQueryProvider _provider;
-
         private readonly IJiraSoapServiceClient _jiraSoapService;
         private readonly IFileSystem _fileSystem;
         private readonly string _username = null;
         private readonly string _password = null;
+
         private string _token = String.Empty;
+        private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string,IEnumerable<ProjectVersion>>();
+        private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
+        private IEnumerable<JiraNamedEntity> _cachedCustomFields = null;
+
 
         /// <summary>
         /// Create a connection to a JIRA server with anonymous access
@@ -175,9 +179,9 @@ namespace Atlassian.Jira
         /// TODO
         /// </summary>
         /// <returns></returns>
-        public Issue CreateIssue()
+        public Issue CreateIssue(string project)
         {
-            return new Issue(this);
+            return new Issue(this, project);
         }
 
         /// <summary>
@@ -239,10 +243,15 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="projectKey">The project to retrieve the versions from</param>
         /// <returns>Collection of JIRA versions.</returns>
-        public IEnumerable<ProjectVersion> GetVersions(string projectKey)
+        public IEnumerable<ProjectVersion> GetProjectVersions(string projectKey)
         {
-            var token = GetAuthenticationToken();
-            return _jiraSoapService.GetVersions(token, projectKey).Select(v => new ProjectVersion(v)).ToList().AsReadOnly();
+            if (!_cachedVersions.ContainsKey(projectKey))
+            {
+                var token = GetAuthenticationToken();
+                _cachedVersions.Add(projectKey, _jiraSoapService.GetVersions(token, projectKey).Select(v => new ProjectVersion(v)));
+            }
+
+            return _cachedVersions[projectKey];            
         }
 
         /// <summary>
@@ -250,10 +259,15 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="projectKey">The project to retrieve the components from</param>
         /// <returns>Collection of JIRA components</returns>
-        public IEnumerable<ProjectComponent> GetComponents(string projectKey)
+        public IEnumerable<ProjectComponent> GetProjectComponents(string projectKey)
         {
-            var token = GetAuthenticationToken();
-            return _jiraSoapService.GetComponents(token, projectKey).Select(c => new ProjectComponent(c)).ToList().AsReadOnly();
+            if (!_cachedComponents.ContainsKey(projectKey))
+            {
+                var token = GetAuthenticationToken();
+                _cachedComponents.Add(projectKey, _jiraSoapService.GetComponents(token, projectKey).Select(c => new ProjectComponent(c)));
+            }
+
+            return _cachedComponents[projectKey];
         }
 
         /// <summary>
@@ -284,6 +298,20 @@ namespace Atlassian.Jira
         {
             var token = GetAuthenticationToken();
             return _jiraSoapService.GetResolutions(token).Select(r => new JiraNamedEntity(r));
+        }
+
+        /// <summary>
+        /// Returns all custom fields within JIRA
+        /// </summary>
+        /// <returns>Collection of JIRA custom fields</returns>
+        public IEnumerable<JiraNamedEntity> GetCustomFields()
+        {
+            if (_cachedCustomFields == null)
+            {
+                var token = GetAuthenticationToken();
+                _cachedCustomFields = _jiraSoapService.GetCustomFields(token).Select(f => new JiraNamedEntity(f));
+            }
+            return _cachedCustomFields;
         }
 
         internal IList<Attachment> GetAttachmentsForIssue(string issueKey)

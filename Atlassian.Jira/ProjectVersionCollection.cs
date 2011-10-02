@@ -12,13 +12,24 @@ namespace Atlassian.Jira
     /// </summary>
     public class ProjectVersionCollection: JiraNamedEntityCollection<ProjectVersion>    
     {
-        internal ProjectVersionCollection()
+        internal ProjectVersionCollection(Jira jira, string projectKey)
+            :base(jira, projectKey)
+        {
+            
+        }
+
+        internal ProjectVersionCollection(Jira jira, string projectKey, IList<ProjectVersion> list)
+            : base(jira, projectKey, list)
         {
         }
 
-        internal ProjectVersionCollection(IList<ProjectVersion> list)
-            : base(list)
+        /// <summary>
+        /// Add a version by name
+        /// </summary>
+        /// <param name="versionName">Version name</param>
+        public void Add(string versionName)
         {
+            this.Add(_jira.GetProjectVersions(_projectKey).First(v => v.Name.Equals(versionName, StringComparison.OrdinalIgnoreCase)));
         }
     }
 }
