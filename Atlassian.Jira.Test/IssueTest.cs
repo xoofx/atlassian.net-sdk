@@ -113,6 +113,22 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void ToRemote_IfComponentsAreSet_ShouldSetComponentsField()
+        {
+            var issue = CreateIssue();
+            var component = new RemoteComponent();
+
+            issue.Components.Add(component.ToLocal());
+
+            var remoteIssue = issue.ToRemote();
+
+            Assert.Equal(1, remoteIssue.components.Length);
+            Assert.Equal(component, remoteIssue.components[0]);
+        }
+
+     
+
+        [Fact]
         public void GetUpdatedFields_ReturnEmptyIfNothingChanged()
         {
             var issue = CreateIssue();
@@ -472,6 +488,11 @@ namespace Atlassian.Jira.Test
             Assert.Equal("foobar", issue["customfield"]);
         }
 
+        [Fact]
+        public void ToRemote_IfCustomFieldIsSet_ShouldAddToCustomFieldArray()
+        {
+
+        }
 
         private Issue CreateIssue()
         {
@@ -484,7 +505,7 @@ namespace Atlassian.Jira.Test
 
         private RemoteFieldValue[] GetUpdatedFieldsForIssue(Issue issue)
         {
-            return ((IRemoteIssueFieldProvider)issue).GetRemoteFields(null);
+            return ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
         }
     }
 }

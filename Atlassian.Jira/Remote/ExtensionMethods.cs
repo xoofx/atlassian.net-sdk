@@ -38,7 +38,20 @@ namespace Atlassian.Jira.Remote
             if(issue.FixVersions.Count > 0)
             {
                 remote.fixVersions = issue.FixVersions.Select(v => v.RemoteVersion).ToArray();
+            }
 
+            if (issue.Components.Count > 0)
+            {
+                remote.components = issue.Components.Select(c => c.RemoteComponent).ToArray();
+            }
+
+            if (issue.CustomFields.Count > 0)
+            {
+                remote.customFieldValues = issue.CustomFields.Select(f => new RemoteCustomFieldValue()
+                {
+                    customfieldId = f.Id,
+                    values = f.Values
+                }).ToArray();
             }
 
             return remote;

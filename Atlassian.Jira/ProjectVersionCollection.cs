@@ -12,14 +12,13 @@ namespace Atlassian.Jira
     /// </summary>
     public class ProjectVersionCollection: JiraNamedEntityCollection<ProjectVersion>    
     {
-        internal ProjectVersionCollection(Jira jira, string projectKey)
-            :base(jira, projectKey)
+        internal ProjectVersionCollection(string fieldName, Jira jira, string projectKey)
+            :this(fieldName, jira, projectKey, new List<ProjectVersion>())
         {
-            
         }
 
-        internal ProjectVersionCollection(Jira jira, string projectKey, IList<ProjectVersion> list)
-            : base(jira, projectKey, list)
+        internal ProjectVersionCollection(string fieldName, Jira jira, string projectKey, IList<ProjectVersion> list)
+            : base(fieldName, jira, projectKey, list)
         {
         }
 
@@ -31,5 +30,7 @@ namespace Atlassian.Jira
         {
             this.Add(_jira.GetProjectVersions(_projectKey).First(v => v.Name.Equals(versionName, StringComparison.OrdinalIgnoreCase)));
         }
+
+
     }
 }

@@ -406,5 +406,42 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.AddLabels("label1", "label2");
         }
+
+        [Fact]
+        public void CreateIssueWithCustomField()
+        {
+            var summaryValue = "Test issue with custom field (Created)" + _random.Next(int.MaxValue);
+
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue
+            };
+            issue["Custom Text Field"] = "My new value";
+
+            var newIssue = issue.SaveChanges();
+
+            Assert.Equal("My new value", newIssue["Custom Text Field"]);
+        }
+
+        [Fact]
+        public void UpdateIssueWithCustomField()
+        {
+            var summaryValue = "Test issue with custom field (Updated)" + _random.Next(int.MaxValue);
+
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue
+            };
+            issue["Custom Text Field"] = "My new value";
+
+            issue = issue.SaveChanges();
+
+            issue["Custom Text Field"] = "My updated value";
+            issue = issue.SaveChanges();
+
+            Assert.Equal("My updated value", issue["Custom Text Field"]);
+        }
     }
 }

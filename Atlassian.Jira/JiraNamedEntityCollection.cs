@@ -11,17 +11,14 @@ namespace Atlassian.Jira
     {
         protected readonly Jira _jira;
         protected readonly string _projectKey;
+        protected readonly string _fieldName;
 
         private List<T> _newElements = new List<T>();
 
-        internal JiraNamedEntityCollection(Jira jira, string projectKey)
-            : this(jira, projectKey, new List<T>())
-        {
-        }
-
-        internal JiraNamedEntityCollection(Jira jira, string projectKey, IList<T> list)
+        internal JiraNamedEntityCollection(string fieldName, Jira jira, string projectKey, IList<T> list)
             : base(list)
         {
+            _fieldName = fieldName;
             _jira = jira;
             _projectKey = projectKey;
         }
@@ -56,7 +53,7 @@ namespace Atlassian.Jira
             return this.Items.GetHashCode();
         }
 
-        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields(string fieldName)
+        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
         {
             var fields = new List<RemoteFieldValue>();
 
@@ -64,7 +61,7 @@ namespace Atlassian.Jira
             {
                 var field = new RemoteFieldValue()
                 {
-                    id = fieldName,
+                    id = _fieldName,
                     values = _newElements.Select(e => e.Id).ToArray()
                 };
                 fields.Add(field);

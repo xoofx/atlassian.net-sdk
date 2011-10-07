@@ -3,12 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
-    public class CustomFieldCollection : ReadOnlyCollection<CustomField>
+    /// <summary>
+    /// Collection of custom fields
+    /// </summary>
+    public class CustomFieldCollection : ReadOnlyCollection<CustomField>, IRemoteIssueFieldProvider
     {
         private readonly Jira _jira;
+
+        internal CustomFieldCollection(Jira jira)
+            : this(jira, new List<CustomField>())   
+        {
+
+        }
 
         internal CustomFieldCollection(Jira jira, IList<CustomField> list)
             : base(list)
@@ -16,18 +26,43 @@ namespace Atlassian.Jira
             _jira = jira;
         }
 
+        /// <summary>
+        /// Add a custom field by name
+        /// </summary>
+        /// <param name="fieldName">The name of the custom field as defined in JIRA</param>
+        /// <param name="fieldValues">The values of the field</param>
         public void Add(string fieldName, string[] fieldValues)
         {
-            var fieldId = _jira.GetCustomFields().First(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase)).Id;
-            this.Items.Add(new CustomField(fieldId, fieldName) { Values = fieldValues });
+            var fieldId = GetIdForFieldName(fieldName);
+            this.Items.Add(new CustomField(fieldId, fieldName, _jira) { Values = fieldValues });
         }
 
+        /// <summary>
+        /// Gets a custom field by name
+        /// </summary>
+        /// <param name="fieldName">Name of the custom field as defined in JIRA</param>
+        /// <returns>CustomField instance if the field has been set on the issue, null otherwise</returns>
         public CustomField this[string fieldName]
         {
             get
             {
-                return this.Items.First(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
+                var fieldId = GetIdForFieldName(fieldName);
+                return this.Items.FirstOrDefault(f => f.Id == fieldId);
             }
+        }
+
+        private string GetIdForFieldName(string fieldName)
+        {
+            return _jira.GetCustomFields().First(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase)).Id;
+        }
+
+        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
+        {
+            return this.Items.Select(f => new RemoteFieldValue()
+            {
+                id = f.Id,
+                values = f.Values
+            }).ToArray();
         }
     }
 }

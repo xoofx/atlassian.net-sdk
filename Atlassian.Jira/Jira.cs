@@ -64,6 +64,7 @@ namespace Atlassian.Jira
             _jiraSoapService = jiraSoapService;
             _fileSystem = fileSystem;
             this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
+            this.Debug = false;
 
             this._provider = new JiraQueryProvider(translator, this);
         }
@@ -207,7 +208,7 @@ namespace Atlassian.Jira
         /// <returns>Updated issues with values populated from server</returns>
         internal Issue UpdateIssue(Issue issue)
         {
-            var fields = ((IRemoteIssueFieldProvider)issue).GetRemoteFields(null);
+            var fields = ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
 
             return UpdateIssue(issue.Key.Value, fields);
         }
@@ -329,14 +330,12 @@ namespace Atlassian.Jira
         internal IList<Comment> GetCommentsForIssue(string issueKey)
         {
             var token = GetAuthenticationToken();
-
             return _jiraSoapService.GetCommentsFromIssue(token, issueKey).Select(c => new Comment(c)).ToList();
         }
 
         internal void AddCommentToIssue(string issueKey, Comment comment)
         {
             var token = GetAuthenticationToken();
-
             _jiraSoapService.AddComment(token, issueKey, comment.toRemote());
         }
     }

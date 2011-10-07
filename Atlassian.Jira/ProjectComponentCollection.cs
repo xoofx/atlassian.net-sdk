@@ -11,14 +11,13 @@ namespace Atlassian.Jira
     /// </summary>
     public class ProjectComponentCollection: JiraNamedEntityCollection<ProjectComponent>
     {
-
-        internal ProjectComponentCollection(Jira jira, string projectKey)
-            :base(jira, projectKey)
+        internal ProjectComponentCollection(string fieldName, Jira jira, string projectKey)
+            :this(fieldName, jira, projectKey, new List<ProjectComponent>())
         {
         }
 
-        internal ProjectComponentCollection(Jira jira, string projectKey, IList<ProjectComponent> list)
-            : base(jira, projectKey, list)
+        internal ProjectComponentCollection(string fieldName, Jira jira, string projectKey, IList<ProjectComponent> list)
+            : base(fieldName, jira, projectKey, list)
         {
         }
 

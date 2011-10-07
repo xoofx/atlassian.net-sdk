@@ -56,14 +56,25 @@ namespace Atlassian.Jira
             Priority = remoteIssue.priority;
             Resolution = remoteIssue.resolution;
 
-            _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection(jira, Project)
-                                : new ProjectVersionCollection(jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
+            _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection("versions", jira, Project)
+                : new ProjectVersionCollection("versions", jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
 
-            _fixVersions = _originalIssue.fixVersions == null ? new ProjectVersionCollection(jira, Project)
-                                : new ProjectVersionCollection(jira, Project, _originalIssue.fixVersions.Select(v => new ProjectVersion(v)).ToList());
+            _fixVersions = _originalIssue.fixVersions == null ? new ProjectVersionCollection("fixVersions", jira, Project)
+                : new ProjectVersionCollection("fixVersions", jira, Project, _originalIssue.fixVersions.Select(v => new ProjectVersion(v)).ToList());
 
-            _components = _originalIssue.components == null ? new ProjectComponentCollection(jira, Project)
-                                : new ProjectComponentCollection(jira, Project, _originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
+            _components = _originalIssue.components == null ? new ProjectComponentCollection("components", jira, Project)
+                : new ProjectComponentCollection("components", jira, Project, _originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
+
+            _customFields = _originalIssue.customFieldValues == null ? new CustomFieldCollection(jira)
+                : new CustomFieldCollection(jira, _originalIssue.customFieldValues.Select(f => new CustomField(f.customfieldId, jira) { Values = f.values }).ToList());
+        }
+
+        internal RemoteIssue RemoteIssue
+        {
+            get
+            {
+                return _originalIssue;
+            }
         }
        
         /// <summary>
@@ -209,15 +220,6 @@ namespace Atlassian.Jira
         {
             get
             {
-                if (_customFields == null)
-                {
-                    var fields = from v in _originalIssue.customFieldValues
-                                 join f in _jira.GetCustomFields() on v.customfieldId equals f.Id
-                                 select new CustomField(f.Id, f.Name) { Values = v.values };
-
-                    _customFields = new CustomFieldCollection(_jira, fields.ToList());
-                }
-
                 return _customFields;
             }
         }
@@ -231,11 +233,26 @@ namespace Atlassian.Jira
         {
             get
             {
-                return CustomFields.First(f => f.Name.Equals(customFieldName, StringComparison.OrdinalIgnoreCase)).Values[0];
+                var customField = _customFields[customFieldName];
+
+                if(customField != null && customField.Values != null && customField.Values.Count() > 0)
+                {
+                    return customField.Values[0];
+                }
+                return null;
             }
             set
             {
-                CustomFields.First(f => f.Name.Equals(customFieldName, StringComparison.OrdinalIgnoreCase)).Values = new string[] { value };
+                var customField = _customFields[customFieldName];
+
+                if (customField != null)
+                {
+                    customField.Values = new string[] { value };
+                }
+                else
+                {
+                    _customFields.Add(customFieldName, new string[] { value });
+                }
             }
         }
 
@@ -345,31 +362,30 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
-        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields(string fieldName)
+        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
         {
             var fields = new List<RemoteFieldValue>();
 
             var remoteFields = typeof(RemoteIssue).GetProperties();
             foreach (var localProperty in typeof(Issue).GetProperties())
             {
-                var remoteProperty = remoteFields.FirstOrDefault(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
-                if (remoteProperty == null)
-                {
-                    continue;
-                }
-
                 if (typeof(IRemoteIssueFieldProvider).IsAssignableFrom(localProperty.PropertyType))
                 {
-                    var fieldsProvider = (IRemoteIssueFieldProvider)localProperty.GetValue(this, null);
+                    var fieldsProvider = localProperty.GetValue(this, null) as IRemoteIssueFieldProvider;
 
                     if (fieldsProvider != null)
                     {
-                        //https://jira.atlassian.com/browse/JRA-12300
-                        fields.AddRange(fieldsProvider.GetRemoteFields(remoteProperty.Name == "affectsVersions" ? "versions" : remoteProperty.Name));
+                        fields.AddRange(fieldsProvider.GetRemoteFields());
                     }
                 }
                 else
                 {
+                    var remoteProperty = remoteFields.FirstOrDefault(i => i.Name.Equals(localProperty.Name, StringComparison.OrdinalIgnoreCase));
+                    if (remoteProperty == null)
+                    {
+                        continue;
+                    }
+
                     var localStringValue = GetStringValueForProperty(this, localProperty);
                     var remoteStringValue = GetStringValueForProperty(_originalIssue, remoteProperty);
 
