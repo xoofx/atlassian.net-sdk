@@ -16,9 +16,9 @@ namespace Atlassian.Jira
     /// </summary>
     public class Issue : IRemoteIssueFieldProvider
     {
-        private readonly RemoteIssue _originalIssue;
         private readonly Jira _jira;
-        
+
+        private RemoteIssue _originalIssue;
         private DateTime? _createDate;
         private DateTime? _updateDate;
         private DateTime? _dueDate;
@@ -35,8 +35,14 @@ namespace Atlassian.Jira
 
         internal Issue(Jira jira, RemoteIssue remoteIssue)
         {
-            _originalIssue = remoteIssue;
             _jira = jira;
+
+            Initialize(remoteIssue);
+        }
+
+        private void Initialize(RemoteIssue remoteIssue)
+        {
+            _originalIssue = remoteIssue;
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -56,25 +62,18 @@ namespace Atlassian.Jira
             Priority = remoteIssue.priority;
             Resolution = remoteIssue.resolution;
 
-            _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection("versions", jira, Project)
-                : new ProjectVersionCollection("versions", jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
+            _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection("versions", _jira, Project)
+                : new ProjectVersionCollection("versions", _jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
 
-            _fixVersions = _originalIssue.fixVersions == null ? new ProjectVersionCollection("fixVersions", jira, Project)
-                : new ProjectVersionCollection("fixVersions", jira, Project, _originalIssue.fixVersions.Select(v => new ProjectVersion(v)).ToList());
+            _fixVersions = _originalIssue.fixVersions == null ? new ProjectVersionCollection("fixVersions", _jira, Project)
+                : new ProjectVersionCollection("fixVersions", _jira, Project, _originalIssue.fixVersions.Select(v => new ProjectVersion(v)).ToList());
 
-            _components = _originalIssue.components == null ? new ProjectComponentCollection("components", jira, Project)
-                : new ProjectComponentCollection("components", jira, Project, _originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
+            _components = _originalIssue.components == null ? new ProjectComponentCollection("components", _jira, Project)
+                : new ProjectComponentCollection("components", _jira, Project, _originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
 
-            _customFields = _originalIssue.customFieldValues == null ? new CustomFieldCollection(jira)
-                : new CustomFieldCollection(jira, _originalIssue.customFieldValues.Select(f => new CustomField(f.customfieldId, jira) { Values = f.values }).ToList());
-        }
-
-        internal RemoteIssue RemoteIssue
-        {
-            get
-            {
-                return _originalIssue;
-            }
+            _customFields = _originalIssue.customFieldValues == null ? new CustomFieldCollection(_jira)
+                : new CustomFieldCollection(_jira, _originalIssue.customFieldValues.Select(f => new CustomField(f.customfieldId, _jira) { Values = f.values }).ToList());
+  
         }
        
         /// <summary>
@@ -259,16 +258,28 @@ namespace Atlassian.Jira
         /// <summary>
         /// Saves field changes to server
         /// </summary>
-        public Issue SaveChanges()
+        public void SaveChanges()
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
-                return _jira.CreateIssue(this);
+                var token = _jira.GetAuthenticationToken();
+                var remoteIssue = this.ToRemote();
+
+                remoteIssue = _jira.RemoteSoapService.CreateIssue(token, remoteIssue);
+                
+                Initialize(remoteIssue);
             }
             else
             {
-                return _jira.UpdateIssue(this);
+                SaveRemoteFields(((IRemoteIssueFieldProvider)this).GetRemoteFields());
             }
+        }
+
+        private void SaveRemoteFields(RemoteFieldValue[] remoteFields)
+        {
+            var token = _jira.GetAuthenticationToken();
+            var remoteIssue = _jira.RemoteSoapService.UpdateIssue(token, this.Key.Value, remoteFields);
+            Initialize(remoteIssue);
         }
 
 
@@ -356,7 +367,7 @@ namespace Atlassian.Jira
                             }
                         };
 
-            _jira.UpdateIssue(_originalIssue.key, fields);
+            SaveRemoteFields(fields);
         }
 
         /// <summary>

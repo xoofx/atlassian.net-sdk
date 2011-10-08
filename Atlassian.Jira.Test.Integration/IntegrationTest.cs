@@ -40,7 +40,7 @@ namespace Atlassian.Jira.Test.Integration
                 Summary = summaryValue
             };
 
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
 
             var issues = (from i in _jira.Issues
                                 where i.Key == issue.Key
@@ -70,7 +70,7 @@ namespace Atlassian.Jira.Test.Integration
                 Summary = summaryValue
             };
 
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
 
 
             var queriedIssues = (from i in _jira.Issues
@@ -95,7 +95,7 @@ namespace Atlassian.Jira.Test.Integration
                 Type = "1",
                 Summary = summaryValue
             };
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
 
 
             // act, get an issue and update it
@@ -133,7 +133,7 @@ namespace Atlassian.Jira.Test.Integration
             };
 
             // create an issue, verify no attachments
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
             Assert.Equal(0, issue.GetAttachments().Count);
 
             // upload an attachment
@@ -161,7 +161,7 @@ namespace Atlassian.Jira.Test.Integration
             };
 
             // create an issue, verify no comments
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
             Assert.Equal(0, issue.GetComments().Count);
 
             // Add a comment
@@ -253,9 +253,9 @@ namespace Atlassian.Jira.Test.Integration
             };
 
             issue.Description = File.ReadAllText("LongIssueDescription.txt"); 
-            var serverIssue = issue.SaveChanges();
+            issue.SaveChanges();
 
-            Assert.Contains("Second stack trace:", serverIssue.Description);
+            Assert.Contains("Second stack trace:", issue.Description);
         }
 
         [Fact]
@@ -290,7 +290,7 @@ namespace Atlassian.Jira.Test.Integration
                 Summary = summaryValue
             };
 
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
 
             issue.AffectsVersions.Add("1.0");
             issue.AffectsVersions.Add("2.0");
@@ -298,15 +298,15 @@ namespace Atlassian.Jira.Test.Integration
             issue.FixVersions.Add("3.0");
             issue.FixVersions.Add("2.0");
 
-            var newIssue = issue.SaveChanges();
+            issue.SaveChanges();
 
-            Assert.Equal(2, newIssue.AffectsVersions.Count);
-            Assert.True(newIssue.AffectsVersions.Any(v => v.Name == "1.0"));
-            Assert.True(newIssue.AffectsVersions.Any(v => v.Name == "2.0"));
+            Assert.Equal(2, issue.AffectsVersions.Count);
+            Assert.True(issue.AffectsVersions.Any(v => v.Name == "1.0"));
+            Assert.True(issue.AffectsVersions.Any(v => v.Name == "2.0"));
 
-            Assert.Equal(2, newIssue.FixVersions.Count);
-            Assert.True(newIssue.FixVersions.Any(v => v.Name == "2.0"));
-            Assert.True(newIssue.FixVersions.Any(v => v.Name == "3.0"));
+            Assert.Equal(2, issue.FixVersions.Count);
+            Assert.True(issue.FixVersions.Any(v => v.Name == "2.0"));
+            Assert.True(issue.FixVersions.Any(v => v.Name == "3.0"));
 
         }
 
@@ -357,7 +357,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.Components.Add("Server");
             issue.Components.Add("Client");
 
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
 
             var newIssue = (from i in _jira.Issues
                             where i.Summary == summaryValue && i.Components == "Server" && i.Components == "Client"
@@ -379,16 +379,16 @@ namespace Atlassian.Jira.Test.Integration
                 Summary = summaryValue
             };
 
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
 
             issue.Components.Add("Server");
             issue.Components.Add("Client");
 
-            var newIssue = issue.SaveChanges();
+            issue.SaveChanges();
 
-            Assert.Equal(2, newIssue.Components.Count);
-            Assert.True(newIssue.Components.Any(c => c.Name == "Server"));
-            Assert.True(newIssue.Components.Any(c => c.Name == "Client"));
+            Assert.Equal(2, issue.Components.Count);
+            Assert.True(issue.Components.Any(c => c.Name == "Server"));
+            Assert.True(issue.Components.Any(c => c.Name == "Client"));
         }
 
         [Fact]
@@ -402,7 +402,7 @@ namespace Atlassian.Jira.Test.Integration
                 Summary = summaryValue
             };
 
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
 
             issue.AddLabels("label1", "label2");
         }
@@ -440,10 +440,10 @@ namespace Atlassian.Jira.Test.Integration
             };
             issue["Custom Text Field"] = "My new value";
 
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
 
             issue["Custom Text Field"] = "My updated value";
-            issue = issue.SaveChanges();
+            issue.SaveChanges();
 
             Assert.Equal("My updated value", issue["Custom Text Field"]);
         }

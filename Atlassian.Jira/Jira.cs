@@ -69,6 +69,14 @@ namespace Atlassian.Jira
             this._provider = new JiraQueryProvider(translator, this);
         }
 
+        internal IJiraSoapServiceClient RemoteSoapService
+        {
+            get
+            {
+                return _jiraSoapService;
+            }
+        }
+
         /// <summary>
         /// Whether to print the translated JQL to console
         /// </summary>
@@ -118,7 +126,7 @@ namespace Atlassian.Jira
             }
         }
         
-        private string GetAuthenticationToken()
+        internal string GetAuthenticationToken()
         {
             if (!String.IsNullOrEmpty(_username) 
                 && !String.IsNullOrEmpty(_password) && String.IsNullOrEmpty(_token))
@@ -183,49 +191,6 @@ namespace Atlassian.Jira
         public Issue CreateIssue(string project)
         {
             return new Issue(this, project);
-        }
-
-        /// <summary>
-        /// Create a new issue on the server
-        /// </summary>
-        /// <param name="newIssue">New Issue to create</param>
-        /// <returns>Created issue with values propulated from server</returns>
-        internal Issue CreateIssue(Issue newIssue)
-        {
-            var token = GetAuthenticationToken();
-
-            var remoteIssue = newIssue.ToRemote();
-            
-            remoteIssue = _jiraSoapService.CreateIssue(_token, remoteIssue);
-
-            return new Issue(this, remoteIssue);
-        }
-
-        /// <summary>
-        /// Updates an issue
-        /// </summary>
-        /// <param name="issue">Issue to update</param>
-        /// <returns>Updated issues with values populated from server</returns>
-        internal Issue UpdateIssue(Issue issue)
-        {
-            var fields = ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
-
-            return UpdateIssue(issue.Key.Value, fields);
-        }
-
-        /// <summary>
-        /// Updates an issue
-        /// </summary>
-        /// <param name="issueKey"></param>
-        /// <param name="remoteFields"></param>
-        /// <returns></returns>
-        internal Issue UpdateIssue(string issueKey, RemoteFieldValue[] remoteFields)
-        {
-            var token = GetAuthenticationToken();
-
-            var remoteIssue = _jiraSoapService.UpdateIssue(token, issueKey, remoteFields);
-
-            return new Issue(this, remoteIssue);
         }
 
         /// <summary>
