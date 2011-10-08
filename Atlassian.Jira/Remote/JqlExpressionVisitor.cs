@@ -110,6 +110,32 @@ namespace Atlassian.Jira.Remote
 
         private void ProcessEqualityOperator(BinaryExpression expression, bool equal)
         {
+            if (expression.Left is MemberExpression)
+            {
+                ProcessMemberEqualityOperator(expression, equal);
+            }
+            else if (expression.Left is MethodCallExpression)
+            {
+                ProcessIndexedMemberEqualityOperator(expression, equal);
+            }
+        }
+
+        private void ProcessIndexedMemberEqualityOperator(BinaryExpression expression, bool equal)
+        {
+            var methodExpression = expression.Left as MethodCallExpression;
+
+            // field
+            _jqlWhere.Append(String.Format("\"{0}\"", ((ConstantExpression)methodExpression.Arguments[0]).Value));
+
+            // operator
+            _jqlWhere.Append(String.Format(" {0} ", equal ? JiraOperators.CONTAINS : JiraOperators.NOTCONTAINS));
+
+            // value
+            ProcessConstant(GetValueFromBinaryExpression(expression));
+        }
+
+        private void ProcessMemberEqualityOperator(BinaryExpression expression, bool equal)
+        {
             var field = GetFieldFromBinaryExpression(expression);
             var value = GetValueFromBinaryExpression(expression);
 

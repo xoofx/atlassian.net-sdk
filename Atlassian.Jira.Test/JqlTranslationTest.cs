@@ -455,5 +455,38 @@ namespace Atlassian.Jira.Test
 
             Assert.Equal("component != \"foo\"", _translator.Jql);
         }
+
+        [Fact]
+        public void CustomFieldEqual()
+        {
+            var jira = CreateJiraInstance();
+            var issues = (from i in jira.Issues
+                          where i["Foo"] == "bar"
+                          select i).ToArray();
+
+            Assert.Equal("\"Foo\" ~ \"bar\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void CustomFieldNotEqual()
+        {
+            var jira = CreateJiraInstance();
+            var issues = (from i in jira.Issues
+                          where i["Foo"] != "bar"
+                          select i).ToArray();
+
+            Assert.Equal("\"Foo\" !~ \"bar\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void CustomFieldMultiple()
+        {
+            var jira = CreateJiraInstance();
+            var issues = (from i in jira.Issues
+                          where i["Foo"] == "foo" && i["Bar"] == "bar"
+                          select i).ToArray();
+
+            Assert.Equal("(\"Foo\" ~ \"foo\" and \"Bar\" ~ \"bar\")", _translator.Jql);
+        }
     }
 }

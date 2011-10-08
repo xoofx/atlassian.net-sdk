@@ -357,10 +357,10 @@ namespace Atlassian.Jira.Test.Integration
             issue.Components.Add("Server");
             issue.Components.Add("Client");
 
-            issue.SaveChanges();
+            issue = issue.SaveChanges();
 
             var newIssue = (from i in _jira.Issues
-                            where i.Components == "Server" && i.Components == "Client"
+                            where i.Summary == summaryValue && i.Components == "Server" && i.Components == "Client"
                             select i).First();
 
             Assert.Equal(2, newIssue.Components.Count);
@@ -408,7 +408,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void CreateIssueWithCustomField()
+        public void CreateAndQueryIssueWithCustomField()
         {
             var summaryValue = "Test issue with custom field (Created)" + _random.Next(int.MaxValue);
 
@@ -419,7 +419,11 @@ namespace Atlassian.Jira.Test.Integration
             };
             issue["Custom Text Field"] = "My new value";
 
-            var newIssue = issue.SaveChanges();
+            issue.SaveChanges();
+
+            var newIssue = (from i in _jira.Issues
+                            where i.Summary == summaryValue && i["Custom Text Field"] == "My new value"
+                            select i).First();
 
             Assert.Equal("My new value", newIssue["Custom Text Field"]);
         }
