@@ -59,19 +59,21 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
-            {
-                Assignee = "admin",
-                Description = "Test Description",
-                DueDate = new DateTime(2011, 12, 12),
-                Environment = "Test Environment",
-                Reporter = "admin",
-                Type = "1",
-                Summary = summaryValue
-            };
+            var issue = _jira.CreateIssue("TST");
+            issue.AffectsVersions.Add("1.0");
+            issue.Assignee = "admin";
+            issue.Components.Add("Server");
+            issue["Custom Text Field"] = "Test Value";  // custom field
+            issue.Description = "Test Description";
+            issue.DueDate = new DateTime(2011, 12, 12);
+            issue.Environment = "Test Environment";
+            issue.FixVersions.Add("2.0");
+            issue.Priority = _jira.GetIssuePriorities().First(i => i.Name == "Major").Id;
+            issue.Reporter = "admin";
+            issue.Summary = summaryValue;
+            issue.Type = _jira.GetIssueTypes("TST").First(i => i.Name == "Bug").Id;
 
             issue.SaveChanges();
-
 
             var queriedIssues = (from i in _jira.Issues
                           where i.Key == issue.Key

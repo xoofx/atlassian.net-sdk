@@ -56,47 +56,5 @@ namespace Atlassian.Jira.Test
             var field = new ComparableTextField();
             Assert.False(field <= "foo");
         }
-
-        [Fact]
-        public void IntEqualsOperator()
-        {
-            var field = new ComparableTextField();
-            Assert.False(field == 1);
-
-            field.Id = 1;
-            Assert.True(field == 1);
-        }
-
-        [Fact]
-        public void IntNotEqualsOperator()
-        {
-            var field = new ComparableTextField();
-            Assert.True(field != 1);
-
-            field.Id = 1;
-            Assert.False(field != 1);
-        }
-
-        [Fact]
-        public void IntGreaterThanOperator()
-        {
-            var field = new ComparableTextField();
-            Assert.False(field > 1);
-        }
-
-        [Fact]
-        public void IntLessThanOperator()
-        {
-            var field = new ComparableTextField();
-            Assert.False(field < 1);
-        }
-
-        [Fact]
-        public void IntLessThanOrEqualsOperator()
-        {
-            var field = new ComparableTextField();
-            Assert.False(field <= 1);
-        }
-
     }
 }

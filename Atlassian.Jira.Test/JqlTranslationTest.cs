@@ -248,29 +248,7 @@ namespace Atlassian.Jira.Test
             Assert.Equal("Priority = \"foo\"", _translator.Jql);
         }
 
-        [Fact]
-        public void GreaterThanOperatorWhenUsingComparableFieldWithInt()
-        {
-            var jira = CreateJiraInstance();
-
-            var issues = (from i in jira.Issues
-                          where i.Priority > 1
-                          select i).ToArray();
-
-            Assert.Equal("Priority > 1", _translator.Jql);
-        }
-
-        [Fact]
-        public void EqualsOperatorWhenUsingComparableFieldWithInt()
-        {
-            var jira = CreateJiraInstance();
-
-            var issues = (from i in jira.Issues
-                          where i.Priority == 1
-                          select i).ToArray();
-
-            Assert.Equal("Priority = 1", _translator.Jql);
-        }
+        
 
         [Fact]
         public void OrderBy()
@@ -278,11 +256,11 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
 
             var issues = (from i in jira.Issues
-                          where i.Priority == 1
+                          where i.Priority == "1"
                           orderby i.Created
                           select i).ToArray();
 
-            Assert.Equal("Priority = 1 order by Created", _translator.Jql);
+            Assert.Equal("Priority = \"1\" order by Created", _translator.Jql);
         }
 
         [Fact]
@@ -291,11 +269,11 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
 
             var issues = (from i in jira.Issues
-                          where i.Priority == 1
+                          where i.Priority == "1"
                           orderby i.Created descending
                           select i).ToArray();
 
-            Assert.Equal("Priority = 1 order by Created desc", _translator.Jql);
+            Assert.Equal("Priority = \"1\" order by Created desc", _translator.Jql);
         }
 
         [Fact]
@@ -304,11 +282,11 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
 
             var issues = (from i in jira.Issues
-                          where i.Priority == 1
+                          where i.Priority == "1"
                           orderby i.Created, i.DueDate
                           select i).ToArray();
 
-            Assert.Equal("Priority = 1 order by Created, DueDate", _translator.Jql);
+            Assert.Equal("Priority = \"1\" order by Created, DueDate", _translator.Jql);
         }
 
         [Fact]
@@ -317,11 +295,11 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
 
             var issues = (from i in jira.Issues
-                          where i.Priority == 1
+                          where i.Priority == "1"
                           orderby i.Created, i.DueDate descending
                           select i).ToArray();
 
-            Assert.Equal("Priority = 1 order by Created, DueDate desc", _translator.Jql);
+            Assert.Equal("Priority = \"1\" order by Created, DueDate desc", _translator.Jql);
         }
 
         [Fact]

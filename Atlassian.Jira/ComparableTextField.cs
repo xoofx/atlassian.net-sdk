@@ -10,7 +10,6 @@ namespace Atlassian.Jira
     /// </summary>
     public class ComparableTextField
     {
-        public int? Id { get; set; }
         public string Value { get; set; }
 
         public ComparableTextField()
@@ -76,36 +75,6 @@ namespace Atlassian.Jira
         public static bool operator >=(ComparableTextField field, string value)
         {
             return false;
-        }
-
-        public static bool operator ==(ComparableTextField field, int id)
-        {
-            return field.Id == id;
-        }
-
-        public static bool operator !=(ComparableTextField field, int id)
-        {
-            return field.Id != id;
-        }
-
-        public static bool operator >(ComparableTextField field, int id)
-        {
-            return field.Id > id;
-        }
-
-        public static bool operator <(ComparableTextField field, int id)
-        {
-            return field.Id < id;
-        }
-
-        public static bool operator <=(ComparableTextField field, int id)
-        {
-            return field.Id <= id;
-        }
-
-        public static bool operator >=(ComparableTextField field, int id)
-        {
-            return field.Id >= id;
         }
 
         public override int GetHashCode()
