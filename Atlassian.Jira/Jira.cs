@@ -165,8 +165,8 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="jql">JQL search query</param>
         /// <param name="maxIssues">Maximum number of issues to return</param>
-        /// <returns>List of Issues that match the search query</returns>
-        public IList<Issue> GetIssuesFromJql(string jql, int? maxIssues)
+        /// <returns>Collection of Issues that match the search query</returns>
+        public IEnumerable<Issue> GetIssuesFromJql(string jql, int? maxIssues)
         {
             if (this.Debug)
             {
