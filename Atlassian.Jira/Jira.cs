@@ -186,7 +186,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// TODO
+        /// Returns a new issue that when saved will be created on the remote JIRA server
         /// </summary>
         /// <returns></returns>
         public Issue CreateIssue(string project)
