@@ -13,17 +13,19 @@ namespace Atlassian.Jira
     public class CustomFieldCollection : ReadOnlyCollection<CustomField>, IRemoteIssueFieldProvider
     {
         private readonly Jira _jira;
+        private readonly string _projectKey;
 
-        internal CustomFieldCollection(Jira jira)
-            : this(jira, new List<CustomField>())   
+        internal CustomFieldCollection(Jira jira, string projectKey)
+            : this(jira, projectKey, new List<CustomField>())   
         {
 
         }
 
-        internal CustomFieldCollection(Jira jira, IList<CustomField> list)
+        internal CustomFieldCollection(Jira jira, string projectKey, IList<CustomField> list)
             : base(list)
         {
             _jira = jira;
+            _projectKey = projectKey;
         }
 
         /// <summary>
@@ -53,7 +55,8 @@ namespace Atlassian.Jira
 
         private string GetIdForFieldName(string fieldName)
         {
-            return _jira.GetCustomFields().First(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase)).Id;
+            // workaround for bug JRA-6857: GetCustomFields() is for admins only
+            return _jira.GetFieldsForEdit(_projectKey).First(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase)).Id;
         }
 
         RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()

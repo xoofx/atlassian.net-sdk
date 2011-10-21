@@ -26,5 +26,6 @@ namespace Atlassian.Jira.Remote
         RemoteVersion[] GetVersions(string token, string projectKey);
         RemoteComponent[] GetComponents(string token, string projectKey);
         RemoteField[] GetCustomFields(string token);
+        RemoteField[] GetFieldsForEdit(string token, string key);
     }
 }

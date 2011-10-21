@@ -71,8 +71,8 @@ namespace Atlassian.Jira
             _components = _originalIssue.components == null ? new ProjectComponentCollection("components", _jira, Project)
                 : new ProjectComponentCollection("components", _jira, Project, _originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
 
-            _customFields = _originalIssue.customFieldValues == null ? new CustomFieldCollection(_jira)
-                : new CustomFieldCollection(_jira, _originalIssue.customFieldValues.Select(f => new CustomField(f.customfieldId, _jira) { Values = f.values }).ToList());
+            _customFields = _originalIssue.customFieldValues == null ? new CustomFieldCollection(_jira, Project)
+                : new CustomFieldCollection(_jira, Project, _originalIssue.customFieldValues.Select(f => new CustomField(f.customfieldId, _jira) { Values = f.values }).ToList());
   
         }
        

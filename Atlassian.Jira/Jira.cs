@@ -23,6 +23,7 @@ namespace Atlassian.Jira
         private string _token = String.Empty;
         private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string,IEnumerable<ProjectVersion>>();
         private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
+        private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
         private IEnumerable<JiraNamedEntity> _cachedCustomFields = null;
 
 
@@ -278,6 +279,26 @@ namespace Atlassian.Jira
                 _cachedCustomFields = _jiraSoapService.GetCustomFields(token).Select(f => new JiraNamedEntity(f));
             }
             return _cachedCustomFields;
+        }
+
+        internal IEnumerable<JiraNamedEntity> GetFieldsForEdit(string projectKey)
+        {
+            if (!_cachedFieldsForEdit.ContainsKey(projectKey))
+            {
+                var tempIssue = this.GetIssuesFromJql(
+                                        String.Format("project = \"{0}\"", projectKey), 
+                                        1).FirstOrDefault();
+
+                if (tempIssue == null)
+                {
+                    throw new InvalidOperationException("Project must contain at least one issue to be able to retrieve issue fields.");
+                }
+
+                var token = GetAuthenticationToken();
+                _cachedFieldsForEdit.Add(projectKey, _jiraSoapService.GetFieldsForEdit(token, tempIssue.Key.Value).Select(f => new JiraNamedEntity(f)));
+            }
+
+            return _cachedFieldsForEdit[projectKey];
         }
 
         internal IList<Attachment> GetAttachmentsForIssue(string issueKey)

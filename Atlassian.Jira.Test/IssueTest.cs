@@ -465,12 +465,17 @@ namespace Atlassian.Jira.Test
         {
             //arrange
             var soapClient = new Mock<IJiraSoapServiceClient>();
-            soapClient.Setup(c => c.GetCustomFields(It.IsAny<string>())).Returns(new RemoteField[] { 
+            soapClient.Setup(c => c.Login("user", "pass")).Returns("token");
+            soapClient.Setup(c => c.GetIssuesFromJqlSearch(It.IsAny<string>(), "project = \"bar\"", 1)).Returns(new RemoteIssue[] {
+                                        new RemoteIssue() { key = "123" }});
+            soapClient.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "123")).Returns(new RemoteField[] { 
                 new RemoteField(){ id="123", name= "CustomField" }});
+
             var jira = new Jira(null, soapClient.Object, null, "user", "pass");
 
             var issue = new RemoteIssue()
             {
+                project = "bar",
                 key = "foo",
                 customFieldValues = new RemoteCustomFieldValue[]{
                                 new RemoteCustomFieldValue(){
@@ -486,12 +491,6 @@ namespace Atlassian.Jira.Test
 
             issue["customfield"] = "foobar";
             Assert.Equal("foobar", issue["customfield"]);
-        }
-
-        [Fact]
-        public void ToRemote_IfCustomFieldIsSet_ShouldAddToCustomFieldArray()
-        {
-
         }
 
         private Issue CreateIssue()

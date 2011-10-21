@@ -110,10 +110,14 @@ namespace Atlassian.Jira.Remote
             return _client.getComponents(token, projectKey);
         }
 
-
         public RemoteField[] GetCustomFields(string token)
         {
             return _client.getCustomFields(token);
+        }
+
+        public RemoteField[] GetFieldsForEdit(string token, string key)
+        {
+            return _client.getFieldsForEdit(token, key);
         }
     }
 }
