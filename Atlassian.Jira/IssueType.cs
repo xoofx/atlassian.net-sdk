@@ -31,6 +31,9 @@ namespace Atlassian.Jira
             return jira.GetIssueTypes(projectKey);
         }
 
+        /// <summary>
+        /// Allows assignation by name
+        /// </summary>
         public static implicit operator IssueType(string name)
         {
             if (name != null)
@@ -51,11 +54,21 @@ namespace Atlassian.Jira
             }
         }
 
+        /// <summary>
+        /// Operator overload to simplify LINQ queries
+        /// </summary>
+        /// <remarks>
+        /// Allows calls in the form of issue.Priority == "High"
+        /// </remarks>
         public static bool operator ==(IssueType entity, string name)
         {
             if ((object)entity == null)
             {
                 return name == null;
+            }
+            else if (name == null)
+            {
+                return false;
             }
             else
             {
@@ -63,6 +76,12 @@ namespace Atlassian.Jira
             }
         }
 
+        /// <summary>
+        /// Operator overload to simplify LINQ queries
+        /// </summary>
+        /// <remarks>
+        /// Allows calls in the form of issue.Priority != "High"
+        /// </remarks>
         public static bool operator !=(IssueType entity, string name)
         {
             if ((object)entity == null)
