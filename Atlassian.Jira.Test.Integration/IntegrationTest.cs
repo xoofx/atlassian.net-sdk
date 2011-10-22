@@ -500,11 +500,5 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Equal("My updated value", issue["Custom Text Field"]);
         }
-
-        [Fact]
-        public void test()
-        {
-            var i = _jira.GetIssue("TST-22");
-        }
     }
 }
