@@ -18,6 +18,9 @@ namespace Atlassian.Jira
     {
         private readonly Jira _jira;
 
+
+        private ComparableTextField _key;
+        private string _project;
         private RemoteIssue _originalIssue;
         private DateTime? _createDate;
         private DateTime? _updateDate;
@@ -36,7 +39,7 @@ namespace Atlassian.Jira
         internal Issue(Jira jira, RemoteIssue remoteIssue)
         {
             _jira = jira;
-
+           
             Initialize(remoteIssue);
         }
 
@@ -44,25 +47,26 @@ namespace Atlassian.Jira
         {
             _originalIssue = remoteIssue;
 
+            _project = remoteIssue.project;
+            _key = remoteIssue.key;
+            _createDate = remoteIssue.created;
+            _dueDate = remoteIssue.duedate;
+            _updateDate = remoteIssue.updated;
+
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
             Environment = remoteIssue.environment;
-            Project = remoteIssue.project;
             Reporter = remoteIssue.reporter;
             Status = remoteIssue.status;
             Summary = remoteIssue.summary;
             Votes = remoteIssue.votes;
 
-            _createDate = remoteIssue.created;
-            _dueDate = remoteIssue.duedate;
-            _updateDate = remoteIssue.updated;
-
-            Key = remoteIssue.key;
+            // names entities
             Priority = remoteIssue.priority;
             Resolution = remoteIssue.resolution;
-
             Type = String.IsNullOrEmpty(remoteIssue.type)? null: new IssueType(_jira, remoteIssue.type);
 
+            // collections
             _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection("versions", _jira, Project)
                 : new ProjectVersionCollection("versions", _jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
 
@@ -103,7 +107,13 @@ namespace Atlassian.Jira
         /// <summary>
         /// Unique identifier for this issue
         /// </summary>
-        public ComparableTextField Key { get; set; }
+        public ComparableTextField Key 
+        {
+            get
+            {
+                return _key;
+            }
+        }
 
         /// <summary>
         /// Importance of the issue in relation to other issues
@@ -113,7 +123,13 @@ namespace Atlassian.Jira
         /// <summary>
         /// Parent project to which the issue belongs
         /// </summary>
-        public string Project { get; set; }
+        public string Project 
+        {
+            get
+            {
+                return _project;
+            }
+        }
 
         /// <summary>
         /// Person who entered the issue into the system

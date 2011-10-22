@@ -198,12 +198,11 @@ namespace Atlassian.Jira.Test
             issue.Description = "foo";
             issue.Assignee = "foo";
             issue.Environment = "foo";
-            issue.Project = "foo";
             issue.Reporter = "foo";
             issue.Status = "foo";
             issue.Type = "foo";
 
-            Assert.Equal(8, GetUpdatedFieldsForIssue(issue).Length);
+            Assert.Equal(7, GetUpdatedFieldsForIssue(issue).Length);
         }
 
         [Fact]
