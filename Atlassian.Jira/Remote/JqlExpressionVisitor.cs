@@ -172,7 +172,7 @@ namespace Atlassian.Jira.Remote
         {
             var valueType = value.GetType();
             if (valueType == typeof(String)
-                || valueType == typeof(ComparableTextField))
+                || valueType == typeof(ComparableString))
             {
                 _jqlWhere.Append(String.Format("\"{0}\"", value));
             }

@@ -19,7 +19,7 @@ namespace Atlassian.Jira
         private readonly Jira _jira;
 
 
-        private ComparableTextField _key;
+        private ComparableString _key;
         private string _project;
         private RemoteIssue _originalIssue;
         private DateTime? _createDate;
@@ -57,13 +57,13 @@ namespace Atlassian.Jira
             Description = remoteIssue.description;
             Environment = remoteIssue.environment;
             Reporter = remoteIssue.reporter;
-            Status = remoteIssue.status;
             Summary = remoteIssue.summary;
             Votes = remoteIssue.votes;
 
-            // names entities
-            Priority = remoteIssue.priority;
-            Resolution = remoteIssue.resolution;
+            // named entities
+            Status = String.IsNullOrEmpty(remoteIssue.status) ? null : new IssueStatus(_jira, remoteIssue.status);
+            Priority = String.IsNullOrEmpty(remoteIssue.priority) ? null : new IssuePriority(_jira, remoteIssue.priority);
+            Resolution = String.IsNullOrEmpty(remoteIssue.resolution) ? null : new IssueResolution(_jira, remoteIssue.resolution);
             Type = String.IsNullOrEmpty(remoteIssue.type)? null: new IssueType(_jira, remoteIssue.type);
 
             // collections
@@ -107,7 +107,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Unique identifier for this issue
         /// </summary>
-        public ComparableTextField Key 
+        public ComparableString Key 
         {
             get
             {
@@ -118,7 +118,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Importance of the issue in relation to other issues
         /// </summary>
-        public ComparableTextField Priority { get; set; }
+        public IssuePriority Priority { get; set; }
 
         /// <summary>
         /// Parent project to which the issue belongs
@@ -139,12 +139,12 @@ namespace Atlassian.Jira
         /// <summary>
         /// Record of the issue's resolution, if the issue has been resolved or closed
         /// </summary>
-        public ComparableTextField Resolution { get; set; }
+        public IssueResolution Resolution { get; set; }
 
         /// <summary>
         /// The stage the issue is currently at in its lifecycle.
         /// </summary>
-        public string Status { get; set; }
+        public IssueStatus Status { get; set; }
 
         /// <summary>
         /// The type of the issue
@@ -396,15 +396,27 @@ namespace Atlassian.Jira
                 environment = this.Environment,
                 project = this.Project,
                 reporter = this.Reporter,
-                status = this.Status,
                 summary = this.Summary,
                 votes = this.Votes,
                 duedate = this.DueDate
             };
 
             remote.key = this.Key != null ? this.Key.Value : null;
-            remote.priority = this.Priority != null ? this.Priority.Value : null;
-            remote.resolution = this.Resolution != null ? this.Resolution.Value : null;
+
+            if (Status != null)
+            {
+                remote.status = Status.Id ?? Status.Load(_jira, Project);
+            }
+
+            if (Resolution != null)
+            {
+                remote.resolution = Resolution.Id ?? Resolution.Load(_jira, Project);
+            }
+
+            if (Priority != null)
+            {
+                remote.priority = Priority.Id ?? Priority.Load(_jira, Project);
+            }
 
             if (Type != null)
             {

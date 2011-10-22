@@ -6,12 +6,12 @@ using Xunit;
 
 namespace Atlassian.Jira.Test
 {
-    public class ComparableTextFieldTest
+    public class ComparableStringTest
     {
         [Fact]
         public void RefereceIsNull_EqualsOperators()
         {
-            ComparableTextField field = null;
+            ComparableString field = null;
             Assert.True(field == null);
             Assert.False(field != null);
         }
@@ -19,42 +19,33 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void StringEqualsOperator()
         {
-            var field = new ComparableTextField();
-            Assert.False(field == "foo");
-
-            field.Value = "foo";
-            Assert.True(field == "foo");
+            Assert.False(new ComparableString("bar") == "foo");
+            Assert.True(new ComparableString("foo") == "foo");
         }
 
         [Fact]
         public void StringNotEqualsOperator()
         {
-            var field = new ComparableTextField();
-            Assert.True(field != "foo");
-
-            field.Value = "foo";
-            Assert.False(field != "foo");
+            Assert.True(new ComparableString("bar") != "foo");
+            Assert.False(new ComparableString("foo") != "foo");
         }
 
         [Fact]
         public void StringGreaterThanOperator()
         {
-            var field = new ComparableTextField();
-            Assert.False(field > "foo");
+            Assert.True(new ComparableString("TST-23") > "TST-1");
         }
 
         [Fact]
         public void StringLessThanOperator()
         {
-            var field = new ComparableTextField();
-            Assert.False(field < "foo");
+            Assert.True(new ComparableString("TST-1") < "TST-2");
         }
 
         [Fact]
         public void StringLessThanOrEqualsOperator()
         {
-            var field = new ComparableTextField();
-            Assert.False(field <= "foo");
+            Assert.True(new ComparableString("TST-1") <= "TST-2");
         }
     }
 }

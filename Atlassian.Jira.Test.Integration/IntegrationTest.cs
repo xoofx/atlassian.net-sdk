@@ -112,7 +112,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.DueDate = new DateTime(2011, 12, 12);
             issue.Environment = "Test Environment";
             issue.FixVersions.Add("2.0");
-            issue.Priority = _jira.GetIssuePriorities().First(i => i.Name == "Major").Id;
+            issue.Priority = "Major";
             issue.Reporter = "admin";
             issue.Summary = summaryValue;
             issue.Type = "1";

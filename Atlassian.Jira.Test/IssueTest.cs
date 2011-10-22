@@ -71,18 +71,16 @@ namespace Atlassian.Jira.Test
             Assert.Equal(new DateTime(2011, 3, 3), issue.DueDate);
             Assert.Equal("environment", issue.Environment);
             Assert.Equal("key", issue.Key.Value);
-            Assert.Equal("priority", issue.Priority.Value);
+            Assert.Equal("priority", issue.Priority.Id);
             Assert.Equal("project", issue.Project);
             Assert.Equal("reporter", issue.Reporter);
-            Assert.Equal("resolution", issue.Resolution.Value);
-            Assert.Equal("status", issue.Status);
+            Assert.Equal("resolution", issue.Resolution.Id);
+            Assert.Equal("status", issue.Status.Id);
             Assert.Equal("summary", issue.Summary);
             Assert.Equal("type", issue.Type.Id);
             Assert.Equal(new DateTime(2011, 2, 2), issue.Updated);
             Assert.Equal(1, issue.Votes);
         }
-
-      
 
         [Fact]
         public void ToRemote_IfFieldsNotSet_ShouldLeaveFieldsNull()

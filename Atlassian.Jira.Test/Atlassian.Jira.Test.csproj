@@ -49,7 +49,7 @@
     <Compile Include="AttachmentTest.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ComparableTextFieldTest.cs" />
+    <Compile Include="ComparableStringTest.cs" />
     <Compile Include="IssueTest.cs" />
     <Compile Include="LinqQueryProviderTest.cs" />
     <Compile Include="JqlTranslationTest.cs" />

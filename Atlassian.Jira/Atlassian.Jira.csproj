@@ -47,7 +47,10 @@
   <ItemGroup>
     <Compile Include="Attachment.cs" />
     <Compile Include="Comment.cs" />
-    <Compile Include="ComparableTextField.cs" />
+    <Compile Include="ComparableString.cs" />
+    <Compile Include="IssueStatus.cs" />
+    <Compile Include="IssueResolution.cs" />
+    <Compile Include="IssuePriority.cs" />
     <Compile Include="CustomField.cs" />
     <Compile Include="CustomFieldCollection.cs" />
     <Compile Include="IssueType.cs" />
