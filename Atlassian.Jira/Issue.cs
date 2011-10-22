@@ -382,7 +382,8 @@ namespace Atlassian.Jira
                 reporter = this.Reporter,
                 status = this.Status,
                 summary = this.Summary,
-                votes = this.Votes
+                votes = this.Votes,
+                duedate = this.DueDate
             };
 
             remote.key = this.Key != null ? this.Key.Value : null;

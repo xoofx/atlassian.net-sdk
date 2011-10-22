@@ -120,92 +120,57 @@ namespace Atlassian.Jira.Test
 
             issue.AffectsVersions.Add(version);
             issue.Assignee = "assignee";
-            
+            issue.Components.Add(component);
+            // issue.CustomFields <-- requires extra setup, test below
+            issue.Description = "description";
+            issue.DueDate = new DateTime(2011, 1, 1);
+            issue.Environment = "environment";
+            issue.FixVersions.Add(version);
+            // issue.Key <-- should be non-settable
+            issue.Priority = "1";
+            // issue.Project <-- should be non-settable
+            issue.Reporter = "reporter";
+            issue.Resolution = "2";
+            issue.Status = "3";
+            issue.Summary = "summary";
+            issue.Type = "4";
+            issue.Votes = 1;
 
-            var remoteIssue = new RemoteIssue()
-            {
-                affectsVersions = new RemoteVersion[] { new RemoteVersion() { id = "remoteVersion" } },
-                assignee = "assignee",
-                components = new RemoteComponent[] { new RemoteComponent() { id = "remoteComponent" } },
-                created = new DateTime(2011, 1, 1),
-                customFieldValues = new RemoteCustomFieldValue[] { new RemoteCustomFieldValue() { customfieldId = "customField" } },
-                description = "description",
-                duedate = new DateTime(2011, 3, 3),
-                environment = "environment",
-                fixVersions = new RemoteVersion[] { new RemoteVersion() { id = "remoteFixVersion" } },
-                key = "key",
-                priority = "priority",
-                project = "project",
-                reporter = "reporter",
-                resolution = "resolution",
-                status = "status",
-                summary = "summary",
-                type = "type",
-                updated = new DateTime(2011, 2, 2),
-                votes = 1
-            };
-
-
-            var remoteIssue = new RemoteIssue()
-            {
-                created = new DateTime(2011, 1, 1),
-                updated = new DateTime(2011, 2, 2),
-                duedate = new DateTime(2011, 3, 3),
-                priority = "High",
-                resolution = "Open",
-                key = "key1"
-            };
-
-            var newRemoteIssue = remoteIssue.ToLocal().ToRemote();
-
-            Assert.Null(newRemoteIssue.created);
-            Assert.Null(newRemoteIssue.updated);
-            Assert.Null(newRemoteIssue.duedate);
-            Assert.Equal("High", newRemoteIssue.priority);
-            Assert.Equal("Open", newRemoteIssue.resolution);
-            Assert.Equal("key1", newRemoteIssue.key);
-        }
-
-        [Fact]
-        public void ToRemote_IfVersionsAreSet_ShouldSetVersionsField()
-        {
-            var issue = CreateIssue();
-            var affectsVersion = new RemoteVersion();
-            var fixVersion = new RemoteVersion();
-
-            issue.AffectsVersions.Add(affectsVersion.ToLocal());
-            issue.FixVersions.Add(fixVersion.ToLocal());
-            
             var remoteIssue = issue.ToRemote();
+
             Assert.Equal(1, remoteIssue.affectsVersions.Length);
-            Assert.ReferenceEquals(affectsVersion, remoteIssue.affectsVersions[0]);
-
-            Assert.Equal(1, remoteIssue.fixVersions.Length);
-            Assert.ReferenceEquals(fixVersion, remoteIssue.fixVersions[0]);
-        }
-
-        [Fact]
-        public void ToRemote_IfComponentsAreSet_ShouldSetComponentsField()
-        {
-            var issue = CreateIssue();
-            var component = new RemoteComponent();
-
-            issue.Components.Add(component.ToLocal());
-
-            var remoteIssue = issue.ToRemote();
-
+            Assert.Equal("assignee", remoteIssue.assignee);
             Assert.Equal(1, remoteIssue.components.Length);
-            Assert.Equal(component, remoteIssue.components[0]);
+            Assert.Null(remoteIssue.created);
+            //Assert.Equal(remoteIssue.customFieldValues);
+            Assert.Equal("description", remoteIssue.description);
+            Assert.Equal(new DateTime(2011, 1, 1), remoteIssue.duedate);
+            Assert.Equal("environment", remoteIssue.environment);
+            Assert.Null(remoteIssue.key);
+            Assert.Equal("1", remoteIssue.priority);
+            Assert.Equal("ProjectKey", remoteIssue.project);
+            Assert.Equal("reporter", remoteIssue.reporter);
+            Assert.Equal("2", remoteIssue.resolution);
+            Assert.Equal("3", remoteIssue.status);
+            Assert.Equal("summary", remoteIssue.summary);
+            Assert.Equal("4", remoteIssue.type);
+            Assert.Null(remoteIssue.updated);
+            Assert.Equal(1, remoteIssue.votes);
         }
 
         [Fact]
-        public void ToRemote_IfNamedEntityNotSet_ShouldLeaveFieldNull()
+        public void ToRemote_IfTypeSetByName_FetchId()
         {
-            var issue = CreateIssue();
+            Mock<IJiraSoapServiceClient> soap;
+            var issue = CreateIssue("ProjectKey", out soap);
+            soap.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(new RemoteIssueType[]{
+                    new RemoteIssueType() { id = "1", name = "Bug"}});
+
+            issue.Type = "Bug";
 
             var remoteIssue = issue.ToRemote();
-
-            Assert.Null(remoteIssue.type);
+            Assert.Equal("1", remoteIssue.type);
         }
 
         [Fact]
@@ -304,6 +269,46 @@ namespace Atlassian.Jira.Test
 
             var issue = remoteIssue.ToLocal();
             Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
+        }
+
+
+        [Fact]
+        public void GetUpdatedFields_IfComponentsAdded_ReturnsFields()
+        {
+            var issue = new RemoteIssue() { key = "foo" }.ToLocal();
+            var component = new RemoteComponent() { id = "1", name = "1.0" };
+            issue.Components.Add(component.ToLocal());
+
+            var fields = GetUpdatedFieldsForIssue(issue);
+            Assert.Equal(1, fields.Length);
+            Assert.Equal("components", fields[0].id);
+            Assert.Equal("1", fields[0].values[0]);
+        }
+
+        [Fact]
+        public void GetUpdatedFields_IfAddFixVersion_ReturnAllFieldsThatChanged()
+        {
+            var issue = new RemoteIssue() { key = "foo" }.ToLocal();
+            var version = new RemoteVersion() { id = "1", name = "1.0" };
+            issue.FixVersions.Add(version.ToLocal());
+
+            var fields = GetUpdatedFieldsForIssue(issue);
+            Assert.Equal(1, fields.Length);
+            Assert.Equal("fixVersions", fields[0].id);
+            Assert.Equal("1", fields[0].values[0]);
+        }
+
+        [Fact]
+        public void GetUpdatedFields_IfAddAffectsVersion_ReturnAllFieldsThatChanged()
+        {
+            var issue = new RemoteIssue() { key = "foo" }.ToLocal();
+            var version = new RemoteVersion() { id = "1", name = "1.0" };
+            issue.AffectsVersions.Add(version.ToLocal());
+
+            var fields = GetUpdatedFieldsForIssue(issue);
+            Assert.Equal(1, fields.Length);
+            Assert.Equal("versions", fields[0].id);
+            Assert.Equal("1", fields[0].values[0]);
         }
 
         [Fact]
@@ -431,116 +436,6 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void Components_IfIssueNotCreated_ShouldReturnEmptyList()
-        {
-            var issue = CreateIssue();
-
-            Assert.Equal(0, issue.Components.Count);
-        }
-
-        [Fact]
-        public void Versions_IfIssueNotCreated_ShouldReturnEmptyList()
-        {
-            var issue = CreateIssue();
-
-            Assert.Equal(0, issue.AffectsVersions.Count());
-            Assert.Equal(0, issue.FixVersions.Count());
-        }
-
-        [Fact]
-        public void Components_IfIssueCreated_ShouldReturnComponents()
-        {
-            var remoteIssue = new RemoteIssue();
-            remoteIssue.components = new RemoteComponent[]{
-                new RemoteComponent(){
-                    id = "1",
-                    name = "Server"
-                }
-            };
-
-            var issue = remoteIssue.ToLocal();
-
-            Assert.Equal(1, issue.Components.Count);
-            Assert.Equal("1", issue.Components[0].Id);
-            Assert.Equal("Server", issue.Components[0].Name);
-        }
-
-        [Fact]
-        public void Versions_IfIssueCreated_ShouldReturnVersions()
-        {
-            var remoteIssue = new RemoteIssue();
-            remoteIssue.affectsVersions = new RemoteVersion[] { new RemoteVersion() 
-                                                                    { id = "1", 
-                                                                      name = "1.0",
-                                                                      archived = true,
-                                                                      released = true,
-                                                                      releaseDate = new DateTime(2011,1,1)
-                                                                    } };
-            remoteIssue.fixVersions = new RemoteVersion[] { new RemoteVersion() 
-                                                                    { id = "2", 
-                                                                      name = "2.0",
-                                                                      archived = true,
-                                                                      released = true,
-                                                                      releaseDate = new DateTime(2011,1,1)
-                                                                    } };
-
-            var issue = remoteIssue.ToLocal();
-
-            Assert.Equal(1, issue.AffectsVersions.Count());
-            Assert.Equal("1", issue.AffectsVersions.ElementAt(0).Id);
-            Assert.Equal("1.0", issue.AffectsVersions.ElementAt(0).Name);
-            Assert.True(issue.AffectsVersions.ElementAt(0).IsArchived);
-            Assert.True(issue.AffectsVersions.ElementAt(0).IsReleased);
-            Assert.Equal(new DateTime(2011, 1, 1), issue.AffectsVersions.ElementAt(0).ReleasedDate);
-
-            Assert.Equal(1, issue.FixVersions.Count());
-            Assert.Equal("2", issue.FixVersions.ElementAt(0).Id);
-            Assert.Equal("2.0", issue.FixVersions.ElementAt(0).Name);
-            Assert.True(issue.FixVersions.ElementAt(0).IsArchived);
-            Assert.True(issue.FixVersions.ElementAt(0).IsReleased);
-            Assert.Equal(new DateTime(2011, 1, 1), issue.FixVersions.ElementAt(0).ReleasedDate);
-        }
-
-        [Fact]
-        public void GetUpdatedFields_IfComponentsAdded_ReturnsFields()
-        {
-            var issue = new RemoteIssue() { key = "foo" }.ToLocal();
-            var component = new RemoteComponent() { id = "1", name = "1.0" };
-            issue.Components.Add(component.ToLocal());
-
-            var fields = GetUpdatedFieldsForIssue(issue);
-            Assert.Equal(1, fields.Length);
-            Assert.Equal("components", fields[0].id);
-            Assert.Equal("1", fields[0].values[0]);
-        }
-
-        [Fact]
-        public void GetUpdatedFields_IfAddFixVersion_ReturnAllFieldsThatChanged()
-        {
-            var issue = new RemoteIssue() { key = "foo" }.ToLocal();
-            var version = new RemoteVersion() { id = "1", name = "1.0" };
-            issue.FixVersions.Add(version.ToLocal());
-
-            var fields = GetUpdatedFieldsForIssue(issue);
-            Assert.Equal(1, fields.Length);
-            Assert.Equal("fixVersions", fields[0].id);
-            Assert.Equal("1", fields[0].values[0]);
-        }
-
-        [Fact]
-        public void GetUpdatedFields_IfAddAffectsVersion_ReturnAllFieldsThatChanged()
-        {
-            var issue = new RemoteIssue() { key = "foo" }.ToLocal();
-            var version = new RemoteVersion() { id = "1", name = "1.0" };
-            issue.AffectsVersions.Add(version.ToLocal());
-
-            var fields = GetUpdatedFieldsForIssue(issue);
-            Assert.Equal(1, fields.Length);
-            Assert.Equal("versions", fields[0].id);
-            Assert.Equal("1", fields[0].values[0]);
-        }
-
-        [Fact]
         public void CustomField_ShouldReturnRemoteValue()
         {
             //arrange
@@ -575,8 +470,15 @@ namespace Atlassian.Jira.Test
 
         private Issue CreateIssue(string project = "TST")
         {
+            Mock<IJiraSoapServiceClient> soap = null;
+
+            return CreateIssue(project, out soap);
+        }
+
+        private Issue CreateIssue(string project, out Mock<IJiraSoapServiceClient> soapClient)
+        {
             var translator = new Mock<IJqlExpressionVisitor>();
-            var soapClient = new Mock<IJiraSoapServiceClient>();
+            soapClient = new Mock<IJiraSoapServiceClient>();
             var jira = new Jira(translator.Object, soapClient.Object, null, "username", "password");
 
             return new Issue(jira, project);
