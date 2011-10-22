@@ -13,6 +13,7 @@ namespace Atlassian.Jira
     public class Jira
     {
         private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
+        private const string ALL_PROJECTS_KEY = "[ALL_PROJECTS]";
 
         private readonly JiraQueryProvider _provider;
         private readonly IJiraSoapServiceClient _jiraSoapService;
@@ -24,8 +25,8 @@ namespace Atlassian.Jira
         private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string,IEnumerable<ProjectVersion>>();
         private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
         private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
+        private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
         private IEnumerable<JiraNamedEntity> _cachedCustomFields = null;
-
 
         /// <summary>
         /// Create a connection to a JIRA server with anonymous access
@@ -199,10 +200,17 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="projectKey">If provided, returns issue types only for given project</param>
         /// <returns>Collection of JIRA issue types</returns>
-        public IEnumerable<JiraNamedEntity> GetIssueTypes(string projectKey = null)
+        public IEnumerable<IssueType> GetIssueTypes(string projectKey = null)
         {
-            var token = GetAuthenticationToken();
-            return _jiraSoapService.GetIssueTypes(token, projectKey).Select(t => new JiraNamedEntity(t));
+            var key = projectKey ?? ALL_PROJECTS_KEY;
+
+            if (!_cachedIssueTypes.ContainsKey(key))
+            {
+                var token = GetAuthenticationToken();
+                _cachedIssueTypes.Add(key, _jiraSoapService.GetIssueTypes(token, projectKey).Select(t => new IssueType(t)));
+            }
+
+            return _cachedIssueTypes[key];
         }
 
         /// <summary>

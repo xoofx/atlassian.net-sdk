@@ -13,67 +13,139 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void Constructor_ShouldSetDefaultValues()
         {
-            var issue = CreateIssue();
-
+            var issue = CreateIssue("ProjectKey");
+            Assert.Equal(0, issue.AffectsVersions.Count);
+            Assert.Null(issue.Assignee);
+            Assert.Equal(0, issue.Components.Count);
+            Assert.Null(issue.Created);
+            Assert.Equal(0, issue.CustomFields.Count);
+            Assert.Null(issue.Description);
             Assert.Null(issue.DueDate);
+            Assert.Null(issue.Environment);
+            Assert.Null(issue.Key);
+            Assert.Null(issue.Priority);
+            Assert.Equal("ProjectKey", issue.Project);
+            Assert.Null(issue.Reporter);
+            Assert.Null(issue.Resolution);
+            Assert.Null(issue.Status);
+            Assert.Null(issue.Summary);
+            Assert.Null(issue.Type);
+            Assert.Null(issue.Updated);
+            Assert.Null(issue.Votes);
         }
 
         [Fact]
-        public void ToLocal_IfFieldsSet_ShouldPopulateFields()
+        public void ConstructorFromRemote_ShouldPopulateFields()
         {
             var remoteIssue = new RemoteIssue()
             {
+                affectsVersions = new RemoteVersion[] { new RemoteVersion() { id = "remoteVersion"}},
+                assignee = "assignee",
+                components = new RemoteComponent[] { new RemoteComponent() { id = "remoteComponent"}},
                 created = new DateTime(2011, 1, 1),
-                updated = new DateTime(2011, 2, 2),
+                customFieldValues = new RemoteCustomFieldValue[] { new RemoteCustomFieldValue() { customfieldId = "customField"} },
+                description = "description",
                 duedate = new DateTime(2011, 3, 3),
-                priority = "High",
-                resolution = "Open",
-                key = "key1"
+                environment = "environment",
+                fixVersions = new RemoteVersion[] { new RemoteVersion() { id = "remoteFixVersion"}},
+                key = "key",
+                priority = "priority",
+                project = "project",
+                reporter = "reporter",
+                resolution = "resolution",
+                status = "status",
+                summary = "summary",
+                type = "type",
+                updated = new DateTime(2011, 2, 2),
+                votes = 1
             };
 
             var issue = remoteIssue.ToLocal();
 
+            Assert.Equal(1, issue.AffectsVersions.Count);
+            Assert.Equal("assignee", issue.Assignee);
+            Assert.Equal(1, issue.Components.Count);
             Assert.Equal(new DateTime(2011, 1, 1), issue.Created);
-            Assert.Equal(new DateTime(2011, 2, 2), issue.Updated);
+            Assert.Equal(1, issue.CustomFields.Count);
+            Assert.Equal("description", issue.Description);
             Assert.Equal(new DateTime(2011, 3, 3), issue.DueDate);
-            Assert.Equal("High", issue.Priority.Value);
-            Assert.Equal("Open", issue.Resolution.Value);
-            Assert.Equal("key1", issue.Key.Value);
+            Assert.Equal("environment", issue.Environment);
+            Assert.Equal("key", issue.Key.Value);
+            Assert.Equal("priority", issue.Priority.Value);
+            Assert.Equal("project", issue.Project);
+            Assert.Equal("reporter", issue.Reporter);
+            Assert.Equal("resolution", issue.Resolution.Value);
+            Assert.Equal("status", issue.Status);
+            Assert.Equal("summary", issue.Summary);
+            Assert.Equal("type", issue.Type.Id);
+            Assert.Equal(new DateTime(2011, 2, 2), issue.Updated);
+            Assert.Equal(1, issue.Votes);
         }
 
-        [Fact]
-        public void ToLocal_IfFieldsNotSet_ShouldNotPopulateFields()
-        {
-            var remoteIssue = new RemoteIssue();
-
-            var issue = remoteIssue.ToLocal();
-
-            Assert.Null(issue.Created);
-            Assert.Null(issue.Updated);
-            Assert.Null(issue.DueDate);
-            Assert.Null(issue.Priority);
-            Assert.Null(issue.Resolution);
-            Assert.Null(issue.Key);
-        }
+      
 
         [Fact]
         public void ToRemote_IfFieldsNotSet_ShouldLeaveFieldsNull()
         {
-            var issue = CreateIssue();
-            issue.Project = "TST";
-            issue.Type = "1";
-            issue.Summary = "Summary";
+            var issue = CreateIssue("ProjectKey");
 
             var remoteIssue = issue.ToRemote();
 
-            Assert.Null(remoteIssue.priority);
+            Assert.Null(remoteIssue.affectsVersions);
+            Assert.Null(remoteIssue.assignee);
+            Assert.Null(remoteIssue.components);
+            Assert.Null(remoteIssue.created);
+            Assert.Null(remoteIssue.customFieldValues);
+            Assert.Null(remoteIssue.description);
+            Assert.Null(remoteIssue.duedate);
+            Assert.Null(remoteIssue.environment);
             Assert.Null(remoteIssue.key);
+            Assert.Null(remoteIssue.priority);
+            Assert.Equal("ProjectKey", remoteIssue.project);
+            Assert.Null(remoteIssue.reporter);
             Assert.Null(remoteIssue.resolution);
+            Assert.Null(remoteIssue.status);
+            Assert.Null(remoteIssue.summary);
+            Assert.Null(remoteIssue.type);
+            Assert.Null(remoteIssue.updated);
+            Assert.Null(remoteIssue.votes);
         }
 
         [Fact]
         public void ToRemote_IfFieldsSet_ShouldPopulateFields()
         {
+            var issue = CreateIssue("ProjectKey");
+            var version = new RemoteVersion().ToLocal();
+            var component = new RemoteComponent().ToLocal();
+
+            issue.AffectsVersions.Add(version);
+            issue.Assignee = "assignee";
+            
+
+            var remoteIssue = new RemoteIssue()
+            {
+                affectsVersions = new RemoteVersion[] { new RemoteVersion() { id = "remoteVersion" } },
+                assignee = "assignee",
+                components = new RemoteComponent[] { new RemoteComponent() { id = "remoteComponent" } },
+                created = new DateTime(2011, 1, 1),
+                customFieldValues = new RemoteCustomFieldValue[] { new RemoteCustomFieldValue() { customfieldId = "customField" } },
+                description = "description",
+                duedate = new DateTime(2011, 3, 3),
+                environment = "environment",
+                fixVersions = new RemoteVersion[] { new RemoteVersion() { id = "remoteFixVersion" } },
+                key = "key",
+                priority = "priority",
+                project = "project",
+                reporter = "reporter",
+                resolution = "resolution",
+                status = "status",
+                summary = "summary",
+                type = "type",
+                updated = new DateTime(2011, 2, 2),
+                votes = 1
+            };
+
+
             var remoteIssue = new RemoteIssue()
             {
                 created = new DateTime(2011, 1, 1),
@@ -126,7 +198,15 @@ namespace Atlassian.Jira.Test
             Assert.Equal(component, remoteIssue.components[0]);
         }
 
-     
+        [Fact]
+        public void ToRemote_IfNamedEntityNotSet_ShouldLeaveFieldNull()
+        {
+            var issue = CreateIssue();
+
+            var remoteIssue = issue.ToRemote();
+
+            Assert.Null(remoteIssue.type);
+        }
 
         [Fact]
         public void GetUpdatedFields_ReturnEmptyIfNothingChanged()
@@ -493,13 +573,13 @@ namespace Atlassian.Jira.Test
             Assert.Equal("foobar", issue["customfield"]);
         }
 
-        private Issue CreateIssue()
+        private Issue CreateIssue(string project = "TST")
         {
             var translator = new Mock<IJqlExpressionVisitor>();
             var soapClient = new Mock<IJiraSoapServiceClient>();
             var jira = new Jira(translator.Object, soapClient.Object, null, "username", "password");
 
-            return new Issue(jira, "TST");
+            return new Issue(jira, project);
         }
 
         private RemoteFieldValue[] GetUpdatedFieldsForIssue(Issue issue)

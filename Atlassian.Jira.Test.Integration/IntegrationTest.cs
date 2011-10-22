@@ -9,14 +9,22 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IntegrationTest
     {
+        private static IEnumerable<IssueType> _issueTypes = null;
+
         private readonly Jira _jira;
         private readonly Random _random;
+
 
         public IntegrationTest()
         {
             _jira = new Jira("http://localhost:2990/jira", "admin", "admin");
             _jira.Debug = true;
             _random = new Random();
+
+            if (_issueTypes == null)
+            {
+                _issueTypes = _jira.GetIssueTypes("TST");
+            }
         }
 
         [Fact]
@@ -27,6 +35,42 @@ namespace Atlassian.Jira.Test.Integration
                          select i;
 
             Assert.Equal(0, issues.Count());
+        }
+
+        [Fact]
+        public void AutoLoadNamedEntities_ById()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "AutoLoadNamedEntities_ById " + _random.Next(int.MaxValue);
+            issue.Type = "1";
+            issue.SaveChanges();
+
+            Assert.Equal("1", issue.Type.Id);
+            Assert.Equal("Bug", issue.Type.Name);
+        }
+
+        [Fact]
+        public void AutoLoadNamedEntities_ByName()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "AutoLoadNamedEntities_Name " + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            Assert.Equal("1", issue.Type.Id);
+            Assert.Equal("Bug", issue.Type.Name);
+        }
+
+        [Fact]
+        public void NamedEntities()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "AutoLoadNamedEntities_Name " + _random.Next(int.MaxValue);
+            issue.Type = _issueTypes.First(e => e.Name == "Bug");
+            issue.SaveChanges();
+
+            Assert.Equal("1", issue.Type.Id);
+            Assert.Equal("Bug", issue.Type.Name);
         }
 
         [Fact]
@@ -50,7 +94,7 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Equal(summaryValue, issues[0].Summary);
             Assert.Equal("TST", issues[0].Project);
-            Assert.Equal("1", issues[0].Type);
+            Assert.Equal("1", issues[0].Type.Id);
         }
 
 
@@ -71,7 +115,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.Priority = _jira.GetIssuePriorities().First(i => i.Name == "Major").Id;
             issue.Reporter = "admin";
             issue.Summary = summaryValue;
-            issue.Type = _jira.GetIssueTypes("TST").First(i => i.Name == "Bug").Id;
+            issue.Type = "1";
 
             issue.SaveChanges();
 

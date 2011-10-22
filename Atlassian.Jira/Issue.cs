@@ -51,7 +51,6 @@ namespace Atlassian.Jira
             Reporter = remoteIssue.reporter;
             Status = remoteIssue.status;
             Summary = remoteIssue.summary;
-            Type = remoteIssue.type;
             Votes = remoteIssue.votes;
 
             _createDate = remoteIssue.created;
@@ -61,6 +60,8 @@ namespace Atlassian.Jira
             Key = remoteIssue.key;
             Priority = remoteIssue.priority;
             Resolution = remoteIssue.resolution;
+
+            Type = String.IsNullOrEmpty(remoteIssue.type)? null: new IssueType(_jira, remoteIssue.type);
 
             _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection("versions", _jira, Project)
                 : new ProjectVersionCollection("versions", _jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
@@ -132,7 +133,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The type of the issue
         /// </summary>
-        public string Type { get; set; }
+        public IssueType Type { get; set; }
         
         /// <summary>
         /// Number of votes the issue has
@@ -368,6 +369,56 @@ namespace Atlassian.Jira
                         };
 
             SaveRemoteFields(fields);
+        }
+
+        internal RemoteIssue ToRemote()
+        {
+            var remote = new RemoteIssue()
+            {
+                assignee = this.Assignee,
+                description = this.Description,
+                environment = this.Environment,
+                project = this.Project,
+                reporter = this.Reporter,
+                status = this.Status,
+                summary = this.Summary,
+                votes = this.Votes
+            };
+
+            remote.key = this.Key != null ? this.Key.Value : null;
+            remote.priority = this.Priority != null ? this.Priority.Value : null;
+            remote.resolution = this.Resolution != null ? this.Resolution.Value : null;
+
+            if (Type != null)
+            {
+                remote.type = Type.Id ?? Type.Load(_jira, Project);
+            }
+
+            if (this.AffectsVersions.Count > 0)
+            {
+                remote.affectsVersions = this.AffectsVersions.Select(v => v.RemoteVersion).ToArray();
+            }
+
+            if(this.FixVersions.Count > 0)
+            {
+                remote.fixVersions = this.FixVersions.Select(v => v.RemoteVersion).ToArray();
+            }
+
+            if (this.Components.Count > 0)
+            {
+                remote.components = this.Components.Select(c => c.RemoteComponent).ToArray();
+            }
+
+            if (this.CustomFields.Count > 0)
+            {
+                remote.customFieldValues = this.CustomFields.Select(f => new RemoteCustomFieldValue()
+                {
+                    customfieldId = f.Id,
+                    values = f.Values
+                }).ToArray();
+            }
+
+            return remote;
         }
 
         /// <summary>

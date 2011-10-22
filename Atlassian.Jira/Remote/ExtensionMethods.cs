@@ -13,48 +13,7 @@ namespace Atlassian.Jira.Remote
         /// </summary>
         public static RemoteIssue ToRemote(this Issue issue)
         {
-            var remote = new RemoteIssue()
-            {
-                assignee = issue.Assignee,
-                description = issue.Description,
-                environment = issue.Environment,
-                project = issue.Project,
-                reporter = issue.Reporter,
-                status = issue.Status,
-                summary = issue.Summary,
-                type = issue.Type,
-                votes = issue.Votes
-            };
-
-            remote.key = issue.Key != null ? issue.Key.Value : null;
-            remote.priority = issue.Priority != null ? issue.Priority.Value : null;
-            remote.resolution = issue.Resolution != null ? issue.Resolution.Value : null;
-
-            if (issue.AffectsVersions.Count > 0)
-            {
-                remote.affectsVersions = issue.AffectsVersions.Select(v => v.RemoteVersion).ToArray();
-            }
-
-            if(issue.FixVersions.Count > 0)
-            {
-                remote.fixVersions = issue.FixVersions.Select(v => v.RemoteVersion).ToArray();
-            }
-
-            if (issue.Components.Count > 0)
-            {
-                remote.components = issue.Components.Select(c => c.RemoteComponent).ToArray();
-            }
-
-            if (issue.CustomFields.Count > 0)
-            {
-                remote.customFieldValues = issue.CustomFields.Select(f => new RemoteCustomFieldValue()
-                {
-                    customfieldId = f.Id,
-                    values = f.Values
-                }).ToArray();
-            }
-
-            return remote;
+            return issue.ToRemote();
         }
 
         /// <summary>
