@@ -38,39 +38,46 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void AutoLoadNamedEntities_ById()
+        public void SetNamedEntities_ById()
         {
             var issue = _jira.CreateIssue("TST");
             issue.Summary = "AutoLoadNamedEntities_ById " + _random.Next(int.MaxValue);
             issue.Type = "1";
+            issue.Priority = "5";
             issue.SaveChanges();
 
             Assert.Equal("1", issue.Type.Id);
             Assert.Equal("Bug", issue.Type.Name);
+
+            Assert.Equal("5", issue.Priority.Id);
+            Assert.Equal("Trivial", issue.Priority.Name);
         }
 
         [Fact]
-        public void AutoLoadNamedEntities_ByName()
+        public void SetNamedEntities_ByName()
         {
             var issue = _jira.CreateIssue("TST");
             issue.Summary = "AutoLoadNamedEntities_Name " + _random.Next(int.MaxValue);
             issue.Type = "Bug";
+            issue.Priority = "Trivial";
             issue.SaveChanges();
 
             Assert.Equal("1", issue.Type.Id);
             Assert.Equal("Bug", issue.Type.Name);
+
+            Assert.Equal("5", issue.Priority.Id);
+            Assert.Equal("Trivial", issue.Priority.Name);
         }
 
         [Fact]
-        public void NamedEntities()
+        public void AutoLoadNamedEntities()
         {
-            var issue = _jira.CreateIssue("TST");
-            issue.Summary = "AutoLoadNamedEntities_Name " + _random.Next(int.MaxValue);
-            issue.Type = _issueTypes.First(e => e.Name == "Bug");
-            issue.SaveChanges();
+            var issue = _jira.GetIssue("TST-1");
 
-            Assert.Equal("1", issue.Type.Id);
             Assert.Equal("Bug", issue.Type.Name);
+            Assert.Equal("Major", issue.Priority.Name);
+            Assert.Equal("Open", issue.Status.Name);
+            Assert.Null(issue.Resolution);
         }
 
         [Fact]
@@ -492,6 +499,12 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             Assert.Equal("My updated value", issue["Custom Text Field"]);
+        }
+
+        [Fact]
+        public void test()
+        {
+            var i = _jira.GetIssue("TST-22");
         }
     }
 }
