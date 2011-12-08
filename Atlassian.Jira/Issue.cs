@@ -387,6 +387,23 @@ namespace Atlassian.Jira
             SaveRemoteFields(fields);
         }
 
+        public void AddWorklog(string timespent)
+        {
+            if(String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to add worklog to issue, issue has not been saved to server.");
+            }
+
+            var worklog = new RemoteWorklog()
+            {
+                startDate = DateTime.Now,
+                timeSpent = timespent
+            };
+
+            var token = _jira.GetAuthenticationToken();
+            _jira.RemoteSoapService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, worklog);
+        }
+
         internal RemoteIssue ToRemote()
         {
             var remote = new RemoteIssue()
@@ -508,5 +525,7 @@ namespace Atlassian.Jira
                 return value != null ? value.ToString() : null;
             }
         }
+
+        
     }
 }

@@ -85,6 +85,7 @@
     <Compile Include="ProjectVersionCollection.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Remote\RemoteWorklogPatchBehavior.cs" />
     <Compile Include="WebClientWrapper.cs" />
   </ItemGroup>
   <ItemGroup />

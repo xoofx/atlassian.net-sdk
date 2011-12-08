@@ -425,11 +425,37 @@ namespace Atlassian.Jira.Test
             issue.AddComment("the comment");
 
             //assert
-            // TODO: Need to modify this obscure assertion.
             mockJiraService.Verify(j => j.AddComment(
                                                 "token",
                                                 "key",
                                                 It.Is<RemoteComment>(r => r.body == "the comment" && r.author == "user")));
+        }
+
+        [Fact]
+        public void AddTimeSpent_IfIssueNotCreated_ShouldThrowAnException()
+        {
+            var issue = CreateIssue();
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.AddWorklog("foo"));
+        }
+
+        [Fact]
+        public void AddTimeSpent_ShouldAddWorkLog()
+        {
+            var mockJiraService = new Mock<IJiraSoapServiceClient>();
+            mockJiraService.Setup(j => j.Login("user", "pass")).Returns("token");
+
+            var jira = new Jira(null, mockJiraService.Object, null, "user", "pass");
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            issue.AddWorklog("1d");
+
+            //assert
+            mockJiraService.Verify(j => j.AddWorklogAndAutoAdjustRemainingEstimate(
+                "token",
+                "key",
+                It.Is<RemoteWorklog>(l => l.timeSpent == "1d")));
         }
 
         [Fact]

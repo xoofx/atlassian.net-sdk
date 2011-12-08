@@ -119,5 +119,11 @@ namespace Atlassian.Jira.Remote
         {
             return _client.getFieldsForEdit(token, key);
         }
+
+
+        public RemoteWorklog AddWorklogAndAutoAdjustRemainingEstimate(string token, string key, RemoteWorklog worklog)
+        {
+            return _client.addWorklogAndAutoAdjustRemainingEstimate(token, key, worklog);
+        }
     }
 }
