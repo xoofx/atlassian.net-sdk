@@ -87,6 +87,8 @@
     </Compile>
     <Compile Include="Remote\RemoteWorklogPatchBehavior.cs" />
     <Compile Include="WebClientWrapper.cs" />
+    <Compile Include="Worklog.cs" />
+    <Compile Include="WorklogStrategy.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

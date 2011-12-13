@@ -326,6 +326,5 @@ namespace Atlassian.Jira
 
             return _cachedFieldsForEdit[projectKey];
         }
-
     }
 }

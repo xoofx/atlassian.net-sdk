@@ -430,16 +430,82 @@ namespace Atlassian.Jira.Test
         public void AddTimeSpent_ShouldAddWorkLog()
         {
             var jira = TestableJira.Create();
+            var remoteWorkLog = new RemoteWorklog() { id = "12345" };
+            jira.SoapService.Setup(s => s.AddWorklogAndAutoAdjustRemainingEstimate(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RemoteWorklog>())).Returns(remoteWorkLog);
             var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
             //act
-            issue.AddWorklog("1d");
+            var result = issue.AddWorklog("1d");
 
             //assert
+            Assert.Equal("12345", result.Id);
             jira.SoapService.Verify(j => j.AddWorklogAndAutoAdjustRemainingEstimate(
                 "token",
                 "key",
                 It.Is<RemoteWorklog>(l => l.timeSpent == "1d")));
+        }
+
+        [Fact]
+        public void GetWorklogs()
+        {
+            var jira = TestableJira.Create();
+            var logs = new RemoteWorklog[] { new RemoteWorklog() { id = "12345" } };
+            jira.SoapService.Setup(s => s.GetWorkLogs(It.IsAny<string>(), "111")).Returns(logs);
+            var issue = (new RemoteIssue() { key = "111" }).ToLocal(jira);
+
+            var result = issue.GetWorklogs();
+
+            Assert.Equal("12345", result.First().Id);
+        }
+
+        [Fact]
+        public void GetWorklogs_IfIssueNotCreated_ShouldThrowException()
+        {
+            var issue = new Issue(TestableJira.Create(), "project");
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.GetWorklogs());
+        }
+
+        [Fact]
+        public void AddTimeSpent_IfRetainRemainingEstimate_ShouldAddWorkLog()
+        {
+            var jira = TestableJira.Create();
+            var remoteWorkLog = new RemoteWorklog() { id = "12345" };
+            jira.SoapService.Setup(s => s.AddWorklogAndRetainRemainingEstimate(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RemoteWorklog>())).Returns(remoteWorkLog);
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            var result = issue.AddWorklog("1d", WorklogStrategy.RetainRemainingEstimate);
+
+            //assert
+            Assert.Equal("12345", result.Id);
+            jira.SoapService.Verify(j => j.AddWorklogAndRetainRemainingEstimate(
+                "token",
+                "key",
+                It.Is<RemoteWorklog>(l => l.timeSpent == "1d")));
+        }
+
+        [Fact]
+        public void AddTimeSpent_IfNewRemainingEstimate_ShouldAddWorkLog()
+        {
+            var jira = TestableJira.Create();
+            var remoteWorkLog = new RemoteWorklog() { id = "12345" };
+            jira.SoapService.Setup(s => s.AddWorklogWithNewRemainingEstimate(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RemoteWorklog>(), It.IsAny<string>())).Returns(remoteWorkLog);
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            var result = issue.AddWorklog("1d", WorklogStrategy.NewRemainingEstimate, "5d");
+
+            //assert
+            Assert.Equal("12345", result.Id);
+            jira.SoapService.Verify(j => j.AddWorklogWithNewRemainingEstimate(
+                "token",
+                "key",
+                It.Is<RemoteWorklog>(l => l.timeSpent == "1d"),
+                "5d"));
         }
 
         [Fact]

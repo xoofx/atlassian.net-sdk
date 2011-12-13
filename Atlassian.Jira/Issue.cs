@@ -394,8 +394,17 @@ namespace Atlassian.Jira
 
             SaveRemoteFields(fields);
         }
-
-        public void AddWorklog(string timespent)
+       
+        /// <summary>
+        ///  Adds a worklog to this issue.
+        /// </summary>
+        /// <param name="timespent">Specifies a time duration in JIRA duration format, representing the time spent working on the worklog</param>
+        /// <param name="worklogStrategy">How to handle the remaining estimate, defaults to AutoAdjustRemainingEstimate</param>
+        /// <param name="newEstimate">New estimate (only used if worklogStrategy set to NewRemainingEstimate)</param>
+        /// <returns>Worklog as constructed by server</returns>
+        public Worklog AddWorklog(string timespent, 
+                                  WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate,
+                                  string newEstimate = null)
         {
             if(String.IsNullOrEmpty(_originalIssue.key))
             {
@@ -409,7 +418,33 @@ namespace Atlassian.Jira
             };
 
             var token = _jira.GetAuthenticationToken();
-            _jira.RemoteSoapService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, worklog);
+            RemoteWorklog remoteWorklog = null;
+
+            switch (worklogStrategy)
+            {
+                case WorklogStrategy.RetainRemainingEstimate:
+                    remoteWorklog = _jira.RemoteSoapService.AddWorklogAndRetainRemainingEstimate(token, _originalIssue.key, worklog);
+                    break;
+                case WorklogStrategy.NewRemainingEstimate:
+                    remoteWorklog = _jira.RemoteSoapService.AddWorklogWithNewRemainingEstimate(token, _originalIssue.key, worklog, newEstimate);
+                    break;                    
+                default:
+                    remoteWorklog = _jira.RemoteSoapService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, worklog);
+                    break;
+            }
+
+            return new Worklog(remoteWorklog);
+        }
+
+        public ReadOnlyCollection<Worklog> GetWorklogs()
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve worklog, issue has not been saved to server.");
+            }
+
+            var token = _jira.GetAuthenticationToken();
+            return _jira.RemoteSoapService.GetWorkLogs(token, _originalIssue.key).Select(w => new Worklog(w)).ToList().AsReadOnly();
         }
 
         internal RemoteIssue ToRemote()
