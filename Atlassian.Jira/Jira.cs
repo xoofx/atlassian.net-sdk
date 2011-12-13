@@ -327,28 +327,5 @@ namespace Atlassian.Jira
             return _cachedFieldsForEdit[projectKey];
         }
 
-        internal IList<Attachment> GetAttachmentsForIssue(string issueKey)
-        {
-            var token = GetAuthenticationToken();
-            return _jiraSoapService.GetAttachmentsFromIssue(token, issueKey).Select(a => new Attachment(this, new WebClientWrapper(), a)).ToList();
-        }
-
-        internal bool AddAttachmentsToIssue(string issueKey, string[] fileNames, string[] base64EncodedAttachmentData)
-        {
-            var token = GetAuthenticationToken();
-            return _jiraSoapService.AddBase64EncodedAttachmentsToIssue(token, issueKey, fileNames, base64EncodedAttachmentData);
-        }
-
-        internal IList<Comment> GetCommentsForIssue(string issueKey)
-        {
-            var token = GetAuthenticationToken();
-            return _jiraSoapService.GetCommentsFromIssue(token, issueKey).Select(c => new Comment(c)).ToList();
-        }
-
-        internal void AddCommentToIssue(string issueKey, Comment comment)
-        {
-            var token = GetAuthenticationToken();
-            _jiraSoapService.AddComment(token, issueKey, comment.toRemote());
-        }
     }
 }

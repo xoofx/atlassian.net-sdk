@@ -310,7 +310,9 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to retrieve attachments from server, issue has not been created.");
             }
 
-            return _jira.GetAttachmentsForIssue(_originalIssue.key).ToList().AsReadOnly();
+            var token =_jira.GetAuthenticationToken();
+            return _jira.RemoteSoapService.GetAttachmentsFromIssue(token, _originalIssue.key)
+                .Select(a => new Attachment(_jira, new WebClientWrapper(), a)).ToList().AsReadOnly();
         }
 
         /// <summary>
@@ -336,7 +338,9 @@ namespace Atlassian.Jira
 
             string content = Convert.ToBase64String(data);
 
-            _jira.AddAttachmentsToIssue(_originalIssue.key, new string[] { name }, new string[]{ content });
+            var token = _jira.GetAuthenticationToken();
+
+            _jira.RemoteSoapService.AddBase64EncodedAttachmentsToIssue(token, _originalIssue.key, new string[] { name }, new string[] { content });
         }
 
         /// <summary>
@@ -348,7 +352,9 @@ namespace Atlassian.Jira
             {
                 throw new InvalidOperationException("Unable to retrieve comments from server, issue has not been created.");
             }
-            return _jira.GetCommentsForIssue(_originalIssue.key).ToList().AsReadOnly();
+
+            var token = _jira.GetAuthenticationToken();
+            return _jira.RemoteSoapService.GetCommentsFromIssue(token, _originalIssue.key).Select(c => new Comment(c)).ToList().AsReadOnly();   
         }
 
         /// <summary>
@@ -363,7 +369,9 @@ namespace Atlassian.Jira
             }
 
             var newComment = new Comment() { Author = _jira.UserName, Body = comment };
-            _jira.AddCommentToIssue(_originalIssue.key, newComment);
+
+            var token = _jira.GetAuthenticationToken();
+            _jira.RemoteSoapService.AddComment(token, _originalIssue.key, newComment.toRemote());
         }
 
         /// <summary>
