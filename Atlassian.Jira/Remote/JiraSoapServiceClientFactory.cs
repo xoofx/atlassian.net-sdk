@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using System.ServiceModel;
 using System.Xml;
+using System.ServiceModel.Dispatcher;
+using System.ServiceModel.Description;
+using System.ServiceModel.Channels;
+using System.IO;
 
 namespace Atlassian.Jira.Remote
 {
@@ -42,8 +46,11 @@ namespace Atlassian.Jira.Remote
             binding.Security.Message.ClientCredentialType = BasicHttpMessageCredentialType.UserName;
 
             var endpoint = new EndpointAddress(endPointUri);
+            var jiraSoapServiceClient = new JiraSoapServiceClient(binding, endpoint);
 
-            return new JiraSoapServiceClient(binding, endpoint);
+            jiraSoapServiceClient.Endpoint.Behaviors.Add(new RemoteWorklogPatchBehavior());
+
+            return jiraSoapServiceClient;
         }
     }
 }

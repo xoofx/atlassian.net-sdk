@@ -27,5 +27,9 @@ namespace Atlassian.Jira.Remote
         RemoteComponent[] GetComponents(string token, string projectKey);
         RemoteField[] GetCustomFields(string token);
         RemoteField[] GetFieldsForEdit(string token, string key);
+        RemoteWorklog AddWorklogAndAutoAdjustRemainingEstimate(string token, string key, RemoteWorklog worklog);
+        RemoteWorklog AddWorklogAndRetainRemainingEstimate(string token, string key, RemoteWorklog worklog);
+        RemoteWorklog AddWorklogWithNewRemainingEstimate(string token, string key, RemoteWorklog worklog, string newRemainingEstimate);
+        RemoteWorklog[] GetWorkLogs(string token, string key);
     }
 }

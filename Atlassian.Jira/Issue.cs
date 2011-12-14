@@ -310,7 +310,9 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to retrieve attachments from server, issue has not been created.");
             }
 
-            return _jira.GetAttachmentsForIssue(_originalIssue.key).ToList().AsReadOnly();
+            var token =_jira.GetAuthenticationToken();
+            return _jira.RemoteSoapService.GetAttachmentsFromIssue(token, _originalIssue.key)
+                .Select(a => new Attachment(_jira, new WebClientWrapper(), a)).ToList().AsReadOnly();
         }
 
         /// <summary>
@@ -336,7 +338,9 @@ namespace Atlassian.Jira
 
             string content = Convert.ToBase64String(data);
 
-            _jira.AddAttachmentsToIssue(_originalIssue.key, new string[] { name }, new string[]{ content });
+            var token = _jira.GetAuthenticationToken();
+
+            _jira.RemoteSoapService.AddBase64EncodedAttachmentsToIssue(token, _originalIssue.key, new string[] { name }, new string[] { content });
         }
 
         /// <summary>
@@ -348,7 +352,9 @@ namespace Atlassian.Jira
             {
                 throw new InvalidOperationException("Unable to retrieve comments from server, issue has not been created.");
             }
-            return _jira.GetCommentsForIssue(_originalIssue.key).ToList().AsReadOnly();
+
+            var token = _jira.GetAuthenticationToken();
+            return _jira.RemoteSoapService.GetCommentsFromIssue(token, _originalIssue.key).Select(c => new Comment(c)).ToList().AsReadOnly();   
         }
 
         /// <summary>
@@ -363,7 +369,9 @@ namespace Atlassian.Jira
             }
 
             var newComment = new Comment() { Author = _jira.UserName, Body = comment };
-            _jira.AddCommentToIssue(_originalIssue.key, newComment);
+
+            var token = _jira.GetAuthenticationToken();
+            _jira.RemoteSoapService.AddComment(token, _originalIssue.key, newComment.toRemote());
         }
 
         /// <summary>
@@ -385,6 +393,58 @@ namespace Atlassian.Jira
                         };
 
             SaveRemoteFields(fields);
+        }
+       
+        /// <summary>
+        ///  Adds a worklog to this issue.
+        /// </summary>
+        /// <param name="timespent">Specifies a time duration in JIRA duration format, representing the time spent working on the worklog</param>
+        /// <param name="worklogStrategy">How to handle the remaining estimate, defaults to AutoAdjustRemainingEstimate</param>
+        /// <param name="newEstimate">New estimate (only used if worklogStrategy set to NewRemainingEstimate)</param>
+        /// <returns>Worklog as constructed by server</returns>
+        public Worklog AddWorklog(string timespent, 
+                                  WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate,
+                                  string newEstimate = null)
+        {
+            if(String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to add worklog to issue, issue has not been saved to server.");
+            }
+
+            var worklog = new RemoteWorklog()
+            {
+                startDate = DateTime.Now,
+                timeSpent = timespent
+            };
+
+            var token = _jira.GetAuthenticationToken();
+            RemoteWorklog remoteWorklog = null;
+
+            switch (worklogStrategy)
+            {
+                case WorklogStrategy.RetainRemainingEstimate:
+                    remoteWorklog = _jira.RemoteSoapService.AddWorklogAndRetainRemainingEstimate(token, _originalIssue.key, worklog);
+                    break;
+                case WorklogStrategy.NewRemainingEstimate:
+                    remoteWorklog = _jira.RemoteSoapService.AddWorklogWithNewRemainingEstimate(token, _originalIssue.key, worklog, newEstimate);
+                    break;                    
+                default:
+                    remoteWorklog = _jira.RemoteSoapService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, worklog);
+                    break;
+            }
+
+            return new Worklog(remoteWorklog);
+        }
+
+        public ReadOnlyCollection<Worklog> GetWorklogs()
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve worklog, issue has not been saved to server.");
+            }
+
+            var token = _jira.GetAuthenticationToken();
+            return _jira.RemoteSoapService.GetWorkLogs(token, _originalIssue.key).Select(w => new Worklog(w)).ToList().AsReadOnly();
         }
 
         internal RemoteIssue ToRemote()
@@ -508,5 +568,7 @@ namespace Atlassian.Jira
                 return value != null ? value.ToString() : null;
             }
         }
+
+        
     }
 }

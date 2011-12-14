@@ -159,9 +159,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void ToRemote_IfTypeSetByName_FetchId()
         {
-            Mock<IJiraSoapServiceClient> soap;
-            var issue = CreateIssue("ProjectKey", out soap);
-            soap.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>()))
+            var jira = TestableJira.Create();
+            var issue = jira.CreateIssue("ProjectKey");
+            jira.SoapService.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(new RemoteIssueType[]{
                     new RemoteIssueType() { id = "1", name = "Bug"}});
 
@@ -320,12 +320,10 @@ namespace Atlassian.Jira.Test
         public void GetAttachments_IfIssueIsCreated_ShouldLoadAttachments()
         {
             //arrange
-            var mockJiraService = new Mock<IJiraSoapServiceClient>();
-            mockJiraService.Setup(j => j.Login("user", "pass")).Returns("thetoken");
-            mockJiraService.Setup(j => j.GetAttachmentsFromIssue("thetoken", "key"))
+            var jira = TestableJira.Create();
+            jira.SoapService.Setup(j => j.GetAttachmentsFromIssue(TestableJira.Token, "key"))
                 .Returns(new RemoteAttachment[1] { new RemoteAttachment() { filename = "attach.txt" } });
             
-            var jira = new Jira(null, mockJiraService.Object, null, "user", "pass");
             var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
             //act
@@ -355,20 +353,15 @@ namespace Atlassian.Jira.Test
         public void AddAttachment_IfIssueCreated_ShouldUpload()
         {
             //arrange
-            var mockJiraService = new Mock<IJiraSoapServiceClient>();
-            mockJiraService.Setup(j => j.Login("user", "pass")).Returns("token");
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(f => f.FileReadAllBytes("foo.txt")).Returns(new byte[] { 1, 2, 3 });
-
-            var jira = new Jira(null, mockJiraService.Object, mockFileSystem.Object, "user", "pass");
+            var jira = TestableJira.Create();
+            jira.FileSystem.Setup(f => f.FileReadAllBytes("foo.txt")).Returns(new byte[] { 1, 2, 3 });
             var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
             //act
             issue.AddAttachment("foo.txt");
 
             //assert
-            // TODO: Need to modify this obscure assertion.
-            mockJiraService.Verify(j => j.AddBase64EncodedAttachmentsToIssue(
+            jira.SoapService.Verify(j => j.AddBase64EncodedAttachmentsToIssue(
                                                 "token",
                                                 "key",
                                                 new string[] { "foo.txt" },
@@ -387,12 +380,9 @@ namespace Atlassian.Jira.Test
         public void GetComments_IfIssueIsCreated_ShouldLoadComments()
         {
             //arrange
-            var mockJiraService = new Mock<IJiraSoapServiceClient>();
-            mockJiraService.Setup(j => j.Login("user", "pass")).Returns("thetoken");
-            mockJiraService.Setup(j => j.GetCommentsFromIssue("thetoken", "key"))
+            var jira = TestableJira.Create();
+            jira.SoapService.Setup(j => j.GetCommentsFromIssue(TestableJira.Token, "key"))
                 .Returns(new RemoteComment[1] { new RemoteComment() { body = "the comment" } });
-
-            var jira = new Jira(null, mockJiraService.Object, null, "user", "pass");
             var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
             //act
@@ -415,35 +405,118 @@ namespace Atlassian.Jira.Test
         public void AddComment_IfIssueCreated_ShouldUpload()
         {
             //arrange
-            var mockJiraService = new Mock<IJiraSoapServiceClient>();
-            mockJiraService.Setup(j => j.Login("user", "pass")).Returns("token");
-
-            var jira = new Jira(null, mockJiraService.Object, null, "user", "pass");
+            var jira = TestableJira.Create();
             var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
             //act
             issue.AddComment("the comment");
 
             //assert
-            // TODO: Need to modify this obscure assertion.
-            mockJiraService.Verify(j => j.AddComment(
+            jira.SoapService.Verify(j => j.AddComment(
                                                 "token",
                                                 "key",
                                                 It.Is<RemoteComment>(r => r.body == "the comment" && r.author == "user")));
         }
 
         [Fact]
+        public void AddTimeSpent_IfIssueNotCreated_ShouldThrowAnException()
+        {
+            var issue = CreateIssue();
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.AddWorklog("foo"));
+        }
+
+        [Fact]
+        public void AddTimeSpent_ShouldAddWorkLog()
+        {
+            var jira = TestableJira.Create();
+            var remoteWorkLog = new RemoteWorklog() { id = "12345" };
+            jira.SoapService.Setup(s => s.AddWorklogAndAutoAdjustRemainingEstimate(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RemoteWorklog>())).Returns(remoteWorkLog);
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            var result = issue.AddWorklog("1d");
+
+            //assert
+            Assert.Equal("12345", result.Id);
+            jira.SoapService.Verify(j => j.AddWorklogAndAutoAdjustRemainingEstimate(
+                "token",
+                "key",
+                It.Is<RemoteWorklog>(l => l.timeSpent == "1d")));
+        }
+
+        [Fact]
+        public void GetWorklogs()
+        {
+            var jira = TestableJira.Create();
+            var logs = new RemoteWorklog[] { new RemoteWorklog() { id = "12345" } };
+            jira.SoapService.Setup(s => s.GetWorkLogs(It.IsAny<string>(), "111")).Returns(logs);
+            var issue = (new RemoteIssue() { key = "111" }).ToLocal(jira);
+
+            var result = issue.GetWorklogs();
+
+            Assert.Equal("12345", result.First().Id);
+        }
+
+        [Fact]
+        public void GetWorklogs_IfIssueNotCreated_ShouldThrowException()
+        {
+            var issue = new Issue(TestableJira.Create(), "project");
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.GetWorklogs());
+        }
+
+        [Fact]
+        public void AddTimeSpent_IfRetainRemainingEstimate_ShouldAddWorkLog()
+        {
+            var jira = TestableJira.Create();
+            var remoteWorkLog = new RemoteWorklog() { id = "12345" };
+            jira.SoapService.Setup(s => s.AddWorklogAndRetainRemainingEstimate(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RemoteWorklog>())).Returns(remoteWorkLog);
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            var result = issue.AddWorklog("1d", WorklogStrategy.RetainRemainingEstimate);
+
+            //assert
+            Assert.Equal("12345", result.Id);
+            jira.SoapService.Verify(j => j.AddWorklogAndRetainRemainingEstimate(
+                "token",
+                "key",
+                It.Is<RemoteWorklog>(l => l.timeSpent == "1d")));
+        }
+
+        [Fact]
+        public void AddTimeSpent_IfNewRemainingEstimate_ShouldAddWorkLog()
+        {
+            var jira = TestableJira.Create();
+            var remoteWorkLog = new RemoteWorklog() { id = "12345" };
+            jira.SoapService.Setup(s => s.AddWorklogWithNewRemainingEstimate(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RemoteWorklog>(), It.IsAny<string>())).Returns(remoteWorkLog);
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            //act
+            var result = issue.AddWorklog("1d", WorklogStrategy.NewRemainingEstimate, "5d");
+
+            //assert
+            Assert.Equal("12345", result.Id);
+            jira.SoapService.Verify(j => j.AddWorklogWithNewRemainingEstimate(
+                "token",
+                "key",
+                It.Is<RemoteWorklog>(l => l.timeSpent == "1d"),
+                "5d"));
+        }
+
+        [Fact]
         public void CustomField_ShouldReturnRemoteValue()
         {
             //arrange
-            var soapClient = new Mock<IJiraSoapServiceClient>();
-            soapClient.Setup(c => c.Login("user", "pass")).Returns("token");
-            soapClient.Setup(c => c.GetIssuesFromJqlSearch(It.IsAny<string>(), "project = \"bar\"", 1)).Returns(new RemoteIssue[] {
+            var jira = TestableJira.Create();
+            jira.SoapService.Setup(c => c.GetIssuesFromJqlSearch(It.IsAny<string>(), "project = \"bar\"", 1)).Returns(new RemoteIssue[] {
                                         new RemoteIssue() { key = "123" }});
-            soapClient.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "123")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "123")).Returns(new RemoteField[] { 
                 new RemoteField(){ id="123", name= "CustomField" }});
-
-            var jira = new Jira(null, soapClient.Object, null, "user", "pass");
 
             var issue = new RemoteIssue()
             {
@@ -467,18 +540,7 @@ namespace Atlassian.Jira.Test
 
         private Issue CreateIssue(string project = "TST")
         {
-            Mock<IJiraSoapServiceClient> soap = null;
-
-            return CreateIssue(project, out soap);
-        }
-
-        private Issue CreateIssue(string project, out Mock<IJiraSoapServiceClient> soapClient)
-        {
-            var translator = new Mock<IJqlExpressionVisitor>();
-            soapClient = new Mock<IJiraSoapServiceClient>();
-            var jira = new Jira(translator.Object, soapClient.Object, null, "username", "password");
-
-            return new Issue(jira, project);
+            return TestableJira.Create().CreateIssue(project);
         }
 
         private RemoteFieldValue[] GetUpdatedFieldsForIssue(Issue issue)
@@ -486,4 +548,28 @@ namespace Atlassian.Jira.Test
             return ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
         }
     }
+
+    public class TestableJira : Jira
+    {
+        public Mock<IJiraSoapServiceClient> SoapService;
+        public Mock<IFileSystem> FileSystem;
+
+        public static string User = "user";
+        public static string Password = "pass";
+        public static string Token = "token";
+
+        private TestableJira(Mock<IJiraSoapServiceClient> soapService, Mock<IFileSystem> fileSystem)
+            : base(null, soapService.Object, fileSystem.Object, User, Password)
+        {
+            SoapService = soapService;
+            FileSystem = fileSystem;
+            SoapService.Setup(j => j.Login(User, Password)).Returns(Token);
+        }
+
+        public static TestableJira Create()
+        {
+            return new TestableJira(new Mock<IJiraSoapServiceClient>(), new Mock<IFileSystem>());
+        }
+    }
+    
 }
