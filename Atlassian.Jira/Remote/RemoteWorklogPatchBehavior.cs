@@ -32,9 +32,13 @@ namespace Atlassian.Jira.Remote
 
         private class RemoteWorklogMessageInspector : IClientMessageInspector
         {
+            private static string _correlationState = "worklog";
+
             public void AfterReceiveReply(ref System.ServiceModel.Channels.Message reply, object correlationState)
             {
-                if (reply.ToString().Contains("addWorklogAndAutoAdjustRemainingEstimate"))
+                if(correlationState != null 
+                    && String.Equals(correlationState, _correlationState)
+                    && !reply.ToString().Contains("<soapenv:Fault>"))
                 {
                     var memoryStream = new MemoryStream();
                     var writer = XmlWriter.Create(memoryStream);
@@ -62,13 +66,24 @@ namespace Atlassian.Jira.Remote
             {
                 var ns = new XmlNamespaceManager(doc.NameTable);
                 ns.AddNamespace("soapenv", "http://schemas.xmlsoap.org/soap/envelope/");
-                var multiRefElement = doc.SelectSingleNode("//soapenv:Body/multiRef", ns) as XmlElement;
-                multiRefElement.SetAttribute("xsi:type", "ns2:RemoteWorklog");
-                multiRefElement.SetAttribute("xmlns:ns2", "http://beans.soap.rpc.jira.atlassian.com");
+                foreach(XmlElement multiRefElement in doc.SelectNodes("//soapenv:Body/multiRef", ns))
+                {
+                    multiRefElement.SetAttribute("xsi:type", "ns2:RemoteWorklog");
+                    multiRefElement.SetAttribute("xmlns:ns2", "http://beans.soap.rpc.jira.atlassian.com");
+                }
             }
 
-            public object BeforeSendRequest(ref System.ServiceModel.Channels.Message request, IClientChannel channel)
+            public object BeforeSendRequest(ref Message request, IClientChannel channel)
             {
+                var requestContent = request.ToString();
+
+                if (requestContent.Contains("addWorklogAndAutoAdjustRemainingEstimate")
+                    || requestContent.Contains("addWorklogAndRetainRemainingEstimate")
+                    || requestContent.Contains("addWorklogWithNewRemainingEstimate")
+                    || requestContent.Contains("getWorklogs"))
+                {
+                    return _correlationState;
+                }
                 return null;
             }
         }

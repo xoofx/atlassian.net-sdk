@@ -500,5 +500,23 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Equal("My updated value", issue["Custom Text Field"]);
         }
+
+        [Fact]
+        public void AddAndGetWorklogs()
+        {
+            var summaryValue = "Test issue with work logs" + _random.Next(int.MaxValue);
+
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue
+            };
+            issue.SaveChanges();
+
+            issue.AddWorklog("1d");
+            issue.AddWorklog("1h", WorklogStrategy.RetainRemainingEstimate);
+            issue.AddWorklog("1m", WorklogStrategy.NewRemainingEstimate, "2d");
+            Assert.Equal(3, issue.GetWorklogs().Count);
+        }
     }
 }

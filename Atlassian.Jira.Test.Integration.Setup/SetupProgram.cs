@@ -93,6 +93,10 @@ namespace Atlassian.Jira.Test.Integration.Setup
             page.Elements.Find("allowRpcOn", MatchMethod.Literal).Click();
             page.Elements.Find("edit_property").Click();
 
+            // go to time tracking screen and enable
+            page.Navigate("secure/admin/TimeTrackingAdmin!default.jspa");
+            page.Elements.Find("activate_submit").Click();
+
             // Restore TestData
             page.Navigate("secure/admin/XmlRestore!default.jspa");
             File.Copy(
