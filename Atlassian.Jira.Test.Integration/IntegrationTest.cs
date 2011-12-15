@@ -253,7 +253,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void RetrieveIssueTypesForProject()
+        public void IssueTypes()
         {
             var issueTypes = _jira.GetIssueTypes("TST");
 
@@ -262,7 +262,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void RetrievesIssuePriorities()
+        public void GetIssuePriorities()
         {
             var priorities = _jira.GetIssuePriorities();
 
@@ -270,7 +270,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void RetrievesIssueResolutions()
+        public void GetIssueResolutions()
         {
             var resolutions = _jira.GetIssueResolutions();
 

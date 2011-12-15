@@ -212,7 +212,7 @@ namespace Atlassian.Jira
                 var project = this.GetProjects().FirstOrDefault(p => p.Key.Equals(projectKey, StringComparison.OrdinalIgnoreCase));
                 if (project != null)
                 {
-                    projectId = project.Key;
+                    projectId = project.Id;
                 }
             }
 

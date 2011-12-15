@@ -93,10 +93,6 @@ namespace Atlassian.Jira.Test.Integration.Setup
             page.Elements.Find("allowRpcOn", MatchMethod.Literal).Click();
             page.Elements.Find("edit_property").Click();
 
-            // go to time tracking screen and enable
-            page.Navigate("secure/admin/TimeTrackingAdmin!default.jspa");
-            page.Elements.Find("activate_submit").Click();
-
             // Restore TestData
             page.Navigate("secure/admin/XmlRestore!default.jspa");
             File.Copy(
@@ -106,6 +102,10 @@ namespace Atlassian.Jira.Test.Integration.Setup
 
             page.Elements.Find("filename", MatchMethod.Literal).SetText("TestData.zip");
             page.Elements.Find("restore_submit").Click();
+
+            // go to time tracking screen and enable
+            page.Navigate("secure/admin/TimeTrackingAdmin!default.jspa");
+            page.Elements.Find("activate_submit").Click();
 
             Console.WriteLine("-------------------------------------------------------");
             Console.WriteLine("JIRA Setup Complete. You can now run the integration tests.");
