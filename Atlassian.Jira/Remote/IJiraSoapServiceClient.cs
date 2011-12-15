@@ -19,7 +19,7 @@ namespace Atlassian.Jira.Remote
         bool AddBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData);
         RemoteComment[] GetCommentsFromIssue(string token, string key);
         void AddComment(string token, string key, RemoteComment comment);
-        RemoteIssueType[] GetIssueTypes(string token, string projectKey);
+        RemoteIssueType[] GetIssueTypes(string token, string projectId);
         RemotePriority[] GetPriorities(string token);
         RemoteResolution[] GetResolutions(string token);
         RemoteStatus[] GetStatuses(string token);
@@ -31,5 +31,6 @@ namespace Atlassian.Jira.Remote
         RemoteWorklog AddWorklogAndRetainRemainingEstimate(string token, string key, RemoteWorklog worklog);
         RemoteWorklog AddWorklogWithNewRemainingEstimate(string token, string key, RemoteWorklog worklog, string newRemainingEstimate);
         RemoteWorklog[] GetWorkLogs(string token, string key);
+        RemoteProject[] GetProjects(string token);
     }
 }

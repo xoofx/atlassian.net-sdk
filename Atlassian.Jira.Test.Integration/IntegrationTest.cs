@@ -9,22 +9,14 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IntegrationTest
     {
-        private static IEnumerable<IssueType> _issueTypes = null;
-
         private readonly Jira _jira;
         private readonly Random _random;
-
 
         public IntegrationTest()
         {
             _jira = new Jira("http://localhost:2990/jira", "admin", "admin");
             _jira.Debug = true;
             _random = new Random();
-
-            if (_issueTypes == null)
-            {
-                _issueTypes = _jira.GetIssueTypes("TST");
-            }
         }
 
         [Fact]
@@ -517,6 +509,12 @@ namespace Atlassian.Jira.Test.Integration
             issue.AddWorklog("1h", WorklogStrategy.RetainRemainingEstimate);
             issue.AddWorklog("1m", WorklogStrategy.NewRemainingEstimate, "2d");
             Assert.Equal(3, issue.GetWorklogs().Count);
+        }
+
+        [Fact]
+        public void GetProjects()
+        {
+            Assert.Equal(1, _jira.GetProjects().Count());
         }
     }
 }

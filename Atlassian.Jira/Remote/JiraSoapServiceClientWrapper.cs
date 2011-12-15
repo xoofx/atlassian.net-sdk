@@ -73,15 +73,15 @@ namespace Atlassian.Jira.Remote
         }
 
 
-        public RemoteIssueType[] GetIssueTypes(string token, string projectKey)
+        public RemoteIssueType[] GetIssueTypes(string token, string projectId)
         {
-            if (String.IsNullOrEmpty(projectKey))
+            if (String.IsNullOrEmpty(projectId))
             {
                 return _client.getIssueTypes(token);
             }
             else
             {
-                return _client.getIssueTypesForProject(token, projectKey);
+                return _client.getIssueTypesForProject(token, projectId);
             }
         }
 
@@ -138,6 +138,11 @@ namespace Atlassian.Jira.Remote
         public RemoteWorklog[] GetWorkLogs(string token, string key)
         {
             return _client.getWorklogs(token, key);
+        }
+
+        public RemoteProject[] GetProjects(string token)
+        {
+            return _client.getProjectsNoSchemes(token);
         }
     }
 }

@@ -30,6 +30,7 @@ namespace Atlassian.Jira
         private IEnumerable<JiraNamedEntity> _cachedPriorities = null;
         private IEnumerable<JiraNamedEntity> _cachedStatuses = null;
         private IEnumerable<JiraNamedEntity> _cachedResolutions = null;
+        private IEnumerable<Project> _cachedProjects = null;
 
         /// <summary>
         /// Create a connection to a JIRA server with anonymous access
@@ -205,15 +206,25 @@ namespace Atlassian.Jira
         /// <returns>Collection of JIRA issue types</returns>
         public IEnumerable<IssueType> GetIssueTypes(string projectKey = null)
         {
-            var key = projectKey ?? ALL_PROJECTS_KEY;
-
-            if (!_cachedIssueTypes.ContainsKey(key))
+            string projectId = null;
+            if (projectKey != null)
             {
-                var token = GetAuthenticationToken();
-                _cachedIssueTypes.Add(key, _jiraSoapService.GetIssueTypes(token, projectKey).Select(t => new IssueType(t)));
+                var project = this.GetProjects().FirstOrDefault(p => p.Key.Equals(projectKey, StringComparison.OrdinalIgnoreCase));
+                if (project != null)
+                {
+                    projectId = project.Key;
+                }
             }
 
-            return _cachedIssueTypes[key];
+            projectKey = projectKey ?? ALL_PROJECTS_KEY;
+
+            if (!_cachedIssueTypes.ContainsKey(projectKey))
+            {
+                var token = GetAuthenticationToken();
+                _cachedIssueTypes.Add(projectKey, _jiraSoapService.GetIssueTypes(token, projectId).Select(t => new IssueType(t)));
+            }
+
+            return _cachedIssueTypes[projectKey];
         }
 
         /// <summary>
@@ -305,6 +316,21 @@ namespace Atlassian.Jira
                 _cachedCustomFields = _jiraSoapService.GetCustomFields(token).Select(f => new JiraNamedEntity(f));
             }
             return _cachedCustomFields;
+        }
+
+        /// <summary>
+        /// Returns all projects defined in JIRA
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<Project> GetProjects()
+        {
+            if (_cachedProjects == null)
+            {
+                var token = GetAuthenticationToken();
+                _cachedProjects = _jiraSoapService.GetProjects(token).Select(p => new Project(p));
+            }
+
+            return _cachedProjects;
         }
 
         internal IEnumerable<JiraNamedEntity> GetFieldsForEdit(string projectKey)
