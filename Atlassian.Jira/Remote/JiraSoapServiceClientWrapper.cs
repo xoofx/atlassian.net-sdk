@@ -75,7 +75,7 @@ namespace Atlassian.Jira.Remote
 
         public RemoteIssueType[] GetIssueTypes(string token, string projectKey)
         {
-            if (String.IsNullOrEmpty(null))
+            if (String.IsNullOrEmpty(projectKey))
             {
                 return _client.getIssueTypes(token);
             }
