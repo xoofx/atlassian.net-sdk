@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Remote;
 using System.Reflection;
 using System.IO;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Dynamic;
+using Atlassian.Jira.Remote;
+using Atlassian.Jira.Linq;
 
 namespace Atlassian.Jira
 {

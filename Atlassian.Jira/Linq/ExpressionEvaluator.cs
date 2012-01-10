@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 
-namespace Atlassian.Jira.Remote
+namespace Atlassian.Jira.Linq
 {
     /// <summary>
     /// Evaluates subtrees that contain local variables.

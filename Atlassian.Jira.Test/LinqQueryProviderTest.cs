@@ -6,6 +6,7 @@ using Xunit;
 using Atlassian.Jira.Remote;
 using Moq;
 using System.Linq.Expressions;
+using Atlassian.Jira.Linq;
 
 namespace Atlassian.Jira.Test
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Atlassian.Jira.Remote
+namespace Atlassian.Jira.Linq
 {
     /// <summary>
     /// Container for the supported JIRA operator strings.

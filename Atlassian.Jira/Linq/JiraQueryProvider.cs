@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 
-namespace Atlassian.Jira.Remote
+namespace Atlassian.Jira.Linq
 {
     public class JiraQueryProvider: IQueryProvider
     {

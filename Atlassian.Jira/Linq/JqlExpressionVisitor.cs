@@ -5,7 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Atlassian.Jira.Remote
+namespace Atlassian.Jira.Linq
 {
     public class JqlExpressionVisitor: ExpressionVisitor, IJqlExpressionVisitor
     {
