@@ -7,7 +7,6 @@ using System.Reflection;
 using System.IO;
 using System.Collections;
 using System.Collections.ObjectModel;
-using System.Dynamic;
 
 namespace Atlassian.Jira
 {
