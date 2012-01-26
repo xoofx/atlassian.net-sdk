@@ -28,9 +28,9 @@ namespace Atlassian.Jira
         private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
         private IEnumerable<JiraNamedEntity> _cachedCustomFields = null;
-        private IEnumerable<JiraNamedEntity> _cachedPriorities = null;
-        private IEnumerable<JiraNamedEntity> _cachedStatuses = null;
-        private IEnumerable<JiraNamedEntity> _cachedResolutions = null;
+        private IEnumerable<IssuePriority> _cachedPriorities = null;
+        private IEnumerable<IssueStatus> _cachedStatuses = null;
+        private IEnumerable<IssueResolution> _cachedResolutions = null;
         private IEnumerable<Project> _cachedProjects = null;
 
         /// <summary>
@@ -264,12 +264,12 @@ namespace Atlassian.Jira
         /// Returns all the issue priorities within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue priorities</returns>
-        public IEnumerable<JiraNamedEntity> GetIssuePriorities()
+        public IEnumerable<IssuePriority> GetIssuePriorities()
         {
             if (_cachedPriorities == null)
             {
                 var token = GetAuthenticationToken();
-                _cachedPriorities = _jiraSoapService.GetPriorities(token).Select(p => new JiraNamedEntity(p));
+                _cachedPriorities = _jiraSoapService.GetPriorities(token).Select(p => new IssuePriority(p));
             }
 
             return _cachedPriorities;
@@ -279,12 +279,12 @@ namespace Atlassian.Jira
         /// Returns all the issue statuses within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue statuses</returns>
-        public IEnumerable<JiraNamedEntity> GetIssueStatuses()
+        public IEnumerable<IssueStatus> GetIssueStatuses()
         {
             if (_cachedStatuses == null)
             {
                 var token = GetAuthenticationToken();
-                _cachedStatuses = _jiraSoapService.GetStatuses(token).Select(s => new JiraNamedEntity(s));
+                _cachedStatuses = _jiraSoapService.GetStatuses(token).Select(s => new IssueStatus(s));
             }
 
             return _cachedStatuses;
@@ -294,12 +294,12 @@ namespace Atlassian.Jira
         /// Returns all the issue resolutions within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue resolutions</returns>
-        public IEnumerable<JiraNamedEntity> GetIssueResolutions()
+        public IEnumerable<IssueResolution> GetIssueResolutions()
         {
             if (_cachedResolutions == null)
             {
                 var token = GetAuthenticationToken();
-                _cachedResolutions = _jiraSoapService.GetResolutions(token).Select(r => new JiraNamedEntity(r));
+                _cachedResolutions = _jiraSoapService.GetResolutions(token).Select(r => new IssueResolution(r));
             }
 
             return _cachedResolutions;
