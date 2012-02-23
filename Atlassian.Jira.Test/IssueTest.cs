@@ -538,6 +538,14 @@ namespace Atlassian.Jira.Test
             Assert.Equal("foobar", issue["customfield"]);
         }
 
+        [Fact]
+        public void Refresh_IfIssueNotCreated_ShouldThrowAnException()
+        {
+            var issue = CreateIssue();
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.Refresh());
+        }
+
         private Issue CreateIssue(string project = "TST")
         {
             return TestableJira.Create().CreateIssue(project);

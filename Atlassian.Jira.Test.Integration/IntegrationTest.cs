@@ -126,6 +126,27 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void UpdateIssueType()
+        {
+            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue
+            };
+            issue.SaveChanges();
+
+            //retrieve the issue from server and update
+            issue = _jira.GetIssue(issue.Key.Value);
+            issue.Type = "2";
+            issue.SaveChanges();
+
+            //retrieve again and verify
+            issue = _jira.GetIssue(issue.Key.Value);
+            Assert.Equal("2", issue.Type.Id);
+        }
+
+        [Fact]
         public void UpdateWithAllFieldsSet()
         {
             // arrange, create an issue to test.

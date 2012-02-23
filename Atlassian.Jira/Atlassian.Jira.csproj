@@ -87,6 +87,7 @@
     <Compile Include="ProjectVersionCollection.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Remote\RemoteFieldNameAttribute.cs" />
     <Compile Include="Remote\RemoteWorklogPatchBehavior.cs" />
     <Compile Include="WebClientWrapper.cs" />
     <Compile Include="Worklog.cs" />

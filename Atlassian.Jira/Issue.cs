@@ -80,6 +80,17 @@ namespace Atlassian.Jira
                 : new CustomFieldCollection(_jira, Project, _originalIssue.customFieldValues.Select(f => new CustomField(f.customfieldId, _jira) { Values = f.values }).ToList());
   
         }
+
+        /// <summary>
+        /// The JIRA server that created this issue
+        /// </summary>
+        public Jira Jira
+        {
+            get
+            {
+                return _jira;
+            }
+        }
        
         /// <summary>
         /// Brief one-line summary of the issue
@@ -149,6 +160,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The type of the issue
         /// </summary>
+        [RemoteFieldName("issuetype")]
         public IssueType Type { get; set; }
         
         /// <summary>
@@ -463,6 +475,9 @@ namespace Atlassian.Jira
             return new Worklog(remoteWorklog);
         }
 
+        /// <summary>
+        /// Retrieve worklogs for current issue
+        /// </summary>
         public ReadOnlyCollection<Worklog> GetWorklogs()
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
@@ -472,6 +487,21 @@ namespace Atlassian.Jira
 
             var token = _jira.GetAuthenticationToken();
             return _jira.RemoteSoapService.GetWorkLogs(token, _originalIssue.key).Select(w => new Worklog(w)).ToList().AsReadOnly();
+        }
+
+        /// <summary>
+        /// Updates all fields from server
+        /// </summary>
+        public void Refresh()
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to refresh, issue has not been saved to server.");
+            }
+
+            var token = _jira.GetAuthenticationToken();
+            var remoteIssue = _jira.RemoteSoapService.GetIssuesFromJqlSearch(token, "key = " + _originalIssue.key, 1).First();
+            Initialize(remoteIssue);
         }
 
         internal RemoteIssue ToRemote()
@@ -569,9 +599,17 @@ namespace Atlassian.Jira
 
                     if (remoteStringValue != localStringValue)
                     {
+                        var remoteFieldName = remoteProperty.Name;
+
+                        var remoteFieldNameAttr = localProperty.GetCustomAttributes(typeof(RemoteFieldNameAttribute), true).OfType<RemoteFieldNameAttribute>().FirstOrDefault();
+                        if (remoteFieldNameAttr != null)
+                        {
+                            remoteFieldName = remoteFieldNameAttr.Name;
+                        }
+
                         fields.Add(new RemoteFieldValue()
                         {
-                            id = remoteProperty.Name,
+                            id = remoteFieldName,
                             values = new string[1] { localStringValue }
                         });
                     }
