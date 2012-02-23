@@ -144,5 +144,10 @@ namespace Atlassian.Jira.Remote
         {
             return _client.getProjectsNoSchemes(token);
         }
+
+        public RemoteIssue CreateIssueWithParent(string token, RemoteIssue newIssue, string parentIssueKey)
+        {
+            return _client.createIssueWithParent(token, newIssue, parentIssueKey);
+        }
     }
 }

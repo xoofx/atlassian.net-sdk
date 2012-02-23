@@ -516,5 +516,23 @@ namespace Atlassian.Jira.Test.Integration
         {
             Assert.Equal(1, _jira.GetProjects().Count());
         }
+
+        [Fact]
+        public void AddIssueAsSubtask() 
+        {
+            var summaryValue = "Test issue as subtask " + _random.Next(int.MaxValue);
+
+            var issue = new Issue(_jira, "TST", "TST-1")
+            {
+                Type = "5", //subtask
+                Summary = summaryValue
+            };
+            issue.SaveChanges();
+
+            var subtasks = _jira.GetIssuesFromJql("project = TST and parent = TST-1");
+
+            Assert.True(subtasks.Any(s => s.Summary.Equals(summaryValue)));
+        }
+
     }
 }

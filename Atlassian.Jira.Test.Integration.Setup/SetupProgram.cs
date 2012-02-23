@@ -80,6 +80,31 @@ namespace Atlassian.Jira.Test.Integration.Setup
             Login(page);
 
             // Restore TestData
+            RestoreBackup(page, currentDir);
+
+            // login
+            Login(page);
+
+            // enable RPC
+            page.Navigate("secure/admin/EditApplicationProperties!default.jspa");
+            page.Elements.Find("allowRpcOn", MatchMethod.Literal).Click();
+            page.Elements.Find("edit_property").Click();
+
+            // enable time tracking
+            page.Navigate("secure/admin/TimeTrackingAdmin!default.jspa");
+            page.Elements.Find("activate_submit").Click();
+
+            // enable subtasks
+            page.Navigate("secure/admin/subtasks/ManageSubTasks.jspa");
+            page.Elements.Find("enable_subtasks").Click();
+
+            Console.WriteLine("-------------------------------------------------------");
+            Console.WriteLine("JIRA Setup Complete. You can now run the integration tests.");
+            Console.WriteLine("-------------------------------------------------------");
+        }
+
+        private static void RestoreBackup(HtmlPage page, string currentDir)
+        {
             page.Navigate("secure/admin/XmlRestore!default.jspa");
             File.Copy(
                 Path.Combine(currentDir, "TestData.zip"),
@@ -89,37 +114,23 @@ namespace Atlassian.Jira.Test.Integration.Setup
             page.Elements.Find("filename", MatchMethod.Literal).SetText("TestData.zip");
             page.Elements.Find("restore_submit").Click();
 
-            // login
-            Login(page);
-
-            // go to configuration screen and set RPC on
-            page.Navigate("secure/admin/EditApplicationProperties!default.jspa");
-            page.Elements.Find("allowRpcOn", MatchMethod.Literal).Click();
-            page.Elements.Find("edit_property").Click();
-
-            // go to time tracking screen and enable
-            page.Navigate("secure/admin/TimeTrackingAdmin!default.jspa");
-            page.Elements.Find("activate_submit").Click();
-
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("JIRA Setup Complete. You can now run the integration tests.");
-            Console.WriteLine("-------------------------------------------------------");
+            // TODO: proper wait  until import is complete
+            Thread.Sleep(15000);
         }
 
         private static void Login(HtmlPage page)
         {
-            page.Navigate("login.jsp");
+            var timeout = DateTime.Now.AddSeconds(10);
+            do
+            {
+                page.Navigate("login.jsp");
+            }
+            while (!page.Elements.Exists("login-form-username") && DateTime.Now < timeout);
 
             page.Elements.Find("login-form-username").SetText("admin");
             page.Elements.Find("login-form-password").SetText("admin");
             page.Elements.Find("login").Click();
-
-            // handle websudo
-            page.Navigate("secure/admin/ViewApplicationProperties.jspa");
-            page.Elements.Find("login-form-authenticatePassword").SetText("admin");
-            page.Elements.Find("authenticateButton").Click();
         }
-
 
         private static void StartJira(string currentDir)
         {

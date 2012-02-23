@@ -165,6 +165,16 @@ namespace Atlassian.Jira.Remote
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(AbstractRemoteEntity))]
         createIssueResponse createIssue(createIssueRequest request);
 
+        // CODEGEN: Generating message contract since the wrapper namespace (http://soap.rpc.jira.atlassian.com) of message createIssueWithParentRequest does not match the default value (https://jira.atlassian.com/rpc/soap/jirasoapservice-v2)
+        [System.ServiceModel.OperationContractAttribute(Action = "", ReplyAction = "*")]
+        [System.ServiceModel.XmlSerializerFormatAttribute(Style = System.ServiceModel.OperationFormatStyle.Rpc, Use = System.ServiceModel.OperationFormatUse.Encoded)]
+        [System.ServiceModel.ServiceKnownTypeAttribute(typeof(RemoteRoleActor))]
+        [System.ServiceModel.ServiceKnownTypeAttribute(typeof(RemoteFieldValue))]
+        [System.ServiceModel.ServiceKnownTypeAttribute(typeof(RemoteCustomFieldValue))]
+        [System.ServiceModel.ServiceKnownTypeAttribute(typeof(RemotePermissionMapping))]
+        [System.ServiceModel.ServiceKnownTypeAttribute(typeof(AbstractRemoteEntity))]
+        createIssueWithParentResponse createIssueWithParent(createIssueWithParentRequest request);
+
         // CODEGEN: Generating message contract since the wrapper namespace (http://soap.rpc.jira.atlassian.com) of message updateIssueRequest does not match the default value (http://jira.atlassian.com/rpc/soap/jirasoapservice-v2)
         [System.ServiceModel.OperationContractAttribute(Action = "", ReplyAction = "*")]
         [System.ServiceModel.XmlSerializerFormatAttribute(Style = System.ServiceModel.OperationFormatStyle.Rpc, Use = System.ServiceModel.OperationFormatUse.Encoded)]
@@ -4044,6 +4054,52 @@ namespace Atlassian.Jira.Remote
         public createIssueResponse(RemoteIssue createIssueReturn)
         {
             this.createIssueReturn = createIssueReturn;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName = "createIssueWithParent", WrapperNamespace = "http://soap.rpc.jira.atlassian.com", IsWrapped = true)]
+    public partial class createIssueWithParentRequest
+    {
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace = "", Order = 0)]
+        public string in0;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace = "", Order = 1)]
+        public RemoteIssue in1;
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace = "", Order = 2)]
+        public string in2;
+
+        public createIssueWithParentRequest()
+        {
+        }
+
+        public createIssueWithParentRequest(string in0, RemoteIssue in1, string in2)
+        {
+            this.in0 = in0;
+            this.in1 = in1;
+            this.in2 = in2;
+        }
+    }
+
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
+    [System.ServiceModel.MessageContractAttribute(WrapperName = "createIssueWithParentResponse", WrapperNamespace = "https://jira.atlassian.com/rpc/soap/jirasoapservice-v2", IsWrapped = true)]
+    public partial class createIssueWithParentResponse
+    {
+
+        [System.ServiceModel.MessageBodyMemberAttribute(Namespace = "", Order = 0)]
+        public RemoteIssue createIssueWithParentReturn;
+
+        public createIssueWithParentResponse()
+        {
+        }
+
+        public createIssueWithParentResponse(RemoteIssue createIssueWithParentReturn)
+        {
+            this.createIssueWithParentReturn = createIssueWithParentReturn;
         }
     }
 
@@ -8168,6 +8224,22 @@ namespace Atlassian.Jira.Remote
             inValue.in1 = in1;
             createIssueResponse retVal = ((JiraSoapService)(this)).createIssue(inValue);
             return retVal.createIssueReturn;
+        }
+
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        createIssueWithParentResponse JiraSoapService.createIssueWithParent(createIssueWithParentRequest request)
+        {
+            return base.Channel.createIssueWithParent(request);
+        }
+
+        public RemoteIssue createIssueWithParent(string in0, RemoteIssue in1, string in2)
+        {
+            createIssueWithParentRequest inValue = new createIssueWithParentRequest();
+            inValue.in0 = in0;
+            inValue.in1 = in1;
+            inValue.in2 = in2;
+            createIssueWithParentResponse retVal = ((JiraSoapService)(this)).createIssueWithParent(inValue);
+            return retVal.createIssueWithParentReturn;
         }
 
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]

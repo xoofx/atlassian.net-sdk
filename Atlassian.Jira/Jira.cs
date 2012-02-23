@@ -194,10 +194,9 @@ namespace Atlassian.Jira
         /// <summary>
         /// Returns a new issue that when saved will be created on the remote JIRA server
         /// </summary>
-        /// <returns></returns>
-        public Issue CreateIssue(string project)
+        public Issue CreateIssue(string project, string parentIssueKey = null)
         {
-            return new Issue(this, project);
+            return new Issue(this, project, parentIssueKey);
         }
 
         /// <summary>

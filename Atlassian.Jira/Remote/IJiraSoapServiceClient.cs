@@ -14,6 +14,7 @@ namespace Atlassian.Jira.Remote
         string Login(string username, string password);
         RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults);
         RemoteIssue CreateIssue(string token, RemoteIssue newIssue);
+        RemoteIssue CreateIssueWithParent(string token, RemoteIssue newIssue, string parentIssueKey);
         RemoteIssue UpdateIssue(string token, string key, RemoteFieldValue[] fields);
         RemoteAttachment[] GetAttachmentsFromIssue(string token, string key);
         bool AddBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData);

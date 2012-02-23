@@ -18,7 +18,7 @@ namespace Atlassian.Jira
     public class Issue : IRemoteIssueFieldProvider
     {
         private readonly Jira _jira;
-
+        private readonly string _parentIssueKey;
 
         private ComparableString _key;
         private string _project;
@@ -31,16 +31,15 @@ namespace Atlassian.Jira
         private ProjectComponentCollection _components = null;
         private CustomFieldCollection _customFields = null;
 
-
-        public Issue(Jira jira, string projectKey)
-            : this(jira, new RemoteIssue() { project = projectKey })
+        public Issue(Jira jira, string projectKey, string parentIssueKey = null)
+            : this(jira, new RemoteIssue() { project = projectKey }, parentIssueKey)
         {
         }
 
-        internal Issue(Jira jira, RemoteIssue remoteIssue)
+        internal Issue(Jira jira, RemoteIssue remoteIssue, string parentIssueKey = null)
         {
             _jira = jira;
-           
+            _parentIssueKey = parentIssueKey;
             Initialize(remoteIssue);
         }
 
@@ -283,8 +282,15 @@ namespace Atlassian.Jira
                 var token = _jira.GetAuthenticationToken();
                 var remoteIssue = this.ToRemote();
 
-                remoteIssue = _jira.RemoteSoapService.CreateIssue(token, remoteIssue);
-                
+                if (String.IsNullOrEmpty(_parentIssueKey))
+                {
+                    remoteIssue = _jira.RemoteSoapService.CreateIssue(token, remoteIssue);
+                }
+                else
+                {
+                    remoteIssue = _jira.RemoteSoapService.CreateIssueWithParent(token, remoteIssue, _parentIssueKey);
+                }
+
                 Initialize(remoteIssue);
             }
             else
