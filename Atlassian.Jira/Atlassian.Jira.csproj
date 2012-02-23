@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attachment.cs" />
+    <Compile Include="AttachmentInfo.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableString.cs" />
     <Compile Include="IssueStatus.cs" />
