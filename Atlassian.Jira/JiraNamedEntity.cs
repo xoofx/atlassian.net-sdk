@@ -60,7 +60,7 @@ namespace Atlassian.Jira
             }
         }
 
-        internal string Load(Jira jira, string projectKey)
+        internal JiraNamedEntity Load(Jira jira, string projectKey)
         {
             var entity = GetEntities(jira, projectKey).FirstOrDefault(e => e.Name.Equals(_name, StringComparison.OrdinalIgnoreCase));
 
@@ -69,7 +69,7 @@ namespace Atlassian.Jira
                 _id = entity._id;
                 _name = entity._name;
             }
-            return _id;
+            return this;
         }
 
         protected virtual IEnumerable<JiraNamedEntity> GetEntities(Jira jira, string projectKey = null)

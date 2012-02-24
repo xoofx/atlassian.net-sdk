@@ -172,6 +172,50 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void GetUpdatedFields_IfJiraNamedPropertyWithId_ReturnField()
+        {
+            var issue = CreateIssue();
+            issue.Type = "5";
+
+            var result = GetUpdatedFieldsForIssue(issue);
+            Assert.Equal(1, result.Length);
+            Assert.Equal("5", result[0].values[0]);
+        }
+
+        [Fact]
+        public void GetUpdatedFieds_IfJiraNamedPropertyWithName_ReturnsFieldWithIdInferred()
+        {
+            var jira = TestableJira.Create();
+            jira.SoapService.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteIssueType[]{
+                new RemoteIssueType() { id ="2", name="Task" }
+            });
+            var issue = jira.CreateIssue("FOO");
+            issue.Type = "Task";
+
+            var result = GetUpdatedFieldsForIssue(issue);
+            Assert.Equal(1, result.Length);
+            Assert.Equal("2", result[0].values[0]);
+        }
+
+        [Fact]
+        public void GetUpdateFields_IfJiraNamedPropertyWithNameNotChanged_ReturnsNoFieldsChanged()
+        {
+            var jira = TestableJira.Create();
+            jira.SoapService.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteIssueType[]{
+                new RemoteIssueType() { id ="5", name="Task" }
+            });
+            var remoteIssue = new RemoteIssue()
+            {
+                type = "5",
+            };
+
+            var issue = remoteIssue.ToLocal(jira);
+            issue.Type = "Task";
+
+            Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
+        }
+
+        [Fact]
         public void GetUpdatedFields_ReturnEmptyIfNothingChanged()
         {
             var issue = CreateIssue();
@@ -197,8 +241,8 @@ namespace Atlassian.Jira.Test
             issue.Assignee = "foo";
             issue.Environment = "foo";
             issue.Reporter = "foo";
-            issue.Status = "foo";
-            issue.Type = "foo";
+            issue.Status = "1";
+            issue.Type = "2";
 
             Assert.Equal(7, GetUpdatedFieldsForIssue(issue).Length);
         }
@@ -224,12 +268,12 @@ namespace Atlassian.Jira.Test
         {
             var remoteIssue = new RemoteIssue()
             {
-                priority = "High",
+                priority = "5",
             };
 
             var issue = remoteIssue.ToLocal();
 
-            issue.Priority = "High";
+            issue.Priority = "5";
             issue.Resolution = null;
 
             Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
@@ -239,7 +283,7 @@ namespace Atlassian.Jira.Test
         public void GetUpdateFields_IfComparable_ReturnsFieldsThatChanged()
         {
             var issue = CreateIssue();
-            issue.Priority = "High";
+            issue.Priority = "5";
 
             Assert.Equal(1, GetUpdatedFieldsForIssue(issue).Length);
             

@@ -522,22 +522,22 @@ namespace Atlassian.Jira
 
             if (Status != null)
             {
-                remote.status = Status.Id ?? Status.Load(_jira, Project);
+                remote.status = Status.Id ?? Status.Load(_jira, Project).Id;
             }
 
             if (Resolution != null)
             {
-                remote.resolution = Resolution.Id ?? Resolution.Load(_jira, Project);
+                remote.resolution = Resolution.Id ?? Resolution.Load(_jira, Project).Id;
             }
 
             if (Priority != null)
             {
-                remote.priority = Priority.Id ?? Priority.Load(_jira, Project);
+                remote.priority = Priority.Id ?? Priority.Load(_jira, Project).Id;
             }
 
             if (Type != null)
             {
-                remote.type = Type.Id ?? Type.Load(_jira, Project);
+                remote.type = Type.Id ?? Type.Load(_jira, Project).Id;
             }
 
             if (this.AffectsVersions.Count > 0)
@@ -619,7 +619,7 @@ namespace Atlassian.Jira
             return fields.ToArray();
         }
 
-        private static string GetStringValueForProperty(object container, PropertyInfo property)
+        private string GetStringValueForProperty(object container, PropertyInfo property)
         {
             var value = property.GetValue(container, null);
 
@@ -627,6 +627,15 @@ namespace Atlassian.Jira
             {
                 var dateValue = (DateTime?)value;
                 return dateValue.HasValue ? dateValue.Value.ToString("d/MMM/yy") : null;
+            }
+            else if (typeof(JiraNamedEntity).IsAssignableFrom(property.PropertyType))
+            {
+                var jiraNamedEntity = property.GetValue(container, null) as JiraNamedEntity;
+                if (jiraNamedEntity != null)
+                {
+                    return jiraNamedEntity.Id ?? jiraNamedEntity.Load(_jira, this.Project).Id;
+                }
+                return null;
             }
             else
             {

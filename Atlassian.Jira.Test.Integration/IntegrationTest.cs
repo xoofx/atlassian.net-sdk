@@ -147,6 +147,26 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void UpdateIssueWithInferredType()
+        {
+            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "Bug",
+                Summary = summaryValue
+            };
+            issue.SaveChanges();
+
+            //  update issue
+            issue.Type = "Task";
+            issue.SaveChanges();
+
+            //retrieve again and verify
+            issue = _jira.GetIssue(issue.Key.Value);
+            Assert.Equal("Task", issue.Type.Name);
+        }
+
+        [Fact]
         public void UpdateWithAllFieldsSet()
         {
             // arrange, create an issue to test.
