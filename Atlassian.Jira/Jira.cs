@@ -333,6 +333,32 @@ namespace Atlassian.Jira
             return _cachedProjects;
         }
 
+        public void WithToken(Action<string> action)
+        {
+            if (String.IsNullOrEmpty(_token))
+            {
+                _token = _jiraSoapService.Login(_username, _password);
+            }
+
+            try
+            {
+                action(_token);
+            }
+            catch(Exception){
+                //if (AllowAnonymous())
+                //{
+                //    throw;
+                //}
+                _token = _jiraSoapService.Login(_username, _password);
+                action(_token);
+            }
+        }
+
+        private bool AllowAnonymous()
+        {
+             return String.IsNullOrEmpty(_username) && String.IsNullOrEmpty(_password);
+        }
+
         internal IEnumerable<JiraNamedEntity> GetFieldsForEdit(string projectKey)
         {
             if (!_cachedFieldsForEdit.ContainsKey(projectKey))
