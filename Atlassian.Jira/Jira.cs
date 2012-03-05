@@ -15,6 +15,7 @@ namespace Atlassian.Jira
     {
         private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
         private const string ALL_PROJECTS_KEY = "[ALL_PROJECTS]";
+        private const string REMOTE_AUTH_EXCEPTION_STRING = "com.atlassian.jira.rpc.exception.RemoteAuthenticationException";
 
         private readonly JiraQueryProvider _provider;
         private readonly IJiraSoapServiceClient _jiraSoapService;
@@ -378,7 +379,8 @@ namespace Atlassian.Jira
             }
             catch(FaultException fe)
             {
-                if (_isAnonymous || !fe.Message.Contains("com.atlassian.jira.rpc.exception.RemoteAuthenticationException"))
+                if (_isAnonymous 
+                    || fe.Message.IndexOf(REMOTE_AUTH_EXCEPTION_STRING, StringComparison.OrdinalIgnoreCase) < 0)
                 {
                     throw;
                 }
