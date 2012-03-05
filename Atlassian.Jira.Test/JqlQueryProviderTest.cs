@@ -10,7 +10,7 @@ using Atlassian.Jira.Linq;
 
 namespace Atlassian.Jira.Test
 {
-    public class LinqQueryProviderTest
+    public class JqlQueryProviderTest
     {
         private Mock<IJiraSoapServiceClient> _soapClient;
 
