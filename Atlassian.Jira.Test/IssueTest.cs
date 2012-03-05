@@ -600,28 +600,4 @@ namespace Atlassian.Jira.Test
             return ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
         }
     }
-
-    public class TestableJira : Jira
-    {
-        public Mock<IJiraSoapServiceClient> SoapService;
-        public Mock<IFileSystem> FileSystem;
-
-        public static string User = "user";
-        public static string Password = "pass";
-        public static string Token = "token";
-
-        private TestableJira(Mock<IJiraSoapServiceClient> soapService, Mock<IFileSystem> fileSystem)
-            : base(null, soapService.Object, fileSystem.Object, User, Password)
-        {
-            SoapService = soapService;
-            FileSystem = fileSystem;
-            SoapService.Setup(j => j.Login(User, Password)).Returns(Token);
-        }
-
-        public static TestableJira Create()
-        {
-            return new TestableJira(new Mock<IJiraSoapServiceClient>(), new Mock<IFileSystem>());
-        }
-    }
-    
 }
