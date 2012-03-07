@@ -51,6 +51,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ComparableStringTest.cs" />
+    <Compile Include="CustomFieldCollectionTest.cs" />
+    <Compile Include="CustomFieldTest.cs" />
     <Compile Include="IssueTest.cs" />
     <Compile Include="JiraTests.cs" />
     <Compile Include="JqlQueryProviderTest.cs" />

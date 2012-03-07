@@ -13,6 +13,7 @@ namespace Atlassian.Jira
     {
         private readonly Jira _jira;
         private readonly string _id;
+        private readonly string _projectKey;
 
         private string _name;
 
@@ -54,7 +55,7 @@ namespace Atlassian.Jira
             {
                 if (String.IsNullOrEmpty(_name)) 
                 {
-                    _name = _jira.GetCustomFields().First(f => f.Id == _id).Name;
+                    _name = _jira.GetFieldsForEdit(.First(f => f.Id == _id).Name;
                 }
 
                 return _name; 
