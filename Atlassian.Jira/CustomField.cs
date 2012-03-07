@@ -17,14 +17,15 @@ namespace Atlassian.Jira
 
         private string _name;
 
-        internal CustomField(string id, Jira jira)
+        internal CustomField(string id, string projectKey, Jira jira)
         {
             _id = id;
             _jira = jira;
+            _projectKey = projectKey;
         }
 
-        internal CustomField(string id, string name, Jira jira)
-            : this(id, jira)
+        internal CustomField(string id, string name, string projectKey, Jira jira)
+            : this(id, projectKey, jira)
         {
             _name = name;
         }
@@ -55,7 +56,7 @@ namespace Atlassian.Jira
             {
                 if (String.IsNullOrEmpty(_name)) 
                 {
-                    _name = _jira.GetFieldsForEdit(.First(f => f.Id == _id).Name;
+                    _name = _jira.GetFieldsForEdit(_projectKey).First(f => f.Id == _id).Name;
                 }
 
                 return _name; 

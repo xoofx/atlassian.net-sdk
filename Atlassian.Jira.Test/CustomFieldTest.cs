@@ -37,7 +37,7 @@ namespace Atlassian.Jira.Test
             }.ToLocal(jira);
 
             //assert
-            Assert.Equal("abc", issue.CustomFields[0].Name);
+            Assert.Equal("CustomField", issue.CustomFields[0].Name);
         }
     }
 }
