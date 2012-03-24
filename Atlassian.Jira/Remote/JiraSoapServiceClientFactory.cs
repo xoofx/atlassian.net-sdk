@@ -41,8 +41,12 @@ namespace Atlassian.Jira.Remote
             }
             binding.TransferMode = TransferMode.Buffered;
             binding.UseDefaultWebProxy = true;
-            binding.MaxReceivedMessageSize = 2147483647;
-            binding.ReaderQuotas = new XmlDictionaryReaderQuotas() { MaxStringContentLength = 2147483647 };
+            binding.MaxReceivedMessageSize = int.MaxValue;
+            binding.ReaderQuotas = new XmlDictionaryReaderQuotas() 
+            { 
+                MaxStringContentLength = int.MaxValue,
+                MaxNameTableCharCount = int.MaxValue,
+            };
             binding.Security.Message.ClientCredentialType = BasicHttpMessageCredentialType.UserName;
 
             var endpoint = new EndpointAddress(endPointUri);
