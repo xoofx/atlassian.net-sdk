@@ -150,7 +150,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Returns issues that matched the specified filter
+        /// Returns issues that match the specified filter
         /// </summary>
         /// <param name="filterName">The name of the filter used for the search</param>
         /// <param name="start">The place in the result set to use as the first issue returned</param>
