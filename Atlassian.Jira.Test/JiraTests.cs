@@ -5,11 +5,45 @@ using System.Text;
 using Xunit;
 using Moq;
 using System.ServiceModel;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira.Test
 {
     public class JiraTests
     {
+        public class GetIssuesFromFilter
+        {
+            [Fact]
+            public void IfFilterNotFoundShouldThrowException()
+            {
+                var jira = TestableJira.Create();
+
+                Assert.Throws(typeof(InvalidOperationException), () => jira.GetIssuesFromFilter("foo"));
+            }
+
+            [Fact]
+            public void RetrievesFilterIdFromServer()
+            {
+                var jira = TestableJira.Create();
+                jira.SoapService.Setup(s => s.GetFavouriteFilters(It.IsAny<string>()))
+                                             .Returns(new RemoteFilter[1] { new RemoteFilter() { name="thefilter", id="123"}});
+                jira.GetIssuesFromFilter("thefilter", 100, 200);
+
+                jira.SoapService.Verify(s => s.GetIssuesFromFilterWithLimit(It.IsAny<string>(), "123", 100, 200));
+            }
+
+            [Fact]
+            public void UsesDefaultsIfNoneProvided()
+            {
+                var jira = TestableJira.Create();
+                jira.SoapService.Setup(s => s.GetFavouriteFilters(It.IsAny<string>()))
+                                             .Returns(new RemoteFilter[1] { new RemoteFilter() { name = "thefilter", id = "123" } });
+                jira.GetIssuesFromFilter("thefilter");
+
+                jira.SoapService.Verify(s => s.GetIssuesFromFilterWithLimit(It.IsAny<string>(), "123", 0, 20));
+            }
+        }
+
         public class WithToken_Anonymous
         {
             [Fact]
