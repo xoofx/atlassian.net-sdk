@@ -1,4 +1,4 @@
-﻿1. Install the Atlassian Plugin SDK 3.3 
+﻿1. Install the Atlassian Plugin SDK 3.8
 	Follow instructions here: http://confluence.atlassian.com/display/DEVNET/Setting+up+your+Plugin+Development+Environment
 
 2. Start Jira Server
