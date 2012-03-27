@@ -30,6 +30,7 @@ namespace Atlassian.Jira
         private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
         private IEnumerable<JiraNamedEntity> _cachedCustomFields = null;
+        private IEnumerable<JiraNamedEntity> _cachedFilters = null;
         private IEnumerable<IssuePriority> _cachedPriorities = null;
         private IEnumerable<IssueStatus> _cachedStatuses = null;
         private IEnumerable<IssueResolution> _cachedResolutions = null;
@@ -146,6 +147,27 @@ namespace Atlassian.Jira
             return (from i in Issues
                     where i.Key == key
                     select i).First();
+        }
+
+        /// <summary>
+        /// Returns issues that matched the specified filter
+        /// </summary>
+        /// <param name="filterName">The name of the filter used for the search</param>
+        /// <param name="start">The place in the result set to use as the first issue returned</param>
+        /// <param name="maxResults">The maximum number of issues to return</param>
+        public IEnumerable<Issue> GetIssuesFromFilter(string filterName, int start = 0, int? maxResults = null)
+        {
+            var filter = this.GetFilters().FirstOrDefault(f => f.Name.Equals(filterName, StringComparison.OrdinalIgnoreCase));
+
+            if (filter == null)
+            {
+                throw new InvalidOperationException(String.Format("Filter with name '{0}' was not found", filterName));
+            }
+
+            return WithToken(token =>
+            {
+                return _jiraSoapService.GetIssuesFromFilterWithLimit(token, filter.Id, start, maxResults ?? this.MaxIssuesPerRequest).Select(i => new Issue(this, i));
+            });
         }
 
         /// <summary>
@@ -326,9 +348,24 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns the favourite filters for the user
+        /// </summary>
+        public IEnumerable<JiraNamedEntity> GetFilters()
+        {
+            if (_cachedFilters == null)
+            {
+                WithToken(token =>
+                {
+                    _cachedFilters = _jiraSoapService.GetFavouriteFilters(token).Select(f => new JiraNamedEntity(f));
+                });
+            }
+
+            return _cachedFilters;
+        }
+
+        /// <summary>
         /// Returns all projects defined in JIRA
         /// </summary>
-        /// <returns></returns>
         public IEnumerable<Project> GetProjects()
         {
             if (_cachedProjects == null)

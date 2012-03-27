@@ -149,5 +149,15 @@ namespace Atlassian.Jira.Remote
         {
             return _client.createIssueWithParent(token, newIssue, parentIssueKey);
         }
+
+        public RemoteFilter[] GetFavouriteFilters(string token)
+        {
+            return _client.getFavouriteFilters(token);
+        }
+
+        public RemoteIssue[] GetIssuesFromFilterWithLimit(string token, string filterId, int offset, int maxResults)
+        {
+            return _client.getIssuesFromFilterWithLimit(token, filterId, offset, maxResults);
+        }
     }
 }

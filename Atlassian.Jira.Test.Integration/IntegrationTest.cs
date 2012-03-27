@@ -20,6 +20,24 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void GetFilters()
+        {
+            var filters = _jira.GetFilters();
+
+            Assert.Equal(1, filters.Count());
+            Assert.Equal("One Issue Filter", filters.First().Name);
+        }
+
+        [Fact]
+        public void GetIssuesFromFilter()
+        {
+            var issues = _jira.GetIssuesFromFilter("One Issue Filter");
+
+            Assert.Equal(1, issues.Count());
+            Assert.Equal("TST-1", issues.First().Key.Value);
+        }
+
+        [Fact]
         public void QueryWithZeroResults()
         {
             var issues = from i in _jira.Issues

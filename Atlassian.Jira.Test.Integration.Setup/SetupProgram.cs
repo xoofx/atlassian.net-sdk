@@ -49,7 +49,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
             try
             {
                 page.Navigate("login.jsp");
-                return page.Elements.Find("h2", 0).CachedInnerText.Trim().Equals("Welcome to Your Company JIRA", StringComparison.OrdinalIgnoreCase);
+                return page.Elements.Find("h2", 0).CachedInnerText.Trim().StartsWith("Welcome", StringComparison.OrdinalIgnoreCase);
             }
             catch
             {
@@ -57,8 +57,6 @@ namespace Atlassian.Jira.Test.Integration.Setup
 
             return false;
         }
-
-
 
         private static void SetupTestData(string currentDir)
         {
@@ -93,10 +91,6 @@ namespace Atlassian.Jira.Test.Integration.Setup
             // enable time tracking
             page.Navigate("secure/admin/TimeTrackingAdmin!default.jspa");
             page.Elements.Find("activate_submit").Click();
-
-            // enable subtasks
-            page.Navigate("secure/admin/subtasks/ManageSubTasks.jspa");
-            page.Elements.Find("enable_subtasks").Click();
 
             Console.WriteLine("-------------------------------------------------------");
             Console.WriteLine("JIRA Setup Complete. You can now run the integration tests.");

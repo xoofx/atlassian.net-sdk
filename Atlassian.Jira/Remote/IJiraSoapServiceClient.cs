@@ -33,5 +33,7 @@ namespace Atlassian.Jira.Remote
         RemoteWorklog AddWorklogWithNewRemainingEstimate(string token, string key, RemoteWorklog worklog, string newRemainingEstimate);
         RemoteWorklog[] GetWorkLogs(string token, string key);
         RemoteProject[] GetProjects(string token);
+        RemoteFilter[] GetFavouriteFilters(string token);
+        RemoteIssue[] GetIssuesFromFilterWithLimit(string token, string filterId, int offset, int maxResults);
     }
 }
