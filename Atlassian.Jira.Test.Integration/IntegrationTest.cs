@@ -20,7 +20,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        void ResolveIssue()
+        void Transition_ResolveIssue()
         {
             var issue = _jira.CreateIssue("TST");
             issue.Summary = "Issue to resolve " + _random.Next(int.MaxValue);
@@ -31,6 +31,21 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Equal("Resolved", issue.Status.Name);
             Assert.Equal("Fixed", issue.Resolution.Name);
+        }
+
+        [Fact]
+        void Transition_ResolveIssue_AsWontFix()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue to resolve " + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            issue.Resolution = "Won't Fix";
+            issue.WorkflowTransition("Resolve Issue");
+
+            Assert.Equal("Resolved", issue.Status.Name);
+            Assert.Equal("Won't Fix", issue.Resolution.Name);
         }
 
         [Fact]

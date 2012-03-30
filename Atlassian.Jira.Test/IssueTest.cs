@@ -240,8 +240,10 @@ namespace Atlassian.Jira.Test
             issue.Environment = "foo";
             issue.Reporter = "foo";
             issue.Type = "2";
+            issue.Resolution = "3";
+            issue.Priority = "4";
 
-            Assert.Equal(6, GetUpdatedFieldsForIssue(issue).Length);
+            Assert.Equal(8, GetUpdatedFieldsForIssue(issue).Length);
         }
 
         [Fact]

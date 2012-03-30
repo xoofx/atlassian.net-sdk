@@ -150,7 +150,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Record of the issue's resolution, if the issue has been resolved or closed
         /// </summary>
-        public IssueResolution Resolution { get; internal set; }
+        public IssueResolution Resolution { get; set; }
 
         /// <summary>
         /// The stage the issue is currently at in its lifecycle.
