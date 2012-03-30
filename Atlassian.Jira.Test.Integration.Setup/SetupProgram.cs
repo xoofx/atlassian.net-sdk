@@ -88,10 +88,6 @@ namespace Atlassian.Jira.Test.Integration.Setup
             page.Elements.Find("allowRpcOn", MatchMethod.Literal).Click();
             page.Elements.Find("edit_property").Click();
 
-            // enable time tracking
-            page.Navigate("secure/admin/TimeTrackingAdmin!default.jspa");
-            page.Elements.Find("activate_submit").Click();
-
             Console.WriteLine("-------------------------------------------------------");
             Console.WriteLine("JIRA Setup Complete. You can now run the integration tests.");
             Console.WriteLine("-------------------------------------------------------");
