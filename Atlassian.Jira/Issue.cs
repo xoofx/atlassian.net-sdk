@@ -155,7 +155,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The stage the issue is currently at in its lifecycle.
         /// </summary>
-        public IssueStatus Status { get; internal set; }
+        public IssueStatus Status { get; set; }
 
         /// <summary>
         /// The type of the issue
