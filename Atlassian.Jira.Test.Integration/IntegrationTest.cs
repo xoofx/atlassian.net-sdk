@@ -27,7 +27,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.Type = "Bug";
             issue.SaveChanges();
 
-            issue.WorkflowTransition("Resolve Issue");
+            issue.WorkflowTransition(WorkflowActions.Resolve);
 
             Assert.Equal("Resolved", issue.Status.Name);
             Assert.Equal("Fixed", issue.Resolution.Name);
@@ -42,7 +42,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             issue.Resolution = "Won't Fix";
-            issue.WorkflowTransition("Resolve Issue");
+            issue.WorkflowTransition(WorkflowActions.Resolve);
 
             Assert.Equal("Resolved", issue.Status.Name);
             Assert.Equal("Won't Fix", issue.Resolution.Name);
