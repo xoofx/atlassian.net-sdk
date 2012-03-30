@@ -20,6 +20,20 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        void ResolveIssue()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue to resolve " + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            issue.WorkflowTransition("Resolve Issue");
+
+            Assert.Equal("Resolved", issue.Status.Name);
+            Assert.Equal("Fixed", issue.Resolution.Name);
+        }
+
+        [Fact]
         public void GetFilters()
         {
             var filters = _jira.GetFilters();

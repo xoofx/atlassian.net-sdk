@@ -159,5 +159,15 @@ namespace Atlassian.Jira.Remote
         {
             return _client.getIssuesFromFilterWithLimit(token, filterId, offset, maxResults);
         }
+
+        public RemoteNamedObject[] GetAvailableActions(string token, string issueKey)
+        {
+            return _client.getAvailableActions(token, issueKey);
+        }
+
+        public RemoteIssue ProgressWorkflowAction(string token, string issueKey, string actionId, RemoteFieldValue[] remoteFieldValues)
+        {
+            return _client.progressWorkflowAction(token, issueKey, actionId, remoteFieldValues);
+        }
     }
 }

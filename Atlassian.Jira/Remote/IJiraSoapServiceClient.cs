@@ -35,5 +35,7 @@ namespace Atlassian.Jira.Remote
         RemoteProject[] GetProjects(string token);
         RemoteFilter[] GetFavouriteFilters(string token);
         RemoteIssue[] GetIssuesFromFilterWithLimit(string token, string filterId, int offset, int maxResults);
+        RemoteNamedObject[] GetAvailableActions(string token, string issueKey);
+        RemoteIssue ProgressWorkflowAction(string token, string issueKey, string actionId, RemoteFieldValue[] remoteFieldValues);
     }
 }

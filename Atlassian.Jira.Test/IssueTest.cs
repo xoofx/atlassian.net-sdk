@@ -381,6 +381,37 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void Transition_IfIssueNotCreated_ShouldThrowAnException()
+        {
+            var issue = CreateIssue();
+            Assert.Throws(typeof(InvalidOperationException), () => issue.WorkflowTransition("foo"));
+        }
+
+        [Fact]
+        public void Transition_IfTransitionNotFound_ShouldThrowAnException()
+        {
+            var jira = TestableJira.Create();
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+            Assert.Throws(typeof(InvalidOperationException), () => issue.WorkflowTransition("foo"));
+        }
+
+        [Fact]
+        public void Transition_CallsProgressWorkflowAction()
+        {
+            var jira = TestableJira.Create();
+            var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+            jira.SoapService.Setup(s => s.GetAvailableActions(It.IsAny<string>(), "key"))
+                            .Returns(new RemoteNamedObject[1] { new RemoteNamedObject() { id="123", name="action" } });
+            jira.SoapService.Setup(s => s.ProgressWorkflowAction(It.IsAny<string>(), "key", "123", It.IsAny<RemoteFieldValue[]>()))
+                            .Returns(new RemoteIssue() { status = "456" });
+
+            issue.WorkflowTransition("action");
+
+            Assert.Equal("456", issue.Status.Id);
+        }
+
+        [Fact]
         public void AddAttachment_IfIssueNotCreated_ShouldThrowAnException()
         {
             var issue = CreateIssue();

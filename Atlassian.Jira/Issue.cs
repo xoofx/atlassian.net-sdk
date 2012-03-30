@@ -309,11 +309,39 @@ namespace Atlassian.Jira
             }
             else
             {
-                SaveRemoteFields(((IRemoteIssueFieldProvider)this).GetRemoteFields());
+                UpdateRemoteFields(((IRemoteIssueFieldProvider)this).GetRemoteFields());
             }
         }
 
-        private void SaveRemoteFields(RemoteFieldValue[] remoteFields)
+        /// <summary>
+        /// Transition an issue through a workflow
+        /// </summary>
+        /// <param name="actionName">The workflow action to transition to</param>
+        public void WorkflowTransition(string actionName)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to execute workflow transition, issue has not been created.");
+            }
+
+            var action = this.GetAvailableActions().FirstOrDefault(a => a.Name.Equals(actionName, StringComparison.OrdinalIgnoreCase));
+            if (action == null)
+            {
+                throw new InvalidOperationException(String.Format("Worflow action with name '{0}' not found.", actionName));
+            }
+            
+            _jira.WithToken(token =>
+            {
+                var remoteIssue = _jira.RemoteSoapService.ProgressWorkflowAction(
+                                                                token,
+                                                                _originalIssue.key,
+                                                                action.Id,
+                                                                ((IRemoteIssueFieldProvider)this).GetRemoteFields());
+                Initialize(remoteIssue);
+            });
+        }
+
+        private void UpdateRemoteFields(RemoteFieldValue[] remoteFields)
         {
             var remoteIssue = _jira.WithToken(token =>
             {
@@ -442,7 +470,7 @@ namespace Atlassian.Jira
                             }
                         };
 
-            SaveRemoteFields(fields);
+            UpdateRemoteFields(fields);
         }
        
         /// <summary>
@@ -582,6 +610,23 @@ namespace Atlassian.Jira
             }
 
             return remote;
+        }
+
+        /// <summary>
+        /// Gets the workflow actions that the issue can be transitioned to
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<JiraNamedEntity> GetAvailableActions()
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve actions, issue has not been saved to server.");
+            }
+
+            return _jira.WithToken(token =>
+            {
+                return _jira.RemoteSoapService.GetAvailableActions(token, _originalIssue.key).Select(a => new JiraNamedEntity(a));
+            });
         }
 
         /// <summary>
