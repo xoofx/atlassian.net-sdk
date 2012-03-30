@@ -48,7 +48,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void SetNamedEntities_ById()
+        public void UpdateNamedEntities_ById()
         {
             var issue = _jira.CreateIssue("TST");
             issue.Summary = "AutoLoadNamedEntities_ById " + _random.Next(int.MaxValue);
@@ -64,7 +64,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void SetNamedEntities_ByName()
+        public void UpdateNamedEntities_ByName()
         {
             var issue = _jira.CreateIssue("TST");
             issue.Summary = "AutoLoadNamedEntities_Name " + _random.Next(int.MaxValue);
@@ -80,7 +80,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void AutoLoadNamedEntities()
+        public void RetrieveNamedEntities()
         {
             var issue = _jira.GetIssue("TST-1");
 
@@ -91,7 +91,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void CreateAndQueryForIssueWithMinimumFieldsSet()
+        public void CreateAndQueryIssueWithMinimumFieldsSet()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
 
@@ -162,26 +162,6 @@ namespace Atlassian.Jira.Test.Integration
             //retrieve again and verify
             issue = _jira.GetIssue(issue.Key.Value);
             Assert.Equal("2", issue.Type.Id);
-        }
-
-        [Fact]
-        public void UpdateIssueWithInferredType()
-        {
-            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
-            {
-                Type = "Bug",
-                Summary = summaryValue
-            };
-            issue.SaveChanges();
-
-            //  update issue
-            issue.Type = "Task";
-            issue.SaveChanges();
-
-            //retrieve again and verify
-            issue = _jira.GetIssue(issue.Key.Value);
-            Assert.Equal("Task", issue.Type.Name);
         }
 
         [Fact]
@@ -257,7 +237,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void AddingAndRetrievingComments()
+        public void AddAndGetComments()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
             var issue = new Issue(_jira, "TST")
@@ -314,7 +294,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void IssueTypes()
+        public void GetIssueTypes()
         {
             var issueTypes = _jira.GetIssueTypes("TST");
 
@@ -339,7 +319,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void RetrievesIssueStatuses()
+        public void GetIssueStatuses()
         {
             var statuses = _jira.GetIssueStatuses();
 
@@ -386,7 +366,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void UpdateVersionsOfIssue()
+        public void UpdateVersions()
         {
             var summaryValue = "Test issue with versions (Updated)" + _random.Next(int.MaxValue);
 
@@ -475,7 +455,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void UpdateComponentsOfIssue()
+        public void UpdateComponents()
         {
             var summaryValue = "Test issue with components (Updated)" + _random.Next(int.MaxValue);
 

@@ -128,8 +128,6 @@ namespace Atlassian.Jira.Test
             issue.Priority = "1";
             // issue.Project <-- should be non-settable
             issue.Reporter = "reporter";
-            issue.Resolution = "2";
-            issue.Status = "3";
             issue.Summary = "summary";
             issue.Type = "4";
             issue.Votes = 1;
@@ -148,8 +146,8 @@ namespace Atlassian.Jira.Test
             Assert.Equal("1", remoteIssue.priority);
             Assert.Equal("ProjectKey", remoteIssue.project);
             Assert.Equal("reporter", remoteIssue.reporter);
-            Assert.Equal("2", remoteIssue.resolution);
-            Assert.Equal("3", remoteIssue.status);
+            Assert.Null(remoteIssue.resolution);
+            Assert.Null(remoteIssue.status);
             Assert.Equal("summary", remoteIssue.summary);
             Assert.Equal("4", remoteIssue.type);
             Assert.Null(remoteIssue.updated);
@@ -241,10 +239,9 @@ namespace Atlassian.Jira.Test
             issue.Assignee = "foo";
             issue.Environment = "foo";
             issue.Reporter = "foo";
-            issue.Status = "1";
             issue.Type = "2";
 
-            Assert.Equal(7, GetUpdatedFieldsForIssue(issue).Length);
+            Assert.Equal(6, GetUpdatedFieldsForIssue(issue).Length);
         }
 
         [Fact]
@@ -258,7 +255,6 @@ namespace Atlassian.Jira.Test
             var issue = remoteIssue.ToLocal();
 
             issue.Summary = "Summary";
-            issue.Status = null;
 
             Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
         }
@@ -274,7 +270,6 @@ namespace Atlassian.Jira.Test
             var issue = remoteIssue.ToLocal();
 
             issue.Priority = "5";
-            issue.Resolution = null;
 
             Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
         }
