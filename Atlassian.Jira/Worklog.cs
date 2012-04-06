@@ -11,43 +11,19 @@ namespace Atlassian.Jira
     /// </summary>
     public class Worklog
     {
-        private readonly string _author;
-        private readonly string _comment;
         private readonly DateTime? _created;
         private readonly string _id;
-        private readonly DateTime? _startDate;
-        private readonly string _timeSpent;
         private readonly long _timeSpentInSeconds;
         private readonly DateTime? _updated;
 
-        public string Author 
-        {
-            get { return _author; }
-        }
-
-        public string Comment
-        {
-            get { return _comment; }
-        }
-
-        public DateTime? CreateDate
-        {
-            get { return _created; }
-        }
+        public string Author { get; set; }
+        public string Comment { get; set; }
+        public DateTime? StartDate { get; set; }
+        public string TimeSpent { get; set; }
 
         public string Id
         {
             get { return _id; }
-        }
-
-        public DateTime? StartDate
-        {
-            get { return _startDate; }
-        }
-
-        public string TimeSpent
-        {
-            get { return _timeSpent; }
         }
 
         public long TimeSpentInSeconds
@@ -55,21 +31,53 @@ namespace Atlassian.Jira
             get { return _timeSpentInSeconds; }
         }
 
+        public DateTime? CreateDate
+        {
+            get { return _created; }
+        }
+
         public DateTime? UpdateDate
         {
             get { return _updated; }
         }
 
-        public Worklog(RemoteWorklog remoteWorklog)
+        /// <summary>
+        /// Creates a new worklog instance
+        /// </summary>
+        /// <param name="timeSpent">Specifies a time duration in JIRA duration format, representing the time spent working</param>
+        /// <param name="startDate">When the work was started</param>
+        /// <param name="comment">An optional comment to describe the work</param>
+        public Worklog(string timeSpent, DateTime startDate, string comment = null)
         {
-            _author = remoteWorklog.author;
-            _comment = remoteWorklog.comment;
-            _created = remoteWorklog.created;
-            _id = remoteWorklog.id;
-            _startDate = remoteWorklog.startDate;
-            _timeSpent = remoteWorklog.timeSpent;
-            _timeSpentInSeconds = remoteWorklog.timeSpentInSeconds;
-            _updated = remoteWorklog.updated;
+            this.TimeSpent = timeSpent;
+            this.StartDate = startDate;
+            this.Comment = comment;
+        }
+
+        internal Worklog(RemoteWorklog remoteWorklog)
+        {
+            if (remoteWorklog != null)
+            {
+                this.Author = remoteWorklog.author;
+                this.Comment = remoteWorklog.comment;
+                this.StartDate = remoteWorklog.startDate;
+                this.TimeSpent = remoteWorklog.timeSpent;
+                _id = remoteWorklog.id;
+                _created = remoteWorklog.created;
+                _timeSpentInSeconds = remoteWorklog.timeSpentInSeconds;
+                _updated = remoteWorklog.updated;
+            }
+        }
+
+        internal RemoteWorklog ToRemote()
+        {
+            return new RemoteWorklog()
+            {
+                author = this.Author,
+                comment = this.Comment,
+                startDate = this.StartDate,
+                timeSpent = this.TimeSpent
+            };
         }
     }
 }

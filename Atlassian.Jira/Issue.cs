@@ -484,37 +484,45 @@ namespace Atlassian.Jira
                                   WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate,
                                   string newEstimate = null)
         {
-            if(String.IsNullOrEmpty(_originalIssue.key))
+            return AddWorklog(new Worklog(timespent, DateTime.Now), worklogStrategy, newEstimate);
+        }
+
+        /// <summary>
+        ///  Adds a worklog to this issue.
+        /// </summary>
+        /// <param name="worklog">The worklog instance to add</param>
+        /// <param name="worklogStrategy">How to handle the remaining estimate, defaults to AutoAdjustRemainingEstimate</param>
+        /// <param name="newEstimate">New estimate (only used if worklogStrategy set to NewRemainingEstimate)</param>
+        /// <returns>Worklog as constructed by server</returns>
+        public Worklog AddWorklog(Worklog worklog,
+                                  WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate,
+                                  string newEstimate = null)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to add worklog to issue, issue has not been saved to server.");
             }
 
-            var worklog = new RemoteWorklog()
-            {
-                startDate = DateTime.Now,
-                timeSpent = timespent
-            };
-
-            RemoteWorklog remoteWorklog = null;
-
+            RemoteWorklog remoteWorklog = worklog.ToRemote();
             _jira.WithToken(token =>
             {
                 switch (worklogStrategy)
                 {
                     case WorklogStrategy.RetainRemainingEstimate:
-                        remoteWorklog = _jira.RemoteSoapService.AddWorklogAndRetainRemainingEstimate(token, _originalIssue.key, worklog);
+                        remoteWorklog = _jira.RemoteSoapService.AddWorklogAndRetainRemainingEstimate(token, _originalIssue.key, remoteWorklog);
                         break;
                     case WorklogStrategy.NewRemainingEstimate:
-                        remoteWorklog = _jira.RemoteSoapService.AddWorklogWithNewRemainingEstimate(token, _originalIssue.key, worklog, newEstimate);
-                        break;                    
+                        remoteWorklog = _jira.RemoteSoapService.AddWorklogWithNewRemainingEstimate(token, _originalIssue.key, remoteWorklog, newEstimate);
+                        break;
                     default:
-                        remoteWorklog = _jira.RemoteSoapService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, worklog);
+                        remoteWorklog = _jira.RemoteSoapService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, remoteWorklog);
                         break;
                 }
             });
 
             return new Worklog(remoteWorklog);
         }
+
 
         /// <summary>
         /// Retrieve worklogs for current issue
@@ -704,7 +712,5 @@ namespace Atlassian.Jira
                 return value != null ? value.ToString() : null;
             }
         }
-
-        
     }
 }

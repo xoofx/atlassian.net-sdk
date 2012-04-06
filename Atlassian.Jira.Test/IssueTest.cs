@@ -529,21 +529,32 @@ namespace Atlassian.Jira.Test
             }
 
             [Fact]
-            public void ShouldAddWorkLog()
+            public void WithWorklogObject_ShouldCallServiceToCreateLog()
             {
                 var jira = TestableJira.Create();
-                var remoteWorkLog = new RemoteWorklog() { id = "12345" };
-                jira.SoapService.Setup(s => s.AddWorklogAndAutoAdjustRemainingEstimate(
-                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RemoteWorklog>())).Returns(remoteWorkLog);
+                var work = new Worklog("1m", DateTime.Now) { Comment = "comment" };
+                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+                var result = issue.AddWorklog(work);
+
+                jira.SoapService.Verify(j => j.AddWorklogAndAutoAdjustRemainingEstimate(
+                    It.IsAny<string>(),
+                    "key",
+                    It.Is<RemoteWorklog>(l => l.timeSpent == "1m" && l.comment == "comment")));
+            }
+
+            [Fact]
+            public void ShouldCallServiceToAddWorkLog()
+            {
+                var jira = TestableJira.Create();
                 var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
                 //act
                 var result = issue.AddWorklog("1d");
 
                 //assert
-                Assert.Equal("12345", result.Id);
                 jira.SoapService.Verify(j => j.AddWorklogAndAutoAdjustRemainingEstimate(
-                    "token",
+                    It.IsAny<string>(),
                     "key",
                     It.Is<RemoteWorklog>(l => l.timeSpent == "1d")));
             }

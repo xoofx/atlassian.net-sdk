@@ -578,7 +578,14 @@ namespace Atlassian.Jira.Test.Integration
             issue.AddWorklog("1d");
             issue.AddWorklog("1h", WorklogStrategy.RetainRemainingEstimate);
             issue.AddWorklog("1m", WorklogStrategy.NewRemainingEstimate, "2d");
-            Assert.Equal(3, issue.GetWorklogs().Count);
+
+            issue.AddWorklog(new Worklog("2d", new DateTime(2012, 1, 1), "comment"));
+
+            var logs = issue.GetWorklogs();
+            Assert.Equal(4, logs.Count);
+            Assert.Equal("comment", logs.ElementAt(3).Comment);
+            Assert.Equal(new DateTime(2012, 1, 1), logs.ElementAt(3).StartDate);
+
         }
 
         [Fact]
