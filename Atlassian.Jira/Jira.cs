@@ -396,6 +396,22 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Executes an action using the user's authentication token and the jira soap client
+        /// </summary>
+        /// <remarks>
+        /// If action fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
+        /// a new token will be requested from server and the action called again.
+        /// </remarks>
+        public void WithToken(Action<string, IJiraSoapServiceClient> action)
+        {
+            WithToken<object>((token, client) =>
+            {
+                action(token, client);
+                return null;
+            });
+        }
+
+        /// <summary>
         /// Executes a function using the user's authentication token.
         /// </summary>
         /// <remarks>
@@ -405,6 +421,18 @@ namespace Atlassian.Jira
         public TResult WithToken<TResult>(Func<string, TResult> function)
             where TResult: class
         {
+            return WithToken((token, client) => function(token));
+        }
+
+        /// <summary>
+        /// Executes a function using the user's authentication token and the jira soap client
+        /// </summary>
+        /// <remarks>
+        /// If function fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
+        /// a new token will be requested from server and the function called again.
+        /// </remarks>
+        public TResult WithToken<TResult>(Func<string, IJiraSoapServiceClient, TResult> function)
+        {
             if (!_isAnonymous && String.IsNullOrEmpty(_token))
             {
                 _token = _jiraSoapService.Login(_username, _password);
@@ -412,18 +440,18 @@ namespace Atlassian.Jira
 
             try
             {
-                return function(_token);
+                return function(_token, this.RemoteSoapService);
             }
-            catch(FaultException fe)
+            catch (FaultException fe)
             {
-                if (_isAnonymous 
+                if (_isAnonymous
                     || fe.Message.IndexOf(REMOTE_AUTH_EXCEPTION_STRING, StringComparison.OrdinalIgnoreCase) < 0)
                 {
                     throw;
                 }
 
                 _token = _jiraSoapService.Login(_username, _password);
-                return function(_token);
+                return function(_token, this.RemoteSoapService);
             }
         }
 
