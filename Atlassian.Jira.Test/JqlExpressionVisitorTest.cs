@@ -440,10 +440,10 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
             var issues = (from i in jira.Issues
-                          where i["Foo"] == "bar"
+                          where i["Foo"] == "foo" && i["Bar"] == new DateTime(2012,1,1)
                           select i).ToArray();
 
-            Assert.Equal("\"Foo\" ~ \"bar\"", _translator.Jql);
+            Assert.Equal("(\"Foo\" ~ \"foo\" and \"Bar\" = \"2012/01/01\")", _translator.Jql);
         }
 
         [Fact]
@@ -451,21 +451,21 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
             var issues = (from i in jira.Issues
-                          where i["Foo"] != "bar"
+                          where i["Foo"] != "foo" && i["Bar"] != new DateTime(2012,1,1)
                           select i).ToArray();
 
-            Assert.Equal("\"Foo\" !~ \"bar\"", _translator.Jql);
+            Assert.Equal("(\"Foo\" !~ \"foo\" and \"Bar\" != \"2012/01/01\")", _translator.Jql);
         }
 
         [Fact]
-        public void CustomFieldMultiple()
+        public void CustomFieldGreaterThan()
         {
             var jira = CreateJiraInstance();
             var issues = (from i in jira.Issues
-                          where i["Foo"] == "foo" && i["Bar"] == "bar"
+                          where i["Foo"] > "foo" && i["Bar"] > new DateTime(2012, 1, 1)
                           select i).ToArray();
 
-            Assert.Equal("(\"Foo\" ~ \"foo\" and \"Bar\" ~ \"bar\")", _translator.Jql);
-        }
+            Assert.Equal("(\"Foo\" > \"foo\" and \"Bar\" > \"2012/01/01\")", _translator.Jql);
+        }       
     }
 }

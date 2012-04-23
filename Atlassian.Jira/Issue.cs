@@ -257,7 +257,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="customFieldName">Custom field name</param>
         /// <returns>Value of the custom field</returns>
-        public string this[string customFieldName]
+        public ComparableString this[string customFieldName]
         {
             get
             {
@@ -275,11 +275,11 @@ namespace Atlassian.Jira
 
                 if (customField != null)
                 {
-                    customField.Values = new string[] { value };
+                    customField.Values = new string[] { value.Value };
                 }
                 else
                 {
-                    _customFields.Add(customFieldName, new string[] { value });
+                    _customFields.Add(customFieldName, new string[] { value.Value });
                 }
             }
         }

@@ -307,6 +307,16 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void QueryIssueWithCustomDateField()
+        {
+            var issue = (from i in _jira.Issues
+                         where i["Custom Date Field"] <= new DateTime(2012,4,1)
+                         select i).First();
+
+            Assert.Equal("Sample bug in Test Project", issue.Summary);
+        }
+
+        [Fact]
         public void QueryIssuesWithTakeExpression()
         {
             // create 2 issues with same summary
