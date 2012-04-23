@@ -523,6 +523,32 @@ namespace Atlassian.Jira
             return new Worklog(remoteWorklog);
         }
 
+        /// <summary>
+        /// Deletes the worklog with the given id and updates the remaining estimate field on the isssue
+        /// </summary>
+        public void DeleteWorklog(Worklog worklog, WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate, string newEstimate = null)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to delete worklog from issue, issue has not been saved to server.");
+            }
+
+            Jira.WithToken((token, client) =>
+            {
+                switch (worklogStrategy)
+                {
+                    case WorklogStrategy.AutoAdjustRemainingEstimate:
+                        client.DeleteWorklogAndAutoAdjustRemainingEstimate(token, worklog.Id);
+                        break;
+                    case WorklogStrategy.RetainRemainingEstimate:
+                        client.DeleteWorklogAndRetainRemainingEstimate(token, worklog.Id);
+                        break;
+                    case WorklogStrategy.NewRemainingEstimate:
+                        client.DeleteWorklogWithNewRemainingEstimate(token, worklog.Id, newEstimate);
+                        break;
+                }
+            });
+        }
 
         /// <summary>
         /// Retrieve worklogs for current issue

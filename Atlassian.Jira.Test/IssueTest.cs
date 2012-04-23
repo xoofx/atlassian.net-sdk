@@ -518,6 +518,17 @@ namespace Atlassian.Jira.Test
             }
         }
 
+        public class DeleteWorklog
+        {
+            [Fact]
+            public void IfIssueNotCreated_ShouldThrownAnException()
+            {
+                var issue = CreateIssue();
+
+                Assert.Throws(typeof(InvalidOperationException), () => issue.DeleteWorklog(null));
+            }
+        }
+
         public class AddWorklog
         {
             [Fact]

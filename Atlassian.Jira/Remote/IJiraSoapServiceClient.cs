@@ -37,6 +37,10 @@ namespace Atlassian.Jira.Remote
         RemoteIssue[] GetIssuesFromFilterWithLimit(string token, string filterId, int offset, int maxResults);
         RemoteNamedObject[] GetAvailableActions(string token, string issueKey);
         RemoteIssue ProgressWorkflowAction(string token, string issueKey, string actionId, RemoteFieldValue[] remoteFieldValues);
+        void DeleteWorklogAndAutoAdjustRemainingEstimate(string token, string in1);
+        void DeleteWorklogAndRetainRemainingEstimate(string token, string worklogId);
+        void DeleteWorklogWithNewRemainingEstimate(string token, string worklogId, string newRemainingEstimate);
+        
 
 
         void AddActorsToProjectRole(string in0, string[] in1, RemoteProjectRole in2, RemoteProject in3, string in4);
@@ -60,9 +64,6 @@ namespace Atlassian.Jira.Remote
         void DeleteProjectAvatar(string in0, long in1);
         void DeleteProjectRole(string in0, RemoteProjectRole in1, bool in2);
         void DeleteUser(string in0, string in1);
-        void DeleteWorklogAndAutoAdjustRemainingEstimate(string in0, string in1);
-        void DeleteWorklogAndRetainRemainingEstimate(string in0, string in1);
-        void DeleteWorklogWithNewRemainingEstimate(string in0, string in1, string in2);
         RemoteComment EditComment(string in0, RemoteComment in1);
         RemotePermission[] GetAllPermissions(string in0);
         RemoteScheme[] GetAssociatedNotificationSchemes(string in0, RemoteProjectRole in1);

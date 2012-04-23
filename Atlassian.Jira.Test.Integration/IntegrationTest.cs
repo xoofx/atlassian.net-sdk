@@ -611,5 +611,23 @@ namespace Atlassian.Jira.Test.Integration
             Assert.True(subtasks.Any(s => s.Summary.Equals(summaryValue)), 
                 String.Format("'{0}' was not found as a sub-task of TST-1", summaryValue));
         }
+
+        [Fact]
+        public void DeleteWorklog()
+        {
+            var summary = "Test issue with worklogs" + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summary
+            };
+            issue.SaveChanges();
+
+            var worklog = issue.AddWorklog("1h");
+            Assert.Equal(1, issue.GetWorklogs().Count);
+
+            issue.DeleteWorklog(worklog);
+            Assert.Equal(0, issue.GetWorklogs().Count);
+        }
     }
 }
