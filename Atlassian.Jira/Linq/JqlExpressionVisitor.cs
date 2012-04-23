@@ -82,7 +82,7 @@ namespace Atlassian.Jira.Linq
             return false;
         }
 
-        private object GetValueFromBinaryExpression(BinaryExpression expression)
+        private object GetFieldValueFromBinaryExpression(BinaryExpression expression)
         {
             if (expression.Right.NodeType == ExpressionType.Constant)
             {
@@ -109,7 +109,7 @@ namespace Atlassian.Jira.Linq
         private void ProcessGreaterAndLessThanOperator(BinaryExpression expression, string operatorString)
         {
             var fieldName = GetFieldNameFromBinaryExpression(expression);
-            var value = GetValueFromBinaryExpression(expression);
+            var value = GetFieldValueFromBinaryExpression(expression);
 
             // field
             _jqlWhere.Append(fieldName);
@@ -138,7 +138,7 @@ namespace Atlassian.Jira.Linq
             var methodExpression = expression.Left as MethodCallExpression;
 
             var fieldName = GetFieldNameFromBinaryExpression(expression);
-            var fieldValue = GetValueFromBinaryExpression(expression);
+            var fieldValue = GetFieldValueFromBinaryExpression(expression);
 
             // field
             _jqlWhere.Append(fieldName);
@@ -156,13 +156,13 @@ namespace Atlassian.Jira.Linq
             _jqlWhere.Append(String.Format(" {0} ", operatorString));
 
             // value
-            ProcessConstant(GetValueFromBinaryExpression(expression));
+            ProcessConstant(GetFieldValueFromBinaryExpression(expression));
         }
 
         private void ProcessMemberEqualityOperator(BinaryExpression expression, bool equal)
         {
             var field = GetFieldNameFromBinaryExpression(expression);
-            var value = GetValueFromBinaryExpression(expression);
+            var value = GetFieldValueFromBinaryExpression(expression);
 
             // field
             _jqlWhere.Append(field);

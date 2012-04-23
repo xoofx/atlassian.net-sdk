@@ -47,8 +47,6 @@ namespace Atlassian.Jira
             }
         }
 
-       
-
         public static bool operator !=(ComparableString field, string value)
         {
             if ((object) field == null)
