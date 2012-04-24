@@ -52,7 +52,7 @@ namespace Atlassian.Jira
         {
             var jsonIssue = JObject.Parse(json);
 
-            var fields = jsonIssue["fields"];
+            var fields = jsonIssue["fields"] as JObject;
             var remoteIssue = new RemoteIssue()
             {
                 key = (string)jsonIssue["key"],
@@ -87,7 +87,17 @@ namespace Atlassian.Jira
                 remoteIssue.components = (from v in (JArray)fields["components"]
                                            select new RemoteComponent() { id = (string)v["id"], name = (string)v["name"] }).ToArray();
             }
-            
+
+            var customFields = new List<RemoteCustomFieldValue>();
+            foreach (var p in fields)
+            {
+                if (p.Key.StartsWith("customfield", StringComparison.InvariantCulture))
+                {
+                    customFields.Add(new RemoteCustomFieldValue() { customfieldId = p.Key, values = new string[] { (string)p.Value }});
+                }
+            }
+            remoteIssue.customFieldValues = customFields.Count > 0? customFields.ToArray(): null;
+
             return new Issue(jira, remoteIssue);
         }
 

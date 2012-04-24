@@ -26,8 +26,9 @@ namespace Atlassian.Jira.Test
                 Assert.Equal("admin", issue.Assignee);
                 Assert.Equal(2, issue.Components.Count);
                 Assert.True(issue.Components.Any(v => v.Name.Equals("server")));
-                Assert.Equal("24/04/2012", issue.Created.Value.ToShortDateString());
-                //Assert.Equal("", issue.CustomFields);
+                Assert.Equal("2012/04/24", issue.Created.Value.ToString("yyyy/MM/dd"));
+                Assert.Equal(1, issue.CustomFields.Count);
+                Assert.Equal("foobar", issue.CustomFields[0].Values[0]);
                 Assert.Equal("Sample Description", issue.Description);
                 Assert.Null(issue.DueDate);
                 Assert.Equal("Sample Environment", issue.Environment);
@@ -42,7 +43,7 @@ namespace Atlassian.Jira.Test
                 Assert.Equal("1", issue.Status.Id);
                 Assert.Equal("There can be only one", issue.Summary);
                 Assert.Equal("1", issue.Type.Id);
-                Assert.Equal("24/04/2012", issue.Updated.Value.ToShortDateString());
+                Assert.Equal("2012/04/24", issue.Updated.Value.ToString("yyyy/MM/dd"));
                 Assert.Equal(0, issue.Votes);
             }
         }
