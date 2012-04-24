@@ -96,7 +96,7 @@ namespace Atlassian.Jira
         public bool Debug { get; set; }
 
         /// <summary>
-        /// Whether to use the JIRA Rest API when querying for issues
+        /// Whether to use the JIRA Rest API when querying for issues. Use only if targetting JIRA 5.0 or above.
         /// </summary>
         /// <remarks>
         /// Enables support for server side Count() and Skip() processing
