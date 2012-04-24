@@ -43,8 +43,15 @@ namespace Atlassian.Jira.Linq
         {
             var jql = _translator.Process(expression);
 
+            if (jql.ProcessCount && _jiraServer.UseRestApi)
+            {
+                return _jiraServer.WithToken<int>((token, client) =>
+                    {
+                        return _jiraServer.RemoteSoapService.GetIssueCountFromJqlSearch(jql.Expression);
+                    });
+            }
 
-            IQueryable<Issue> issues = _jiraServer.GetIssuesFromJql(jql.Expression, jql.NumberOfResults).AsQueryable();
+            IQueryable<Issue> issues = _jiraServer.GetIssuesFromJql(jql.Expression, jql.MaxResults, jql.StartAt).AsQueryable();
 
             if (isEnumerable)
             {

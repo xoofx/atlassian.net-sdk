@@ -5,11 +5,45 @@ using System.Text;
 using Xunit;
 using Atlassian.Jira.Remote;
 using Moq;
+using System.IO;
 
 namespace Atlassian.Jira.Test
 {
     public class IssueTest
     {
+        public class FromJson
+        {
+            [Fact]
+            public void ShouldRetrieveValues()
+            {
+                var jira = TestableJira.Create();
+                string json = File.ReadAllText("IssueJSON.txt");
+
+                var issue = Issue.FromJson(jira, json);
+
+                //Assert.Equal("", issue.AffectsVersions);                
+                Assert.Equal("admin", issue.Assignee);
+                //Assert.Equal("", issue.Components);
+                Assert.Equal("24/04/2012", issue.Created.Value.ToShortDateString());
+                //Assert.Equal("", issue.CustomFields);
+                Assert.Equal("Sample Description", issue.Description);
+                Assert.Null(issue.DueDate);
+                Assert.Equal("Sample Environment", issue.Environment);
+                //Assert.Equal("Sample Environment", issue.FixVersions);
+                Assert.Same(jira, issue.Jira);
+                Assert.Equal("TST-1", issue.Key);
+                Assert.Equal("3", issue.Priority.Id);
+                Assert.Equal("TST", issue.Project);
+                Assert.Equal("admin", issue.Reporter);
+                Assert.Null(issue.Resolution);
+                Assert.Equal("1", issue.Status.Id);
+                Assert.Equal("There can be only one", issue.Summary);
+                Assert.Equal("1", issue.Type.Id);
+                Assert.Equal("24/04/2012", issue.Updated.Value.ToShortDateString());
+                Assert.Equal(0, issue.Votes);
+            }
+        }
+
         public class Constructor
         {
             [Fact]

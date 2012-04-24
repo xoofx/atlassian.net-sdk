@@ -375,7 +375,7 @@ namespace Atlassian.Jira.Test
                           where i.Assignee == "foo"
                           select i).Take(50).ToArray();
 
-            Assert.Equal(50, _translator.NumberOfResults);
+            Assert.Equal(50, _translator.MaxResults);
         }
 
         [Fact]
@@ -388,8 +388,34 @@ namespace Atlassian.Jira.Test
                           where i.Assignee == "foo"
                           select i).Take(take).ToArray();
 
-            Assert.Equal(100, _translator.NumberOfResults);
+            Assert.Equal(100, _translator.MaxResults);
         }
+
+        [Fact]
+        public void SkipWithConstant()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = (from i in jira.Issues
+                          where i.Assignee == "foo"
+                          select i).Skip(50).ToArray();
+
+            Assert.Equal(50, _translator.StartAt);
+        }
+
+        [Fact]
+        public void SkipWithLocalVariable()
+        {
+            var jira = CreateJiraInstance();
+            var skip = 100;
+
+            var issues = (from i in jira.Issues
+                          where i.Assignee == "foo"
+                          select i).Skip(skip).ToArray();
+
+            Assert.Equal(100, _translator.StartAt);
+        }
+
 
         [Fact]
         public void VersionsEqual()
@@ -466,6 +492,33 @@ namespace Atlassian.Jira.Test
                           select i).ToArray();
 
             Assert.Equal("(\"Foo\" > \"foo\" and \"Bar\" > \"2012/01/01\")", _translator.Jql);
-        }       
+        }
+
+        [Fact]
+        public void Count()
+        {
+            var jira = CreateJiraInstance();
+            var issues = from i in jira.Issues
+                         where i.Summary == "foo"
+                         select i;
+
+            issues.Count();
+
+            Assert.True(_translator.ProcessCount);
+        }
+
+        [Fact]
+        public void VisitorShouldResetAllPropertiesBetweenCalls()
+        {
+            var jira = CreateJiraInstance();
+            var issues = from i in jira.Issues
+                         where i.Summary == "foo"
+                         select i;
+
+            issues.Count();
+            issues.Skip(1).FirstOrDefault();
+
+            Assert.False(_translator.ProcessCount);
+        }
     }
 }

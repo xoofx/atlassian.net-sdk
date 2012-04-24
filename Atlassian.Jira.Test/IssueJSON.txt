@@ -1,0 +1,132 @@
+﻿{
+        "expand": "editmeta,renderedFields,transitions,changelog,operations",
+        "id": "10200",
+        "self": "http://localhost:8080/jira/rest/api/latest/issue/10200",
+        "key": "TST-1",
+        "fields": {
+            "summary": "There can be only one",
+            "progress": {
+                "progress": 0,
+                "total": 0
+            },
+            "issuetype": {
+                "self": "http://localhost:8080/jira/rest/api/2/issuetype/1",
+                "id": "1",
+                "description": "A problem which impairs or prevents the functions of the product.",
+                "iconUrl": "http://localhost:8080/jira/images/icons/bug.gif",
+                "name": "Bug",
+                "subtask": false
+            },
+            "votes": {
+                "self": "http://localhost:8080/jira/rest/api/2/issue/TST-1/votes",
+                "votes": 0,
+                "hasVoted": false
+            },
+            "resolution": null,
+            "fixVersions": [{
+                "self": "http://localhost:8080/jira/rest/api/2/version/10000",
+                "id": "10000",
+                "name": "1.0",
+                "archived": false,
+                "released": false
+            }, {
+                "self": "http://localhost:8080/jira/rest/api/2/version/10001",
+                "id": "10001",
+                "name": "2.0",
+                "archived": false,
+                "released": false
+            }],
+            "resolutiondate": null,
+            "timespent": null,
+            "reporter": {
+                "self": "http://localhost:8080/jira/rest/api/2/user?username=admin",
+                "name": "admin",
+                "emailAddress": "admin@qa.com",
+                "avatarUrls": {
+                    "16x16": "http://localhost:8080/jira/secure/useravatar?size=small&avatarId=10122",
+                    "48x48": "http://localhost:8080/jira/secure/useravatar?avatarId=10122"
+                },
+                "displayName": "Administrator",
+                "active": true
+            },
+            "aggregatetimeoriginalestimate": null,
+            "updated": "2012-04-24T10:36:48.000+1000",
+            "created": "2012-04-24T09:26:11.000+1000",
+            "description": "Sample Description",
+            "priority": {
+                "self": "http://localhost:8080/jira/rest/api/2/priority/3",
+                "iconUrl": "http://localhost:8080/jira/images/icons/priority_major.gif",
+                "name": "Major",
+                "id": "3"
+            },
+            "duedate": null,
+            "issuelinks": [],
+            "watches": {
+                "self": "http://localhost:8080/jira/rest/api/2/issue/TST-1/watchers",
+                "watchCount": 0,
+                "isWatching": false
+            },
+            "subtasks": [],
+            "status": {
+                "self": "http://localhost:8080/jira/rest/api/2/status/1",
+                "description": "The issue is open and ready for the assignee to start work on it.",
+                "iconUrl": "http://localhost:8080/jira/images/icons/status_open.gif",
+                "name": "Open",
+                "id": "1"
+            },
+            "labels": [],
+            "assignee": {
+                "self": "http://localhost:8080/jira/rest/api/2/user?username=admin",
+                "name": "admin",
+                "emailAddress": "admin@qa.com",
+                "avatarUrls": {
+                    "16x16": "http://localhost:8080/jira/secure/useravatar?size=small&avatarId=10122",
+                    "48x48": "http://localhost:8080/jira/secure/useravatar?avatarId=10122"
+                },
+                "displayName": "Administrator",
+                "active": true
+            },
+            "workratio": -1,
+            "aggregatetimeestimate": null,
+            "project": {
+                "self": "http://localhost:8080/jira/rest/api/2/project/TST",
+                "id": "10100",
+                "key": "TST",
+                "name": "TST",
+                "avatarUrls": {
+                    "16x16": "http://localhost:8080/jira/secure/projectavatar?size=small&pid=10100&avatarId=10011",
+                    "48x48": "http://localhost:8080/jira/secure/projectavatar?pid=10100&avatarId=10011"
+                }
+            },
+            "versions": [{
+                "self": "http://localhost:8080/jira/rest/api/2/version/10000",
+                "id": "10000",
+                "name": "1.0",
+                "archived": false,
+                "released": false
+            }, {
+                "self": "http://localhost:8080/jira/rest/api/2/version/10001",
+                "id": "10001",
+                "name": "2.0",
+                "archived": false,
+                "released": false
+            }],
+            "environment": "Sample Environment",
+            "timeestimate": null,
+            "aggregateprogress": {
+                "progress": 0,
+                "total": 0
+            },
+            "components": [{
+                "self": "http://localhost:8080/jira/rest/api/2/component/10001",
+                "id": "10001",
+                "name": "client"
+            }, {
+                "self": "http://localhost:8080/jira/rest/api/2/component/10000",
+                "id": "10000",
+                "name": "server"
+            }],
+            "timeoriginalestimate": null,
+            "aggregatetimespent": null
+        }
+    }

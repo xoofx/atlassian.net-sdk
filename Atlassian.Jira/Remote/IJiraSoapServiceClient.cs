@@ -12,7 +12,11 @@ namespace Atlassian.Jira.Remote
     {
         string Url { get; }
         string Login(string username, string password);
+
+        string GetJsonFromJqlSearch(string jql, int startAt, int maxResults, string[] fields = null);
+        int GetIssueCountFromJqlSearch(string jql);
         RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults);
+        
         RemoteIssue CreateIssue(string token, RemoteIssue newIssue);
         RemoteIssue CreateIssueWithParent(string token, RemoteIssue newIssue, string parentIssueKey);
         RemoteIssue UpdateIssue(string token, string key, RemoteFieldValue[] fields);

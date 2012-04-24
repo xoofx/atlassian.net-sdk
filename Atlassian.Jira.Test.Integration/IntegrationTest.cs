@@ -20,6 +20,20 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void Test2()
+        {
+            var jira = new Jira("http://farmas-pc:8080/jira", "admin", "admin");
+            jira.Debug = true;
+            jira.UseRestApi = true;
+            var issues = from i in jira.Issues
+                         where i.Key == "TST-1"
+                         select i;
+
+            //Assert.Equal(1, issues.Count());
+            Assert.Equal("There can be only one", issues.First().Summary);
+        }
+
+        [Fact]
         void Transition_ResolveIssue()
         {
             var issue = _jira.CreateIssue("TST");

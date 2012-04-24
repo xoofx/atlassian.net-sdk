@@ -11,7 +11,9 @@ namespace Atlassian.Jira.Linq
     {
         private StringBuilder _jqlWhere;
         private StringBuilder _jqlOrderBy;
-        private int? _numberOfResults;
+        private int? _maxResults;
+        private int? _startAt;
+        private bool _processCount;
 
         public string Jql 
         { 
@@ -21,22 +23,42 @@ namespace Atlassian.Jira.Linq
             } 
         }
 
-        public int? NumberOfResults
+        public int? MaxResults
         {
             get
             {
-                return _numberOfResults;
+                return _maxResults;
             }
         }
 
-        public JqlData Process(Expression expression)
+        public bool ProcessCount 
         {
+            get
+            {
+                return _processCount;
+            }
+        }
+
+        public int? StartAt 
+        {
+            get
+            {
+                return _startAt;
+            }
+        }
+
+
+        public JqlData Process(Expression expression)
+        {            
             expression = ExpressionEvaluator.PartialEval(expression);
             _jqlWhere = new StringBuilder();
             _jqlOrderBy = new StringBuilder();
+            this._maxResults = null;
+            this._processCount = false;
+            this._startAt = 0;
 
             this.Visit(expression);
-            return new JqlData { Expression = Jql, NumberOfResults = _numberOfResults };
+            return new JqlData { Expression = Jql, MaxResults = _maxResults, ProcessCount = _processCount };
         }
 
         private string GetFieldNameFromBinaryExpression(BinaryExpression expression)
@@ -236,13 +258,26 @@ namespace Atlassian.Jira.Linq
             {
                 ProcessTake(node);
             }
+            else if (node.Method.Name == "Skip")
+            {
+                ProcessSkip(node);
+            }
+            else if (node.Method.Name == "Count")
+            {
+                _processCount = true;
+            }
 
             return base.VisitMethodCall(node) ;
         }
 
         private void ProcessTake(MethodCallExpression node)
         {
-            _numberOfResults = int.Parse(((ConstantExpression)node.Arguments[1]).Value.ToString());
+            _maxResults = int.Parse(((ConstantExpression)node.Arguments[1]).Value.ToString());
+        }
+
+        private void ProcessSkip(MethodCallExpression node)
+        {
+            _startAt = int.Parse(((ConstantExpression)node.Arguments[1]).Value.ToString());
         }
 
         private void ProcessOrderBy(MethodCallExpression node)
@@ -316,6 +351,8 @@ namespace Atlassian.Jira.Linq
 
             return node;
         }
+
+
 
     }
 }

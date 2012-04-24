@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.ServiceModel;
 using System.Xml;
+using RestSharp;
+using Newtonsoft.Json.Linq;
 
 namespace Atlassian.Jira.Remote
 {
@@ -14,11 +16,20 @@ namespace Atlassian.Jira.Remote
     {
         private readonly JiraSoapServiceClient _client;
         private readonly string _url;
+        private readonly string _username;
+        private readonly string _password;
 
         public JiraSoapServiceClientWrapper(string jiraBaseUrl)
+            : this(jiraBaseUrl, null, null)
+        {
+        }
+
+        public JiraSoapServiceClientWrapper(string jiraBaseUrl, string username, string password)
         {
             _client = JiraSoapServiceClientFactory.Create(jiraBaseUrl);
             _url = jiraBaseUrl.EndsWith("/") ? jiraBaseUrl : jiraBaseUrl += "/";
+            _username = username;
+            _password = password;
         }
 
         public string Url
@@ -27,6 +38,31 @@ namespace Atlassian.Jira.Remote
             {
                 return _url;
             }
+        }
+
+        public string GetJsonFromJqlSearch(string jql, int startAt, int maxResults, string[] fields = null)
+        {
+            var restClient = new RestClient(_url);
+            if (!String.IsNullOrEmpty(_username) && !String.IsNullOrEmpty(_password))
+            {
+                restClient.Authenticator = new HttpBasicAuthenticator(_username, _password);
+            }
+
+            var request = new RestRequest();
+            request.Method = Method.POST;
+            request.Resource = "rest/api/latest/search";
+            request.RequestFormat = DataFormat.Json;
+            request.AddBody(new { jql = jql, startAt = startAt, maxResults = maxResults, fields = fields });
+
+            var response = restClient.Execute(request);
+
+            return response.Content;
+        }
+
+        public int GetIssueCountFromJqlSearch(string jql)
+        {
+            var json = JObject.Parse(GetJsonFromJqlSearch(jql, 0, 1, new string[1] { "summary" }));
+            return (int) json["total"];
         }
 
         public string Login(string username, string password)
@@ -60,18 +96,15 @@ namespace Atlassian.Jira.Remote
             return _client.addBase64EncodedAttachmentsToIssue(token, key, fileNames, base64EncodedAttachmentData);
         }
 
-
         public RemoteComment[] GetCommentsFromIssue(string token, string key)
         {
             return _client.getComments(token, key);
         }
 
-
         public void AddComment(string token, string key, RemoteComment comment)
         {
             _client.addComment(token, key, comment);
         }
-
 
         public RemoteIssueType[] GetIssueTypes(string token, string projectId)
         {
@@ -586,5 +619,8 @@ namespace Atlassian.Jira.Remote
         {
             _client.updateWorklogWithNewRemainingEstimate(in0, in1, in2);
         }
+
+
+        
     }
 }

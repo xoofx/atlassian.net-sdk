@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Dynamic;
 using Atlassian.Jira.Remote;
 using Atlassian.Jira.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Atlassian.Jira
 {
@@ -31,9 +32,47 @@ namespace Atlassian.Jira
         private ProjectComponentCollection _components = null;
         private CustomFieldCollection _customFields = null;
 
+        /// <summary>
+        /// Create an issue to be saved into JIRA
+        /// </summary>
+        /// <param name="jira">The JIRA server where the issue will be saved at.</param>
+        /// <param name="projectKey">The project that the issue will be saved at.</param>
+        /// <param name="parentIssueKey">An optional parent issue key</param>
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
             : this(jira, new RemoteIssue() { project = projectKey }, parentIssueKey)
         {
+        }
+
+        /// <summary>
+        /// Create an issue from a JSON represantation
+        /// </summary>
+        /// <param name="jira">The Jira object that retrieved the issue</param>
+        /// <param name="json">The JSON representation of this issue</param>
+        public static Issue FromJson(Jira jira, string json)
+        {
+            var jsonIssue = JObject.Parse(json);
+
+            var fields = jsonIssue["fields"];
+            var remoteIssue = new RemoteIssue()
+            {
+                key = (string)jsonIssue["key"],
+                summary = (string)fields["summary"],
+                assignee = fields["assignee"].Type == JTokenType.Null ? null : (string)fields["assignee"]["name"],
+                created = fields["created"].Type == JTokenType.Null ? null : (DateTime?)fields["created"],
+                duedate = fields["duedate"].Type == JTokenType.Null ? null : (DateTime?)fields["duedate"],
+                description = fields["description"].Type == JTokenType.Null ? null : (string)fields["description"],
+                environment = fields["environment"].Type == JTokenType.Null ? null : (string)fields["environment"],
+                priority = fields["priority"].Type == JTokenType.Null ? null : (string)fields["priority"]["id"],
+                project = (string) fields["project"]["key"],
+                reporter = fields["reporter"].Type == JTokenType.Null ? null : (string)fields["reporter"]["name"],
+                resolution = fields["resolution"].Type == JTokenType.Null? null: (string) fields["resolution"]["id"],
+                status = fields["status"].Type == JTokenType.Null? null: (string) fields["status"]["id"],
+                type = fields["issuetype"].Type == JTokenType.Null? null: (string) fields["issuetype"]["id"],
+                updated = fields["updated"].Type == JTokenType.Null ? null : (DateTime?)fields["updated"],
+                votes = fields["votes"].Type == JTokenType.Null ? null : (long?)fields["votes"]["votes"]
+            };
+
+            return new Issue(jira, remoteIssue);
         }
 
         internal Issue(Jira jira, RemoteIssue remoteIssue, string parentIssueKey = null)

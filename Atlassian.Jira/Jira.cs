@@ -5,6 +5,8 @@ using System.Text;
 using Atlassian.Jira.Remote;
 using Atlassian.Jira.Linq;
 using System.ServiceModel;
+using RestSharp;
+using Newtonsoft.Json.Linq;
 
 namespace Atlassian.Jira
 {
@@ -53,7 +55,7 @@ namespace Atlassian.Jira
         /// <param name="password">passowrd to use to authenticate</param>
         public Jira(string url, string username, string password)
             :this(new JqlExpressionVisitor(),
-                  new JiraSoapServiceClientWrapper(url),
+                  new JiraSoapServiceClientWrapper(url, username, password),
                   new FileSystem(),
                   username, 
                   password)
@@ -91,11 +93,15 @@ namespace Atlassian.Jira
         /// <summary>
         /// Whether to print the translated JQL to console
         /// </summary>
-        public bool Debug 
-        { 
-            get; 
-            set; 
-        }
+        public bool Debug { get; set; }
+
+        /// <summary>
+        /// Whether to use the JIRA Rest API when querying for issues
+        /// </summary>
+        /// <remarks>
+        /// Enables support for server side Count() and Skip() processing
+        /// </remarks>
+        public bool UseRestApi { get; set; }
 
         /// <summary>
         /// Maximum number of issues per request
@@ -184,9 +190,9 @@ namespace Atlassian.Jira
         /// Execute a specific JQL query and return the resulting issues
         /// </summary>
         /// <param name="jql">JQL search query</param>
-        /// <param name="maxIssues">Maximum number of issues to return</param>
+        /// <param name="maxResults">Maximum number of issues to return</param>
         /// <returns>Collection of Issues that match the search query</returns>
-        public IEnumerable<Issue> GetIssuesFromJql(string jql, int? maxIssues)
+        public IEnumerable<Issue> GetIssuesFromJql(string jql, int? maxResults, int startAt = 0)
         {
             if (this.Debug)
             {
@@ -195,13 +201,29 @@ namespace Atlassian.Jira
 
             IList<Issue> issues = new List<Issue>();
 
-            WithToken(t =>
+            if (UseRestApi)
             {
-                foreach (RemoteIssue remoteIssue in _jiraSoapService.GetIssuesFromJqlSearch(t, jql, maxIssues ?? MaxIssuesPerRequest))
+                var json = JObject.Parse(_jiraSoapService.GetJsonFromJqlSearch(jql, startAt, maxResults?? MaxIssuesPerRequest));
+
+                foreach(var issue in (JArray)json["issues"])
                 {
-                    issues.Add(new Issue(this, remoteIssue));
+                    issues.Add(Issue.FromJson(this, issue.ToString()));
                 }
-            });
+            }
+            else if (startAt == 0)
+            {
+                WithToken(t =>
+                {
+                    foreach (RemoteIssue remoteIssue in _jiraSoapService.GetIssuesFromJqlSearch(t, jql, maxResults ?? MaxIssuesPerRequest))
+                    {
+                        issues.Add(new Issue(this, remoteIssue));
+                    }
+                });
+            }
+            else
+            {
+                throw new InvalidOperationException("'StartAt' cannot be used with SOAP API, set Jira.UseRestApi instead");
+            }
 
             return issues;
         }
