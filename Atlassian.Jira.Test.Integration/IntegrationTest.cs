@@ -20,17 +20,16 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void Test2()
+        public void CountIssuesWithRestApi()
         {
-            var jira = new Jira("http://farmas-pc:8080/jira", "admin", "admin");
+            var jira = new Jira("http://localhost:2990/jira", "admin", "admin");
             jira.Debug = true;
             jira.UseRestApi = true;
             var issues = from i in jira.Issues
                          where i.Key == "TST-1"
                          select i;
 
-            //Assert.Equal(1, issues.Count());
-            Assert.Equal("There can be only one", issues.First().Summary);
+            Assert.Equal(1, issues.Count());
         }
 
         [Fact]
@@ -401,7 +400,7 @@ namespace Atlassian.Jira.Test.Integration
         public void GetCustomFields()
         {
             var fields = _jira.GetCustomFields();
-            Assert.Equal(1, fields.Count());
+            Assert.Equal(2, fields.Count());
         }
 
         [Fact]

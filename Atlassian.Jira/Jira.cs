@@ -483,7 +483,7 @@ namespace Atlassian.Jira
             {
                 var tempIssue = this.GetIssuesFromJql(
                                         String.Format("project = \"{0}\"", projectKey), 
-                                        1).FirstOrDefault();
+                                        0, 1).FirstOrDefault();
 
                 if (tempIssue == null)
                 {

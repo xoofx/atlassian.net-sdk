@@ -52,7 +52,7 @@ namespace Atlassian.Jira.Remote
             request.Method = Method.POST;
             request.Resource = "rest/api/latest/search";
             request.RequestFormat = DataFormat.Json;
-            request.AddBody(new { jql = jql, startAt = startAt, maxResults = maxResults, fields = fields });
+            request.AddBody(new { jql = jql, startAt = startAt, maxResults = maxResults });
 
             var response = restClient.Execute(request);
 

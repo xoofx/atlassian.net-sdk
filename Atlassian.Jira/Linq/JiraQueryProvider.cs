@@ -51,7 +51,7 @@ namespace Atlassian.Jira.Linq
                     });
             }
 
-            IQueryable<Issue> issues = _jiraServer.GetIssuesFromJql(jql.Expression, jql.MaxResults, jql.StartAt).AsQueryable();
+            IQueryable<Issue> issues = _jiraServer.GetIssuesFromJql(jql.Expression, jql.StartAt, jql.MaxResults ?? _jiraServer.MaxIssuesPerRequest).AsQueryable();
 
             if (isEnumerable)
             {
