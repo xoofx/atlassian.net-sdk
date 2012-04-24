@@ -183,7 +183,7 @@ namespace Atlassian.Jira
         /// <returns>Collection of Issues that match the search query</returns>
         public IEnumerable<Issue> GetIssuesFromJql(string jql)
         {
-            return GetIssuesFromJql(jql, null);
+            return GetIssuesFromJql(jql, 0, this.MaxIssuesPerRequest);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Atlassian.Jira
         /// <param name="jql">JQL search query</param>
         /// <param name="maxResults">Maximum number of issues to return</param>
         /// <returns>Collection of Issues that match the search query</returns>
-        public IEnumerable<Issue> GetIssuesFromJql(string jql, int? maxResults, int startAt = 0)
+        public IEnumerable<Issue> GetIssuesFromJql(string jql, int startAt, int maxResults)
         {
             if (this.Debug)
             {
@@ -203,7 +203,7 @@ namespace Atlassian.Jira
 
             if (UseRestApi)
             {
-                var json = JObject.Parse(_jiraRemoteService.GetJsonFromJqlSearch(jql, startAt, maxResults?? MaxIssuesPerRequest));
+                var json = JObject.Parse(_jiraRemoteService.GetJsonFromJqlSearch(jql, startAt, maxResults));
 
                 foreach(var issue in (JArray)json["issues"])
                 {
@@ -212,9 +212,9 @@ namespace Atlassian.Jira
             }
             else if (startAt == 0)
             {
-                WithToken(t =>
+                WithToken(token =>
                 {
-                    foreach (RemoteIssue remoteIssue in _jiraRemoteService.GetIssuesFromJqlSearch(t, jql, maxResults ?? MaxIssuesPerRequest))
+                    foreach (RemoteIssue remoteIssue in _jiraRemoteService.GetIssuesFromJqlSearch(token, jql, maxResults))
                     {
                         issues.Add(new Issue(this, remoteIssue));
                     }
