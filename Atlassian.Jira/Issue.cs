@@ -72,6 +72,22 @@ namespace Atlassian.Jira
                 votes = fields["votes"].Type == JTokenType.Null ? null : (long?)fields["votes"]["votes"]
             };
 
+            if (fields["versions"].Type != JTokenType.Null)
+            {
+                remoteIssue.affectsVersions = (from v in (JArray)fields["versions"]
+                                               select new RemoteVersion() { id = (string)v["id"], name = (string)v["name"] }).ToArray();
+            }
+            if (fields["fixVersions"].Type != JTokenType.Null)
+            {
+                remoteIssue.fixVersions = (from v in (JArray)fields["fixVersions"]
+                                               select new RemoteVersion() { id = (string)v["id"], name = (string)v["name"] }).ToArray();
+            }
+            if (fields["components"].Type != JTokenType.Null)
+            {
+                remoteIssue.components = (from v in (JArray)fields["components"]
+                                           select new RemoteComponent() { id = (string)v["id"], name = (string)v["name"] }).ToArray();
+            }
+            
             return new Issue(jira, remoteIssue);
         }
 

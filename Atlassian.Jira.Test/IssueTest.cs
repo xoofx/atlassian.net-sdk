@@ -21,15 +21,18 @@ namespace Atlassian.Jira.Test
 
                 var issue = Issue.FromJson(jira, json);
 
-                //Assert.Equal("", issue.AffectsVersions);                
+                Assert.Equal(2, issue.AffectsVersions.Count);
+                Assert.True(issue.AffectsVersions.Any(v => v.Name.Equals("1.0")));
                 Assert.Equal("admin", issue.Assignee);
-                //Assert.Equal("", issue.Components);
+                Assert.Equal(2, issue.Components.Count);
+                Assert.True(issue.Components.Any(v => v.Name.Equals("server")));
                 Assert.Equal("24/04/2012", issue.Created.Value.ToShortDateString());
                 //Assert.Equal("", issue.CustomFields);
                 Assert.Equal("Sample Description", issue.Description);
                 Assert.Null(issue.DueDate);
                 Assert.Equal("Sample Environment", issue.Environment);
-                //Assert.Equal("Sample Environment", issue.FixVersions);
+                Assert.Equal(2, issue.FixVersions.Count);
+                Assert.True(issue.FixVersions.Any(v => v.Name.Equals("1.0")));
                 Assert.Same(jira, issue.Jira);
                 Assert.Equal("TST-1", issue.Key);
                 Assert.Equal("3", issue.Priority.Id);

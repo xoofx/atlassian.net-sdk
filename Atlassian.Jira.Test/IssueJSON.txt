@@ -66,6 +66,7 @@
                 "watchCount": 0,
                 "isWatching": false
             },
+			"customfield_10000": "foobar",
             "subtasks": [],
             "status": {
                 "self": "http://localhost:8080/jira/rest/api/2/status/1",
