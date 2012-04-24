@@ -12,21 +12,21 @@ namespace Atlassian.Jira.Remote
     /// <summary>
     /// Wraps the auto-generated JiraSoapServiceClient proxy
     /// </summary>
-    internal class JiraSoapServiceClientWrapper: IJiraSoapServiceClient
+    internal class JiraRemoteServiceWrapper: IJiraRemoteService
     {
         private readonly JiraSoapServiceClient _client;
         private readonly string _url;
         private readonly string _username;
         private readonly string _password;
 
-        public JiraSoapServiceClientWrapper(string jiraBaseUrl)
+        public JiraRemoteServiceWrapper(string jiraBaseUrl)
             : this(jiraBaseUrl, null, null)
         {
         }
 
-        public JiraSoapServiceClientWrapper(string jiraBaseUrl, string username, string password)
+        public JiraRemoteServiceWrapper(string jiraBaseUrl, string username, string password)
         {
-            _client = JiraSoapServiceClientFactory.Create(jiraBaseUrl);
+            _client = JiraRemoteServiceFactory.Create(jiraBaseUrl);
             _url = jiraBaseUrl.EndsWith("/") ? jiraBaseUrl : jiraBaseUrl += "/";
             _username = username;
             _password = password;

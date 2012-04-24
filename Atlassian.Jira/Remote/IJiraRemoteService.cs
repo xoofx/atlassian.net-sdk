@@ -6,9 +6,9 @@ using System.Text;
 namespace Atlassian.Jira.Remote
 {
     /// <summary>
-    /// Abstract the proxy SOAP client implementation
+    /// Abstract interactions with remote jira server
     /// </summary>
-    public interface IJiraSoapServiceClient
+    public interface IJiraRemoteService
     {
         string Url { get; }
         string Login(string username, string password);

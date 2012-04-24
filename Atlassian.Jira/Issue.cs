@@ -336,11 +336,11 @@ namespace Atlassian.Jira
                 {
                     if (String.IsNullOrEmpty(_parentIssueKey))
                     {
-                        remoteIssue = _jira.RemoteSoapService.CreateIssue(token, remoteIssue);
+                        remoteIssue = _jira.RemoteService.CreateIssue(token, remoteIssue);
                     }
                     else
                     {
-                        remoteIssue = _jira.RemoteSoapService.CreateIssueWithParent(token, remoteIssue, _parentIssueKey);
+                        remoteIssue = _jira.RemoteService.CreateIssueWithParent(token, remoteIssue, _parentIssueKey);
                     }
                 });
 
@@ -371,7 +371,7 @@ namespace Atlassian.Jira
             
             _jira.WithToken(token =>
             {
-                var remoteIssue = _jira.RemoteSoapService.ProgressWorkflowAction(
+                var remoteIssue = _jira.RemoteService.ProgressWorkflowAction(
                                                                 token,
                                                                 _originalIssue.key,
                                                                 action.Id,
@@ -384,7 +384,7 @@ namespace Atlassian.Jira
         {
             var remoteIssue = _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.UpdateIssue(token, this.Key.Value, remoteFields);
+                return _jira.RemoteService.UpdateIssue(token, this.Key.Value, remoteFields);
             });
             Initialize(remoteIssue);
         }
@@ -401,7 +401,7 @@ namespace Atlassian.Jira
 
             return _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetAttachmentsFromIssue(token, _originalIssue.key)
+                return _jira.RemoteService.GetAttachmentsFromIssue(token, _originalIssue.key)
                     .Select(a => new Attachment(_jira, new WebClientWrapper(), a)).ToList().AsReadOnly();
             });
         }
@@ -448,7 +448,7 @@ namespace Atlassian.Jira
 
             _jira.WithToken(token =>
             {
-                _jira.RemoteSoapService.AddBase64EncodedAttachmentsToIssue(
+                _jira.RemoteService.AddBase64EncodedAttachmentsToIssue(
                     token, 
                     _originalIssue.key, 
                     names.ToArray(), 
@@ -468,7 +468,7 @@ namespace Atlassian.Jira
 
             return _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetCommentsFromIssue(token, _originalIssue.key).Select(c => new Comment(c)).ToList().AsReadOnly();   
+                return _jira.RemoteService.GetCommentsFromIssue(token, _originalIssue.key).Select(c => new Comment(c)).ToList().AsReadOnly();   
             });
         }
 
@@ -487,7 +487,7 @@ namespace Atlassian.Jira
 
             _jira.WithToken(token =>
             {
-                _jira.RemoteSoapService.AddComment(token, _originalIssue.key, newComment.toRemote());
+                _jira.RemoteService.AddComment(token, _originalIssue.key, newComment.toRemote());
             });
         }
 
@@ -548,13 +548,13 @@ namespace Atlassian.Jira
                 switch (worklogStrategy)
                 {
                     case WorklogStrategy.RetainRemainingEstimate:
-                        remoteWorklog = _jira.RemoteSoapService.AddWorklogAndRetainRemainingEstimate(token, _originalIssue.key, remoteWorklog);
+                        remoteWorklog = _jira.RemoteService.AddWorklogAndRetainRemainingEstimate(token, _originalIssue.key, remoteWorklog);
                         break;
                     case WorklogStrategy.NewRemainingEstimate:
-                        remoteWorklog = _jira.RemoteSoapService.AddWorklogWithNewRemainingEstimate(token, _originalIssue.key, remoteWorklog, newEstimate);
+                        remoteWorklog = _jira.RemoteService.AddWorklogWithNewRemainingEstimate(token, _originalIssue.key, remoteWorklog, newEstimate);
                         break;
                     default:
-                        remoteWorklog = _jira.RemoteSoapService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, remoteWorklog);
+                        remoteWorklog = _jira.RemoteService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, remoteWorklog);
                         break;
                 }
             });
@@ -601,7 +601,7 @@ namespace Atlassian.Jira
 
             return _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetWorkLogs(token, _originalIssue.key).Select(w => new Worklog(w)).ToList().AsReadOnly();
+                return _jira.RemoteService.GetWorkLogs(token, _originalIssue.key).Select(w => new Worklog(w)).ToList().AsReadOnly();
             });
         }
 
@@ -617,7 +617,7 @@ namespace Atlassian.Jira
 
             var remoteIssue = _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetIssuesFromJqlSearch(token, "key = " + _originalIssue.key, 1).First();
+                return _jira.RemoteService.GetIssuesFromJqlSearch(token, "key = " + _originalIssue.key, 1).First();
             });
             Initialize(remoteIssue);
         }
@@ -698,7 +698,7 @@ namespace Atlassian.Jira
 
             return _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetAvailableActions(token, _originalIssue.key).Select(a => new JiraNamedEntity(a));
+                return _jira.RemoteService.GetAvailableActions(token, _originalIssue.key).Select(a => new JiraNamedEntity(a));
             });
         }
 

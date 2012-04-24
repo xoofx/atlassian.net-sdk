@@ -16,7 +16,7 @@ namespace Atlassian.Jira.Test
         private Jira CreateJiraInstance()
         {
             _translator = new JqlExpressionVisitor();
-            var soapClient = new Mock<IJiraSoapServiceClient>();
+            var soapClient = new Mock<IJiraRemoteService>();
 
             soapClient.Setup(r => r.GetIssuesFromJqlSearch(
                                         It.IsAny<string>(),

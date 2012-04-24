@@ -47,7 +47,7 @@ namespace Atlassian.Jira.Linq
             {
                 return _jiraServer.WithToken<int>((token, client) =>
                     {
-                        return _jiraServer.RemoteSoapService.GetIssueCountFromJqlSearch(jql.Expression);
+                        return _jiraServer.RemoteService.GetIssueCountFromJqlSearch(jql.Expression);
                     });
             }
 

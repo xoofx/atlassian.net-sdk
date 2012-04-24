@@ -14,7 +14,7 @@ namespace Atlassian.Jira.Remote
     /// <summary>
     /// Factory for JiraSoapServiceClient proxy
     /// </summary>
-    public static class JiraSoapServiceClientFactory
+    public static class JiraRemoteServiceFactory
     {
         /// <summary>
         /// Creates and configures a JiraSoapServiceClient

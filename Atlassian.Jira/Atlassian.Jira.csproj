@@ -79,13 +79,13 @@
     <Compile Include="Linq\ExpressionEvaluator.cs" />
     <Compile Include="Linq\ExpressionTreeModifier.cs" />
     <Compile Include="Remote\ExtensionMethods.cs" />
-    <Compile Include="Remote\IJiraSoapServiceClient.cs" />
+    <Compile Include="Remote\IJiraRemoteService.cs" />
     <Compile Include="Linq\IJqlExpressionVisitor.cs" />
     <Compile Include="Linq\JiraQueryable.cs" />
     <Compile Include="Linq\JiraQueryProvider.cs" />
     <Compile Include="Remote\JiraSoapService.cs" />
-    <Compile Include="Remote\JiraSoapServiceClientFactory.cs" />
-    <Compile Include="Remote\JiraSoapServiceClientWrapper.cs" />
+    <Compile Include="Remote\JiraRemoteServiceFactory.cs" />
+    <Compile Include="Remote\JiraRemoteServiceWrapper.cs" />
     <Compile Include="Linq\JqlData.cs" />
     <Compile Include="Linq\JqlExpressionVisitor.cs" />
     <Compile Include="Linq\JiraOperators.cs" />
