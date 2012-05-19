@@ -42,6 +42,8 @@ namespace Atlassian.Jira.Remote
             binding.TransferMode = TransferMode.Buffered;
             binding.UseDefaultWebProxy = true;
             binding.MaxReceivedMessageSize = int.MaxValue;
+            binding.SendTimeout = new TimeSpan(0, 10, 0);
+            binding.ReceiveTimeout = new TimeSpan(0, 10, 0);
             binding.ReaderQuotas = new XmlDictionaryReaderQuotas() 
             { 
                 MaxStringContentLength = int.MaxValue,
