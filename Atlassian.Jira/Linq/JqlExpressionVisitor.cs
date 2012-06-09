@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
@@ -135,8 +136,6 @@ namespace Atlassian.Jira.Linq
 
         private void ProcessIndexedMemberEqualityOperator(BinaryExpression expression, bool equal)
         {
-            var methodExpression = expression.Left as MethodCallExpression;
-
             var fieldName = GetFieldNameFromBinaryExpression(expression);
             var fieldValue = GetFieldValueFromBinaryExpression(expression);
 
@@ -144,19 +143,19 @@ namespace Atlassian.Jira.Linq
             _jqlWhere.Append(fieldName);
 
             // operator
-            var operatorString = String.Empty;
-            if(typeof(string).Equals(fieldValue.GetType()))
+            string operatorString;
+            if (fieldValue is string)
             {
-                operatorString = equal? JiraOperators.CONTAINS: JiraOperators.NOTCONTAINS;
+                operatorString = equal ? JiraOperators.CONTAINS : JiraOperators.NOTCONTAINS;
             }
             else
             {
-                operatorString = equal? JiraOperators.EQUALS: JiraOperators.NOTEQUALS;
+                operatorString = equal ? JiraOperators.EQUALS : JiraOperators.NOTEQUALS;
             }
             _jqlWhere.Append(String.Format(" {0} ", operatorString));
 
             // value
-            ProcessConstant(GetFieldValueFromBinaryExpression(expression));
+            ProcessConstant(fieldValue);
         }
 
         private void ProcessMemberEqualityOperator(BinaryExpression expression, bool equal)
@@ -199,7 +198,8 @@ namespace Atlassian.Jira.Linq
         {
             var valueType = value.GetType();
             if (valueType == typeof(String)
-                || valueType == typeof(ComparableString))
+                || valueType == typeof(ComparableString)
+                || valueType == typeof(LiteralMatch))
             {
                 _jqlWhere.Append(String.Format("\"{0}\"", value));
             }
