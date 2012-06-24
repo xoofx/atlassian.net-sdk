@@ -57,13 +57,13 @@ namespace Atlassian.Jira
         {
             // workaround for bug JRA-6857: GetCustomFields() is for admins only
             var customField =
-                _jira.GetFieldsForEdit(_projectKey).First(
+                _jira.GetFieldsForEdit(_projectKey).FirstOrDefault(
                     f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
 
             if (customField == null)
             {
-                throw new InvalidOperationException("Could not find custom field with name '{0}' on the JIRA server. " + 
-                    "Make sure this field is available when editing this issue. For more information see JRA-6857");
+                throw new InvalidOperationException(String.Format("Could not find custom field with name '{0}' on the JIRA server. " 
+                    + "Make sure this field is available when editing this issue. For more information see JRA-6857", fieldName));
             }
 
             return customField.Id;
