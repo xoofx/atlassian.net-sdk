@@ -387,7 +387,7 @@ namespace Atlassian.Jira.Test.Integration
         public void GetCustomFields()
         {
             var fields = _jira.GetCustomFields();
-            Assert.Equal(2, fields.Count());
+            Assert.Equal(4, fields.Count());
         }
 
         [Fact]
