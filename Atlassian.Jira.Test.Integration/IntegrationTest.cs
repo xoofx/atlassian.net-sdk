@@ -405,6 +405,28 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void UpdateAssignee()
+        {
+            var summaryValue = "Test issue with assignee (Updated)" + _random.Next(int.MaxValue);
+
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue
+            };
+
+            issue.SaveChanges();
+
+            issue.Assignee = "test"; //username
+            issue.SaveChanges();
+            Assert.Equal("test", issue.Assignee);
+
+            issue.Assignee = "admin";
+            issue.SaveChanges();
+            Assert.Equal("admin", issue.Assignee);
+        }
+
+        [Fact]
         public void UpdateVersions()
         {
             var summaryValue = "Test issue with versions (Updated)" + _random.Next(int.MaxValue);

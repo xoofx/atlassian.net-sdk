@@ -11,6 +11,32 @@ namespace Atlassian.Jira.Test
     public class CustomFieldCollectionTest
     {
         [Fact]
+        public void IndexByName_ShouldThrowIfUnableToFindRemoteValue()
+        {
+            var jira = TestableJira.Create();
+            jira.SoapService
+               .Setup(c => c.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+               .Returns(new RemoteIssue[] 
+                {
+                    new RemoteIssue() { key = "123" }
+                });
+
+            var issue = new RemoteIssue()
+            {
+                project = "bar",
+                key = "foo",
+                customFieldValues = new RemoteCustomFieldValue[]{
+                                new RemoteCustomFieldValue(){
+                                    customfieldId = "123",
+                                    values = new string[] {"abc"}
+                                }
+                            }
+            }.ToLocal(jira);
+
+            Assert.Throws(typeof (InvalidOperationException), () => issue["CustomField"]);
+        }
+
+        [Fact]
         public void IndexByName_ShouldReturnRemoteValue()
         {
             //arrange

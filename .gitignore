@@ -40,4 +40,5 @@ Ankh.NoLoad
 #Tooling
 _ReSharper*/
 *.resharper
+*.ncrunchsolution
 [Tt]est[Rr]esult*
