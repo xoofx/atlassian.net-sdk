@@ -460,7 +460,7 @@ namespace Atlassian.Jira
 
         internal IEnumerable<JiraNamedEntity> GetFieldsForAction(string issueKey, string projectKey, string actionId)
         {
-            if (!_cachedFieldsForAction.ContainsKey(issueKey, actionId))
+            if (!_cachedFieldsForAction.ContainsKey(projectKey, actionId))
             {
                 WithToken((token, service) =>
                 {
@@ -469,7 +469,7 @@ namespace Atlassian.Jira
                 });
             }
 
-            return _cachedFieldsForAction[issueKey, actionId];
+            return _cachedFieldsForAction[projectKey, actionId];
         }
 
         internal IEnumerable<JiraNamedEntity> GetFieldsForEdit(string issueKey, string projectKey)
