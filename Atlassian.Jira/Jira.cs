@@ -5,6 +5,7 @@ using System.Text;
 using Atlassian.Jira.Remote;
 using Atlassian.Jira.Linq;
 using System.ServiceModel;
+using Util.DoubleKeyDictionary;
 
 namespace Atlassian.Jira
 {
@@ -27,15 +28,17 @@ namespace Atlassian.Jira
         private string _token = String.Empty;
         private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string,IEnumerable<ProjectVersion>>();
         private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
-        private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
-        private IEnumerable<JiraNamedEntity> _cachedCustomFields = null;
         private IEnumerable<JiraNamedEntity> _cachedFilters = null;
         private IEnumerable<IssuePriority> _cachedPriorities = null;
         private IEnumerable<IssueStatus> _cachedStatuses = null;
         private IEnumerable<IssueResolution> _cachedResolutions = null;
         private IEnumerable<Project> _cachedProjects = null;
 
+        private IEnumerable<JiraNamedEntity> _cachedCustomFields = null;
+        private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
+        private DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>> _cachedFieldsForAction = new DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>>();
+        
         /// <summary>
         /// Create a connection to a JIRA server with anonymous access
         /// </summary>
@@ -455,22 +458,28 @@ namespace Atlassian.Jira
             }
         }
 
-        internal IEnumerable<JiraNamedEntity> GetFieldsForEdit(string projectKey)
+        internal IEnumerable<JiraNamedEntity> GetFieldsForAction(string issueKey, string projectKey, string actionId)
+        {
+            if (!_cachedFieldsForAction.ContainsKey(issueKey, actionId))
+            {
+                WithToken((token, service) =>
+                {
+                    _cachedFieldsForAction.Add(projectKey, actionId, _jiraSoapService.GetFieldsForAction(token, issueKey, actionId)
+                        .Select(f => new JiraNamedEntity(f)));
+                });
+            }
+
+            return _cachedFieldsForAction[issueKey, actionId];
+        }
+
+        internal IEnumerable<JiraNamedEntity> GetFieldsForEdit(string issueKey, string projectKey)
         {
             if (!_cachedFieldsForEdit.ContainsKey(projectKey))
             {
-                var tempIssue = this.GetIssuesFromJql(
-                                        String.Format("project = \"{0}\"", projectKey), 
-                                        1).FirstOrDefault();
-
-                if (tempIssue == null)
-                {
-                    throw new InvalidOperationException("Project must contain at least one issue to be able to retrieve issue fields.");
-                }
-
                 WithToken(token =>
                 {
-                    _cachedFieldsForEdit.Add(projectKey, _jiraSoapService.GetFieldsForEdit(token, tempIssue.Key.Value).Select(f => new JiraNamedEntity(f)));
+                    _cachedFieldsForEdit.Add(projectKey, _jiraSoapService.GetFieldsForEdit(token, issueKey)
+                        .Select(f => new JiraNamedEntity(f)));
                 });
             }
 

@@ -11,21 +11,18 @@ namespace Atlassian.Jira
     /// </summary>
     public class CustomField
     {
-        private readonly Jira _jira;
         private readonly string _id;
-        private readonly string _projectKey;
-
+        private readonly Issue _issue;
         private string _name;
 
-        internal CustomField(string id, string projectKey, Jira jira)
+        internal CustomField(string id, Issue issue)
         {
             _id = id;
-            _jira = jira;
-            _projectKey = projectKey;
+            _issue = issue;
         }
 
-        internal CustomField(string id, string name, string projectKey, Jira jira)
-            : this(id, projectKey, jira)
+        internal CustomField(string id, string name, Issue issue)
+            : this(id, issue)
         {
             _name = name;
         }
@@ -56,7 +53,7 @@ namespace Atlassian.Jira
             {
                 if (String.IsNullOrEmpty(_name)) 
                 {
-                    _name = _jira.GetFieldsForEdit(_projectKey).First(f => f.Id == _id).Name;
+                    _name = _issue.Jira.GetFieldsForEdit(_issue.Key.Value, _issue.Project).First(f => f.Id == _id).Name;
                 }
 
                 return _name; 

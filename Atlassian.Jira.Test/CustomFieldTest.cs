@@ -15,19 +15,13 @@ namespace Atlassian.Jira.Test
         {
             //arrange
             var jira = TestableJira.Create();
-            jira.SoapService
-                .Setup(c => c.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
-                .Returns(new RemoteIssue[] 
-                {
-                    new RemoteIssue() { key = "123" }
-                });
-            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "123")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] { 
                 new RemoteField(){ id="123", name= "CustomField" }});
 
             var issue = new RemoteIssue()
             {
-                project = "bar",
-                key = "foo",
+                project = "projectKey",
+                key = "issueKey",
                 customFieldValues = new RemoteCustomFieldValue[]{
                                 new RemoteCustomFieldValue(){
                                     customfieldId = "123",
