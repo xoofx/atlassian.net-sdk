@@ -75,7 +75,7 @@ namespace Atlassian.Jira
         {
             _getFieldIdProvider = fieldName =>
             {
-                var customField = _issue.Jira.GetFieldsForEdit(_issue.Key.Value, _issue.Project)
+                var customField = _issue.Jira.GetFieldsForEdit(_issue)
                     .FirstOrDefault(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
 
                 if (customField == null)
@@ -99,7 +99,7 @@ namespace Atlassian.Jira
         {
             _getFieldIdProvider = name =>
             {
-                var customField = _issue.Jira.GetFieldsForAction(_issue.Key.Value, _issue.Project, actionId)
+                var customField = _issue.Jira.GetFieldsForAction(_issue, actionId)
                     .FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
                 if (customField == null)

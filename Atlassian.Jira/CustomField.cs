@@ -53,7 +53,7 @@ namespace Atlassian.Jira
             {
                 if (String.IsNullOrEmpty(_name)) 
                 {
-                    _name = _issue.Jira.GetFieldsForEdit(_issue.Key.Value, _issue.Project).First(f => f.Id == _id).Name;
+                    _name = _issue.Jira.GetFieldsForEdit(_issue).First(f => f.Id == _id).Name;
                 }
 
                 return _name; 

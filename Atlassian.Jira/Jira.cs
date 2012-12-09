@@ -457,33 +457,56 @@ namespace Atlassian.Jira
                 return function(_token, this.RemoteSoapService);
             }
         }
-
-        internal IEnumerable<JiraNamedEntity> GetFieldsForAction(string issueKey, string projectKey, string actionId)
+        
+        internal IEnumerable<JiraNamedEntity> GetFieldsForAction(Issue issue, string actionId)
         {
-            if (!_cachedFieldsForAction.ContainsKey(projectKey, actionId))
+            if (issue.Key == null)
+            {
+                issue = GetOneIssueFromProject(issue.Project);
+            }
+
+            if (!_cachedFieldsForAction.ContainsKey(issue.Project, actionId))
             {
                 WithToken((token, service) =>
                 {
-                    _cachedFieldsForAction.Add(projectKey, actionId, _jiraSoapService.GetFieldsForAction(token, issueKey, actionId)
+                    _cachedFieldsForAction.Add(issue.Project, actionId, _jiraSoapService.GetFieldsForAction(token, issue.Key.Value, actionId)
                         .Select(f => new JiraNamedEntity(f)));
                 });
             }
 
-            return _cachedFieldsForAction[projectKey, actionId];
+            return _cachedFieldsForAction[issue.Project, actionId];
         }
 
-        internal IEnumerable<JiraNamedEntity> GetFieldsForEdit(string issueKey, string projectKey)
+        internal IEnumerable<JiraNamedEntity> GetFieldsForEdit(Issue issue)
         {
-            if (!_cachedFieldsForEdit.ContainsKey(projectKey))
+            if (issue.Key == null)
+            {
+                issue = GetOneIssueFromProject(issue.Project);
+            }
+
+            if (!_cachedFieldsForEdit.ContainsKey(issue.Project))
             {
                 WithToken(token =>
                 {
-                    _cachedFieldsForEdit.Add(projectKey, _jiraSoapService.GetFieldsForEdit(token, issueKey)
+                    _cachedFieldsForEdit.Add(issue.Project, _jiraSoapService.GetFieldsForEdit(token, issue.Key.Value)
                         .Select(f => new JiraNamedEntity(f)));
                 });
             }
 
-            return _cachedFieldsForEdit[projectKey];
+            return _cachedFieldsForEdit[issue.Project];
+        }
+
+        private Issue GetOneIssueFromProject(string projectKey)
+        {
+            var tempIssue = this.GetIssuesFromJql(String.Format("project = \"{0}\"", projectKey) ,1)
+                                .FirstOrDefault();
+
+            if (tempIssue == null)
+            {
+                throw new InvalidOperationException("Project must contain at least one issue to be able to retrieve issue fields.");
+            }
+
+            return tempIssue;
         }
     }
 }
