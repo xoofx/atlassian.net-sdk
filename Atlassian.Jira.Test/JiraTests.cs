@@ -75,6 +75,31 @@ namespace Atlassian.Jira.Test
             }
         }
 
+        public class GetAccessToken 
+        {
+            [Fact]
+            public void WillThrowExceptionIfNoCredentialsProviderExists()
+            {
+                // Arrange
+                var soapService = new Mock<IJiraSoapServiceClient>();
+                var jira = new Jira(null, soapService.Object, null, null, null); 
+
+                // Act
+                Assert.Throws<InvalidOperationException>(() => jira.GetAccessToken());
+            }
+
+            [Fact]
+            public void WillThrowExceptionIfCredentialsProviderReturnsNull()
+            {
+                // Arrange
+                var soapService = new Mock<IJiraSoapServiceClient>();
+                var jira = new Jira(null, soapService.Object, null, null, () => null); 
+
+                // Act
+                Assert.Throws<InvalidOperationException>(() => jira.GetAccessToken());
+            }
+        }
+
         public class WithToken_UserAndPassword
         {
             [Fact]

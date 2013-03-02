@@ -87,7 +87,11 @@ namespace Atlassian.Jira
         public void Download(string fullFileName)
         {
             var credentials = _jira.GetCredentials();
-            // TODO
+
+            if (String.IsNullOrEmpty(credentials.UserName) || String.IsNullOrEmpty(credentials.Password))
+            {
+                throw new InvalidOperationException("Unable to download attachment, user and/or password are missing. You can specify a provider for credentials when constructing the Jira instance.");
+            }
 
             _webClient.AddQueryString("os_username", credentials.UserName);
             _webClient.AddQueryString("os_password", credentials.Password);

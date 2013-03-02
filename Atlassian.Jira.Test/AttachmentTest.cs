@@ -11,6 +11,25 @@ namespace Atlassian.Jira.Test
     public class AttachmentTest
     {
         [Fact]
+        public void Download_ShouldThrowExceptionIfUserAndPasswordAreMissing()
+        {
+            //arrange
+            var mockWebClient = new Mock<IWebClient>();
+            var mockSoapClient = new Mock<IJiraSoapServiceClient>();
+
+            var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("user", null));
+
+            var attachment = (new RemoteAttachment()
+            {
+                id = "attachID",
+                filename = "attach.txt"
+            }).ToLocal(jira, mockWebClient.Object);
+
+            //act
+            Assert.Throws<InvalidOperationException>(() => attachment.Download("C:\\foo\\bar.txt"));
+        }
+
+        [Fact]
         public void Download_ShouldSaveAttachmentToSpecifiedLocation()
         {
             //arrange

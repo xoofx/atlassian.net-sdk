@@ -43,7 +43,7 @@ namespace Atlassian.Jira
         private DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>> _cachedFieldsForAction = new DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>>();
         
         /// <summary>
-        /// Create a connection to a JIRA server with anonymous access
+        /// Create a proxy that connects with a JIRA server with anonymous access.
         /// </summary>
         /// <param name="url">Url to the JIRA server</param>
         public Jira(string url)
@@ -54,20 +54,8 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Create a connection to a JIRA server with provided credentials
+        /// Create a proxy that connects with a JIRA server with anonymous access with depencies.
         /// </summary>
-        /// <param name="url">Url to the JIRA server</param>
-        /// <param name="username">username to use to authenticate</param>
-        /// <param name="password">passowrd to use to authenticate</param>
-        public Jira(string url, string username, string password)
-            :this(new JqlExpressionVisitor(),
-                  new JiraSoapServiceClientWrapper(url),
-                  new FileSystem(),
-                  null,
-                  () => new JiraCredentials(username, password))
-        {
-        }
-
         public Jira(IJqlExpressionVisitor translator,
                     IJiraSoapServiceClient jiraSoapService,
                     IFileSystem fileSystem)
@@ -81,6 +69,42 @@ namespace Atlassian.Jira
             this._provider = new JiraQueryProvider(translator, this);
         }
 
+        /// <summary>
+        /// Create a proxy that connects with a JIRA server with specified credentials.
+        /// </summary>
+        /// <param name="url">Url to the JIRA server</param>
+        /// <param name="username">Username used to authenticate</param>
+        /// <param name="password">Password used to authenticate</param>
+        public Jira(string url, string username, string password)
+            :this(url,
+                  null,
+                  () => new JiraCredentials(username, password))
+        {
+        }
+
+        /// <summary>
+        /// Create a proxy that connects with a JIRA server with specified access token.
+        /// </summary>
+        /// <param name="url">Url to the JIRA server.</param>
+        /// <param name="token">JIRA access token to use.</param>
+        /// <param name="credentialsProvider">Provider of credentials needed to re-generate token.</param>
+        public Jira(string url, string token, Func<JiraCredentials> credentialsProvider = null)
+            : this(new JqlExpressionVisitor(),
+                  new JiraSoapServiceClientWrapper(url),
+                  new FileSystem(),
+                  token,
+                  credentialsProvider)
+        {
+        }
+        
+        /// <summary>
+        /// Create a proxy that connects with a JIRA server with specified access token and dependencies.
+        /// </summary>
+        /// <param name="translator"></param>
+        /// <param name="jiraSoapService"></param>
+        /// <param name="fileSystem"></param>
+        /// <param name="accessToken"></param>
+        /// <param name="credentialsProvider"></param>
         public Jira(IJqlExpressionVisitor translator,
                     IJiraSoapServiceClient jiraSoapService,
                     IFileSystem fileSystem,
@@ -125,7 +149,18 @@ namespace Atlassian.Jira
 
         internal JiraCredentials GetCredentials()
         {
-            return _credentialsProvider();
+            if (_credentialsProvider == null)
+            {
+                throw new InvalidOperationException("Unable to get user and password, credentials provider is not set.");
+            }
+
+            var credentials = _credentialsProvider();
+            if (credentials == null)
+            {
+                throw new InvalidOperationException("Unable to get user and password, credentials provider returned null.");
+            }
+
+            return credentials;
         }
 
         internal IFileSystem FileSystem
@@ -463,10 +498,12 @@ namespace Atlassian.Jira
             }
         }
 
-        private string GetAccessToken()
+        /// <summary>
+        /// Retrieves an access token from server using current credentials.
+        /// </summary>
+        public string GetAccessToken()
         {
             var credentials = GetCredentials();
-            // TODO
             return _jiraSoapService.Login(credentials.UserName, credentials.Password);
         }
         

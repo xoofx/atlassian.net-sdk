@@ -501,6 +501,17 @@ namespace Atlassian.Jira.Test
             }
 
             [Fact]
+            public void IfCredentialsMissingUserName_ShouldThrownException()
+            {
+                // Arrange
+                var jira = TestableJira.Create("token", new JiraCredentials(null));
+                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+                // Act
+                Assert.Throws<InvalidOperationException>(() => issue.AddComment("the comment"));
+            }
+
+            [Fact]
             public void IfIssueCreated_ShouldUpload()
             {
                 //arrange
