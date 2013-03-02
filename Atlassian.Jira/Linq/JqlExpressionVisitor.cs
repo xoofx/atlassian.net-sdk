@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Globalization;
 
 namespace Atlassian.Jira.Linq
 {
@@ -206,7 +207,11 @@ namespace Atlassian.Jira.Linq
             }
             else if (valueType == typeof(DateTime))
             {
-                _jqlWhere.Append(String.Format("\"{0}\"", ((DateTime)value).ToString("yyyy/MM/dd")));
+                /* Using "en-us" culture to conform to formats of JIRA.
+                 * See https://bitbucket.org/farmas/atlassian.net-sdk/issue/31 
+                 */
+                var dateString = ((DateTime)value).ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo);
+                _jqlWhere.Append(String.Format("\"{0}\"", dateString));
 
             }
             else

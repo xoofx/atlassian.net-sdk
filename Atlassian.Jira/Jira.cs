@@ -6,6 +6,7 @@ using Atlassian.Jira.Remote;
 using Atlassian.Jira.Linq;
 using System.ServiceModel;
 using Util.DoubleKeyDictionary;
+using System.Globalization;
 
 namespace Atlassian.Jira
 {
@@ -14,6 +15,9 @@ namespace Atlassian.Jira
     /// </summary>
     public class Jira
     {
+        internal const string DEFAULT_DATE_FORMAT = "yyyy/MM/dd";
+        internal static CultureInfo DefaultCultureInfo = CultureInfo.GetCultureInfo("en-us");
+
         private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
         private const string ALL_PROJECTS_KEY = "[ALL_PROJECTS]";
         private const string REMOTE_AUTH_EXCEPTION_STRING = "com.atlassian.jira.rpc.exception.RemoteAuthenticationException";

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -14,8 +15,6 @@ namespace Atlassian.Jira
     /// </remarks>
     public class ComparableString
     {
-        private const string JIRA_DATE_FORMAT_STRING = "yyyy/MM/dd";
-
         public string Value { get; set; }
 
         public ComparableString(string value)
@@ -87,7 +86,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return field.Value == value.ToString(JIRA_DATE_FORMAT_STRING);
+                return field.Value == value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo);
             }
         }
 
@@ -99,28 +98,28 @@ namespace Atlassian.Jira
             }
             else
             {
-                return field.Value != value.ToString(JIRA_DATE_FORMAT_STRING);
+                return field.Value != value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo);
             }
         }
 
         public static bool operator >(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToString(JIRA_DATE_FORMAT_STRING)) > 0;
+            return field.Value.CompareTo(value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo)) > 0;
         }
 
         public static bool operator <(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToString(JIRA_DATE_FORMAT_STRING)) < 0;
+            return field.Value.CompareTo(value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo)) < 0;
         }
 
         public static bool operator <=(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToString(JIRA_DATE_FORMAT_STRING)) <= 0;
+            return field.Value.CompareTo(value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo)) <= 0;
         }
 
         public static bool operator >=(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToString(JIRA_DATE_FORMAT_STRING)) >= 0;
+            return field.Value.CompareTo(value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo)) >= 0;
         }
 
         public override string ToString()
@@ -140,6 +139,15 @@ namespace Atlassian.Jira
             }
 
             return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            if (this.Value == null)
+            {
+                return 0;
+            }
+            return this.Value.GetHashCode();
         }
     }
 }

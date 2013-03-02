@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Atlassian.Jira.Linq;
 using Atlassian.Jira.Remote;
 using Moq;
@@ -364,6 +366,30 @@ namespace Atlassian.Jira.Test
                           select i).ToArray();
 
             Assert.Equal("Created > \"2011/01/01 00:00\"", _translator.Jql);
+        }
+
+        [Fact]
+        // https://bitbucket.org/farmas/atlassian.net-sdk/issue/31
+        public void DateTimeFormattedAsEnUs()
+        {
+            var currentCulture = Thread.CurrentThread.CurrentCulture;
+
+            try
+            {
+                Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
+                var jira = CreateJiraInstance();
+                var date = new DateTime(2011, 1, 1);
+
+                var issues = (from i in jira.Issues
+                              where i.Created > date
+                              select i).ToArray();
+
+                Assert.Equal("Created > \"2011/01/01\"", _translator.Jql);
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = currentCulture;
+            }
         }
 
         [Fact]
