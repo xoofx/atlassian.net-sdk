@@ -25,11 +25,10 @@ namespace Atlassian.Jira
         private readonly JiraQueryProvider _provider;
         private readonly IJiraSoapServiceClient _jiraSoapService;
         private readonly IFileSystem _fileSystem;
-        private readonly string _username = null;
-        private readonly string _password = null;
         private readonly bool _isAnonymous = false;
 
         private string _token = String.Empty;
+        private Func<JiraCredentials> _credentialsProvider;
         private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string,IEnumerable<ProjectVersion>>();
         private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
@@ -48,7 +47,9 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="url">Url to the JIRA server</param>
         public Jira(string url)
-            : this(url, null, null)
+            : this(new JqlExpressionVisitor(),
+                  new JiraSoapServiceClientWrapper(url),
+                  new FileSystem())
         {
         }
 
@@ -62,29 +63,34 @@ namespace Atlassian.Jira
             :this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
                   new FileSystem(),
-                  username, 
-                  password)
+                  null,
+                  () => new JiraCredentials(username, password))
         {
         }
 
-        /// <summary>
-        /// Create a connection to a JIRA server
-        /// </summary>
-        public Jira(IJqlExpressionVisitor translator, 
-                    IJiraSoapServiceClient jiraSoapService, 
-                    IFileSystem fileSystem,
-                    string username, 
-                    string password)
+        public Jira(IJqlExpressionVisitor translator,
+                    IJiraSoapServiceClient jiraSoapService,
+                    IFileSystem fileSystem)
         {
-            _username = username;
-            _password = password;
-            _isAnonymous = String.IsNullOrEmpty(username) && String.IsNullOrEmpty(password);
+            _isAnonymous = true;
             _jiraSoapService = jiraSoapService;
             _fileSystem = fileSystem;
             this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
 
             this._provider = new JiraQueryProvider(translator, this);
+        }
+
+        public Jira(IJqlExpressionVisitor translator,
+                    IJiraSoapServiceClient jiraSoapService,
+                    IFileSystem fileSystem,
+                    string accessToken,
+                    Func<JiraCredentials> credentialsProvider = null)
+            : this(translator, jiraSoapService,  fileSystem)
+        {
+            _token = accessToken;
+            _credentialsProvider = credentialsProvider;
+            _isAnonymous = false;
         }
 
         internal IJiraSoapServiceClient RemoteSoapService
@@ -117,14 +123,9 @@ namespace Atlassian.Jira
             get { return _jiraSoapService.Url; }
         }
 
-        internal string UserName
+        internal JiraCredentials GetCredentials()
         {
-            get { return _username; }
-        }
-
-        internal string Password
-        {
-            get { return _password; }
+            return _credentialsProvider();
         }
 
         internal IFileSystem FileSystem
@@ -442,7 +443,7 @@ namespace Atlassian.Jira
         {
             if (!_isAnonymous && String.IsNullOrEmpty(_token))
             {
-                _token = _jiraSoapService.Login(_username, _password);
+                _token = GetAccessToken();
             }
 
             try
@@ -457,9 +458,16 @@ namespace Atlassian.Jira
                     throw;
                 }
 
-                _token = _jiraSoapService.Login(_username, _password);
+                _token = GetAccessToken();
                 return function(_token, this.RemoteSoapService);
             }
+        }
+
+        private string GetAccessToken()
+        {
+            var credentials = GetCredentials();
+            // TODO
+            return _jiraSoapService.Login(credentials.UserName, credentials.Password);
         }
         
         internal IEnumerable<JiraNamedEntity> GetFieldsForAction(Issue issue, string actionId)

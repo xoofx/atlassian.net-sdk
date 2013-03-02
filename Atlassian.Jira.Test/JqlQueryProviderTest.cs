@@ -21,7 +21,7 @@ namespace Atlassian.Jira.Test
 
             translator.Setup(t => t.Process(It.IsAny<Expression>())).Returns(new JqlData() { Expression = "dummy expression" });
             
-            return new Jira(translator.Object, _soapClient.Object, null, "username", "password");
+            return new Jira(translator.Object, _soapClient.Object, null);
         }
 
         [Fact]

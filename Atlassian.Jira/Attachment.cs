@@ -86,8 +86,11 @@ namespace Atlassian.Jira
         /// <param name="fullFileName">Full file name where attachment will be downloaded</param>
         public void Download(string fullFileName)
         {
-            _webClient.AddQueryString("os_username", _jira.UserName);
-            _webClient.AddQueryString("os_password", _jira.Password);
+            var credentials = _jira.GetCredentials();
+            // TODO
+
+            _webClient.AddQueryString("os_username", credentials.UserName);
+            _webClient.AddQueryString("os_password", credentials.Password);
 
             var url = String.Format("{0}secure/attachment/{1}/{2}",
                 _jira.Url.EndsWith("/") ? _jira.Url : _jira.Url + "/",

@@ -12,21 +12,28 @@ namespace Atlassian.Jira.Test
         public Mock<IJiraSoapServiceClient> SoapService;
         public Mock<IFileSystem> FileSystem;
 
-        public const string User = "user";
-        public const string Password = "pass";
-        public const string Token = "token";
-
-        private TestableJira(Mock<IJiraSoapServiceClient> soapService, Mock<IFileSystem> fileSystem, string user, string pass)
-            : base(null, soapService.Object, fileSystem.Object, user, pass)
+        private TestableJira(Mock<IJiraSoapServiceClient> soapService, Mock<IFileSystem> fileSystem, string token, Func<JiraCredentials> credentialsProvider)
+            : base(null, soapService.Object, fileSystem.Object, token, credentialsProvider  )
         {
             SoapService = soapService;
             FileSystem = fileSystem;
-            SoapService.Setup(j => j.Login(User, Password)).Returns(Token);
         }
 
-        public static TestableJira Create(string user = User, string pass = Password)
+        private TestableJira(Mock<IJiraSoapServiceClient> soapService, Mock<IFileSystem> fileSystem)
+            : base(null, soapService.Object, fileSystem.Object)
         {
-            return new TestableJira(new Mock<IJiraSoapServiceClient>(), new Mock<IFileSystem>(), user, pass);
+            SoapService = soapService;
+            FileSystem = fileSystem;
+        }
+
+        public static TestableJira Create(string token = "token", JiraCredentials credentials = null)
+        {
+            return new TestableJira(new Mock<IJiraSoapServiceClient>(), new Mock<IFileSystem>(), token, () => credentials);
+        }
+
+        public static TestableJira CreateAnonymous()
+        {
+            return new TestableJira(new Mock<IJiraSoapServiceClient>(), new Mock<IFileSystem>());
         }
     }
 }

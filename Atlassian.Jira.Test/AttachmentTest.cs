@@ -18,7 +18,7 @@ namespace Atlassian.Jira.Test
             var mockSoapClient = new Mock<IJiraSoapServiceClient>();
             mockSoapClient.Setup(j => j.Url).Returns("http://foo:2990/jira/");
 
-            var jira = new Jira(null, mockSoapClient.Object, null, "user", "pass");
+            var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("user", "pass"));
 
             var attachment = (new RemoteAttachment()
             {
@@ -43,7 +43,7 @@ namespace Atlassian.Jira.Test
             var mockSoapClient = new Mock<IJiraSoapServiceClient>();
             mockSoapClient.Setup(j => j.Url).Returns("http://foo:2990/jira");
 
-            var jira = new Jira(null, mockSoapClient.Object, null, "user", "pass");
+            var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("user", "pass"));
 
             var attachment = (new RemoteAttachment()
             {

@@ -49,7 +49,7 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void DoesNotRetrieveToken()
             {
-                var jira = TestableJira.Create(user: null, pass: null);
+                var jira = TestableJira.CreateAnonymous();
                 jira.SoapService.Setup(s => s.Login(It.IsAny<string>(), It.IsAny<string>())).Throws(new Exception("Unexpected call to login"));
 
                 string innerToken = null;
@@ -60,7 +60,7 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void DoesNotRetrieveTokenIfMethodThrowsException()
             {
-                var jira = TestableJira.Create(user: null, pass: null);
+                var jira = TestableJira.CreateAnonymous();
                 jira.SoapService.Setup(s => s.Login(It.IsAny<string>(), It.IsAny<string>())).Throws(new Exception("Unexpected call to login"));
 
                 string innerToken = null;
@@ -103,7 +103,7 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void RetrievesNewTokenIfMethodThrowsAuthException()
             {
-                var jira = TestableJira.Create();
+                var jira = TestableJira.Create(null, new JiraCredentials("user", "pass"));
                 jira.SoapService.Setup(s => s.Login(It.IsAny<string>(), It.IsAny<string>())).ReturnsInOrder("token1", "token2");
 
                 string innerToken = "";
