@@ -354,10 +354,22 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
-        public void DateTimeNow()
+        public void DateTimeWithLiteralString()
         {
             var jira = CreateJiraInstance();
             var date = new DateTime(2011, 1, 1);
+
+            var issues = (from i in jira.Issues
+                          where i.Created > new LiteralDateTime(date.ToString("yyyy/MM/dd HH:mm"))
+                          select i).ToArray();
+
+            Assert.Equal("Created > \"2011/01/01 00:00\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void DateTimeNow()
+        {
+            var jira = CreateJiraInstance();
 
             var issues = (from i in jira.Issues
                           where i.Created > DateTime.Now

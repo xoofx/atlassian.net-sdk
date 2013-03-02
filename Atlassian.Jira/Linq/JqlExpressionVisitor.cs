@@ -199,6 +199,7 @@ namespace Atlassian.Jira.Linq
             var valueType = value.GetType();
             if (valueType == typeof(String)
                 || valueType == typeof(ComparableString)
+                || valueType == typeof(LiteralDateTime)
                 || valueType == typeof(LiteralMatch))
             {
                 _jqlWhere.Append(String.Format("\"{0}\"", value));
