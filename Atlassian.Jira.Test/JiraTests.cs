@@ -49,7 +49,7 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void DoesNotRetrieveToken()
             {
-                var jira = TestableJira.Create(user: null, pass: null);
+                var jira = TestableJira.CreateAnonymous();
                 jira.SoapService.Setup(s => s.Login(It.IsAny<string>(), It.IsAny<string>())).Throws(new Exception("Unexpected call to login"));
 
                 string innerToken = null;
@@ -60,7 +60,7 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void DoesNotRetrieveTokenIfMethodThrowsException()
             {
-                var jira = TestableJira.Create(user: null, pass: null);
+                var jira = TestableJira.CreateAnonymous();
                 jira.SoapService.Setup(s => s.Login(It.IsAny<string>(), It.IsAny<string>())).Throws(new Exception("Unexpected call to login"));
 
                 string innerToken = null;
@@ -72,6 +72,31 @@ namespace Atlassian.Jira.Test
                     }));
                 jira.WithToken(t => innerToken = t);
                 Assert.Equal(String.Empty, innerToken);
+            }
+        }
+
+        public class GetAccessToken 
+        {
+            [Fact]
+            public void WillThrowExceptionIfNoCredentialsProviderExists()
+            {
+                // Arrange
+                var soapService = new Mock<IJiraSoapServiceClient>();
+                var jira = new Jira(null, soapService.Object, null, null, null); 
+
+                // Act
+                Assert.Throws<InvalidOperationException>(() => jira.GetAccessToken());
+            }
+
+            [Fact]
+            public void WillThrowExceptionIfCredentialsProviderReturnsNull()
+            {
+                // Arrange
+                var soapService = new Mock<IJiraSoapServiceClient>();
+                var jira = new Jira(null, soapService.Object, null, null, () => null); 
+
+                // Act
+                Assert.Throws<InvalidOperationException>(() => jira.GetAccessToken());
             }
         }
 
@@ -103,7 +128,7 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void RetrievesNewTokenIfMethodThrowsAuthException()
             {
-                var jira = TestableJira.Create();
+                var jira = TestableJira.Create(null, new JiraCredentials("user", "pass"));
                 jira.SoapService.Setup(s => s.Login(It.IsAny<string>(), It.IsAny<string>())).ReturnsInOrder("token1", "token2");
 
                 string innerToken = "";

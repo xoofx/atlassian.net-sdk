@@ -443,7 +443,13 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to add comment to issue, issue has not been created.");
             }
 
-            var newComment = new Comment() { Author = _jira.UserName, Body = comment };
+            var credentials = _jira.GetCredentials();
+            if (String.IsNullOrEmpty(credentials.UserName))
+            {
+                throw new InvalidOperationException("Unable to add comment due to missing user name to use for the author field. You can specify a provider for credentials when constructing the Jira instance.");
+            }
+
+            var newComment = new Comment() { Author = credentials.UserName, Body = comment };
 
             _jira.WithToken(token =>
             {

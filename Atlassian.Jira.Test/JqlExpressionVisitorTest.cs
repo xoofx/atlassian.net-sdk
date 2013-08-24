@@ -25,7 +25,7 @@ namespace Atlassian.Jira.Test
                                         It.IsAny<string>(),
                                         It.IsAny<int>())).Returns(new RemoteIssue[0]);
 
-            return new Jira(_translator, soapClient.Object, null, "username", "password");
+            return new Jira(_translator, soapClient.Object, null);
         }
 
         [Fact]

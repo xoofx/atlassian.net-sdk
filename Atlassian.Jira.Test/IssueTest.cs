@@ -373,8 +373,8 @@ namespace Atlassian.Jira.Test
             public void IfIssueIsCreated_ShouldLoadAttachments()
             {
                 //arrange
-                var jira = TestableJira.Create();
-                jira.SoapService.Setup(j => j.GetAttachmentsFromIssue(TestableJira.Token, "key"))
+                var jira = TestableJira.Create("token");
+                jira.SoapService.Setup(j => j.GetAttachmentsFromIssue("token", "key"))
                     .Returns(new RemoteAttachment[1] { new RemoteAttachment() { filename = "attach.txt" } });
 
                 var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
@@ -476,8 +476,8 @@ namespace Atlassian.Jira.Test
             public void IfIssueIsCreated_ShouldLoadComments()
             {
                 //arrange
-                var jira = TestableJira.Create();
-                jira.SoapService.Setup(j => j.GetCommentsFromIssue(TestableJira.Token, "key"))
+                var jira = TestableJira.Create("token");
+                jira.SoapService.Setup(j => j.GetCommentsFromIssue("token", "key"))
                     .Returns(new RemoteComment[1] { new RemoteComment() { body = "the comment" } });
                 var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
@@ -501,10 +501,21 @@ namespace Atlassian.Jira.Test
             }
 
             [Fact]
+            public void IfCredentialsMissingUserName_ShouldThrownException()
+            {
+                // Arrange
+                var jira = TestableJira.Create("token", new JiraCredentials(null));
+                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+
+                // Act
+                Assert.Throws<InvalidOperationException>(() => issue.AddComment("the comment"));
+            }
+
+            [Fact]
             public void IfIssueCreated_ShouldUpload()
             {
                 //arrange
-                var jira = TestableJira.Create();
+                var jira = TestableJira.Create("token", new JiraCredentials("user", "pass"));
                 var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
                 //act

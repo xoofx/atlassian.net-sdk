@@ -20,6 +20,31 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        void WithAccessTokenInsteadOfUserAndPassword()
+        {
+            // get access token for user
+            var accessToken = _jira.GetAccessToken();
+
+            // create a new jira instance using access token only
+            var jiraAccessToken = new Jira("http://localhost:2990/jira", accessToken);
+
+            // create and query issues
+            var summaryValue = "Test Summary from JIRA with access token " + _random.Next(int.MaxValue);
+            var issue = new Issue(jiraAccessToken, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue
+            };
+            issue.SaveChanges();
+
+            var issues = (from i in jiraAccessToken.Issues
+                          where i.Key == issue.Key
+                          select i).ToArray();
+
+            Assert.Equal(1, issues.Count());
+        }
+
+        [Fact]
         void Transition_ResolveIssue()
         {
             var issue = _jira.CreateIssue("TST");

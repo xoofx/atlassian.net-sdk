@@ -86,8 +86,15 @@ namespace Atlassian.Jira
         /// <param name="fullFileName">Full file name where attachment will be downloaded</param>
         public void Download(string fullFileName)
         {
-            _webClient.AddQueryString("os_username", _jira.UserName);
-            _webClient.AddQueryString("os_password", _jira.Password);
+            var credentials = _jira.GetCredentials();
+
+            if (String.IsNullOrEmpty(credentials.UserName) || String.IsNullOrEmpty(credentials.Password))
+            {
+                throw new InvalidOperationException("Unable to download attachment, user and/or password are missing. You can specify a provider for credentials when constructing the Jira instance.");
+            }
+
+            _webClient.AddQueryString("os_username", credentials.UserName);
+            _webClient.AddQueryString("os_password", credentials.Password);
 
             var url = String.Format("{0}secure/attachment/{1}/{2}",
                 _jira.Url.EndsWith("/") ? _jira.Url : _jira.Url + "/",
