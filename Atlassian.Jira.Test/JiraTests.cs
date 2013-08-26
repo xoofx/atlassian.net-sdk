@@ -158,5 +158,33 @@ namespace Atlassian.Jira.Test
                     }));
             }
         }
+
+        public class DeleteIssue
+        {
+            [Fact]
+            public void WillThrowExceptionIfIssueHasNotBeenInitializedWithAKey()
+            {
+                // Arrange
+                var jira = TestableJira.Create();
+                var issue = jira.CreateIssue("TST");
+
+                // Act, Assert
+                Assert.Throws<InvalidOperationException>(() => jira.DeleteIssue(issue));
+            }
+
+            [Fact]
+            public void WillDeleteIssueFromServer()
+            {
+                // Arrange
+                var jira = TestableJira.Create();
+                var issue = (new RemoteIssue() { key = "TST-1" }).ToLocal(jira);
+
+                // Act
+                jira.DeleteIssue(issue);
+
+                // Assert
+                jira.SoapService.Verify(service => service.DeleteIssue(It.IsAny<string>(), "TST-1"));
+            }
+        }
     }
 }

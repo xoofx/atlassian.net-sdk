@@ -40,9 +40,9 @@ namespace Atlassian.Jira.Remote
         void DeleteWorklogAndAutoAdjustRemainingEstimate(string token, string in1);
         void DeleteWorklogAndRetainRemainingEstimate(string token, string worklogId);
         void DeleteWorklogWithNewRemainingEstimate(string token, string worklogId, string newRemainingEstimate);
-        
+        void DeleteIssue(string token, string issueKey);
 
-
+        /* Full list with un-edited arg names */
         void AddActorsToProjectRole(string in0, string[] in1, RemoteProjectRole in2, RemoteProject in3, string in4);
         void AddDefaultActorsToProjectRole(string in0, string[] in1, RemoteProjectRole in2, string in3);
         RemotePermissionScheme AddPermissionTo(string in0, RemotePermissionScheme in1, RemotePermission in2, RemoteEntity in3);
@@ -57,7 +57,6 @@ namespace Atlassian.Jira.Remote
         RemoteProjectRole CreateProjectRole(string in0, RemoteProjectRole in1);
         RemoteUser CreateUser(string in0, string in1, string in2, string in3, string in4);
         void DeleteGroup(string in0, string in1, string in2);
-        void DeleteIssue(string in0, string in1);
         RemotePermissionScheme DeletePermissionFrom(string in0, RemotePermissionScheme in1, RemotePermission in2, RemoteEntity in3);
         void DeletePermissionScheme(string in0, string in1);
         void DeleteProject(string in0, string in1);

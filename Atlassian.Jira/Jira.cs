@@ -258,6 +258,23 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Deletes the issue specified from the JIRA server.
+        /// </summary>
+        /// <param name="issue">Issue to delete.</param>
+        public void DeleteIssue(Issue issue)
+        {
+            if (issue.Key == null || String.IsNullOrEmpty(issue.Key.ToString()))
+            {
+                throw new InvalidOperationException("Unable to delete issue, it has not been created.");
+            }
+
+            WithToken(token =>
+            {
+                _jiraSoapService.DeleteIssue(token, issue.Key.ToString());
+            });
+        }
+
+        /// <summary>
         /// Returns all the issue types within JIRA
         /// </summary>
         /// <param name="projectKey">If provided, returns issue types only for given project</param>
