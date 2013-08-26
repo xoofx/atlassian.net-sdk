@@ -543,16 +543,16 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void DeleteIssue()
         {
-            var summary = String.Format("Issue to delete ({0})", _random.Next(int.MaxValue));
-
             // Create issue and verify it is found in server.
             var issue = _jira.CreateIssue("TST");
+            issue.Type = "1";
+            issue.Summary = String.Format("Issue to delete ({0})", _random.Next(int.MaxValue));
             issue.SaveChanges();
             Assert.True(_jira.Issues.Where(i => i.Key == issue.Key).Any(), "Expected issue in server");
 
             // Delete issue and verify it is no longer found.
             _jira.DeleteIssue(issue);
-            Assert.False(_jira.Issues.Where(i => i.Key == issue.Key).Any(), "Expected no issue in server");
+            Assert.Throws<System.ServiceModel.FaultException>(() => _jira.GetIssue(issue.Key.Value));
         }
 
         [Fact]
