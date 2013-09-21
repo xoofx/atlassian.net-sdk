@@ -55,6 +55,31 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void Download_ShouldUriEncodeUserAndPassword()
+        {
+            // Arrange
+            var mockWebClient = new Mock<IWebClient>();
+            var mockSoapClient = new Mock<IJiraSoapServiceClient>();
+            mockSoapClient.Setup(j => j.Url).Returns("http://foo:2990/jira/");
+
+            var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("my<user#with&chars", "my<pass#with&chars"));
+
+            var attachment = (new RemoteAttachment()
+            {
+                id = "attachID",
+                filename = "attach.txt"
+            }).ToLocal(jira, mockWebClient.Object);
+
+            // Act
+            attachment.Download("C:\\foo\\bar.txt");
+
+            // Assert
+            mockWebClient.Verify(c => c.AddQueryString("os_username", "my%3Cuser%23with%26chars"));
+            mockWebClient.Verify(c => c.AddQueryString("os_password", "my%3Cpass%23with%26chars"));
+            mockWebClient.Verify(c => c.Download("http://foo:2990/jira/secure/attachment/attachID/attach.txt", "C:\\foo\\bar.txt"));
+        }
+
+        [Fact]
         public void Download_IfJiraUrlDoesNotEndInSlash_ShouldFixTheUrlBeforeDownloading()
         {
             //arrange

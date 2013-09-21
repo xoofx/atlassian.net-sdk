@@ -93,8 +93,8 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to download attachment, user and/or password are missing. You can specify a provider for credentials when constructing the Jira instance.");
             }
 
-            _webClient.AddQueryString("os_username", credentials.UserName);
-            _webClient.AddQueryString("os_password", credentials.Password);
+            _webClient.AddQueryString("os_username", Uri.EscapeDataString(credentials.UserName));
+            _webClient.AddQueryString("os_password", Uri.EscapeDataString(credentials.Password));
 
             var url = String.Format("{0}secure/attachment/{1}/{2}",
                 _jira.Url.EndsWith("/") ? _jira.Url : _jira.Url + "/",
