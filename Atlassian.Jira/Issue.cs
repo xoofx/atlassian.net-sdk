@@ -30,6 +30,7 @@ namespace Atlassian.Jira
         private ProjectVersionCollection _fixVersions = null;
         private ProjectComponentCollection _components = null;
         private CustomFieldCollection _customFields = null;
+        private IssueStatus _status;
 
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
             : this(jira, new RemoteIssue() { project = projectKey }, parentIssueKey)
@@ -61,7 +62,7 @@ namespace Atlassian.Jira
             Votes = remoteIssue.votes;
 
             // named entities
-            Status = String.IsNullOrEmpty(remoteIssue.status) ? null : new IssueStatus(_jira, remoteIssue.status);
+            _status = String.IsNullOrEmpty(remoteIssue.status) ? null : new IssueStatus(_jira, remoteIssue.status);
             Priority = String.IsNullOrEmpty(remoteIssue.priority) ? null : new IssuePriority(_jira, remoteIssue.priority);
             Resolution = String.IsNullOrEmpty(remoteIssue.resolution) ? null : new IssueResolution(_jira, remoteIssue.resolution);
             Type = String.IsNullOrEmpty(remoteIssue.type)? null: new IssueType(_jira, remoteIssue.type);
@@ -154,7 +155,13 @@ namespace Atlassian.Jira
         /// <summary>
         /// The stage the issue is currently at in its lifecycle.
         /// </summary>
-        public IssueStatus Status { get; set; }
+        public IssueStatus Status
+        {
+            get
+            {
+                return _status;
+            }
+        }
 
         /// <summary>
         /// The type of the issue
