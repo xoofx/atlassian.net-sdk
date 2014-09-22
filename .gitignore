@@ -42,3 +42,6 @@ _ReSharper*/
 *.resharper
 *.ncrunchsolution
 [Tt]est[Rr]esult*
+
+# NuGet
+packages/

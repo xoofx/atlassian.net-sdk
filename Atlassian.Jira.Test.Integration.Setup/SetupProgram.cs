@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.Web.Testing.Light;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
-
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using OpenQA.Selenium.Chrome;
 
 namespace Atlassian.Jira.Test.Integration.Setup
 {
@@ -15,117 +16,42 @@ namespace Atlassian.Jira.Test.Integration.Setup
         static void Main(string[] args)
         {
             var currentDir = Path.GetDirectoryName(typeof(SetupProgram).Assembly.Location);
+            var arg = args.Length > 0 ? args[0].ToLowerInvariant() : null;
             Environment.CurrentDirectory = currentDir;
 
-            if (args.Length > 0)
+            if (arg != null && arg.Equals("start", StringComparison.OrdinalIgnoreCase))
             {
-                switch (args[0].ToLowerInvariant())
-                {
-                    case "start":
-                        StartJira(currentDir);
-                        break;
-                    case "setup":
-                        SetupTestData(currentDir);
-                        break;
-                    default:
-                        throw new ArgumentException(String.Format("Unknwon command '{0}'", args[0]));
-                }
+                StartJira(currentDir);
+            }
+            else if (arg != null && arg.Equals("setup", StringComparison.OrdinalIgnoreCase))
+            {
+                SetupJira(currentDir);
             }
             else
             {
-                StartJira(currentDir);
-                SetupTestData(currentDir);                
+                PrintInstructions();
             }
+            
         }
 
-        private static bool IsJiraReady(int seconds)
+        private static void PrintInstructions()
         {
             Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine(String.Format("Checking if JIRA is up (wait time: {0} seconds).", seconds));
+            Console.WriteLine("To setup JIRA to run integration tests:");
+            Console.WriteLine("  1. 'JiraSetup.exe start'");
+            Console.WriteLine("  2. Wait until tomcat container is fully ready.");
+            Console.WriteLine("  3. 'JiraSetup.exe setup'.");
+            Console.WriteLine("  4. Wait until the back up restore is complete.");
+            Console.WriteLine("  5. Due to bug JRA-25757 you need to restart the JIRA server." +
+                " Kill the JIRA process started in step 1 and rerun 'JiraSetup.exe start' (you may have to do this 2 times.");
             Console.WriteLine("-------------------------------------------------------");
-
-            HtmlPage page = new HtmlPage(new Uri("http://localhost:2990/jira/"));
-
-            try
-            {
-                page.Navigate("login.jsp");
-                return page.Elements.Find("h2", 0).CachedInnerText.Trim().StartsWith("Welcome", StringComparison.OrdinalIgnoreCase);
-            }
-            catch
-            {
-            }
-
-            return false;
-        }
-
-        private static void SetupTestData(string currentDir)
-        {
-            int seconds = 0;
-            while (!IsJiraReady(seconds))
-            {
-                Thread.Sleep(1000);
-                seconds++;
-            }
-
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("Restoring test data.");
-            Console.WriteLine("-------------------------------------------------------");
-
-
-            HtmlPage page = new HtmlPage(new Uri("http://localhost:2990/jira/"));
-
-            // login
-            Login(page);
-
-            // Restore TestData
-            RestoreBackup(page, currentDir);
-
-            // login
-            Login(page);
-
-            // enable RPC
-            page.Navigate("secure/admin/EditApplicationProperties!default.jspa");
-            page.Elements.Find("allowRpcOn", MatchMethod.Literal).Click();
-            page.Elements.Find("edit_property").Click();
-
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("JIRA Setup Complete. You can now run the integration tests.");
-            Console.WriteLine("-------------------------------------------------------");
-        }
-
-        private static void RestoreBackup(HtmlPage page, string currentDir)
-        {
-            page.Navigate("secure/admin/XmlRestore!default.jspa");
-            File.Copy(
-                Path.Combine(currentDir, "TestData.zip"),
-                Path.Combine(currentDir, @"amps-standalone\target\jira\home\import\TestData.zip"),
-                true);
-
-            page.Elements.Find("filename", MatchMethod.Literal).SetText("TestData.zip");
-            page.Elements.Find("restore_submit").Click();
-
-            // TODO: proper wait  until import is complete
-            Thread.Sleep(15000);
-        }
-
-        private static void Login(HtmlPage page)
-        {
-            var timeout = DateTime.Now.AddSeconds(10);
-            do
-            {
-                page.Navigate("login.jsp");
-            }
-            while (!page.Elements.Exists("login-form-username") && DateTime.Now < timeout);
-
-            page.Elements.Find("login-form-username").SetText("admin");
-            page.Elements.Find("login-form-password").SetText("admin");
-            page.Elements.Find("login").Click();
         }
 
         private static void StartJira(string currentDir)
         {
             Console.WriteLine("-------------------------------------------------------");
             Console.WriteLine("Starting JIRA.");
+            Console.WriteLine("Wait until the tomcat container is ready to accept requests.");
             Console.WriteLine("-------------------------------------------------------");
 
             var process = new Process();
@@ -133,5 +59,62 @@ namespace Atlassian.Jira.Test.Integration.Setup
             process.Start();
         }
 
+        private static void SetupJira(string currentDir)
+        {
+            var webDriver = new ChromeDriver();
+
+            Console.WriteLine("-------------------------------------------------------");
+            Console.WriteLine("Restoring test data.");
+            Console.WriteLine("-------------------------------------------------------");
+
+            // Login
+            LoginToJira(webDriver);
+            
+            // Restore TestData
+            File.Copy(
+                Path.Combine(currentDir, "TestData.zip"),
+                Path.Combine(currentDir, @"amps-standalone\target\jira\home\import\TestData.zip"),
+                true);
+
+            webDriver.Url = "http://localhost:2990/jira/secure/admin/XmlRestore!default.jspa";
+            WaitForElement(webDriver, By.Name("filename")).SendKeys("TestData.zip");
+            WaitForElement(webDriver, By.Id("restore_submit")).Click();
+
+            // Wait until restore is complete
+            WaitForElement(
+                webDriver, 
+                TimeSpan.FromMinutes(2), 
+                wd => wd.FindElements(By.TagName("p"))
+                    .FirstOrDefault(we => we.Text.Trim().Equals("Your project has been successfully imported.", StringComparison.OrdinalIgnoreCase)));
+
+            // Login again
+            LoginToJira(webDriver);
+
+            Console.WriteLine("-------------------------------------------------------");
+            Console.WriteLine("JIRA Setup Complete. You can now run the integration tests.");
+            Console.WriteLine("-------------------------------------------------------");
+
+            webDriver.Quit();
+        }
+
+        private static void LoginToJira(ChromeDriver webDriver)
+        {
+            webDriver.Url = "http://localhost:2990/jira/login.jsp";
+            WaitForElement(webDriver, By.Id("login-form-username")).SendKeys("admin");
+            WaitForElement(webDriver, By.Id("login-form-password")).SendKeys("admin");
+            WaitForElement(webDriver, By.Id("login-form-submit")).Click();
+            WaitForElement(webDriver, By.Id("header-details-user-fullname"));
+        }
+
+        private static IWebElement WaitForElement(IWebDriver webDriver, By locator)
+        {
+            return WaitForElement(webDriver, TimeSpan.FromSeconds(10), wd => wd.FindElements(locator).FirstOrDefault());
+        }
+
+        private static IWebElement WaitForElement(IWebDriver webDriver, TimeSpan timeout, Func<IWebDriver, IWebElement> func)
+        {
+            var wait = new WebDriverWait(webDriver, timeout);
+            return wait.Until(func);
+        }
     }
 }

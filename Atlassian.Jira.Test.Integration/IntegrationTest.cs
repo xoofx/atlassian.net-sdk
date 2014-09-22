@@ -15,7 +15,6 @@ namespace Atlassian.Jira.Test.Integration
         public IntegrationTest()
         {
             _jira = new Jira("http://localhost:2990/jira", "admin", "admin");
-            _jira.Debug = true;
             _random = new Random();
         }
 
