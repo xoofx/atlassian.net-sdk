@@ -114,6 +114,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
         private static IWebElement WaitForElement(IWebDriver webDriver, TimeSpan timeout, Func<IWebDriver, IWebElement> func)
         {
             var wait = new WebDriverWait(webDriver, timeout);
+            wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException));
             return wait.Until(func);
         }
     }
