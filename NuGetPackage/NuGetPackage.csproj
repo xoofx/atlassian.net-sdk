@@ -49,9 +49,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <Target Name="NugetBuild" Condition="'$(Configuration)' == 'Release'">
-	<MSBuild Projects="$(MSBuildProjectDirectory)\..\Atlassian.Jira\Atlassian.Jira.csproj" Properties="Configuration=Release" />
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Atlassian.Jira\Atlassian.Jira.csproj" Properties="Configuration=Release" />
     <Move SourceFiles="$(MSBuildProjectDirectory)\..\Atlassian.Jira\bin\Release\Atlassian.Jira.dll;$(MSBuildProjectDirectory)\..\Atlassian.Jira\bin\Release\Atlassian.Jira.pdb;$(MSBuildProjectDirectory)\..\Atlassian.Jira\bin\Release\Atlassian.Jira.xml;" DestinationFolder="$(OutputPath)lib" />
-	<Copy SourceFiles="$(MSBuildProjectDirectory)\Package.nuspec" DestinationFolder="$(OutputPath)" />
-    <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(MSBuildProjectDirectory)\NuGet.exe&quot; pack Package.nuspec" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\Package.nuspec" DestinationFolder="$(OutputPath)" />
+    <Exec WorkingDirectory="$(OutputPath)" Command="&quot;$(MSBuildProjectDirectory)\..\.nuget\NuGet.exe&quot; pack Package.nuspec" />
   </Target>
 </Project>
