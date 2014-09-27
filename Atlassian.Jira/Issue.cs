@@ -116,6 +116,22 @@ namespace Atlassian.Jira
         public string Assignee { get; set; }
 
         /// <summary>
+        /// Gets the internal identifier assigned by JIRA.
+        /// </summary>
+        public string JiraIdentifier
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(this._originalIssue.key))
+                {
+                    throw new InvalidOperationException("Unable to retrieve JIRA id, issue has not been created.");
+                }
+
+                return this._originalIssue.id;
+            }
+        }
+
+        /// <summary>
         /// Unique identifier for this issue
         /// </summary>
         public ComparableString Key 

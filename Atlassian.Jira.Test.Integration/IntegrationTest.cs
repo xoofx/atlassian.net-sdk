@@ -194,6 +194,7 @@ namespace Atlassian.Jira.Test.Integration
                           select i).ToArray();
 
             Assert.Equal(summaryValue, queriedIssues[0].Summary);
+            Assert.NotNull(queriedIssues[0].JiraIdentifier);
         }
 
         [Fact]
