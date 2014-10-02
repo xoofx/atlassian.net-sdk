@@ -55,14 +55,6 @@ namespace Atlassian.Jira
             }
         }
 
-        public string GroupLevel
-        {
-            get
-            {
-                return _remoteComment.groupLevel;
-            }
-        }
-
         public string Id
         {
             get
@@ -71,11 +63,27 @@ namespace Atlassian.Jira
             }
         }
 
+        public string GroupLevel
+        {
+            get
+            {
+                return _remoteComment.groupLevel;
+            }
+            set
+            {
+                _remoteComment.groupLevel = value;
+            }
+        }
+
         public string RoleLevel
         {
             get
             {
                 return _remoteComment.roleLevel;
+            }
+            set
+            {
+                _remoteComment.roleLevel = value;
             }
         }
 

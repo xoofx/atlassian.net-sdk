@@ -456,27 +456,36 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Add a comment to this issue
+        /// Add a comment to this issue.
         /// </summary>
-        /// <param name="comment">Comment text to add</param>
+        /// <param name="comment">Comment text to add.</param>
         public void AddComment(string comment)
+        {
+            var credentials = _jira.GetCredentials();
+            var newComment = new Comment() { Author = credentials.UserName, Body = comment };
+
+            this.AddComment(newComment);
+        }
+
+        /// <summary>
+        /// Add a comment to this issue.
+        /// </summary>
+        /// <param name="comment">Comment object to add.</param>
+        public void AddComment(Comment comment)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to add comment to issue, issue has not been created.");
             }
 
-            var credentials = _jira.GetCredentials();
-            if (String.IsNullOrEmpty(credentials.UserName))
+            if (String.IsNullOrEmpty(comment.Author))
             {
-                throw new InvalidOperationException("Unable to add comment due to missing user name to use for the author field. You can specify a provider for credentials when constructing the Jira instance.");
+                throw new InvalidOperationException("Unable to add comment due to missing author field. You can specify a provider for credentials when constructing the Jira instance.");
             }
-
-            var newComment = new Comment() { Author = credentials.UserName, Body = comment };
 
             _jira.WithToken(token =>
             {
-                _jira.RemoteSoapService.AddComment(token, _originalIssue.key, newComment.toRemote());
+                _jira.RemoteSoapService.AddComment(token, _originalIssue.key, comment.toRemote());
             });
         }
 
