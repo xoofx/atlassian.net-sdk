@@ -60,7 +60,12 @@ namespace Atlassian.Jira
             }
         }
 
-        internal JiraNamedEntity Load(Jira jira, string projectKey)
+        protected Jira Jira
+        {
+            get { return _jira; }
+        }
+
+        internal JiraNamedEntity LoadByName(Jira jira, string projectKey)
         {
             var entity = GetEntities(jira, projectKey).FirstOrDefault(e => e.Name.Equals(_name, StringComparison.OrdinalIgnoreCase));
 

@@ -11,8 +11,10 @@ namespace Atlassian.Jira
     /// </summary>
     public class IssueType : JiraNamedEntity
     {
-         internal IssueType(AbstractNamedRemoteEntity remoteEntity)
-             : base(remoteEntity)
+        private bool? _isSubTask;
+
+        internal IssueType(RemoteIssueType remoteIssueType)
+             : base(remoteIssueType)
         {
         }
 
@@ -26,8 +28,35 @@ namespace Atlassian.Jira
         {
         }
 
+        /// <summary>
+        /// Whether this issue type represents a sub-task.
+        /// </summary>
+        public bool IsSubTask
+        {
+            get
+            {
+                if (!_isSubTask.HasValue)
+                {
+                    if (this.Jira == null)
+                    {
+                        throw new InvalidOperationException("Unable to retrieve remote issue type information. This is not supported if the issue type has been set by user code.");
+                    }
+
+                    _isSubTask = this.Jira.GetSubTaskIssueTypes().Any(issueType => issueType.Id.Equals(this.Id, StringComparison.OrdinalIgnoreCase));
+                }
+
+
+                return _isSubTask.Value;
+            }
+        }
+
         protected override IEnumerable<JiraNamedEntity> GetEntities(Jira jira, string projectKey = null)
         {
+            if (jira == null)
+            {
+                throw new ArgumentNullException("jira");
+            }
+
             return jira.GetIssueTypes(projectKey);
         }
 

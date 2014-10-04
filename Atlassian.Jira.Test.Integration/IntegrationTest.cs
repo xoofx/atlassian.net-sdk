@@ -479,7 +479,23 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(2, issue.FixVersions.Count);
             Assert.True(issue.FixVersions.Any(v => v.Name == "2.0"));
             Assert.True(issue.FixVersions.Any(v => v.Name == "3.0"));
+        }
 
+        [Fact]
+        public void CreateAndQueryIssueWithSubTask()
+        {
+            var parentTask = _jira.CreateIssue("TST");
+            parentTask.Type = "1";
+            parentTask.Summary = "Test issue with SubTask" + _random.Next(int.MaxValue);
+            parentTask.SaveChanges();
+
+            var subTask = _jira.CreateIssue("TST", parentTask.Key.Value);
+            subTask.Type = "5"; // SubTask issue type.
+            subTask.Summary = "Test SubTask" + _random.Next(int.MaxValue);
+            subTask.SaveChanges();
+
+            Assert.False(parentTask.Type.IsSubTask);
+            Assert.True(subTask.Type.IsSubTask);
         }
 
         [Fact]

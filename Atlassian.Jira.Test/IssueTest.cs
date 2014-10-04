@@ -143,7 +143,6 @@ namespace Atlassian.Jira.Test
                 Assert.Equal("assignee", remoteIssue.assignee);
                 Assert.Equal(1, remoteIssue.components.Length);
                 Assert.Null(remoteIssue.created);
-                //Assert.Equal(remoteIssue.customFieldValues);
                 Assert.Equal("description", remoteIssue.description);
                 Assert.Equal(new DateTime(2011, 1, 1), remoteIssue.duedate);
                 Assert.Equal("environment", remoteIssue.environment);
@@ -178,7 +177,7 @@ namespace Atlassian.Jira.Test
         public class GetUpdatedFields
         {
             [Fact]
-            public void IfJiraNamedPropertyWithId_ReturnField()
+            public void IfIssueTypeWithId_ReturnField()
             {
                 var issue = CreateIssue();
                 issue.Type = "5";
@@ -189,7 +188,7 @@ namespace Atlassian.Jira.Test
             }
 
             [Fact]
-            public void IfJiraNamedPropertyWithName_ReturnsFieldWithIdInferred()
+            public void IfIssueTypeWithName_ReturnsFieldWithIdInferred()
             {
                 var jira = TestableJira.Create();
                 jira.SoapService.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>()))
@@ -205,7 +204,7 @@ namespace Atlassian.Jira.Test
             }
 
             [Fact]
-            public void IfJiraNamedPropertyWithNameNotChanged_ReturnsNoFieldsChanged()
+            public void IfIssueTypeWithNameNotChanged_ReturnsNoFieldsChanged()
             {
                 var jira = TestableJira.Create();
                 jira.SoapService.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>()))

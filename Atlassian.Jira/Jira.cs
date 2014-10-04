@@ -32,6 +32,7 @@ namespace Atlassian.Jira
         private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string,IEnumerable<ProjectVersion>>();
         private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
+        private Dictionary<string, IEnumerable<IssueType>> _cachedSubTaskIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
         private IEnumerable<JiraNamedEntity> _cachedFilters = null;
         private IEnumerable<IssuePriority> _cachedPriorities = null;
         private IEnumerable<IssueStatus> _cachedStatuses = null;
@@ -275,6 +276,24 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns all the sub-tasks issue types within JIRA.
+        /// </summary>
+        public IEnumerable<IssueType> GetSubTaskIssueTypes()
+        {
+            if (!_cachedSubTaskIssueTypes.ContainsKey(ALL_PROJECTS_KEY))
+            {
+                WithToken(token =>
+                {
+                    _cachedSubTaskIssueTypes.Add(
+                        ALL_PROJECTS_KEY,
+                        _jiraSoapService.GetSubTaskIssueTypes(token).Select(remoteIssueType => new IssueType(remoteIssueType)));
+                });
+            }
+
+            return _cachedSubTaskIssueTypes[ALL_PROJECTS_KEY];
+        }
+
+        /// <summary>
         /// Returns all the issue types within JIRA
         /// </summary>
         /// <param name="projectKey">If provided, returns issue types only for given project</param>
@@ -297,7 +316,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedIssueTypes.Add(projectKey, _jiraSoapService.GetIssueTypes(token, projectId).Select(t => new IssueType(t)));
+                    _cachedIssueTypes.Add(projectKey, _jiraSoapService.GetIssueTypes(token, projectId).Select(remoteIssueType => new IssueType(remoteIssueType)));
                 });
             }
 

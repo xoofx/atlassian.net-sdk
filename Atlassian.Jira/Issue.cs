@@ -638,22 +638,22 @@ namespace Atlassian.Jira
 
             if (Status != null)
             {
-                remote.status = Status.Id ?? Status.Load(_jira, Project).Id;
+                remote.status = Status.Id ?? Status.LoadByName(_jira, Project).Id;
             }
 
             if (Resolution != null)
             {
-                remote.resolution = Resolution.Id ?? Resolution.Load(_jira, Project).Id;
+                remote.resolution = Resolution.Id ?? Resolution.LoadByName(_jira, Project).Id;
             }
 
             if (Priority != null)
             {
-                remote.priority = Priority.Id ?? Priority.Load(_jira, Project).Id;
+                remote.priority = Priority.Id ?? Priority.LoadByName(_jira, Project).Id;
             }
 
             if (Type != null)
             {
-                remote.type = Type.Id ?? Type.Load(_jira, Project).Id;
+                remote.type = Type.Id ?? Type.LoadByName(_jira, Project).Id;
             }
 
             if (this.AffectsVersions.Count > 0)
@@ -766,7 +766,7 @@ namespace Atlassian.Jira
                 var jiraNamedEntity = property.GetValue(container, null) as JiraNamedEntity;
                 if (jiraNamedEntity != null)
                 {
-                    return jiraNamedEntity.Id ?? jiraNamedEntity.Load(_jira, this.Project).Id;
+                    return jiraNamedEntity.Id ?? jiraNamedEntity.LoadByName(_jira, this.Project).Id;
                 }
                 return null;
             }
