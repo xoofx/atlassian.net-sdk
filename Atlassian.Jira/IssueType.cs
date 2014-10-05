@@ -16,6 +16,7 @@ namespace Atlassian.Jira
         internal IssueType(RemoteIssueType remoteIssueType)
              : base(remoteIssueType)
         {
+            _isSubTask = remoteIssueType.subTask;
         }
 
         internal IssueType(Jira jira, string id)
