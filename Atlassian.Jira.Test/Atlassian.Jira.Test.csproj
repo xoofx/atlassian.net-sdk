@@ -76,7 +76,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <UsingTask AssemblyFile="..\AssemblyReferences\xunit\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
+  <UsingTask AssemblyFile="..\packages\xunit.1.9.2\lib\net20\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
   <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release'">
     <xunit Assembly="$(OutputPath)\Atlassian.Jira.Test.dll" />
   </Target>
