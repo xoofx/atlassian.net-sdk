@@ -498,7 +498,6 @@ namespace Atlassian.Jira
         /// a new token will be requested from server and the function called again.
         /// </remarks>
         public TResult WithToken<TResult>(Func<string, TResult> function)
-            where TResult: class
         {
             return WithToken((token, client) => function(token));
         }

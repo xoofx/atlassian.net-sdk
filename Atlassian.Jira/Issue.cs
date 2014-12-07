@@ -588,6 +588,24 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Retrieve the resolution date for this issue.
+        /// </summary>
+        /// <returns>Resultion date for this issue, null if it hasn't been resolved.</returns>
+        public DateTime? GetResolutionDate()
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                return null;
+            }
+
+            return _jira.WithToken(token =>
+            {
+                var date = _jira.RemoteSoapService.GetResolutionDateByKey(token, _originalIssue.key);               
+                return date.Ticks > 0 ? date : (DateTime?) null;
+            });
+        }
+
+        /// <summary>
         /// Retrieve worklogs for current issue
         /// </summary>
         public ReadOnlyCollection<Worklog> GetWorklogs()

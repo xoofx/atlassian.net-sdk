@@ -58,6 +58,29 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void GetResolutionDate()
+        {
+            // Arrange
+            var issue = _jira.CreateIssue("TST");
+            var currentDate = DateTime.Now;
+            issue.Summary = "Issue to resolve " + Guid.NewGuid().ToString();
+            issue.Type = "Bug";
+
+            // Act, Assert: Returns null for unsaved issue.
+            Assert.Null(issue.GetResolutionDate());
+
+            // Act, Assert: Returns null for saved unresolved issue.
+            issue.SaveChanges();
+            Assert.Null(issue.GetResolutionDate());
+
+            // Act, Assert: returns date for saved resolved issue.
+            issue.WorkflowTransition(WorkflowActions.Resolve);
+            var date = issue.GetResolutionDate();
+            Assert.NotNull(date);
+            Assert.Equal(date.Value.Year, currentDate.Year);
+        }
+
+        [Fact]
         void Transition_ResolveIssue_AsWontFix()
         {
             var issue = _jira.CreateIssue("TST");
