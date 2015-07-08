@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using Newtonsoft.Json;
 namespace Atlassian.Jira.Remote
 {
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")]
@@ -1133,6 +1134,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
         public string author
         {
             get
@@ -1217,6 +1219,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
         public string updateAuthor
         {
             get
@@ -1277,6 +1280,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
         public string author
         {
             get
@@ -1361,6 +1365,8 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonProperty("started")]
+        [JsonConverter(typeof(DateFixupJsonConverter))]
         public System.Nullable<System.DateTime> startDate
         {
             get
@@ -1388,6 +1394,7 @@ namespace Atlassian.Jira.Remote
         }
 
         /// <remarks/>
+        [JsonIgnore]
         public long timeSpentInSeconds
         {
             get
@@ -1400,8 +1407,19 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        [JsonProperty("timeSpentSeconds")]
+        private long timeSpentInSecondsDeserializer
+        {
+            set
+            {
+                this.timeSpentInSeconds = value;
+            }
+        }
+
+
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
         public string updateAuthor
         {
             get
@@ -2301,6 +2319,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
         public string author
         {
             get
@@ -2421,6 +2440,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonProperty("versions")]
         public RemoteVersion[] affectsVersions
         {
             get
@@ -2435,6 +2455,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
         public string assignee
         {
             get
@@ -2491,6 +2512,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonIgnore]
         public RemoteCustomFieldValue[] customFieldValues
         {
             get
@@ -2575,6 +2597,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "id")]
         public string priority
         {
             get
@@ -2589,6 +2612,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "key")]
         public string project
         {
             get
@@ -2603,6 +2627,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
         public string reporter
         {
             get
@@ -2617,6 +2642,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "id")]
         public string resolution
         {
             get
@@ -2659,6 +2685,8 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonProperty("issuetype")]
+        [JsonConverter(typeof(NestedValueJsonConverter), "id")]
         public string type
         {
             get

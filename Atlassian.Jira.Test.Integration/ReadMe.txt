@@ -1,4 +1,4 @@
-﻿1. Install the Atlassian Plugin SDK 4.x
+﻿1. Install the Atlassian Plugin SDK 5.x
 	Follow instructions here: https://developer.atlassian.com/display/DOCS/Install+the+Atlassian+SDK+on+a+Windows+System
 
 2. Start Jira Server

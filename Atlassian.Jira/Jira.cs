@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Atlassian.Jira.Linq;
 using Atlassian.Jira.Remote;
-using Atlassian.Jira.Linq;
-using System.ServiceModel;
-using Util.DoubleKeyDictionary;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.ServiceModel;
+using System.Text;
+using Util.DoubleKeyDictionary;
 
 namespace Atlassian.Jira
 {
@@ -23,13 +23,13 @@ namespace Atlassian.Jira
         private const string REMOTE_AUTH_EXCEPTION_STRING = "com.atlassian.jira.rpc.exception.RemoteAuthenticationException";
 
         private readonly JiraQueryProvider _provider;
-        private readonly IJiraSoapServiceClient _jiraSoapService;
+        private readonly IJiraServiceClient _jiraSoapService;
         private readonly IFileSystem _fileSystem;
         private readonly bool _isAnonymous = false;
 
         private string _token = String.Empty;
         private Func<JiraCredentials> _credentialsProvider;
-        private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string,IEnumerable<ProjectVersion>>();
+        private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string, IEnumerable<ProjectVersion>>();
         private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedSubTaskIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
@@ -42,7 +42,7 @@ namespace Atlassian.Jira
         private IEnumerable<JiraNamedEntity> _cachedCustomFields = null;
         private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
         private DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>> _cachedFieldsForAction = new DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>>();
-        
+
         /// <summary>
         /// Create a proxy that connects with a JIRA server with anonymous access.
         /// </summary>
@@ -58,11 +58,11 @@ namespace Atlassian.Jira
         /// Create a proxy that connects with a JIRA server with anonymous access with depencies.
         /// </summary>
         public Jira(IJqlExpressionVisitor translator,
-                    IJiraSoapServiceClient jiraSoapService,
+                    IJiraServiceClient jiraService,
                     IFileSystem fileSystem)
         {
             _isAnonymous = true;
-            _jiraSoapService = jiraSoapService;
+            _jiraSoapService = jiraService;
             _fileSystem = fileSystem;
             this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
@@ -77,7 +77,7 @@ namespace Atlassian.Jira
         /// <param name="username">Username used to authenticate</param>
         /// <param name="password">Password used to authenticate</param>
         public Jira(string url, string username, string password)
-            :this(url,
+            : this(url,
                   null,
                   () => new JiraCredentials(username, password))
         {
@@ -97,28 +97,46 @@ namespace Atlassian.Jira
                   credentialsProvider)
         {
         }
-        
+
         /// <summary>
         /// Create a proxy that connects with a JIRA server with specified access token and dependencies.
         /// </summary>
         /// <param name="translator"></param>
-        /// <param name="jiraSoapService"></param>
+        /// <param name="jiraService"></param>
         /// <param name="fileSystem"></param>
         /// <param name="accessToken"></param>
         /// <param name="credentialsProvider"></param>
         public Jira(IJqlExpressionVisitor translator,
-                    IJiraSoapServiceClient jiraSoapService,
+                    IJiraServiceClient jiraService,
                     IFileSystem fileSystem,
                     string accessToken,
                     Func<JiraCredentials> credentialsProvider = null)
-            : this(translator, jiraSoapService,  fileSystem)
+            : this(translator, jiraService, fileSystem)
         {
             _token = accessToken;
             _credentialsProvider = credentialsProvider;
             _isAnonymous = false;
         }
 
-        internal IJiraSoapServiceClient RemoteSoapService
+        /// <summary>
+        /// Creates a JIRA client configured to use the REST API.
+        /// </summary>
+        /// <param name="url">Url to the JIRA server.</param>
+        /// <param name="username">Username used to authenticate.</param>
+        /// <param name="password">Password used to authenticate.</param>
+        /// <param name="enableTrace">Whether to enable console trace for REST requests.</param>
+        /// <returns>Jira object configured to use REST API.</returns>
+        public static Jira CreateRestClient(string url, string username, string password, bool enableTrace = false)
+        {
+            return new Jira(
+                new JqlExpressionVisitor(),
+                new JiraRestServiceClient(url, username, password, enableTrace),
+                new FileSystem(),
+                null,
+                () => new JiraCredentials(username, password));
+        }
+
+        internal IJiraServiceClient RemoteService
         {
             get
             {
@@ -129,10 +147,10 @@ namespace Atlassian.Jira
         /// <summary>
         /// Whether to print the translated JQL to console
         /// </summary>
-        public bool Debug 
-        { 
-            get; 
-            set; 
+        public bool Debug
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -167,7 +185,7 @@ namespace Atlassian.Jira
         internal IFileSystem FileSystem
         {
             get { return _fileSystem; }
-        } 
+        }
 
         /// <summary>
         /// Query the issues database
@@ -338,7 +356,7 @@ namespace Atlassian.Jira
                 });
             }
 
-            return _cachedVersions[projectKey];            
+            return _cachedVersions[projectKey];
         }
 
         /// <summary>
@@ -481,7 +499,7 @@ namespace Atlassian.Jira
         /// If action fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
         /// a new token will be requested from server and the action called again.
         /// </remarks>
-        public void WithToken(Action<string, IJiraSoapServiceClient> action)
+        public void WithToken(Action<string, IJiraServiceClient> action)
         {
             WithToken<object>((token, client) =>
             {
@@ -509,7 +527,7 @@ namespace Atlassian.Jira
         /// If function fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
         /// a new token will be requested from server and the function called again.
         /// </remarks>
-        public TResult WithToken<TResult>(Func<string, IJiraSoapServiceClient, TResult> function)
+        public TResult WithToken<TResult>(Func<string, IJiraServiceClient, TResult> function)
         {
             if (!_isAnonymous && String.IsNullOrEmpty(_token))
             {
@@ -518,7 +536,7 @@ namespace Atlassian.Jira
 
             try
             {
-                return function(_token, this.RemoteSoapService);
+                return function(_token, this.RemoteService);
             }
             catch (FaultException fe)
             {
@@ -529,7 +547,7 @@ namespace Atlassian.Jira
                 }
 
                 _token = GetAccessToken();
-                return function(_token, this.RemoteSoapService);
+                return function(_token, this.RemoteService);
             }
         }
 
@@ -541,7 +559,7 @@ namespace Atlassian.Jira
             var credentials = GetCredentials();
             return _jiraSoapService.Login(credentials.UserName, credentials.Password);
         }
-        
+
         internal IEnumerable<JiraNamedEntity> GetFieldsForAction(Issue issue, string actionId)
         {
             if (issue.Key == null)
@@ -582,7 +600,7 @@ namespace Atlassian.Jira
 
         private Issue GetOneIssueFromProject(string projectKey)
         {
-            var tempIssue = this.GetIssuesFromJql(String.Format("project = \"{0}\"", projectKey) ,1)
+            var tempIssue = this.GetIssuesFromJql(String.Format("project = \"{0}\"", projectKey), 1)
                                 .FirstOrDefault();
 
             if (tempIssue == null)

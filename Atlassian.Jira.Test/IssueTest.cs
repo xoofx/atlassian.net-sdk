@@ -452,7 +452,7 @@ namespace Atlassian.Jira.Test
                 var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
                 jira.SoapService.Setup(s => s.GetAvailableActions(It.IsAny<string>(), "key"))
                                 .Returns(new RemoteNamedObject[1] { new RemoteNamedObject() { id = "123", name = "action" } });
-                jira.SoapService.Setup(s => s.ProgressWorkflowAction(It.IsAny<string>(), "key", "123", It.IsAny<RemoteFieldValue[]>()))
+                jira.SoapService.Setup(s => s.ProgressWorkflowAction(It.IsAny<string>(), It.IsAny<RemoteIssue>(), "123", It.IsAny<RemoteFieldValue[]>()))
                                 .Returns(new RemoteIssue() { status = "456" });
 
                 issue.WorkflowTransition("action");

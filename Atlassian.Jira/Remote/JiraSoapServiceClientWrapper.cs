@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.ServiceModel;
+using System.Text;
 using System.Xml;
 
 namespace Atlassian.Jira.Remote
@@ -10,7 +10,7 @@ namespace Atlassian.Jira.Remote
     /// <summary>
     /// Wraps the auto-generated JiraSoapServiceClient proxy
     /// </summary>
-    internal class JiraSoapServiceClientWrapper: IJiraSoapServiceClient
+    internal class JiraSoapServiceClientWrapper : IJiraServiceClient
     {
         private readonly JiraSoapServiceClient _client;
         private readonly string _url;
@@ -34,6 +34,23 @@ namespace Atlassian.Jira.Remote
             return _client.login(username, password);
         }
 
+        public void AddLabels(string token, RemoteIssue remoteIssue, string[] labels)
+        {
+            var fields = new RemoteFieldValue[] {
+                new RemoteFieldValue() {
+                    id="labels",
+                    values = labels
+                }
+            };
+
+            this.UpdateIssue(token, remoteIssue, fields);
+        }
+
+        public RemoteIssue[] GetIssuesFromJqlSearch(string jqlSearch, int startAt, int maxResults, string[] fields)
+        {
+            throw new NotImplementedException("Only supported by REST API.");
+        }
+
         public RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults)
         {
             return _client.getIssuesFromJqlSearch(token, jqlSearch, maxNumResults);
@@ -41,13 +58,13 @@ namespace Atlassian.Jira.Remote
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
         {
-            
+
             return _client.createIssue(token, newIssue);
         }
 
-        public RemoteIssue UpdateIssue(string token, string key, RemoteFieldValue[] fields)
+        public RemoteIssue UpdateIssue(string token, RemoteIssue issue, RemoteFieldValue[] fields)
         {
-            return _client.updateIssue(token, key, fields);
+            return _client.updateIssue(token, issue.key, fields);
         }
 
         public RemoteAttachment[] GetAttachmentsFromIssue(string token, string key)
@@ -60,18 +77,15 @@ namespace Atlassian.Jira.Remote
             return _client.addBase64EncodedAttachmentsToIssue(token, key, fileNames, base64EncodedAttachmentData);
         }
 
-
         public RemoteComment[] GetCommentsFromIssue(string token, string key)
         {
             return _client.getComments(token, key);
         }
 
-
         public void AddComment(string token, string key, RemoteComment comment)
         {
             _client.addComment(token, key, comment);
         }
-
 
         public RemoteIssueType[] GetIssueTypes(string token, string projectId)
         {
@@ -165,11 +179,10 @@ namespace Atlassian.Jira.Remote
             return _client.getAvailableActions(token, issueKey);
         }
 
-        public RemoteIssue ProgressWorkflowAction(string token, string issueKey, string actionId, RemoteFieldValue[] remoteFieldValues)
+        public RemoteIssue ProgressWorkflowAction(string token, RemoteIssue issue, string actionId, RemoteFieldValue[] remoteFieldValues)
         {
-            return _client.progressWorkflowAction(token, issueKey, actionId, remoteFieldValues);
+            return _client.progressWorkflowAction(token, issue.key, actionId, remoteFieldValues);
         }
-
 
         public void AddActorsToProjectRole(string in0, string[] in1, RemoteProjectRole in2, RemoteProject in3, string in4)
         {
@@ -277,19 +290,19 @@ namespace Atlassian.Jira.Remote
             _client.deleteUser(in0, in1);
         }
 
-        public void DeleteWorklogAndAutoAdjustRemainingEstimate(string in0, string in1)
+        public void DeleteWorklogAndAutoAdjustRemainingEstimate(string token, string issueKey, string workloadId)
         {
-            _client.deleteWorklogAndAutoAdjustRemainingEstimate(in0, in1);
+            _client.deleteWorklogAndAutoAdjustRemainingEstimate(token, workloadId);
         }
 
-        public void DeleteWorklogAndRetainRemainingEstimate(string in0, string in1)
+        public void DeleteWorklogAndRetainRemainingEstimate(string token, string issueKey, string workloadId)
         {
-            _client.deleteWorklogAndRetainRemainingEstimate(in0, in1);
+            _client.deleteWorklogAndRetainRemainingEstimate(token, workloadId);
         }
 
-        public void DeleteWorklogWithNewRemainingEstimate(string in0, string in1, string in2)
+        public void DeleteWorklogWithNewRemainingEstimate(string token, string issueKey, string workloadId, string newRemainingEstimate)
         {
-            _client.deleteWorklogWithNewRemainingEstimate(in0, in1, in2);
+            _client.deleteWorklogWithNewRemainingEstimate(token, workloadId, newRemainingEstimate);
         }
 
         public RemoteComment EditComment(string in0, RemoteComment in1)

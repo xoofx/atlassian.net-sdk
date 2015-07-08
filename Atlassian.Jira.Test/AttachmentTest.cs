@@ -15,7 +15,7 @@ namespace Atlassian.Jira.Test
         {
             //arrange
             var mockWebClient = new Mock<IWebClient>();
-            var mockSoapClient = new Mock<IJiraSoapServiceClient>();
+            var mockSoapClient = new Mock<IJiraServiceClient>();
 
             var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("user", null));
 
@@ -34,7 +34,7 @@ namespace Atlassian.Jira.Test
         {
             //arrange
             var mockWebClient = new Mock<IWebClient>();
-            var mockSoapClient = new Mock<IJiraSoapServiceClient>();
+            var mockSoapClient = new Mock<IJiraServiceClient>();
             mockSoapClient.Setup(j => j.Url).Returns("http://foo:2990/jira/");
 
             var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("user", "pass"));
@@ -59,7 +59,7 @@ namespace Atlassian.Jira.Test
         {
             // Arrange
             var mockWebClient = new Mock<IWebClient>();
-            var mockSoapClient = new Mock<IJiraSoapServiceClient>();
+            var mockSoapClient = new Mock<IJiraServiceClient>();
             mockSoapClient.Setup(j => j.Url).Returns("http://foo:2990/jira/");
 
             var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("my<user#with&chars", "my<pass#with&chars"));
@@ -84,7 +84,7 @@ namespace Atlassian.Jira.Test
         {
             //arrange
             var mockWebClient = new Mock<IWebClient>();
-            var mockSoapClient = new Mock<IJiraSoapServiceClient>();
+            var mockSoapClient = new Mock<IJiraServiceClient>();
             mockSoapClient.Setup(j => j.Url).Returns("http://foo:2990/jira");
 
             var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("user", "pass"));

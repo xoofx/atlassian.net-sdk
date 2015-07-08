@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
-using System.IO;
+﻿using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Dynamic;
-using Atlassian.Jira.Remote;
-using Atlassian.Jira.Linq;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace Atlassian.Jira
 {
@@ -65,7 +65,7 @@ namespace Atlassian.Jira
             _status = String.IsNullOrEmpty(remoteIssue.status) ? null : new IssueStatus(_jira, remoteIssue.status);
             Priority = String.IsNullOrEmpty(remoteIssue.priority) ? null : new IssuePriority(_jira, remoteIssue.priority);
             Resolution = String.IsNullOrEmpty(remoteIssue.resolution) ? null : new IssueResolution(_jira, remoteIssue.resolution);
-            Type = String.IsNullOrEmpty(remoteIssue.type)? null: new IssueType(_jira, remoteIssue.type);
+            Type = String.IsNullOrEmpty(remoteIssue.type) ? null : new IssueType(_jira, remoteIssue.type);
 
             // collections
             _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection("versions", _jira, Project)
@@ -91,7 +91,7 @@ namespace Atlassian.Jira
                 return _jira;
             }
         }
-       
+
         /// <summary>
         /// Brief one-line summary of the issue
         /// </summary>
@@ -134,7 +134,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Unique identifier for this issue
         /// </summary>
-        public ComparableString Key 
+        public ComparableString Key
         {
             get
             {
@@ -150,7 +150,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Parent project to which the issue belongs
         /// </summary>
-        public string Project 
+        public string Project
         {
             get
             {
@@ -162,7 +162,7 @@ namespace Atlassian.Jira
         /// Person who entered the issue into the system
         /// </summary>
         public string Reporter { get; set; }
-        
+
         /// <summary>
         /// Record of the issue's resolution, if the issue has been resolved or closed
         /// </summary>
@@ -184,7 +184,7 @@ namespace Atlassian.Jira
         /// </summary>
         [RemoteFieldName("issuetype")]
         public IssueType Type { get; set; }
-        
+
         /// <summary>
         /// Number of votes the issue has
         /// </summary>
@@ -193,7 +193,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Time and date on which this issue was entered into JIRA
         /// </summary>
-        public DateTime? Created 
+        public DateTime? Created
         {
             get
             {
@@ -204,7 +204,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Date by which this issue is scheduled to be completed
         /// </summary>
-        public DateTime? DueDate 
+        public DateTime? DueDate
         {
             get
             {
@@ -219,7 +219,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Time and date on which this issue was last edited
         /// </summary>
-        public DateTime? Updated 
+        public DateTime? Updated
         {
             get
             {
@@ -285,7 +285,7 @@ namespace Atlassian.Jira
             {
                 var customField = _customFields[customFieldName];
 
-                if(customField != null && customField.Values != null && customField.Values.Count() > 0)
+                if (customField != null && customField.Values != null && customField.Values.Count() > 0)
                 {
                     return customField.Values[0];
                 }
@@ -312,18 +312,18 @@ namespace Atlassian.Jira
         public void SaveChanges()
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
-            {   
+            {
                 var remoteIssue = this.ToRemote();
 
                 _jira.WithToken(token =>
                 {
                     if (String.IsNullOrEmpty(_parentIssueKey))
                     {
-                        remoteIssue = _jira.RemoteSoapService.CreateIssue(token, remoteIssue);
+                        remoteIssue = _jira.RemoteService.CreateIssue(token, remoteIssue);
                     }
                     else
                     {
-                        remoteIssue = _jira.RemoteSoapService.CreateIssueWithParent(token, remoteIssue, _parentIssueKey);
+                        remoteIssue = _jira.RemoteService.CreateIssueWithParent(token, remoteIssue, _parentIssueKey);
                     }
                 });
 
@@ -351,12 +351,12 @@ namespace Atlassian.Jira
             {
                 throw new InvalidOperationException(String.Format("Worflow action with name '{0}' not found.", actionName));
             }
-            
+
             _jira.WithToken(token =>
             {
-                var remoteIssue = _jira.RemoteSoapService.ProgressWorkflowAction(
+                var remoteIssue = _jira.RemoteService.ProgressWorkflowAction(
                                                                 token,
-                                                                _originalIssue.key,
+                                                                this.ToRemote(),
                                                                 action.Id,
                                                                 ((IRemoteIssueFieldProvider)this).GetRemoteFields());
                 Initialize(remoteIssue);
@@ -367,7 +367,7 @@ namespace Atlassian.Jira
         {
             var remoteIssue = _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.UpdateIssue(token, this.Key.Value, remoteFields);
+                return _jira.RemoteService.UpdateIssue(token, this.ToRemote(), remoteFields);
             });
             Initialize(remoteIssue);
         }
@@ -384,7 +384,7 @@ namespace Atlassian.Jira
 
             return _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetAttachmentsFromIssue(token, _originalIssue.key)
+                return _jira.RemoteService.GetAttachmentsFromIssue(token, _originalIssue.key)
                     .Select(a => new Attachment(_jira, new WebClientWrapper(), a)).ToList().AsReadOnly();
             });
         }
@@ -422,7 +422,7 @@ namespace Atlassian.Jira
 
             var content = new List<string>();
             var names = new List<string>();
-            
+
             foreach (var a in attachments)
             {
                 names.Add(a.Name);
@@ -431,10 +431,10 @@ namespace Atlassian.Jira
 
             _jira.WithToken(token =>
             {
-                _jira.RemoteSoapService.AddBase64EncodedAttachmentsToIssue(
-                    token, 
-                    _originalIssue.key, 
-                    names.ToArray(), 
+                _jira.RemoteService.AddBase64EncodedAttachmentsToIssue(
+                    token,
+                    _originalIssue.key,
+                    names.ToArray(),
                     content.ToArray());
             });
         }
@@ -451,7 +451,7 @@ namespace Atlassian.Jira
 
             return _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetCommentsFromIssue(token, _originalIssue.key).Select(c => new Comment(c)).ToList().AsReadOnly();   
+                return _jira.RemoteService.GetCommentsFromIssue(token, _originalIssue.key).Select(c => new Comment(c)).ToList().AsReadOnly();
             });
         }
 
@@ -485,7 +485,7 @@ namespace Atlassian.Jira
 
             _jira.WithToken(token =>
             {
-                _jira.RemoteSoapService.AddComment(token, _originalIssue.key, comment.toRemote());
+                _jira.RemoteService.AddComment(token, _originalIssue.key, comment.toRemote());
             });
         }
 
@@ -500,16 +500,12 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to add label to issue, issue has not been created.");
             }
 
-            var fields = new RemoteFieldValue[] { 
-                            new RemoteFieldValue() { 
-                                id="labels",
-                                values = labels
-                            }
-                        };
-
-            UpdateRemoteFields(fields);
+            _jira.WithToken(token =>
+            {
+                this._jira.RemoteService.AddLabels(token, _originalIssue, labels);
+            });
         }
-       
+
         /// <summary>
         ///  Adds a worklog to this issue.
         /// </summary>
@@ -517,7 +513,7 @@ namespace Atlassian.Jira
         /// <param name="worklogStrategy">How to handle the remaining estimate, defaults to AutoAdjustRemainingEstimate</param>
         /// <param name="newEstimate">New estimate (only used if worklogStrategy set to NewRemainingEstimate)</param>
         /// <returns>Worklog as constructed by server</returns>
-        public Worklog AddWorklog(string timespent, 
+        public Worklog AddWorklog(string timespent,
                                   WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate,
                                   string newEstimate = null)
         {
@@ -546,13 +542,13 @@ namespace Atlassian.Jira
                 switch (worklogStrategy)
                 {
                     case WorklogStrategy.RetainRemainingEstimate:
-                        remoteWorklog = _jira.RemoteSoapService.AddWorklogAndRetainRemainingEstimate(token, _originalIssue.key, remoteWorklog);
+                        remoteWorklog = _jira.RemoteService.AddWorklogAndRetainRemainingEstimate(token, _originalIssue.key, remoteWorklog);
                         break;
                     case WorklogStrategy.NewRemainingEstimate:
-                        remoteWorklog = _jira.RemoteSoapService.AddWorklogWithNewRemainingEstimate(token, _originalIssue.key, remoteWorklog, newEstimate);
+                        remoteWorklog = _jira.RemoteService.AddWorklogWithNewRemainingEstimate(token, _originalIssue.key, remoteWorklog, newEstimate);
                         break;
                     default:
-                        remoteWorklog = _jira.RemoteSoapService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, remoteWorklog);
+                        remoteWorklog = _jira.RemoteService.AddWorklogAndAutoAdjustRemainingEstimate(token, _originalIssue.key, remoteWorklog);
                         break;
                 }
             });
@@ -575,13 +571,13 @@ namespace Atlassian.Jira
                 switch (worklogStrategy)
                 {
                     case WorklogStrategy.AutoAdjustRemainingEstimate:
-                        client.DeleteWorklogAndAutoAdjustRemainingEstimate(token, worklog.Id);
+                        client.DeleteWorklogAndAutoAdjustRemainingEstimate(token, this._originalIssue.key, worklog.Id);
                         break;
                     case WorklogStrategy.RetainRemainingEstimate:
-                        client.DeleteWorklogAndRetainRemainingEstimate(token, worklog.Id);
+                        client.DeleteWorklogAndRetainRemainingEstimate(token, this._originalIssue.key, worklog.Id);
                         break;
                     case WorklogStrategy.NewRemainingEstimate:
-                        client.DeleteWorklogWithNewRemainingEstimate(token, worklog.Id, newEstimate);
+                        client.DeleteWorklogWithNewRemainingEstimate(token, this._originalIssue.key, worklog.Id, newEstimate);
                         break;
                 }
             });
@@ -600,8 +596,8 @@ namespace Atlassian.Jira
 
             return _jira.WithToken(token =>
             {
-                var date = _jira.RemoteSoapService.GetResolutionDateByKey(token, _originalIssue.key);               
-                return date.Ticks > 0 ? date : (DateTime?) null;
+                var date = _jira.RemoteService.GetResolutionDateByKey(token, _originalIssue.key);
+                return date.Ticks > 0 ? date : (DateTime?)null;
             });
         }
 
@@ -617,7 +613,7 @@ namespace Atlassian.Jira
 
             return _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetWorkLogs(token, _originalIssue.key).Select(w => new Worklog(w)).ToList().AsReadOnly();
+                return _jira.RemoteService.GetWorkLogs(token, _originalIssue.key).Select(w => new Worklog(w)).ToList().AsReadOnly();
             });
         }
 
@@ -633,7 +629,7 @@ namespace Atlassian.Jira
 
             var remoteIssue = _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetIssuesFromJqlSearch(token, "key = " + _originalIssue.key, 1).First();
+                return _jira.RemoteService.GetIssuesFromJqlSearch(token, "key = " + _originalIssue.key, 1).First();
             });
             Initialize(remoteIssue);
         }
@@ -679,7 +675,7 @@ namespace Atlassian.Jira
                 remote.affectsVersions = this.AffectsVersions.Select(v => v.RemoteVersion).ToArray();
             }
 
-            if(this.FixVersions.Count > 0)
+            if (this.FixVersions.Count > 0)
             {
                 remote.fixVersions = this.FixVersions.Select(v => v.RemoteVersion).ToArray();
             }
@@ -714,7 +710,7 @@ namespace Atlassian.Jira
 
             return _jira.WithToken(token =>
             {
-                return _jira.RemoteSoapService.GetAvailableActions(token, _originalIssue.key).Select(a => new JiraNamedEntity(a));
+                return _jira.RemoteService.GetAvailableActions(token, _originalIssue.key).Select(a => new JiraNamedEntity(a));
             });
         }
 

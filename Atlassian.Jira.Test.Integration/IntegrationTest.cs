@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Xunit;
-using System.IO;
 
 namespace Atlassian.Jira.Test.Integration
 {
@@ -14,33 +14,12 @@ namespace Atlassian.Jira.Test.Integration
 
         public IntegrationTest()
         {
+#if SOAP
             _jira = new Jira("http://localhost:2990/jira", "admin", "admin");
+#else
+            _jira = Jira.CreateRestClient("http://localhost:2990/jira", "admin", "admin");
+#endif
             _random = new Random();
-        }
-
-        [Fact]
-        void WithAccessTokenInsteadOfUserAndPassword()
-        {
-            // get access token for user
-            var accessToken = _jira.GetAccessToken();
-
-            // create a new jira instance using access token only
-            var jiraAccessToken = new Jira("http://localhost:2990/jira", accessToken);
-
-            // create and query issues
-            var summaryValue = "Test Summary from JIRA with access token " + _random.Next(int.MaxValue);
-            var issue = new Issue(jiraAccessToken, "TST")
-            {
-                Type = "1",
-                Summary = summaryValue
-            };
-            issue.SaveChanges();
-
-            var issues = (from i in jiraAccessToken.Issues
-                          where i.Key == issue.Key
-                          select i).ToArray();
-
-            Assert.Equal(1, issues.Count());
         }
 
         [Fact]
@@ -117,7 +96,7 @@ namespace Atlassian.Jira.Test.Integration
         public void QueryWithZeroResults()
         {
             var issues = from i in _jira.Issues
-                         where i.Created == new DateTime(2010,1,1)
+                         where i.Created == new DateTime(2010, 1, 1)
                          select i;
 
             Assert.Equal(0, issues.Count());
@@ -174,14 +153,15 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
 
             issue.SaveChanges();
 
             var issues = (from i in _jira.Issues
-                                where i.Key == issue.Key
-                                select i).ToArray();
+                          where i.Key == issue.Key
+                          select i).ToArray();
 
             Assert.Equal(1, issues.Count());
 
@@ -189,7 +169,6 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("TST", issues[0].Project);
             Assert.Equal("1", issues[0].Type.Id);
         }
-
 
         [Fact]
         public void CreateAndQueryIssueWithAllFieldsSet()
@@ -213,8 +192,8 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             var queriedIssues = (from i in _jira.Issues
-                          where i.Key == issue.Key
-                          select i).ToArray();
+                                 where i.Key == issue.Key
+                                 select i).ToArray();
 
             Assert.Equal(summaryValue, queriedIssues[0].Summary);
             Assert.NotNull(queriedIssues[0].JiraIdentifier);
@@ -227,7 +206,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
             issue.SaveChanges();
 
@@ -258,11 +238,10 @@ namespace Atlassian.Jira.Test.Integration
             };
             issue.SaveChanges();
 
-
             // act, get an issue and update it
             var serverIssue = (from i in _jira.Issues
-                                 where i.Key == issue.Key
-                                 select i).ToArray().First();
+                               where i.Key == issue.Key
+                               select i).ToArray().First();
 
             serverIssue.Description = "Updated Description";
             serverIssue.DueDate = new DateTime(2011, 10, 10);
@@ -272,15 +251,19 @@ namespace Atlassian.Jira.Test.Integration
 
             // assert, get the issue again and verify
             var newServerIssue = (from i in _jira.Issues
-                               where i.Key == issue.Key
-                               select i).ToArray().First();
+                                  where i.Key == issue.Key
+                                  select i).ToArray().First();
 
             Assert.Equal("Updated " + summaryValue, newServerIssue.Summary);
             Assert.Equal("Updated Description", newServerIssue.Description);
             Assert.Equal("Updated Environment", newServerIssue.Environment);
 
+#if SOAP
             // Note: Dates returned from JIRA are UTC
-            Assert.Equal(new DateTime(2011, 10, 10).ToUniversalTime(), newServerIssue.DueDate);
+            //Assert.Equal(new DateTime(2011, 10, 10).ToUniversalTime(), newServerIssue.DueDate);
+#else
+            Assert.Equal(serverIssue.DueDate, newServerIssue.DueDate);
+#endif
         }
 
         [Fact]
@@ -290,7 +273,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
 
             // create an issue, verify no attachments
@@ -320,7 +304,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
 
             // create an issue, verify no comments
@@ -341,8 +326,8 @@ namespace Atlassian.Jira.Test.Integration
         {
             // create 2 issues with same summary
             var randomNumber = _random.Next(int.MaxValue);
-            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber }).SaveChanges();
-            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber }).SaveChanges(); 
+            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
+            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
 
             //set maximum issues and query
             _jira.MaxIssuesPerRequest = 1;
@@ -358,7 +343,7 @@ namespace Atlassian.Jira.Test.Integration
         public void QueryIssueWithCustomDateField()
         {
             var issue = (from i in _jira.Issues
-                         where i["Custom Date Field"] <= new DateTime(2012,4,1)
+                         where i["Custom Date Field"] <= new DateTime(2012, 4, 1)
                          select i).First();
 
             Assert.Equal("Sample bug in Test Project", issue.Summary);
@@ -369,13 +354,13 @@ namespace Atlassian.Jira.Test.Integration
         {
             // create 2 issues with same summary
             var randomNumber = _random.Next(int.MaxValue);
-            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber }).SaveChanges();
-            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber }).SaveChanges();
+            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
+            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
 
             // query with take method to only return 1
             var issues = (from i in _jira.Issues
-                         where i.Summary == randomNumber.ToString()
-                         select i).Take(1);
+                          where i.Summary == randomNumber.ToString()
+                          select i).Take(1);
 
             Assert.Equal(1, issues.Count());
         }
@@ -385,7 +370,12 @@ namespace Atlassian.Jira.Test.Integration
         {
             var issueTypes = _jira.GetIssueTypes("TST");
 
+#if SOAP
             Assert.Equal(4, issueTypes.Count());
+#else
+            // In addition, rest API contains "Sub-Task" as an issue type.
+            Assert.Equal(5, issueTypes.Count());
+#endif
             Assert.True(issueTypes.Any(i => i.Name == "Bug"));
         }
 
@@ -422,10 +412,11 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = "Serialization nastiness"
+                Summary = "Serialization nastiness",
+                Assignee = "admin"
             };
 
-            issue.Description = File.ReadAllText("LongIssueDescription.txt"); 
+            issue.Description = File.ReadAllText("LongIssueDescription.txt");
             issue.SaveChanges();
 
             Assert.Contains("Second stack trace:", issue.Description);
@@ -435,7 +426,13 @@ namespace Atlassian.Jira.Test.Integration
         public void GetCustomFields()
         {
             var fields = _jira.GetCustomFields();
+#if SOAP
             Assert.Equal(4, fields.Count());
+#else
+            // There is no REST API to retrieve ONLY custom fields, the available resource
+            // returns ALL fields.
+            Assert.Equal(44, fields.Count());
+#endif
         }
 
         [Fact]
@@ -460,7 +457,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
 
             issue.SaveChanges();
@@ -482,7 +480,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
 
             issue.SaveChanges();
@@ -495,13 +494,13 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            Assert.Equal(2, issue.AffectsVersions.Count);
-            Assert.True(issue.AffectsVersions.Any(v => v.Name == "1.0"));
-            Assert.True(issue.AffectsVersions.Any(v => v.Name == "2.0"));
-
             Assert.Equal(2, issue.FixVersions.Count);
             Assert.True(issue.FixVersions.Any(v => v.Name == "2.0"));
             Assert.True(issue.FixVersions.Any(v => v.Name == "3.0"));
+
+            Assert.Equal(2, issue.AffectsVersions.Count);
+            Assert.True(issue.AffectsVersions.Any(v => v.Name == "1.0"));
+            Assert.True(issue.AffectsVersions.Any(v => v.Name == "2.0"));
         }
 
         [Fact]
@@ -529,7 +528,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
 
             issue.AffectsVersions.Add("1.0");
@@ -541,7 +541,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             var newIssue = (from i in _jira.Issues
-                            where i.AffectsVersions == "1.0" && i.AffectsVersions == "2.0" 
+                            where i.AffectsVersions == "1.0" && i.AffectsVersions == "2.0"
                                     && i.FixVersions == "2.0" && i.FixVersions == "3.0"
                             select i).First();
 
@@ -562,7 +562,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
 
             issue.Components.Add("Server");
@@ -591,7 +592,11 @@ namespace Atlassian.Jira.Test.Integration
 
             // Delete issue and verify it is no longer found.
             _jira.DeleteIssue(issue);
+#if SOAP
             Assert.Throws<System.ServiceModel.FaultException>(() => _jira.GetIssue(issue.Key.Value));
+#else
+            Assert.Throws<InvalidOperationException>(() => _jira.GetIssue(issue.Key.Value));
+#endif
         }
 
         [Fact]
@@ -602,7 +607,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
 
             issue.SaveChanges();
@@ -625,7 +631,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
 
             issue.SaveChanges();
@@ -641,7 +648,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
             issue["Custom Text Field"] = "My new value";
 
@@ -662,7 +670,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
             issue["Custom Text Field"] = "My new value";
 
@@ -682,7 +691,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
             issue.SaveChanges();
 
@@ -696,7 +706,6 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(4, logs.Count);
             Assert.Equal("comment", logs.ElementAt(3).Comment);
             Assert.Equal(new DateTime(2012, 1, 1), logs.ElementAt(3).StartDate);
-
         }
 
         [Fact]
@@ -706,20 +715,21 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void AddIssueAsSubtask() 
+        public void AddIssueAsSubtask()
         {
             var summaryValue = "Test issue as subtask " + _random.Next(int.MaxValue);
 
             var issue = new Issue(_jira, "TST", "TST-1")
             {
                 Type = "5", //subtask
-                Summary = summaryValue
+                Summary = summaryValue,
+                Assignee = "admin"
             };
             issue.SaveChanges();
 
             var subtasks = _jira.GetIssuesFromJql("project = TST and parent = TST-1");
 
-            Assert.True(subtasks.Any(s => s.Summary.Equals(summaryValue)), 
+            Assert.True(subtasks.Any(s => s.Summary.Equals(summaryValue)),
                 String.Format("'{0}' was not found as a sub-task of TST-1", summaryValue));
         }
 
@@ -730,7 +740,8 @@ namespace Atlassian.Jira.Test.Integration
             var issue = new Issue(_jira, "TST")
             {
                 Type = "1",
-                Summary = summary
+                Summary = summary,
+                Assignee = "admin"
             };
             issue.SaveChanges();
 
@@ -740,5 +751,34 @@ namespace Atlassian.Jira.Test.Integration
             issue.DeleteWorklog(worklog);
             Assert.Equal(0, issue.GetWorklogs().Count);
         }
+
+#if SOAP
+        [Fact]
+        // Access token is only available in SOAP API.
+        void WithAccessTokenInsteadOfUserAndPassword()
+        {
+            // get access token for user
+            var accessToken = _jira.GetAccessToken();
+
+            // create a new jira instance using access token only
+            var jiraAccessToken = new Jira("http://localhost:2990/jira", accessToken);
+
+            // create and query issues
+            var summaryValue = "Test Summary from JIRA with access token " + _random.Next(int.MaxValue);
+            var issue = new Issue(jiraAccessToken, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+            issue.SaveChanges();
+
+            var issues = (from i in jiraAccessToken.Issues
+                          where i.Key == issue.Key
+                          select i).ToArray();
+
+            Assert.Equal(1, issues.Count());
+        }
+#endif
     }
 }

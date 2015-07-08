@@ -12,12 +12,12 @@ namespace Atlassian.Jira.Test
 {
     public class JqlQueryProviderTest
     {
-        private Mock<IJiraSoapServiceClient> _soapClient;
+        private Mock<IJiraServiceClient> _soapClient;
 
         private Jira CreateJiraInstance()
         {
             var translator = new Mock<IJqlExpressionVisitor>();
-            _soapClient = new Mock<IJiraSoapServiceClient>();
+            _soapClient = new Mock<IJiraServiceClient>();
 
             translator.Setup(t => t.Process(It.IsAny<Expression>())).Returns(new JqlData() { Expression = "dummy expression" });
             
