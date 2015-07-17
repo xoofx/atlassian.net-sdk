@@ -18,7 +18,7 @@ namespace Atlassian.Jira.Remote
 
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(string);
+            return true;
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -30,7 +30,7 @@ namespace Atlassian.Jira.Remote
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var outerObject = JObject.Load(reader);
-            return outerObject[this._innerProperty].ToString();
+            return Convert.ChangeType(outerObject[this._innerProperty], objectType);
         }
     }
 }

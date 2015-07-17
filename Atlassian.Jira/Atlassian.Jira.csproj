@@ -102,7 +102,6 @@
     <Compile Include="ProjectVersionCollection.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Remote\JsonDeserializers.cs" />
     <Compile Include="Remote\RemoteIssueJsonConverter.cs" />
     <Compile Include="Remote\RestSharpJsonSerializer.cs" />
     <Compile Include="Remote\NestedValueJsonConverter.cs" />

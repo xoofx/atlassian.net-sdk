@@ -1416,7 +1416,6 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
         [JsonConverter(typeof(NestedValueJsonConverter), "name")]
@@ -2657,6 +2656,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "id")]
         public string status
         {
             get
@@ -2715,6 +2715,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "votes")]
         public System.Nullable<long> votes
         {
             get
