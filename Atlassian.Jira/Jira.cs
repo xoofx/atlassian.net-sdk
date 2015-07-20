@@ -33,13 +33,14 @@ namespace Atlassian.Jira
         private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedSubTaskIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
+        private Dictionary<string, Issue> _cachedIssues = new Dictionary<string, Issue>();
         private IEnumerable<JiraNamedEntity> _cachedFilters = null;
         private IEnumerable<IssuePriority> _cachedPriorities = null;
         private IEnumerable<IssueStatus> _cachedStatuses = null;
         private IEnumerable<IssueResolution> _cachedResolutions = null;
         private IEnumerable<Project> _cachedProjects = null;
 
-        private IEnumerable<JiraNamedEntity> _cachedCustomFields = null;
+        private IEnumerable<CustomField> _cachedCustomFields = null;
         private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
         private DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>> _cachedFieldsForAction = new DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>>();
 
@@ -126,11 +127,11 @@ namespace Atlassian.Jira
         /// <param name="password">Password used to authenticate.</param>
         /// <param name="enableTrace">Whether to enable console trace for REST requests.</param>
         /// <returns>Jira object configured to use REST API.</returns>
-        public static Jira CreateRestClient(string url, string username, string password, bool enableTrace = false)
+        public static Jira CreateRestClient(string url, string username, string password, JiraRestClientSettings settings = null)
         {
             return new Jira(
                 new JqlExpressionVisitor(),
-                new JiraRestServiceClient(url, username, password, enableTrace),
+                new JiraRestServiceClient(url, username, password, settings ?? new JiraRestClientSettings()),
                 new FileSystem(),
                 null,
                 () => new JiraCredentials(username, password));
@@ -432,13 +433,13 @@ namespace Atlassian.Jira
         /// Returns all custom fields within JIRA
         /// </summary>
         /// <returns>Collection of JIRA custom fields</returns>
-        public IEnumerable<JiraNamedEntity> GetCustomFields()
+        public IEnumerable<CustomField> GetCustomFields()
         {
             if (_cachedCustomFields == null)
             {
                 WithToken(token =>
                 {
-                    _cachedCustomFields = _jiraSoapService.GetCustomFields(token).Select(f => new JiraNamedEntity(f));
+                    _cachedCustomFields = _jiraSoapService.GetCustomFields(token).Select(f => new CustomField(f));
                 });
             }
             return _cachedCustomFields;
@@ -600,15 +601,20 @@ namespace Atlassian.Jira
 
         private Issue GetOneIssueFromProject(string projectKey)
         {
-            var tempIssue = this.GetIssuesFromJql(String.Format("project = \"{0}\"", projectKey), 1)
+            if (!this._cachedIssues.ContainsKey(projectKey))
+            {
+                var tempIssue = this.GetIssuesFromJql(String.Format("project = \"{0}\"", projectKey), 1)
                                 .FirstOrDefault();
 
-            if (tempIssue == null)
-            {
-                throw new InvalidOperationException("Project must contain at least one issue to be able to retrieve issue fields.");
+                if (tempIssue == null)
+                {
+                    throw new InvalidOperationException("Project must contain at least one issue to be able to retrieve issue fields.");
+                }
+
+                this._cachedIssues.Add(projectKey, tempIssue);
             }
 
-            return tempIssue;
+            return this._cachedIssues[projectKey];
         }
     }
 }

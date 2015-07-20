@@ -17,23 +17,28 @@ namespace Atlassian.Jira.Remote
         private readonly RestClient _restClient;
         private readonly string _url;
         private readonly bool _enableTrace;
-
-        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings()
+        private readonly JsonSerializerSettings _serializerSettings;
+        private readonly RemoteField[] _customFields;
+        private readonly Dictionary<string, ICustomFieldValueSerializer> _customFieldSerializers;
+        
+        public JiraRestServiceClient(string jiraBaseUrl, string username, string password, JiraRestClientSettings settings)
         {
-            NullValueHandling = NullValueHandling.Ignore
-        };
-
-        public JiraRestServiceClient(string jiraBaseUrl, string username, string password, bool enableTrace)
-        {
-
-            this._enableTrace = enableTrace;
+            this._customFieldSerializers = new Dictionary<string, ICustomFieldValueSerializer>(settings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
+            this._enableTrace = settings.EnableTrace;
             this._url = jiraBaseUrl.EndsWith("/") ? jiraBaseUrl : jiraBaseUrl += "/";
             this._restClient = new RestClient(this._url);
+
+            this._serializerSettings = new JsonSerializerSettings();
+            this._serializerSettings.NullValueHandling = NullValueHandling.Ignore;
 
             if (!String.IsNullOrEmpty(username) && !String.IsNullOrEmpty(password))
             {
                 this._restClient.Authenticator = new HttpBasicAuthenticator(username, password);
             }
+
+            // retrieve the custom fields once.
+            this._customFields = this.GetCustomFields(null).Where(f => f.IsCustomField).ToArray();
+            this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(this._customFields, this._customFieldSerializers));
         }
 
         public string Url
@@ -87,10 +92,7 @@ namespace Atlassian.Jira.Remote
             request.Method = method;
             request.Resource = resource;
             request.RequestFormat = DataFormat.Json;
-            request.JsonSerializer = new RestSharpJsonSerializer(new JsonSerializer()
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            });
+            request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(this._serializerSettings));
             request.AddJsonBody(requestBody);
 
             LogRequest(request, requestBody);
@@ -166,7 +168,8 @@ namespace Atlassian.Jira.Remote
         public RemoteField[] GetCustomFields(string token)
         {
             var fields = ExecuteRequest("rest/api/2/field");
-            return JsonConvert.DeserializeObject<RemoteField[]>(fields.ToString(), _serializerSettings);
+            return JsonConvert.DeserializeObject<RemoteField[]>(fields.ToString(), _serializerSettings)
+                .Where(f => f.IsCustomField).ToArray();
         }
 
         public RemoteField[] GetFieldsForEdit(string token, string key)

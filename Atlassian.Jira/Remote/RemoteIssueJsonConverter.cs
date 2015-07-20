@@ -7,7 +7,6 @@ using System.Text;
 
 namespace Atlassian.Jira.Remote
 {
-    [JsonConverter(typeof(RemoteIssueJsonConverter))]
     public class RemoteIssueWrapper
     {
         private readonly RemoteIssue _remoteIssue;
@@ -38,6 +37,19 @@ namespace Atlassian.Jira.Remote
 
     public class RemoteIssueJsonConverter : JsonConverter
     {
+        private readonly RemoteField[] _remoteFields;
+        private readonly IDictionary<string, ICustomFieldValueSerializer> _customFieldSerializers;
+        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings()
+        {
+            NullValueHandling = NullValueHandling.Ignore
+        };
+
+        public RemoteIssueJsonConverter(RemoteField[] remoteFields, IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers)
+        {
+            this._remoteFields = remoteFields;
+            this._customFieldSerializers = customFieldSerializers;
+        }
+
         public override bool CanConvert(Type objectType)
         {
             return objectType == typeof(RemoteIssueWrapper);
@@ -49,25 +61,15 @@ namespace Atlassian.Jira.Remote
             var fields = issueObj["fields"] as JObject;
 
             // deserialize the RemoteIssue from the fields json.
-            var remoteIssue = JsonConvert.DeserializeObject<RemoteIssue>(fields.ToString(), new JsonSerializerSettings()
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            });
+            var remoteIssue = JsonConvert.DeserializeObject<RemoteIssue>(fields.ToString(), this._serializerSettings);
 
             // set the id and key of the remoteissue.
-            remoteIssue.id = (string) issueObj["id"];
+            remoteIssue.id = (string)issueObj["id"];
             remoteIssue.key = (string)issueObj["key"];
 
-            // set the custom fields of the remote issue.
-            var customFields = new List<RemoteCustomFieldValue>();
-            foreach (var customField in fields)
-            {
-                if (customField.Key.StartsWith("customfield", StringComparison.InvariantCulture) && customField.Value.Type != JTokenType.Null)
-                {
-                    customFields.Add(new RemoteCustomFieldValue() { customfieldId = customField.Key, values = new string[] { (string)customField.Value } });
-                }
-            }
-            remoteIssue.customFieldValues = customFields.Count > 0 ? customFields.ToArray() : null;
+            // load the custom fields
+            var customFields = GetCustomFieldValuesFromObject(fields);
+            remoteIssue.customFieldValues = customFields.Any() ? customFields.ToArray() : null;
 
             return new RemoteIssueWrapper(remoteIssue);
         }
@@ -83,23 +85,11 @@ namespace Atlassian.Jira.Remote
             var issue = issueWrapper.RemoteIssue;
 
             // Round trip the remote issue to get a JObject that has all the fields in the proper format.
-            var issueJson = JsonConvert.SerializeObject(issue, new JsonSerializerSettings()
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            });
+            var issueJson = JsonConvert.SerializeObject(issue, _serializerSettings);
             var fields = JObject.Parse(issueJson);
 
             // Add the custom fields as additional JProperties.
-            if (issue.customFieldValues != null)
-            {
-                foreach (var customField in issue.customFieldValues)
-                {
-                    if (customField.values != null)
-                    {
-                        fields.Add(customField.customfieldId, customField.values.FirstOrDefault());
-                    }
-                }
-            }
+            AddCustomFieldValuesToObject(issue, fields);
 
             // Add a field for the parent issue if this is a sub-task
             if (!String.IsNullOrEmpty(issueWrapper.ParentIssueKey))
@@ -112,6 +102,62 @@ namespace Atlassian.Jira.Remote
 
             var wrapper = new JObject(new JProperty("fields", fields));
             wrapper.WriteTo(writer);
+        }
+
+        private string GetCustomFieldType(string customFieldId)
+        {
+            return this._remoteFields.First(f => f.id.Equals(customFieldId, StringComparison.InvariantCultureIgnoreCase)).CustomFieldType;
+        }
+
+        private void AddCustomFieldValuesToObject(RemoteIssue remoteIssue, JObject jObject)
+        {
+            if (remoteIssue.customFieldValues != null)
+            {
+                foreach (var customField in remoteIssue.customFieldValues)
+                {
+                    if (customField.values != null)
+                    {
+                        var customFieldType = GetCustomFieldType(customField.customfieldId);
+                        JToken jToken;
+
+                        if (this._customFieldSerializers.ContainsKey(customFieldType))
+                        {
+                            jToken = this._customFieldSerializers[customFieldType].ToJson(customField.values);
+                        }                       
+                        else
+                        {
+                            jToken = JValue.CreateString(customField.values[0]);
+                        }
+
+                        jObject.Add(customField.customfieldId, jToken);
+                    }
+                }
+            }
+        }
+
+        private IEnumerable<RemoteCustomFieldValue> GetCustomFieldValuesFromObject(JObject jObject)
+        {
+            return jObject.Values<JProperty>()
+                .Where(field => field.Name.StartsWith("customfield", StringComparison.InvariantCulture) && field.Value.Type != JTokenType.Null)
+                .Select(field =>
+                {
+                    var customFieldType = GetCustomFieldType(field.Name);
+                    var remoteCustomFieldValue = new RemoteCustomFieldValue()
+                    {
+                        customfieldId = field.Name
+                    };
+
+                    if (this._customFieldSerializers.ContainsKey(customFieldType))
+                    {
+                        remoteCustomFieldValue.values = this._customFieldSerializers[customFieldType].FromJson(field.Value);
+                    }
+                    else
+                    {
+                        remoteCustomFieldValue.values = new string[1] { field.Value.ToString() };
+                    }
+
+                    return remoteCustomFieldValue;
+                });
         }
     }
 }

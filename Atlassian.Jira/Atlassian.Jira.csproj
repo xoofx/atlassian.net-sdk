@@ -59,13 +59,16 @@
     <Compile Include="AttachmentInfo.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableString.cs" />
+    <Compile Include="CustomField.cs" />
+    <Compile Include="ICustomFieldValueSerializer.cs" />
     <Compile Include="IssueStatus.cs" />
     <Compile Include="IssueResolution.cs" />
     <Compile Include="IssuePriority.cs" />
-    <Compile Include="CustomField.cs" />
-    <Compile Include="CustomFieldCollection.cs" />
+    <Compile Include="CustomFieldValue.cs" />
+    <Compile Include="CustomFieldValueCollection.cs" />
     <Compile Include="IssueType.cs" />
     <Compile Include="JiraCredentials.cs" />
+    <Compile Include="JiraRestClientSettings.cs" />
     <Compile Include="LiteralDateTime.cs" />
     <Compile Include="LiteralMatch.cs" />
     <Compile Include="Project.cs" />
@@ -83,6 +86,7 @@
     <Compile Include="JiraNamedEntity.cs" />
     <Compile Include="Linq\ExpressionEvaluator.cs" />
     <Compile Include="Linq\ExpressionTreeModifier.cs" />
+    <Compile Include="Remote\CustomFieldValueSerializers.cs" />
     <Compile Include="Remote\DateFixupJsonConverter.cs" />
     <Compile Include="Remote\ExtensionMethods.cs" />
     <Compile Include="Remote\IJiraServiceClient.cs" />

@@ -29,7 +29,7 @@ namespace Atlassian.Jira
         private ProjectVersionCollection _affectsVersions = null;
         private ProjectVersionCollection _fixVersions = null;
         private ProjectComponentCollection _components = null;
-        private CustomFieldCollection _customFields = null;
+        private CustomFieldValueCollection _customFields = null;
         private IssueStatus _status;
 
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
@@ -77,8 +77,8 @@ namespace Atlassian.Jira
             _components = _originalIssue.components == null ? new ProjectComponentCollection("components", _jira, Project)
                 : new ProjectComponentCollection("components", _jira, Project, _originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
 
-            _customFields = _originalIssue.customFieldValues == null ? new CustomFieldCollection(this)
-                : new CustomFieldCollection(this, _originalIssue.customFieldValues.Select(f => new CustomField(f.customfieldId, this) { Values = f.values }).ToList());
+            _customFields = _originalIssue.customFieldValues == null ? new CustomFieldValueCollection(this)
+                : new CustomFieldValueCollection(this, _originalIssue.customFieldValues.Select(f => new CustomFieldValue(f.customfieldId, this) { Values = f.values }).ToList());
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The custom fields associated with this issue
         /// </summary>
-        public CustomFieldCollection CustomFields
+        public CustomFieldValueCollection CustomFields
         {
             get
             {
