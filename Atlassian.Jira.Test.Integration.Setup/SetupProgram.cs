@@ -1,13 +1,13 @@
-﻿using System;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
-using System.Diagnostics;
 using System.Threading;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using OpenQA.Selenium.Chrome;
 
 namespace Atlassian.Jira.Test.Integration.Setup
 {
@@ -31,7 +31,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
             {
                 PrintInstructions();
             }
-            
+
         }
 
         private static void PrintInstructions()
@@ -69,7 +69,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
 
             // Login
             LoginToJira(webDriver);
-            
+
             // Restore TestData
             File.Copy(
                 Path.Combine(currentDir, "TestData.zip"),
@@ -78,14 +78,14 @@ namespace Atlassian.Jira.Test.Integration.Setup
 
             webDriver.Url = "http://localhost:2990/jira/secure/admin/XmlRestore!default.jspa";
             WaitForElement(webDriver, By.Name("filename")).SendKeys("TestData.zip");
-            WaitForElement(webDriver, By.Id("restore_submit")).Click();
+            WaitForElement(webDriver, By.Id("restore-xml-data-backup-submit")).Click();
 
             // Wait until restore is complete
             WaitForElement(
-                webDriver, 
-                TimeSpan.FromMinutes(2), 
+                webDriver,
+                TimeSpan.FromMinutes(3),
                 wd => wd.FindElements(By.TagName("p"))
-                    .FirstOrDefault(we => we.Text.Trim().Equals("Your project has been successfully imported.", StringComparison.OrdinalIgnoreCase)));
+                    .FirstOrDefault(we => we.Text.Trim().Equals("Your import has been successful.", StringComparison.OrdinalIgnoreCase)));
 
             // Login again
             LoginToJira(webDriver);
