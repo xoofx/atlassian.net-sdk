@@ -684,6 +684,59 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void CreateAndUpdateIssueWithComplexCustomFields()
+        {
+            var summaryValue = "Test issue with lots of custom fields (Created)" + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            issue.SaveChanges();
+
+            var newIssue = _jira.GetIssue(issue.Key.Value);
+
+            newIssue["Custom Text Field"] = "My new value";
+            newIssue["Custom Date Field"] = "2015-10-03";
+            newIssue["Custom User Field"] = "admin";
+            newIssue["Custom Select Field"] = "Blue";
+            newIssue["Custom Group Field"] = "jira-users";
+            newIssue["Custom Project Field"] = "TST";
+            newIssue["Custom Version Field"] = "1.0";
+            newIssue["Custom Radio Field"] = "option1";
+            newIssue["Custom Number Field"] = "1234";
+            newIssue.CustomFields.AddArray("Custom Labels Field", "label1", "label2");
+            newIssue.CustomFields.AddArray("Custom Multi Group Field", "jira-developers", "jira-users");
+            newIssue.CustomFields.AddArray("Custom Multi Select Field", "option1", "option2");
+            newIssue.CustomFields.AddArray("Custom Multi User Field", "admin", "test");
+            newIssue.CustomFields.AddArray("Custom Checboxes Field", "option1", "option2");
+            newIssue.CustomFields.AddArray("Custom Multi Version Field", "2.0", "3.0");
+
+            newIssue.SaveChanges();
+
+            var updatedIssue = _jira.GetIssue(issue.Key.Value);
+
+            Assert.Equal("My new value", updatedIssue["Custom Text Field"]);
+            Assert.Equal("2015-10-03", updatedIssue["Custom Date Field"]);
+            Assert.Equal("admin", updatedIssue["Custom User Field"]);
+            Assert.Equal("Blue", updatedIssue["Custom Select Field"]);
+            Assert.Equal("jira-users", updatedIssue["Custom Group Field"]);
+            Assert.Equal("TST", updatedIssue["Custom Project Field"]);
+            Assert.Equal("1.0", updatedIssue["Custom Version Field"]);
+            Assert.Equal("option1", updatedIssue["Custom Radio Field"]);
+            Assert.Equal("1234", updatedIssue["Custom Number Field"]);
+
+            Assert.Equal(new string[2] { "label1", "label2" }, updatedIssue.CustomFields["Custom Labels Field"].Values);
+            Assert.Equal(new string[2] { "jira-developers", "jira-users" }, updatedIssue.CustomFields["Custom Multi Group Field"].Values);
+            Assert.Equal(new string[2] { "option1", "option2" }, updatedIssue.CustomFields["Custom Multi Select Field"].Values);
+            Assert.Equal(new string[2] { "admin", "test" }, updatedIssue.CustomFields["Custom Multi User Field"].Values);
+            Assert.Equal(new string[2] { "option1", "option2" }, updatedIssue.CustomFields["Custom Checboxes Field"].Values);
+            Assert.Equal(new string[2] { "2.0", "3.0" }, updatedIssue.CustomFields["Custom Multi Version Field"].Values);
+        }
+
+        [Fact]
         public void CreateAndQueryIssueWithCustomField()
         {
             var summaryValue = "Test issue with custom field (Created)" + _random.Next(int.MaxValue);
