@@ -20,7 +20,7 @@ namespace Atlassian.Jira.Remote
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly RemoteField[] _customFields;
         private readonly Dictionary<string, ICustomFieldValueSerializer> _customFieldSerializers;
-        
+
         public JiraRestServiceClient(string jiraBaseUrl, string username, string password, JiraRestClientSettings settings)
         {
             this._customFieldSerializers = new Dictionary<string, ICustomFieldValueSerializer>(settings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
@@ -37,7 +37,7 @@ namespace Atlassian.Jira.Remote
             }
 
             // retrieve the custom fields once.
-            this._customFields = this.GetCustomFields(null).Where(f => f.IsCustomField).ToArray();
+            this._customFields = this.GetCustomFieldsInternal(null).Where(f => f.IsCustomField).ToArray();
             this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(this._customFields, this._customFieldSerializers));
         }
 
@@ -166,6 +166,11 @@ namespace Atlassian.Jira.Remote
         }
 
         public RemoteField[] GetCustomFields(string token)
+        {
+            return this._customFields;
+        }
+
+        public RemoteField[] GetCustomFieldsInternal(string token)
         {
             var fields = ExecuteRequest("rest/api/2/field");
             return JsonConvert.DeserializeObject<RemoteField[]>(fields.ToString(), _serializerSettings)
