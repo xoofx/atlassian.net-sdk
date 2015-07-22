@@ -426,7 +426,7 @@ namespace Atlassian.Jira.Test.Integration
         public void GetCustomFields()
         {
             var fields = _jira.GetCustomFields();
-            Assert.Equal(4, fields.Count());
+            Assert.Equal(19, fields.Count());
         }
 
         [Fact]
@@ -634,6 +634,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.AddLabels("label1", "label2");
         }
 
+#if !SOAP
         [Fact]
         public void CreateAndQueryIssueWithComplexCustomFields()
         {
@@ -658,7 +659,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.CustomFields.AddArray("Custom Multi Group Field", "jira-developers", "jira-users");
             issue.CustomFields.AddArray("Custom Multi Select Field", "option1", "option2");
             issue.CustomFields.AddArray("Custom Multi User Field", "admin", "test");
-            issue.CustomFields.AddArray("Custom Checboxes Field", "option1", "option2");
+            issue.CustomFields.AddArray("Custom Checkboxes Field", "option1", "option2");
             issue.CustomFields.AddArray("Custom Multi Version Field", "2.0", "3.0");
 
             issue.SaveChanges();
@@ -679,7 +680,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(new string[2] { "jira-developers", "jira-users" }, newIssue.CustomFields["Custom Multi Group Field"].Values);
             Assert.Equal(new string[2] { "option1", "option2" }, newIssue.CustomFields["Custom Multi Select Field"].Values);
             Assert.Equal(new string[2] { "admin", "test" }, newIssue.CustomFields["Custom Multi User Field"].Values);
-            Assert.Equal(new string[2] { "option1", "option2" }, newIssue.CustomFields["Custom Checboxes Field"].Values);
+            Assert.Equal(new string[2] { "option1", "option2" }, newIssue.CustomFields["Custom Checkboxes Field"].Values);
             Assert.Equal(new string[2] { "2.0", "3.0" }, newIssue.CustomFields["Custom Multi Version Field"].Values);
         }
 
@@ -711,7 +712,7 @@ namespace Atlassian.Jira.Test.Integration
             newIssue.CustomFields.AddArray("Custom Multi Group Field", "jira-developers", "jira-users");
             newIssue.CustomFields.AddArray("Custom Multi Select Field", "option1", "option2");
             newIssue.CustomFields.AddArray("Custom Multi User Field", "admin", "test");
-            newIssue.CustomFields.AddArray("Custom Checboxes Field", "option1", "option2");
+            newIssue.CustomFields.AddArray("Custom Checkboxes Field", "option1", "option2");
             newIssue.CustomFields.AddArray("Custom Multi Version Field", "2.0", "3.0");
 
             newIssue.SaveChanges();
@@ -732,9 +733,10 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(new string[2] { "jira-developers", "jira-users" }, updatedIssue.CustomFields["Custom Multi Group Field"].Values);
             Assert.Equal(new string[2] { "option1", "option2" }, updatedIssue.CustomFields["Custom Multi Select Field"].Values);
             Assert.Equal(new string[2] { "admin", "test" }, updatedIssue.CustomFields["Custom Multi User Field"].Values);
-            Assert.Equal(new string[2] { "option1", "option2" }, updatedIssue.CustomFields["Custom Checboxes Field"].Values);
+            Assert.Equal(new string[2] { "option1", "option2" }, updatedIssue.CustomFields["Custom Checkboxes Field"].Values);
             Assert.Equal(new string[2] { "2.0", "3.0" }, updatedIssue.CustomFields["Custom Multi Version Field"].Values);
         }
+#endif
 
         [Fact]
         public void CreateAndQueryIssueWithCustomField()
