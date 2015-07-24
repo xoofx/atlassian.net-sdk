@@ -42,8 +42,6 @@ namespace Atlassian.Jira.Test.Integration.Setup
             Console.WriteLine("  2. Wait until tomcat container is fully ready.");
             Console.WriteLine("  3. 'JiraSetup.exe setup'.");
             Console.WriteLine("  4. Wait until the back up restore is complete.");
-            Console.WriteLine("  5. Due to bug JRA-25757 you need to restart the JIRA server." +
-                " Kill the JIRA process started in step 1 and rerun 'JiraSetup.exe start' (you may have to do this 2 times).");
             Console.WriteLine("-------------------------------------------------------");
         }
 
