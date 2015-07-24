@@ -2,6 +2,7 @@
 using Atlassian.Jira.Remote;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.ServiceModel;
@@ -253,7 +254,7 @@ namespace Atlassian.Jira
         {
             if (this.Debug)
             {
-                Console.WriteLine("JQL: " + jql);
+                Trace.WriteLine("JQL: " + jql);
             }
 
             IList<Issue> issues = new List<Issue>();

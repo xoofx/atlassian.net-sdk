@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -59,20 +60,19 @@ namespace Atlassian.Jira.Remote
         {
             if (this._enableTrace)
             {
-                Console.WriteLine();
-                Console.WriteLine("[{0}] Request Url: {1}",
+                Trace.WriteLine(String.Format("[{0}] Request Url: {1}",
                     request.Method,
-                    request.Resource);
+                    request.Resource));
 
                 if (body != null)
                 {
-                    Console.WriteLine("[{0}] Request Data: {1}",
+                    Trace.WriteLine(String.Format("[{0}] Request Data: {1}",
                         request.Method,
                         JsonConvert.SerializeObject(body, new JsonSerializerSettings()
                         {
                             Formatting = Formatting.Indented,
                             NullValueHandling = NullValueHandling.Ignore
-                        }));
+                        })));
                 }
             }
         }
