@@ -129,11 +129,41 @@ namespace Atlassian.Jira
 
         RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
         {
-            return this.Items.Select(f => new RemoteFieldValue()
-            {
-                id = f.Id,
-                values = f.Values
-            }).ToArray();
+            return this.Items
+                .Where(field => IsCustomFieldNewOrUpdated(field))
+                .Select(field => new RemoteFieldValue()
+                {
+                    id = field.Id,
+                    values = field.Values
+                }).ToArray();
         }
+
+        private bool IsCustomFieldNewOrUpdated(CustomFieldValue customField)
+        {
+            if (this._issue.OriginalRemoteIssue.customFieldValues == null)
+            {
+                // Original remote issue had no custom fields, this means that a new one has been added by user.
+                return true;
+            }
+
+            var originalField = this._issue.OriginalRemoteIssue.customFieldValues.FirstOrDefault(field => field.customfieldId == customField.Id);
+
+            if (originalField == null)
+            {
+                // A custom field with this id does not exist on the original remote issue, this means that it was
+                //   added by the user
+                return true;
+            }
+            else if (originalField.values == null)
+            {
+                // The remote custom field was not initialized, include it on the payload.
+                return true;
+            }
+            else
+            {
+                return !originalField.values.SequenceEqual(customField.Values);
+            }
+        }
+
     }
 }

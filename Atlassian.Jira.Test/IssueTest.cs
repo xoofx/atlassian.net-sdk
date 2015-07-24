@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using Atlassian.Jira.Remote;
-using Moq;
 
 namespace Atlassian.Jira.Test
 {
@@ -176,6 +176,98 @@ namespace Atlassian.Jira.Test
 
         public class GetUpdatedFields
         {
+            [Fact]
+            public void ReturnsCustomFieldsAdded()
+            {
+                var jira = TestableJira.Create();
+                var remoteIssue = new RemoteIssue()
+                {
+                    key = "TST-1",
+                    project = "TST",
+                    type = "1"
+                };
+                var remoteField = new RemoteField()
+                {
+                    id = "CustomField1",
+                    name = "My Custom Field"
+                };
+
+                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
+                jira.SoapService.Setup(s => s.GetFieldsForEdit(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteField[1] { remoteField });
+
+                var issue = jira.CreateIssue("TST");
+                issue["My Custom Field"] = "test value";
+
+                var result = GetUpdatedFieldsForIssue(issue);
+                Assert.Equal(1, result.Length);
+                Assert.Equal("CustomField1", result.First().id);
+            }
+
+            [Fact]
+            public void ExcludesCustomFieldsNotModified()
+            {
+                var jira = TestableJira.Create();
+                var remoteField = new RemoteField()
+                {
+                    id = "CustomField1",
+                    name = "My Custom Field"
+                };
+                var remoteCustomFieldValue = new RemoteCustomFieldValue()
+                {
+                    customfieldId = "CustomField1",
+                    values = new string[1] { "My Value" }
+                };
+                var remoteIssue = new RemoteIssue()
+                {
+                    key = "TST-1",
+                    project = "TST",
+                    type = "1",
+                    customFieldValues = new RemoteCustomFieldValue[1] { remoteCustomFieldValue }
+                };
+
+                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
+                jira.SoapService.Setup(s => s.GetFieldsForEdit(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteField[1] { remoteField });
+
+                var issue = jira.GetIssuesFromJql("TST-1").First();
+
+                var result = GetUpdatedFieldsForIssue(issue);
+                Assert.Equal(0, result.Length);
+            }
+
+            [Fact]
+            public void ReturnsCustomFieldThatWasModified()
+            {
+                var jira = TestableJira.Create();
+                var remoteField = new RemoteField()
+                {
+                    id = "CustomField1",
+                    name = "My Custom Field"
+                };
+                var remoteCustomFieldValue = new RemoteCustomFieldValue()
+                {
+                    customfieldId = "CustomField1",
+                    values = new string[1] { "My Value" }
+                };
+                var remoteIssue = new RemoteIssue()
+                {
+                    key = "TST-1",
+                    project = "TST",
+                    type = "1",
+                    customFieldValues = new RemoteCustomFieldValue[1] { remoteCustomFieldValue }
+                };
+
+                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
+                jira.SoapService.Setup(s => s.GetFieldsForEdit(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteField[1] { remoteField });
+
+                var issue = jira.GetIssuesFromJql("TST-1").First();
+                issue["My Custom Field"] = "My New Value";
+
+                var result = GetUpdatedFieldsForIssue(issue);
+                Assert.Equal(1, result.Length);
+                Assert.Equal("CustomField1", result.First().id);
+                Assert.Equal("My New Value", result.First().values[0]);
+            }
+
             [Fact]
             public void IfIssueTypeWithId_ReturnField()
             {

@@ -81,6 +81,14 @@ namespace Atlassian.Jira
                 : new CustomFieldValueCollection(this, _originalIssue.customFieldValues.Select(f => new CustomFieldValue(f.customfieldId, this) { Values = f.values }).ToList());
         }
 
+        internal RemoteIssue OriginalRemoteIssue
+        {
+            get
+            {
+                return this._originalIssue;
+            }
+        }
+
         /// <summary>
         /// The JIRA server that created this issue
         /// </summary>
