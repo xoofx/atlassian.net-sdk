@@ -101,12 +101,17 @@ namespace Atlassian.Jira.Test.Integration.Setup
             WaitForElement(webDriver, By.Id("login-form-username")).SendKeys("admin");
             WaitForElement(webDriver, By.Id("login-form-password")).SendKeys("admin");
             WaitForElement(webDriver, By.Id("login-form-submit")).Click();
-            WaitForElement(webDriver, By.Id("header-details-user-fullname"));
+            WaitForElement(webDriver, By.Id("header-details-user-fullname"), TimeSpan.FromSeconds(30));
         }
 
         private static IWebElement WaitForElement(IWebDriver webDriver, By locator)
         {
-            return WaitForElement(webDriver, TimeSpan.FromSeconds(10), wd => wd.FindElements(locator).FirstOrDefault());
+            return WaitForElement(webDriver, locator, TimeSpan.FromSeconds(10));
+        }
+
+        private static IWebElement WaitForElement(IWebDriver webDriver, By locator, TimeSpan timeout)
+        {
+            return WaitForElement(webDriver, timeout, wd => wd.FindElements(locator).FirstOrDefault());
         }
 
         private static IWebElement WaitForElement(IWebDriver webDriver, TimeSpan timeout, Func<IWebDriver, IWebElement> func)
