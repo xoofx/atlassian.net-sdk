@@ -24,7 +24,7 @@ namespace Atlassian.Jira
         private const string REMOTE_AUTH_EXCEPTION_STRING = "com.atlassian.jira.rpc.exception.RemoteAuthenticationException";
 
         private readonly JiraQueryProvider _provider;
-        private readonly IJiraServiceClient _jiraSoapService;
+        private readonly IJiraServiceClient _jiraService;
         private readonly IFileSystem _fileSystem;
         private readonly bool _isAnonymous = false;
 
@@ -64,7 +64,7 @@ namespace Atlassian.Jira
                     IFileSystem fileSystem)
         {
             _isAnonymous = true;
-            _jiraSoapService = jiraService;
+            _jiraService = jiraService;
             _fileSystem = fileSystem;
             this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
@@ -142,7 +142,7 @@ namespace Atlassian.Jira
         {
             get
             {
-                return _jiraSoapService;
+                return _jiraService;
             }
         }
 
@@ -165,7 +165,7 @@ namespace Atlassian.Jira
         /// </summary>
         public string Url
         {
-            get { return _jiraSoapService.Url; }
+            get { return _jiraService.Url; }
         }
 
         internal JiraCredentials GetCredentials()
@@ -230,7 +230,7 @@ namespace Atlassian.Jira
 
             return WithToken(token =>
             {
-                return _jiraSoapService.GetIssuesFromFilterWithLimit(token, filter.Id, start, maxResults ?? this.MaxIssuesPerRequest).Select(i => new Issue(this, i));
+                return _jiraService.GetIssuesFromFilterWithLimit(token, filter.Id, start, maxResults ?? this.MaxIssuesPerRequest).Select(i => new Issue(this, i));
             });
         }
 
@@ -262,7 +262,7 @@ namespace Atlassian.Jira
 
             WithToken(token =>
             {
-                foreach (RemoteIssue remoteIssue in _jiraSoapService.GetIssuesFromJqlSearch(token, jql, maxIssues ?? MaxIssuesPerRequest, startAt))
+                foreach (RemoteIssue remoteIssue in _jiraService.GetIssuesFromJqlSearch(token, jql, maxIssues ?? MaxIssuesPerRequest, startAt))
                 {
                     issues.Add(new Issue(this, remoteIssue));
                 }
@@ -292,7 +292,7 @@ namespace Atlassian.Jira
 
             WithToken(token =>
             {
-                _jiraSoapService.DeleteIssue(token, issue.Key.ToString());
+                _jiraService.DeleteIssue(token, issue.Key.ToString());
             });
         }
 
@@ -307,7 +307,7 @@ namespace Atlassian.Jira
                 {
                     _cachedSubTaskIssueTypes.Add(
                         ALL_PROJECTS_KEY,
-                        _jiraSoapService.GetSubTaskIssueTypes(token).Select(remoteIssueType => new IssueType(remoteIssueType)));
+                        _jiraService.GetSubTaskIssueTypes(token).Select(remoteIssueType => new IssueType(remoteIssueType)));
                 });
             }
 
@@ -337,7 +337,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedIssueTypes.Add(projectKey, _jiraSoapService.GetIssueTypes(token, projectId).Select(remoteIssueType => new IssueType(remoteIssueType)));
+                    _cachedIssueTypes.Add(projectKey, _jiraService.GetIssueTypes(token, projectId).Select(remoteIssueType => new IssueType(remoteIssueType)));
                 });
             }
 
@@ -355,7 +355,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedVersions.Add(projectKey, _jiraSoapService.GetVersions(token, projectKey).Select(v => new ProjectVersion(v)));
+                    _cachedVersions.Add(projectKey, _jiraService.GetVersions(token, projectKey).Select(v => new ProjectVersion(v)));
                 });
             }
 
@@ -373,7 +373,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedComponents.Add(projectKey, _jiraSoapService.GetComponents(token, projectKey).Select(c => new ProjectComponent(c)));
+                    _cachedComponents.Add(projectKey, _jiraService.GetComponents(token, projectKey).Select(c => new ProjectComponent(c)));
                 });
             }
 
@@ -390,7 +390,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedPriorities = _jiraSoapService.GetPriorities(token).Select(p => new IssuePriority(p));
+                    _cachedPriorities = _jiraService.GetPriorities(token).Select(p => new IssuePriority(p));
                 });
             }
 
@@ -407,7 +407,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedStatuses = _jiraSoapService.GetStatuses(token).Select(s => new IssueStatus(s));
+                    _cachedStatuses = _jiraService.GetStatuses(token).Select(s => new IssueStatus(s));
                 });
             }
 
@@ -424,7 +424,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedResolutions = _jiraSoapService.GetResolutions(token).Select(r => new IssueResolution(r));
+                    _cachedResolutions = _jiraService.GetResolutions(token).Select(r => new IssueResolution(r));
                 });
             }
 
@@ -441,7 +441,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedCustomFields = _jiraSoapService.GetCustomFields(token).Select(f => new CustomField(f));
+                    _cachedCustomFields = _jiraService.GetCustomFields(token).Select(f => new CustomField(f));
                 });
             }
             return _cachedCustomFields;
@@ -456,7 +456,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedFilters = _jiraSoapService.GetFavouriteFilters(token).Select(f => new JiraNamedEntity(f));
+                    _cachedFilters = _jiraService.GetFavouriteFilters(token).Select(f => new JiraNamedEntity(f));
                 });
             }
 
@@ -472,7 +472,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedProjects = _jiraSoapService.GetProjects(token).Select(p => new Project(p));
+                    _cachedProjects = _jiraService.GetProjects(token).Select(p => new Project(p));
                 });
             }
 
@@ -560,7 +560,7 @@ namespace Atlassian.Jira
         public string GetAccessToken()
         {
             var credentials = GetCredentials();
-            return _jiraSoapService.Login(credentials.UserName, credentials.Password);
+            return _jiraService.Login(credentials.UserName, credentials.Password);
         }
 
         internal IEnumerable<JiraNamedEntity> GetFieldsForAction(Issue issue, string actionId)
@@ -574,7 +574,7 @@ namespace Atlassian.Jira
             {
                 WithToken((token, service) =>
                 {
-                    _cachedFieldsForAction.Add(issue.Project, actionId, _jiraSoapService.GetFieldsForAction(token, issue.Key.Value, actionId)
+                    _cachedFieldsForAction.Add(issue.Project, actionId, _jiraService.GetFieldsForAction(token, issue.Key.Value, actionId)
                         .Select(f => new JiraNamedEntity(f)));
                 });
             }
@@ -593,7 +593,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cachedFieldsForEdit.Add(issue.Project, _jiraSoapService.GetFieldsForEdit(token, issue.Key.Value)
+                    _cachedFieldsForEdit.Add(issue.Project, _jiraService.GetFieldsForEdit(token, issue.Key.Value)
                         .Select(f => new JiraNamedEntity(f)));
                 });
             }
