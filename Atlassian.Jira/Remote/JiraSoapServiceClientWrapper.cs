@@ -46,9 +46,16 @@ namespace Atlassian.Jira.Remote
             this.UpdateIssue(token, remoteIssue, fields);
         }
 
-        public RemoteIssue[] GetIssuesFromJqlSearch(string jqlSearch, int startAt, int maxResults, string[] fields)
+        public RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxResults, int startAt)
         {
-            throw new NotImplementedException("Only supported by REST API.");
+            if (startAt > 0)
+            {
+                throw new NotSupportedException("'startAt' is only supported by REST API.");
+            }
+            else
+            {
+                return GetIssuesFromJqlSearch(token, jqlSearch, maxResults);
+            }
         }
 
         public RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults)

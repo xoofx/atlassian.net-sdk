@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using Atlassian.Jira.Remote;
-using Moq;
 
 namespace Atlassian.Jira.Test
 {
@@ -17,7 +17,7 @@ namespace Atlassian.Jira.Test
             {
                 // Arrange
                 var jira = TestableJira.Create();
-                jira.SoapService.Setup(j => j.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+                jira.SoapService.Setup(j => j.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
                                 .Returns(new RemoteIssue[]
                                 {
                                     new RemoteIssue() { id = "123", key = "mykey", type = "2", project = "myproject"  }
@@ -40,7 +40,7 @@ namespace Atlassian.Jira.Test
                 // Arrange
                 var jira = TestableJira.Create();
                 jira.SoapService
-                    .Setup(j => j.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+                    .Setup(j => j.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
                     .Returns(new RemoteIssue[] {
                         new RemoteIssue() { id = "123", key = "mykey", type = "666", project = "myproject" }
                     });

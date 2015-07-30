@@ -248,9 +248,10 @@ namespace Atlassian.Jira
         /// Execute a specific JQL query and return the resulting issues
         /// </summary>
         /// <param name="jql">JQL search query</param>
-        /// <param name="maxIssues">Maximum number of issues to return</param>
+        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <returns>Collection of Issues that match the search query</returns>
-        public IEnumerable<Issue> GetIssuesFromJql(string jql, int? maxIssues)
+        public IEnumerable<Issue> GetIssuesFromJql(string jql, int? maxIssues = null, int startAt = 0)
         {
             if (this.Debug)
             {
@@ -259,9 +260,9 @@ namespace Atlassian.Jira
 
             IList<Issue> issues = new List<Issue>();
 
-            WithToken(t =>
+            WithToken(token =>
             {
-                foreach (RemoteIssue remoteIssue in _jiraSoapService.GetIssuesFromJqlSearch(t, jql, maxIssues ?? MaxIssuesPerRequest))
+                foreach (RemoteIssue remoteIssue in _jiraSoapService.GetIssuesFromJqlSearch(token, jql, maxIssues ?? MaxIssuesPerRequest, startAt))
                 {
                     issues.Add(new Issue(this, remoteIssue));
                 }

@@ -115,14 +115,13 @@ namespace Atlassian.Jira.Remote
             return response.StatusCode != HttpStatusCode.NoContent ? JToken.Parse(response.Content) : new JObject();
         }
 
-        public RemoteIssue[] GetIssuesFromJqlSearch(string jqlSearch, int startAt, int maxResults, string[] fields = null)
+        public RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxResults, int startAt)
         {
             var responseObj = ExecuteRequestWithData("rest/api/2/search", new
             {
                 jql = jqlSearch,
                 startAt = startAt,
                 maxResults = maxResults,
-                fields = fields
             });
 
             var issues = (JArray)responseObj["issues"];
@@ -131,7 +130,7 @@ namespace Atlassian.Jira.Remote
 
         public RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults)
         {
-            return this.GetIssuesFromJqlSearch(jqlSearch, 0, maxNumResults);
+            return this.GetIssuesFromJqlSearch(token, jqlSearch, maxNumResults, 0);
         }
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
@@ -229,7 +228,7 @@ namespace Atlassian.Jira.Remote
             var resource = String.Format("rest/api/2/filter/{0}", filterId);
             var jql = ExecuteRequest(resource)["jql"].ToString();
 
-            return this.GetIssuesFromJqlSearch(jql, offset, maxResults);
+            return this.GetIssuesFromJqlSearch(token, jql, maxResults, offset);
         }
 
         public RemoteStatus[] GetStatuses(string token)

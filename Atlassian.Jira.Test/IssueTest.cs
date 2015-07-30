@@ -192,7 +192,7 @@ namespace Atlassian.Jira.Test
                     name = "My Custom Field"
                 };
 
-                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
+                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
                 jira.SoapService.Setup(s => s.GetFieldsForEdit(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteField[1] { remoteField });
 
                 var issue = jira.CreateIssue("TST");
@@ -225,7 +225,7 @@ namespace Atlassian.Jira.Test
                     customFieldValues = new RemoteCustomFieldValue[1] { remoteCustomFieldValue }
                 };
 
-                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
+                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
                 jira.SoapService.Setup(s => s.GetFieldsForEdit(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteField[1] { remoteField });
 
                 var issue = jira.GetIssuesFromJql("TST-1").First();
@@ -256,7 +256,7 @@ namespace Atlassian.Jira.Test
                     customFieldValues = new RemoteCustomFieldValue[1] { remoteCustomFieldValue }
                 };
 
-                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
+                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
                 jira.SoapService.Setup(s => s.GetFieldsForEdit(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteField[1] { remoteField });
 
                 var issue = jira.GetIssuesFromJql("TST-1").First();
