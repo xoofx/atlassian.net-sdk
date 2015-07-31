@@ -23,6 +23,7 @@ namespace Atlassian.Jira.Test
             soapClient.Setup(r => r.GetIssuesFromJqlSearch(
                                         It.IsAny<string>(),
                                         It.IsAny<string>(),
+                                        It.IsAny<int>(),
                                         It.IsAny<int>())).Returns(new RemoteIssue[0]);
 
             return new Jira(_translator, soapClient.Object, null);

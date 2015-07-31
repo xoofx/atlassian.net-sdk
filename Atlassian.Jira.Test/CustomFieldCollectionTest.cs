@@ -15,7 +15,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = TestableJira.Create();
             jira.SoapService
-               .Setup(c => c.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+               .Setup(c => c.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
                .Returns(new RemoteIssue[] 
                 {
                     new RemoteIssue() { key = "123" }

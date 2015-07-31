@@ -126,12 +126,7 @@ namespace Atlassian.Jira.Remote
 
             var issues = (JArray)responseObj["issues"];
             return issues.Cast<JObject>().Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this._serializerSettings).RemoteIssue).ToArray();
-        }
-
-        public RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults)
-        {
-            return this.GetIssuesFromJqlSearch(token, jqlSearch, maxNumResults, 0);
-        }
+        }       
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
         {

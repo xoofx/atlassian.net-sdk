@@ -54,13 +54,8 @@ namespace Atlassian.Jira.Remote
             }
             else
             {
-                return GetIssuesFromJqlSearch(token, jqlSearch, maxResults);
+                return _client.getIssuesFromJqlSearch(token, jqlSearch, maxResults);
             }
-        }
-
-        public RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxNumResults)
-        {
-            return _client.getIssuesFromJqlSearch(token, jqlSearch, maxNumResults);
         }
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
