@@ -27,6 +27,7 @@ namespace Atlassian.Jira
         private readonly IJiraServiceClient _jiraService;
         private readonly IFileSystem _fileSystem;
         private readonly bool _isAnonymous = false;
+        private readonly RestClientWrapper _restClient;
 
         private string _token = String.Empty;
         private Func<JiraCredentials> _credentialsProvider;
@@ -69,6 +70,7 @@ namespace Atlassian.Jira
             this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
 
+            this._restClient = new RestClientWrapper(jiraService.Url);
             this._provider = new JiraQueryProvider(translator, this);
         }
 
@@ -118,6 +120,10 @@ namespace Atlassian.Jira
             _token = accessToken;
             _credentialsProvider = credentialsProvider;
             _isAnonymous = false;
+
+            JiraCredentials credentials = credentialsProvider == null ? new JiraCredentials(null) : credentialsProvider();
+
+            this._restClient = new RestClientWrapper(jiraService.Url, credentials.UserName, credentials.Password);
         }
 
         /// <summary>
@@ -147,13 +153,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets a client configured to interact with JIRA's REST API.
+        /// </summary>
+        public RestClientWrapper RestClient
+        {
+            get { return this._restClient; }
+        }
+
+        /// <summary>
         /// Whether to print the translated JQL to console
         /// </summary>
-        public bool Debug
-        {
-            get;
-            set;
-        }
+        public bool Debug { get; set; }
 
         /// <summary>
         /// Maximum number of issues per request

@@ -68,6 +68,7 @@
     <Compile Include="CustomFieldValueCollection.cs" />
     <Compile Include="IssueType.cs" />
     <Compile Include="JiraCredentials.cs" />
+    <Compile Include="JiraNamedResource.cs" />
     <Compile Include="JiraRestClientSettings.cs" />
     <Compile Include="LiteralDateTime.cs" />
     <Compile Include="LiteralMatch.cs" />
@@ -107,6 +108,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Remote\RemoteIssueJsonConverter.cs" />
+    <Compile Include="Remote\RestClientSettings.cs" />
+    <Compile Include="Remote\RestClientWrapper.cs" />
     <Compile Include="Remote\RestSharpJsonSerializer.cs" />
     <Compile Include="Remote\NestedValueJsonConverter.cs" />
     <Compile Include="Remote\RemoteFieldNameAttribute.cs" />

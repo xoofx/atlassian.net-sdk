@@ -6,11 +6,19 @@ using System.Text;
 
 namespace Atlassian.Jira
 {
-    public class JiraRestClientSettings
+    /// <summary>
+    /// Settings to configure the JIRA REST client.
+    /// </summary>
+    public class JiraRestClientSettings : RestClientSettings
     {
-        public bool EnableTrace { get; set; }
+        /// <summary>
+        /// Dictionary of serializers for custom fields.
+        /// </summary>
         public IDictionary<string, ICustomFieldValueSerializer> CustomFieldSerializers { get; set; }
 
+        /// <summary>
+        /// Create a new instance of the settings.
+        /// </summary>
         public JiraRestClientSettings()
         {
             this.CustomFieldSerializers = new Dictionary<string, ICustomFieldValueSerializer>();

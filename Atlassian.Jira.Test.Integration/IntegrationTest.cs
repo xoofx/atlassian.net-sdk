@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,6 +21,15 @@ namespace Atlassian.Jira.Test.Integration
             _jira = Jira.CreateRestClient("http://localhost:2990/jira", "admin", "admin");
 #endif
             _random = new Random();
+        }
+
+        [Fact]
+        public void ExecuteRestRequest()
+        {
+            var users = _jira.RestClient.ExecuteRequest<JiraNamedResource[]>(Method.GET, "rest/api/2/user/assignable/multiProjectSearch?projectKeys=TST");
+
+            Assert.Equal(2, users.Length);
+            Assert.True(users.Any(u => u.Name == "admin"));
         }
 
         [Fact]
