@@ -101,7 +101,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
             WaitForElement(webDriver, By.Id("login-form-username")).SendKeys("admin");
             WaitForElement(webDriver, By.Id("login-form-password")).SendKeys("admin");
             WaitForElement(webDriver, By.Id("login-form-submit")).Click();
-            WaitForElement(webDriver, By.Id("header-details-user-fullname"), TimeSpan.FromSeconds(30));
+            WaitForElement(webDriver, By.Id("header-details-user-fullname"), TimeSpan.FromSeconds(60));
         }
 
         private static IWebElement WaitForElement(IWebDriver webDriver, By locator)
