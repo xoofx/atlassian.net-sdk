@@ -70,8 +70,13 @@ namespace Atlassian.Jira
             this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
 
-            this._restClient = new RestClientWrapper(jiraService.Url);
             this._provider = new JiraQueryProvider(translator, this);
+
+            if (!String.IsNullOrEmpty(jiraService.Url))
+            {
+                this._restClient = new RestClientWrapper(jiraService.Url);
+            }
+
         }
 
         /// <summary>
@@ -85,6 +90,10 @@ namespace Atlassian.Jira
                   null,
                   () => new JiraCredentials(username, password))
         {
+            if (!String.IsNullOrEmpty(url))
+            {
+                this._restClient = new RestClientWrapper(url, username, password);
+            }
         }
 
         /// <summary>
@@ -120,10 +129,6 @@ namespace Atlassian.Jira
             _token = accessToken;
             _credentialsProvider = credentialsProvider;
             _isAnonymous = false;
-
-            JiraCredentials credentials = credentialsProvider == null ? new JiraCredentials(null) : credentialsProvider();
-
-            this._restClient = new RestClientWrapper(jiraService.Url, credentials.UserName, credentials.Password);
         }
 
         /// <summary>
