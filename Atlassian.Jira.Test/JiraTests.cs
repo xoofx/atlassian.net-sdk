@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using Xunit;
-using Moq;
-using System.ServiceModel;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira.Test
 {
@@ -26,7 +26,7 @@ namespace Atlassian.Jira.Test
             {
                 var jira = TestableJira.Create();
                 jira.SoapService.Setup(s => s.GetFavouriteFilters(It.IsAny<string>()))
-                                             .Returns(new RemoteFilter[1] { new RemoteFilter() { name="thefilter", id="123"}});
+                                             .Returns(new RemoteFilter[1] { new RemoteFilter() { name = "thefilter", id = "123" } });
                 jira.GetIssuesFromFilter("thefilter", 100, 200);
 
                 jira.SoapService.Verify(s => s.GetIssuesFromFilterWithLimit(It.IsAny<string>(), "123", 100, 200));
@@ -54,7 +54,7 @@ namespace Atlassian.Jira.Test
 
                 string innerToken = null;
                 jira.WithToken(t => innerToken = t);
-                Assert.Equal(String.Empty, innerToken);
+                Assert.Null(innerToken);
             }
 
             [Fact]
@@ -64,25 +64,25 @@ namespace Atlassian.Jira.Test
                 jira.SoapService.Setup(s => s.Login(It.IsAny<string>(), It.IsAny<string>())).Throws(new Exception("Unexpected call to login"));
 
                 string innerToken = null;
-                 Assert.Throws(typeof(InvalidOperationException), () =>
-                    jira.WithToken(t =>
-                    {
-                        innerToken = t;
-                        throw new InvalidOperationException();
-                    }));
+                Assert.Throws(typeof(InvalidOperationException), () =>
+                   jira.WithToken(t =>
+                   {
+                       innerToken = t;
+                       throw new InvalidOperationException();
+                   }));
                 jira.WithToken(t => innerToken = t);
-                Assert.Equal(String.Empty, innerToken);
+                Assert.Null(innerToken);
             }
         }
 
-        public class GetAccessToken 
+        public class GetAccessToken
         {
             [Fact]
             public void WillThrowExceptionIfNoCredentialsProviderExists()
             {
                 // Arrange
                 var soapService = new Mock<IJiraServiceClient>();
-                var jira = new Jira(null, soapService.Object, null, null, null); 
+                var jira = new Jira(null, soapService.Object, null, null, null);
 
                 // Act
                 Assert.Throws<InvalidOperationException>(() => jira.GetAccessToken());
@@ -93,7 +93,7 @@ namespace Atlassian.Jira.Test
             {
                 // Arrange
                 var soapService = new Mock<IJiraServiceClient>();
-                var jira = new Jira(null, soapService.Object, null, null, () => null); 
+                var jira = new Jira(null, soapService.Object, null, null, null);
 
                 // Act
                 Assert.Throws<InvalidOperationException>(() => jira.GetAccessToken());

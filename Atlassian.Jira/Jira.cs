@@ -26,11 +26,10 @@ namespace Atlassian.Jira
         private readonly JiraQueryProvider _provider;
         private readonly IJiraServiceClient _jiraService;
         private readonly IFileSystem _fileSystem;
-        private readonly bool _isAnonymous = false;
         private readonly RestClientWrapper _restClient;
+        private readonly JiraCredentials _credentials;
 
         private string _token = String.Empty;
-        private Func<JiraCredentials> _credentialsProvider;
         private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string, IEnumerable<ProjectVersion>>();
         private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
         private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
@@ -58,42 +57,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Create a proxy that connects with a JIRA server with anonymous access with depencies.
-        /// </summary>
-        public Jira(IJqlExpressionVisitor translator,
-                    IJiraServiceClient jiraService,
-                    IFileSystem fileSystem)
-        {
-            _isAnonymous = true;
-            _jiraService = jiraService;
-            _fileSystem = fileSystem;
-            this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
-            this.Debug = false;
-
-            this._provider = new JiraQueryProvider(translator, this);
-
-            if (!String.IsNullOrEmpty(jiraService.Url))
-            {
-                this._restClient = new RestClientWrapper(jiraService.Url);
-            }
-
-        }
-
-        /// <summary>
         /// Create a proxy that connects with a JIRA server with specified credentials.
         /// </summary>
         /// <param name="url">Url to the JIRA server</param>
         /// <param name="username">Username used to authenticate</param>
         /// <param name="password">Password used to authenticate</param>
         public Jira(string url, string username, string password)
-            : this(url,
-                  null,
-                  () => new JiraCredentials(username, password))
+            : this(new JqlExpressionVisitor(),
+                  new JiraSoapServiceClientWrapper(url),
+                  new FileSystem(),
+                  new JiraCredentials(username, password))
         {
-            if (!String.IsNullOrEmpty(url))
-            {
-                this._restClient = new RestClientWrapper(url, username, password);
-            }
         }
 
         /// <summary>
@@ -102,33 +76,45 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="token">JIRA access token to use.</param>
         /// <param name="credentialsProvider">Provider of credentials needed to re-generate token.</param>
+        [Obsolete]
         public Jira(string url, string token, Func<JiraCredentials> credentialsProvider = null)
             : this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
                   new FileSystem(),
-                  token,
-                  credentialsProvider)
+                  credentialsProvider == null ? new JiraCredentials(null) : credentialsProvider(),
+                  token)
         {
         }
 
         /// <summary>
         /// Create a proxy that connects with a JIRA server with specified access token and dependencies.
         /// </summary>
-        /// <param name="translator"></param>
-        /// <param name="jiraService"></param>
-        /// <param name="fileSystem"></param>
-        /// <param name="accessToken"></param>
-        /// <param name="credentialsProvider"></param>
         public Jira(IJqlExpressionVisitor translator,
                     IJiraServiceClient jiraService,
                     IFileSystem fileSystem,
-                    string accessToken,
-                    Func<JiraCredentials> credentialsProvider = null)
-            : this(translator, jiraService, fileSystem)
+                    JiraCredentials credentials = null,
+                    string accessToken = null)
         {
+            _provider = new JiraQueryProvider(translator, this);
+            _jiraService = jiraService;
+            _fileSystem = fileSystem;
             _token = accessToken;
-            _credentialsProvider = credentialsProvider;
-            _isAnonymous = false;
+            _credentials = credentials;
+
+            this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
+            this.Debug = false;
+
+            if (!String.IsNullOrEmpty(jiraService.Url))
+            {
+                if (this._credentials == null)
+                {
+                    this._restClient = new RestClientWrapper(jiraService.Url);
+                }
+                else
+                {
+                    this._restClient = new RestClientWrapper(jiraService.Url, _credentials.UserName, _credentials.Password);
+                }
+            }
         }
 
         /// <summary>
@@ -145,8 +131,15 @@ namespace Atlassian.Jira
                 new JqlExpressionVisitor(),
                 new JiraRestServiceClient(url, username, password, settings ?? new JiraRestClientSettings()),
                 new FileSystem(),
-                null,
-                () => new JiraCredentials(username, password));
+                new JiraCredentials(username, password));
+        }
+
+        private bool IsAnonymous
+        {
+            get
+            {
+                return this._credentials == null;
+            }
         }
 
         internal IJiraServiceClient RemoteService
@@ -185,18 +178,12 @@ namespace Atlassian.Jira
 
         internal JiraCredentials GetCredentials()
         {
-            if (_credentialsProvider == null)
+            if (this._credentials == null)
             {
-                throw new InvalidOperationException("Unable to get user and password, credentials provider is not set.");
+                throw new InvalidOperationException("Unable to get user and password, credentials has not been set.");
             }
 
-            var credentials = _credentialsProvider();
-            if (credentials == null)
-            {
-                throw new InvalidOperationException("Unable to get user and password, credentials provider returned null.");
-            }
-
-            return credentials;
+            return this._credentials;
         }
 
         internal IFileSystem FileSystem
@@ -547,7 +534,7 @@ namespace Atlassian.Jira
         /// </remarks>
         public TResult WithToken<TResult>(Func<string, IJiraServiceClient, TResult> function)
         {
-            if (!_isAnonymous && String.IsNullOrEmpty(_token))
+            if (!IsAnonymous && String.IsNullOrEmpty(_token))
             {
                 _token = GetAccessToken();
             }
@@ -558,7 +545,7 @@ namespace Atlassian.Jira
             }
             catch (FaultException fe)
             {
-                if (_isAnonymous
+                if (IsAnonymous
                     || fe.Message.IndexOf(REMOTE_AUTH_EXCEPTION_STRING, StringComparison.OrdinalIgnoreCase) < 0)
                 {
                     throw;

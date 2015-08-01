@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Moq;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira.Test
 {
@@ -12,8 +12,8 @@ namespace Atlassian.Jira.Test
         public Mock<IJiraServiceClient> SoapService;
         public Mock<IFileSystem> FileSystem;
 
-        private TestableJira(Mock<IJiraServiceClient> soapService, Mock<IFileSystem> fileSystem, string token, Func<JiraCredentials> credentialsProvider)
-            : base(null, soapService.Object, fileSystem.Object, token, credentialsProvider  )
+        private TestableJira(Mock<IJiraServiceClient> soapService, Mock<IFileSystem> fileSystem, JiraCredentials credentials, string token)
+            : base(null, soapService.Object, fileSystem.Object, credentials, token)
         {
             SoapService = soapService;
             FileSystem = fileSystem;
@@ -28,7 +28,7 @@ namespace Atlassian.Jira.Test
 
         public static TestableJira Create(string token = "token", JiraCredentials credentials = null)
         {
-            return new TestableJira(new Mock<IJiraServiceClient>(), new Mock<IFileSystem>(), token, () => credentials);
+            return new TestableJira(new Mock<IJiraServiceClient>(), new Mock<IFileSystem>(), credentials, token);
         }
 
         public static TestableJira CreateAnonymous()

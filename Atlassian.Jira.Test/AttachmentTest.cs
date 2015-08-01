@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using Atlassian.Jira.Remote;
-using Moq;
 
 namespace Atlassian.Jira.Test
 {
@@ -17,7 +17,7 @@ namespace Atlassian.Jira.Test
             var mockWebClient = new Mock<IWebClient>();
             var mockSoapClient = new Mock<IJiraServiceClient>();
 
-            var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("user", null));
+            var jira = new Jira(null, mockSoapClient.Object, null, new JiraCredentials("user"), "token");
 
             var attachment = (new RemoteAttachment()
             {
@@ -37,7 +37,7 @@ namespace Atlassian.Jira.Test
             var mockSoapClient = new Mock<IJiraServiceClient>();
             mockSoapClient.Setup(j => j.Url).Returns("http://foo:2990/jira/");
 
-            var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("user", "pass"));
+            var jira = new Jira(null, mockSoapClient.Object, null, new JiraCredentials("user", "pass"), "token");
 
             var attachment = (new RemoteAttachment()
             {
@@ -62,7 +62,7 @@ namespace Atlassian.Jira.Test
             var mockSoapClient = new Mock<IJiraServiceClient>();
             mockSoapClient.Setup(j => j.Url).Returns("http://foo:2990/jira/");
 
-            var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("my<user#with&chars", "my<pass#with&chars"));
+            var jira = new Jira(null, mockSoapClient.Object, null, new JiraCredentials("my<user#with&chars", "my<pass#with&chars"), "token");
 
             var attachment = (new RemoteAttachment()
             {
@@ -87,7 +87,7 @@ namespace Atlassian.Jira.Test
             var mockSoapClient = new Mock<IJiraServiceClient>();
             mockSoapClient.Setup(j => j.Url).Returns("http://foo:2990/jira");
 
-            var jira = new Jira(null, mockSoapClient.Object, null, "token", () => new JiraCredentials("user", "pass"));
+            var jira = new Jira(null, mockSoapClient.Object, null, new JiraCredentials("user", "pass"), "token");
 
             var attachment = (new RemoteAttachment()
             {
