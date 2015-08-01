@@ -66,6 +66,7 @@
     <Compile Include="IssuePriority.cs" />
     <Compile Include="CustomFieldValue.cs" />
     <Compile Include="CustomFieldValueCollection.cs" />
+    <Compile Include="IssueTimeTrackingData.cs" />
     <Compile Include="IssueType.cs" />
     <Compile Include="JiraCredentials.cs" />
     <Compile Include="JiraNamedResource.cs" />

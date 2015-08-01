@@ -1,5 +1,8 @@
 ﻿using Atlassian.Jira.Linq;
 using Atlassian.Jira.Remote;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using RestSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -720,6 +723,21 @@ namespace Atlassian.Jira
             {
                 return _jira.RemoteService.GetAvailableActions(token, _originalIssue.key).Select(a => new JiraNamedEntity(a));
             });
+        }
+
+        /// <summary>
+        /// Gets time tracking information for this issue.
+        /// </summary>
+        public IssueTimeTrackingData GetTimeTrackingData()
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve time tracking data, issue has not been saved to server.");
+            }
+
+            var resource = String.Format("rest/api/2/issue/{0}?fields=timetracking", _originalIssue.key);
+            var timeTrackingJson = _jira.RestClient.ExecuteRequest(Method.GET, resource)["fields"]["timetracking"];
+            return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), _jira.RestClient.SerializerSettings);
         }
 
         /// <summary>

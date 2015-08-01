@@ -18,9 +18,26 @@ namespace Atlassian.Jira.Test.Integration
 #if SOAP
             _jira = new Jira("http://localhost:2990/jira", "admin", "admin");
 #else
-            _jira = Jira.CreateRestClient("http://localhost:2990/jira", "admin", "admin");
+            _jira = Jira.CreateRestClient("http://feanor:2990/jira", "admin", "admin");
 #endif
             _random = new Random();
+        }
+
+        [Fact]
+        public void GetTimeTrackingDataForIssue()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue with timetracking " + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            var timetracking = issue.GetTimeTrackingData();
+            Assert.Null(timetracking.TimeSpent);
+
+            issue.AddWorklog("2d");
+
+            timetracking = issue.GetTimeTrackingData();
+            Assert.Equal("2d", timetracking.TimeSpent);
         }
 
         [Fact]
