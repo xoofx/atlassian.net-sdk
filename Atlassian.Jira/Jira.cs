@@ -87,6 +87,21 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Create a proxy that connects with a JIRA server with specified access token.
+        /// </summary>
+        /// <param name="url">Url to the JIRA server.</param>
+        /// <param name="token">JIRA access token to use.</param>
+        /// <param name="credentials">Credentials used to re-generate token.</param>
+        public Jira(string url, string token, JiraCredentials credentials)
+            : this(new JqlExpressionVisitor(),
+                  new JiraSoapServiceClientWrapper(url),
+                  new FileSystem(),
+                  credentials,
+                  token)
+        {
+        }
+
+        /// <summary>
         /// Create a proxy that connects with a JIRA server with specified access token and dependencies.
         /// </summary>
         public Jira(IJqlExpressionVisitor translator,
