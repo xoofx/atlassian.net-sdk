@@ -26,7 +26,7 @@ namespace Atlassian.Jira
         private readonly JiraQueryProvider _provider;
         private readonly IJiraServiceClient _jiraService;
         private readonly IFileSystem _fileSystem;
-        private readonly RestClientWrapper _restClient;
+        private readonly IJiraRestClient _restClient;
         private readonly JiraCredentials _credentials;
 
         private string _token = String.Empty;
@@ -115,19 +115,20 @@ namespace Atlassian.Jira
             _fileSystem = fileSystem;
             _token = accessToken;
             _credentials = credentials;
+            _restClient = jiraService as IJiraRestClient;
 
             this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
 
-            if (!String.IsNullOrEmpty(jiraService.Url))
+            if (_restClient == null && !String.IsNullOrEmpty(jiraService.Url))
             {
                 if (this._credentials == null)
                 {
-                    this._restClient = new RestClientWrapper(jiraService.Url);
+                    this._restClient = new JiraRestServiceClient(jiraService.Url);
                 }
                 else
                 {
-                    this._restClient = new RestClientWrapper(jiraService.Url, _credentials.UserName, _credentials.Password);
+                    this._restClient = new JiraRestServiceClient(jiraService.Url, _credentials.UserName, _credentials.Password);
                 }
             }
         }
@@ -138,13 +139,17 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="username">Username used to authenticate.</param>
         /// <param name="password">Password used to authenticate.</param>
-        /// <param name="enableTrace">Whether to enable console trace for REST requests.</param>
+        /// <param name="settings">Settings to configure the rest client.</param>
         /// <returns>Jira object configured to use REST API.</returns>
         public static Jira CreateRestClient(string url, string username, string password, JiraRestClientSettings settings = null)
         {
+            settings = settings ?? new JiraRestClientSettings();
+            var restClient = new JiraRestServiceClient(url, username, password, settings);
+            restClient.InitializeCustomFieldSerializers(settings.CustomFieldSerializers);
+
             return new Jira(
                 new JqlExpressionVisitor(),
-                new JiraRestServiceClient(url, username, password, settings ?? new JiraRestClientSettings()),
+                restClient,
                 new FileSystem(),
                 new JiraCredentials(username, password));
         }
@@ -168,7 +173,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets a client configured to interact with JIRA's REST API.
         /// </summary>
-        public RestClientWrapper RestClient
+        public IJiraRestClient RestClient
         {
             get { return this._restClient; }
         }

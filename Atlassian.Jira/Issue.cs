@@ -735,9 +735,7 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to retrieve time tracking data, issue has not been saved to server.");
             }
 
-            var resource = String.Format("rest/api/2/issue/{0}?fields=timetracking", _originalIssue.key);
-            var timeTrackingJson = _jira.RestClient.ExecuteRequest(Method.GET, resource)["fields"]["timetracking"];
-            return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), _jira.RestClient.SerializerSettings);
+            return _jira.RestClient.GetTimeTrackingData(_originalIssue.key);
         }
 
         /// <summary>

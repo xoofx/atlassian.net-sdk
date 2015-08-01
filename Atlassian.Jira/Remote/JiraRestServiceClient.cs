@@ -13,27 +13,117 @@ namespace Atlassian.Jira.Remote
     /// <summary>
     /// Implements the service client contract using REST calls.
     /// </summary>
-    internal class JiraRestServiceClient : IJiraServiceClient
+    internal class JiraRestServiceClient : IJiraServiceClient, IJiraRestClient
     {
-        private readonly RestClientWrapper _restClient;
-        private readonly RemoteField[] _customFields;
-        private readonly Dictionary<string, ICustomFieldValueSerializer> _customFieldSerializers;
+        private readonly RestClient _restClient;
+        private readonly JsonSerializerSettings _serializerSettings;
+        private readonly RestClientSettings _clientSettings;
+        
+        private RemoteField[] _customFields;
 
-        public JiraRestServiceClient(string jiraBaseUrl, string username, string password, JiraRestClientSettings settings)
+        public JiraRestServiceClient(string jiraBaseUrl, string username = null, string password = null, RestClientSettings settings = null)
         {
-            this._restClient = new RestClientWrapper(jiraBaseUrl, username, password, settings);
-            this._customFieldSerializers = new Dictionary<string, ICustomFieldValueSerializer>(settings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
+            var url = jiraBaseUrl.EndsWith("/") ? jiraBaseUrl : jiraBaseUrl += "/";
 
-            // retrieve the custom fields once.
-            this._customFields = this.GetCustomFieldsInternal(null).Where(f => f.IsCustomField).ToArray();
-            this._restClient.SerializerSettings.Converters.Add(new RemoteIssueJsonConverter(this._customFields, this._customFieldSerializers));
+            this._clientSettings = settings ?? new RestClientSettings();
+            this._serializerSettings = new JsonSerializerSettings();
+            this._serializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            this._restClient = new RestClient(url);
+
+            if (!String.IsNullOrEmpty(username) && !String.IsNullOrEmpty(password))
+            {
+                this._restClient.Authenticator = new HttpBasicAuthenticator(username, password);
+            }
         }
 
+        public void InitializeCustomFieldSerializers(IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers) 
+        {
+            var serializers = new Dictionary<string, ICustomFieldValueSerializer>(customFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
+            var customFields = this.GetCustomFields(null);
+            this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(customFields, customFieldSerializers));
+        }
+
+        #region IJiraRestClient        
+        public JToken ExecuteRequest(Method method, string resource, object requestBody = null)
+        {
+            var request = new RestRequest();
+            request.Method = method;
+            request.Resource = resource;
+
+            if (requestBody != null)
+            {
+                request.RequestFormat = DataFormat.Json;
+                request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(this._serializerSettings));
+                request.AddJsonBody(requestBody);
+            }
+
+            LogRequest(request, requestBody);
+            var response = this._restClient.Execute(request);
+            EnsureValidResponse(response);
+
+            return response.StatusCode != HttpStatusCode.NoContent ? JToken.Parse(response.Content) : new JObject();
+        }
+        
+        public T ExecuteRequest<T>(Method method, string resource, object requestBody = null)
+        {
+            var response = ExecuteRequest(method, resource, requestBody);
+            return JsonConvert.DeserializeObject<T>(response.ToString(), _serializerSettings);
+        }
+        
+        public IRestResponse ExecuteRequest(IRestRequest request)
+        {
+            var response = this._restClient.Execute(request);
+            EnsureValidResponse(response);
+            return response;
+        }
+
+        /// <summary>
+        /// Gets time tracking information for this issue.
+        /// </summary>
+        public IssueTimeTrackingData GetTimeTrackingData(string issueKey)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}?fields=timetracking", issueKey);
+            var timeTrackingJson = ExecuteRequest(Method.GET, resource)["fields"]["timetracking"];
+            return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), _serializerSettings);
+        }
+
+        private void LogRequest(RestRequest request, object body = null)
+        {
+            if (this._clientSettings.EnableRequestTrace)
+            {
+                Trace.WriteLine(String.Format("[{0}] Request Url: {1}",
+                    request.Method,
+                    request.Resource));
+
+                if (body != null)
+                {
+                    Trace.WriteLine(String.Format("[{0}] Request Data: {1}",
+                        request.Method,
+                        JsonConvert.SerializeObject(body, new JsonSerializerSettings()
+                        {
+                            Formatting = Formatting.Indented,
+                            NullValueHandling = NullValueHandling.Ignore
+                        })));
+                }
+            }
+        }
+
+        private void EnsureValidResponse(IRestResponse response)
+        {
+            if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError
+                || response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                throw new InvalidOperationException(response.Content);
+            }
+        }
+        #endregion
+
+        #region IJiraServiceClient - Supported
         public string Url
         {
             get
             {
-                return this._restClient.BaseUrl;
+                return _restClient.BaseUrl.ToString();
             }
         }
 
@@ -45,7 +135,7 @@ namespace Atlassian.Jira.Remote
 
         public RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxResults, int startAt)
         {
-            var responseObj = this._restClient.ExecuteRequest(Method.POST, "rest/api/2/search", new
+            var responseObj = this.ExecuteRequest(Method.POST, "rest/api/2/search", new
             {
                 jql = jqlSearch,
                 startAt = startAt,
@@ -53,7 +143,7 @@ namespace Atlassian.Jira.Remote
             });
 
             var issues = (JArray)responseObj["issues"];
-            return issues.Cast<JObject>().Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this._restClient.SerializerSettings).RemoteIssue).ToArray();
+            return issues.Cast<JObject>().Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this._serializerSettings).RemoteIssue).ToArray();
         }
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
@@ -63,36 +153,36 @@ namespace Atlassian.Jira.Remote
 
         public RemoteIssue CreateIssueWithParent(string token, RemoteIssue newIssue, string parentIssueKey)
         {
-            var responseObj = this._restClient.ExecuteRequest(Method.POST, "rest/api/2/issue", new RemoteIssueWrapper(newIssue, parentIssueKey));
+            var responseObj = this.ExecuteRequest(Method.POST, "rest/api/2/issue", new RemoteIssueWrapper(newIssue, parentIssueKey));
             return this.GetIssue(token, (string)responseObj["key"]);
         }
 
         public RemoteVersion[] GetVersions(string token, string projectKey)
         {
             var resource = String.Format("rest/api/2/project/{0}/versions", projectKey);
-            return this._restClient.ExecuteRequest<RemoteVersion[]>(Method.GET, resource);
+            return this.ExecuteRequest<RemoteVersion[]>(Method.GET, resource);
         }
 
         public RemoteComponent[] GetComponents(string token, string projectKey)
         {
             var resource = String.Format("rest/api/2/project/{0}/components", projectKey);
-            return this._restClient.ExecuteRequest<RemoteComponent[]>(Method.GET, resource);
+            return this.ExecuteRequest<RemoteComponent[]>(Method.GET, resource);
         }
 
         public RemotePriority[] GetPriorities(string token)
         {
-            return this._restClient.ExecuteRequest<RemotePriority[]>(Method.GET, "rest/api/2/priority");
+            return this.ExecuteRequest<RemotePriority[]>(Method.GET, "rest/api/2/priority");
         }
 
         public RemoteField[] GetCustomFields(string token)
         {
-            return this._customFields;
-        }
+            if (this._customFields == null)
+            {
+                this._customFields = this.ExecuteRequest<RemoteField[]>(Method.GET, "rest/api/2/field")
+                    .Where(f => f.IsCustomField).ToArray();
+            }
 
-        public RemoteField[] GetCustomFieldsInternal(string token)
-        {
-            return this._restClient.ExecuteRequest<RemoteField[]>(Method.GET, "rest/api/2/field")
-                .Where(f => f.IsCustomField).ToArray();
+            return this._customFields;
         }
 
         public RemoteField[] GetFieldsForEdit(string token, string key)
@@ -104,7 +194,7 @@ namespace Atlassian.Jira.Remote
         public RemoteIssue GetIssue(string token, string issueId)
         {
             var resource = String.Format("rest/api/2/issue/{0}", issueId);
-            return this._restClient.ExecuteRequest<RemoteIssueWrapper>(Method.GET, resource).RemoteIssue;
+            return this.ExecuteRequest<RemoteIssueWrapper>(Method.GET, resource).RemoteIssue;
         }
 
         public RemoteIssue GetIssueById(string token, string issueId)
@@ -114,18 +204,18 @@ namespace Atlassian.Jira.Remote
 
         public RemoteProject[] GetProjects(string token)
         {
-            return this._restClient.ExecuteRequest<RemoteProject[]>(Method.GET, "rest/api/2/project");
+            return this.ExecuteRequest<RemoteProject[]>(Method.GET, "rest/api/2/project");
         }
 
         public RemoteIssueType[] GetIssueTypes(string token, string projectId)
         {
-            return this._restClient.ExecuteRequest<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype");
+            return this.ExecuteRequest<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype");
         }
 
         public DateTime GetResolutionDateByKey(string token, string issueKey)
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=resolutiondate", issueKey);
-            var issueJson = this._restClient.ExecuteRequest(Method.GET, resource);
+            var issueJson = this.ExecuteRequest(Method.GET, resource);
             var fields = issueJson["fields"];
             var resolutionDate = fields["resolutiondate"];
 
@@ -134,49 +224,49 @@ namespace Atlassian.Jira.Remote
 
         public RemoteFilter[] GetFavouriteFilters(string token)
         {
-            return this._restClient.ExecuteRequest<RemoteFilter[]>(Method.GET, "rest/api/2/filter/favourite");
+            return this.ExecuteRequest<RemoteFilter[]>(Method.GET, "rest/api/2/filter/favourite");
         }
 
         public RemoteIssue[] GetIssuesFromFilterWithLimit(string token, string filterId, int offset, int maxResults)
         {
             var resource = String.Format("rest/api/2/filter/{0}", filterId);
-            var jql = this._restClient.ExecuteRequest(Method.GET, resource)["jql"].ToString();
+            var jql = this.ExecuteRequest(Method.GET, resource)["jql"].ToString();
 
             return this.GetIssuesFromJqlSearch(token, jql, maxResults, offset);
         }
 
         public RemoteStatus[] GetStatuses(string token)
         {
-            return this._restClient.ExecuteRequest<RemoteStatus[]>(Method.GET, "rest/api/2/status");
+            return this.ExecuteRequest<RemoteStatus[]>(Method.GET, "rest/api/2/status");
         }
 
         public RemoteResolution[] GetResolutions(string token)
         {
-            return this._restClient.ExecuteRequest<RemoteResolution[]>(Method.GET, "rest/api/2/resolution");
+            return this.ExecuteRequest<RemoteResolution[]>(Method.GET, "rest/api/2/resolution");
         }
 
         public RemoteComment[] GetCommentsFromIssue(string token, string key)
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=comment", key);
-            var issueJson = this._restClient.ExecuteRequest(Method.GET, resource);
+            var issueJson = this.ExecuteRequest(Method.GET, resource);
             var comments = issueJson["fields"]["comment"]["comments"];
 
-            return JsonConvert.DeserializeObject<RemoteComment[]>(comments.ToString(), this._restClient.SerializerSettings);
+            return JsonConvert.DeserializeObject<RemoteComment[]>(comments.ToString(), this._serializerSettings);
         }
 
         public void AddComment(string token, string key, RemoteComment comment)
         {
             var resource = String.Format("rest/api/2/issue/{0}/comment", key);
-            var responseObj = this._restClient.ExecuteRequest(Method.POST, resource, comment);
+            var responseObj = this.ExecuteRequest(Method.POST, resource, comment);
         }
 
         public RemoteAttachment[] GetAttachmentsFromIssue(string token, string key)
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=attachment", key);
-            var issueJson = this._restClient.ExecuteRequest(Method.GET, resource);
+            var issueJson = this.ExecuteRequest(Method.GET, resource);
             var attachments = issueJson["fields"]["attachment"];
 
-            return JsonConvert.DeserializeObject<RemoteAttachment[]>(attachments.ToString(), this._restClient.SerializerSettings);
+            return JsonConvert.DeserializeObject<RemoteAttachment[]>(attachments.ToString(), this._serializerSettings);
         }
 
         public bool AddBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData)
@@ -193,7 +283,7 @@ namespace Atlassian.Jira.Remote
                 request.AddFile("file", Convert.FromBase64String(base64EncodedAttachmentData[i]), fileNames[i]);
             }
 
-            this._restClient.ExecuteRequest(request);
+            this.ExecuteRequest(request);
 
             return true;
         }
@@ -201,14 +291,14 @@ namespace Atlassian.Jira.Remote
         public RemoteNamedObject[] GetAvailableActions(string token, string issueKey)
         {
             var resource = String.Format("rest/api/2/issue/{0}/transitions", issueKey);
-            var transitions = this._restClient.ExecuteRequest(Method.GET, resource)["transitions"];
-            return JsonConvert.DeserializeObject<RemoteNamedObject[]>(transitions.ToString(), this._restClient.SerializerSettings);
+            var transitions = this.ExecuteRequest(Method.GET, resource)["transitions"];
+            return JsonConvert.DeserializeObject<RemoteNamedObject[]>(transitions.ToString(), this._serializerSettings);
         }
 
         public void AddLabels(string token, RemoteIssue remoteIssue, string[] labels)
         {
             var resource = String.Format("rest/api/2/issue/{0}", remoteIssue.key);
-            this._restClient.ExecuteRequest(Method.PUT, resource, new
+            this.ExecuteRequest(Method.PUT, resource, new
             {
                 fields = new
                 {
@@ -221,7 +311,7 @@ namespace Atlassian.Jira.Remote
         private JObject BuildFieldsObjectFromIssue(RemoteIssue remoteIssue, RemoteFieldValue[] remoteFields)
         {
             var issueWrapper = new RemoteIssueWrapper(remoteIssue);
-            var issueJson = JsonConvert.SerializeObject(issueWrapper, this._restClient.SerializerSettings);
+            var issueJson = JsonConvert.SerializeObject(issueWrapper, this._serializerSettings);
             var issueFields = JObject.Parse(issueJson)["fields"] as JObject;
             var updateFields = new JObject();
 
@@ -238,7 +328,7 @@ namespace Atlassian.Jira.Remote
             var resource = String.Format("rest/api/2/issue/{0}", remoteIssue.key);
             var fields = BuildFieldsObjectFromIssue(remoteIssue, remoteFields);
 
-            this._restClient.ExecuteRequest(Method.PUT, resource, new { fields = fields });
+            this.ExecuteRequest(Method.PUT, resource, new { fields = fields });
 
             return this.GetIssue(token, remoteIssue.key);
         }
@@ -247,7 +337,7 @@ namespace Atlassian.Jira.Remote
         {
             var resource = String.Format("rest/api/2/issue/{0}/transitions", remoteIssue.key);
             var fields = BuildFieldsObjectFromIssue(remoteIssue, remoteFields);
-            this._restClient.ExecuteRequest(Method.POST, resource, new
+            this.ExecuteRequest(Method.POST, resource, new
             {
                 transition = new
                 {
@@ -262,27 +352,27 @@ namespace Atlassian.Jira.Remote
         public void DeleteIssue(string token, string issueKey)
         {
             var resource = String.Format("rest/api/2/issue/{0}", issueKey);
-            var versions = this._restClient.ExecuteRequest(Method.DELETE, resource);
+            var versions = this.ExecuteRequest(Method.DELETE, resource);
         }
 
         public RemoteIssueType[] GetSubTaskIssueTypes(string token)
         {
-            return this._restClient.ExecuteRequest<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype")
+            return this.ExecuteRequest<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype")
                 .Where(i => i.subTask).ToArray();
         }
 
         public RemoteWorklog[] GetWorkLogs(string token, string key)
         {
             var resource = String.Format("rest/api/2/issue/{0}/worklog", key);
-            var worklogs = this._restClient.ExecuteRequest(Method.GET, resource)["worklogs"];
+            var worklogs = this.ExecuteRequest(Method.GET, resource)["worklogs"];
 
-            return JsonConvert.DeserializeObject<RemoteWorklog[]>(worklogs.ToString(), this._restClient.SerializerSettings);
+            return JsonConvert.DeserializeObject<RemoteWorklog[]>(worklogs.ToString(), this._serializerSettings);
         }
 
         public RemoteWorklog AddWorklog(string token, string key, RemoteWorklog worklog, string queryString = null)
         {
             var resource = String.Format("rest/api/2/issue/{0}/worklog?{1}", key, queryString);
-            var response = this._restClient.ExecuteRequest(Method.POST, resource, worklog);
+            var response = this.ExecuteRequest(Method.POST, resource, worklog);
             return this.GetWorkLogs(token, key).First(w => w.id == (string)response["id"]);
         }
 
@@ -304,7 +394,7 @@ namespace Atlassian.Jira.Remote
         private void DeleteWorklog(string token, string issueKey, string worklogId, string queryString = null)
         {
             var resource = String.Format("rest/api/2/issue/{0}/worklog/{1}?{2}", issueKey, worklogId, queryString);
-            this._restClient.ExecuteRequest(Method.DELETE, resource);
+            this.ExecuteRequest(Method.DELETE, resource);
         }
 
         public void DeleteWorklogAndAutoAdjustRemainingEstimate(string token, string issueKey, string worklogId)
@@ -321,7 +411,9 @@ namespace Atlassian.Jira.Remote
         {
             DeleteWorklog(token, issueKey, worklogId, "adjustEstimate=new&newEstimate=" + newRemainingEstimate);
         }
+        #endregion
 
+        #region IJiraServiceClient - Unsupported
         public void AddActorsToProjectRole(string in0, string[] in1, RemoteProjectRole in2, RemoteProject in3, string in4)
         {
             throw new NotImplementedException();
@@ -696,5 +788,6 @@ namespace Atlassian.Jira.Remote
         {
             throw new NotImplementedException();
         }
+        #endregion
     }
 }

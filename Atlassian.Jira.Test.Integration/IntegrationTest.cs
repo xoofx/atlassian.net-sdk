@@ -18,7 +18,7 @@ namespace Atlassian.Jira.Test.Integration
 #if SOAP
             _jira = new Jira("http://localhost:2990/jira", "admin", "admin");
 #else
-            _jira = Jira.CreateRestClient("http://feanor:2990/jira", "admin", "admin");
+            _jira = Jira.CreateRestClient("http://localhost:2990/jira", "admin", "admin");
 #endif
             _random = new Random();
         }

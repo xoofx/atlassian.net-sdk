@@ -61,6 +61,7 @@
     <Compile Include="ComparableString.cs" />
     <Compile Include="CustomField.cs" />
     <Compile Include="ICustomFieldValueSerializer.cs" />
+    <Compile Include="IJiraRestClient.cs" />
     <Compile Include="IssueStatus.cs" />
     <Compile Include="IssueResolution.cs" />
     <Compile Include="IssuePriority.cs" />
@@ -110,7 +111,6 @@
     </Compile>
     <Compile Include="Remote\RemoteIssueJsonConverter.cs" />
     <Compile Include="Remote\RestClientSettings.cs" />
-    <Compile Include="Remote\RestClientWrapper.cs" />
     <Compile Include="Remote\RestSharpJsonSerializer.cs" />
     <Compile Include="Remote\NestedValueJsonConverter.cs" />
     <Compile Include="Remote\RemoteFieldNameAttribute.cs" />
