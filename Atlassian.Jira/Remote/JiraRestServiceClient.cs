@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira.Remote
 {
@@ -18,7 +19,7 @@ namespace Atlassian.Jira.Remote
         private readonly RestClient _restClient;
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly RestClientSettings _clientSettings;
-        
+
         private RemoteField[] _customFields;
 
         public JiraRestServiceClient(string jiraBaseUrl, string username = null, string password = null, RestClientSettings settings = null)
@@ -36,15 +37,15 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        public void InitializeCustomFieldSerializers(IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers) 
+        public void InitializeCustomFieldSerializers(IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers)
         {
             var serializers = new Dictionary<string, ICustomFieldValueSerializer>(customFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
             var customFields = this.GetCustomFields(null);
             this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(customFields, customFieldSerializers));
         }
 
-        #region IJiraRestClient        
-        public JToken ExecuteRequest(Method method, string resource, object requestBody = null)
+        #region IJiraRestClient
+        public Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null)
         {
             var request = new RestRequest();
             request.Method = method;
@@ -58,18 +59,35 @@ namespace Atlassian.Jira.Remote
             }
 
             LogRequest(request, requestBody);
-            var response = this._restClient.Execute(request);
-            EnsureValidResponse(response);
+            return this._restClient.ExecuteTaskAsync(request).ContinueWith<JToken>(responseTask =>
+            {
+                var response = responseTask.Result;
 
-            return response.StatusCode != HttpStatusCode.NoContent ? JToken.Parse(response.Content) : new JObject();
+                EnsureValidResponse(response);
+
+                return response.StatusCode != HttpStatusCode.NoContent ? JToken.Parse(response.Content) : new JObject();
+
+            }, TaskContinuationOptions.OnlyOnRanToCompletion);
         }
-        
+
+        public Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null)
+        {
+            return ExecuteRequestAsync(method, resource, requestBody).ContinueWith<T>(responseTask =>
+            {
+                return JsonConvert.DeserializeObject<T>(responseTask.Result.ToString(), _serializerSettings);
+            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+        }
+
+        public JToken ExecuteRequest(Method method, string resource, object requestBody = null)
+        {
+            return ExecuteRequestAsync(method, resource, requestBody).Result;
+        }
+
         public T ExecuteRequest<T>(Method method, string resource, object requestBody = null)
         {
-            var response = ExecuteRequest(method, resource, requestBody);
-            return JsonConvert.DeserializeObject<T>(response.ToString(), _serializerSettings);
+            return ExecuteRequestAsync<T>(method, resource, requestBody).Result;
         }
-        
+
         public IRestResponse ExecuteRequest(IRestRequest request)
         {
             var response = this._restClient.Execute(request);

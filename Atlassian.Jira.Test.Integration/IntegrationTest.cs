@@ -12,13 +12,14 @@ namespace Atlassian.Jira.Test.Integration
     {
         private readonly Jira _jira;
         private readonly Random _random;
+        private readonly string _host = "http://localhost:2990/jira";
 
         public IntegrationTest()
         {
 #if SOAP
-            _jira = new Jira("http://localhost:2990/jira", "admin", "admin");
+            _jira = new Jira(_host, "admin", "admin");
 #else
-            _jira = Jira.CreateRestClient("http://localhost:2990/jira", "admin", "admin");
+            _jira = Jira.CreateRestClient(_host, "admin", "admin");
 #endif
             _random = new Random();
         }
@@ -616,7 +617,7 @@ namespace Atlassian.Jira.Test.Integration
 #if SOAP
             Assert.Throws<System.ServiceModel.FaultException>(() => _jira.GetIssue(issue.Key.Value));
 #else
-            Assert.Throws<InvalidOperationException>(() => _jira.GetIssue(issue.Key.Value));
+            Assert.Throws<AggregateException>(() => _jira.GetIssue(issue.Key.Value));
 #endif
         }
 
