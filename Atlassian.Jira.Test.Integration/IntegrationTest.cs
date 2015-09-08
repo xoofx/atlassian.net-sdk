@@ -51,6 +51,24 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void ExecuteRawRestRequest()
+        {
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test Summary " + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+
+            issue.SaveChanges();
+
+            var rawBody = String.Format("{{ \"jql\": \"Key=\\\"{0}\\\"\" }}", issue.Key.Value);
+            var json = _jira.RestClient.ExecuteRequest(Method.POST, "rest/api/2/search", rawBody);
+
+            Assert.Equal(issue.Key.Value, json["issues"][0]["key"].ToString());
+        }
+
+        [Fact]
         void Transition_ResolveIssue()
         {
             var issue = _jira.CreateIssue("TST");

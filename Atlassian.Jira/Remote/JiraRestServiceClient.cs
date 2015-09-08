@@ -50,10 +50,19 @@ namespace Atlassian.Jira.Remote
             var request = new RestRequest();
             request.Method = method;
             request.Resource = resource;
+            request.RequestFormat = DataFormat.Json;
 
-            if (requestBody != null)
+            if (requestBody is string)
             {
-                request.RequestFormat = DataFormat.Json;
+                request.AddParameter(new Parameter
+                {
+                    Name = "application/json",
+                    Type = ParameterType.RequestBody,
+                    Value = requestBody
+                });
+            }
+            else if (requestBody != null)
+            {
                 request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(this._serializerSettings));
                 request.AddJsonBody(requestBody);
             }
