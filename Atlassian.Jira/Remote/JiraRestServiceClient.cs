@@ -67,7 +67,7 @@ namespace Atlassian.Jira.Remote
 
                 return response.StatusCode != HttpStatusCode.NoContent ? JToken.Parse(response.Content) : new JObject();
 
-            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+            });
         }
 
         public Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null)
@@ -75,17 +75,31 @@ namespace Atlassian.Jira.Remote
             return ExecuteRequestAsync(method, resource, requestBody).ContinueWith<T>(responseTask =>
             {
                 return JsonConvert.DeserializeObject<T>(responseTask.Result.ToString(), _serializerSettings);
-            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+            });
         }
 
         public JToken ExecuteRequest(Method method, string resource, object requestBody = null)
         {
-            return ExecuteRequestAsync(method, resource, requestBody).Result;
+            try
+            {
+                return ExecuteRequestAsync(method, resource, requestBody).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
         }
 
         public T ExecuteRequest<T>(Method method, string resource, object requestBody = null)
         {
-            return ExecuteRequestAsync<T>(method, resource, requestBody).Result;
+            try
+            {
+                return ExecuteRequestAsync<T>(method, resource, requestBody).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
         }
 
         public IRestResponse ExecuteRequest(IRestRequest request)
@@ -128,7 +142,11 @@ namespace Atlassian.Jira.Remote
 
         private void EnsureValidResponse(IRestResponse response)
         {
-            if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError
+            if (!string.IsNullOrEmpty(response.ErrorMessage))
+            {
+                throw new InvalidOperationException(response.ErrorMessage);
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError
                 || response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
                 throw new InvalidOperationException(response.Content);

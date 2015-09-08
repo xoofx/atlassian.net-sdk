@@ -617,7 +617,7 @@ namespace Atlassian.Jira.Test.Integration
 #if SOAP
             Assert.Throws<System.ServiceModel.FaultException>(() => _jira.GetIssue(issue.Key.Value));
 #else
-            Assert.Throws<AggregateException>(() => _jira.GetIssue(issue.Key.Value));
+            Assert.Throws<InvalidOperationException>(() => _jira.GetIssue(issue.Key.Value));
 #endif
         }
 
