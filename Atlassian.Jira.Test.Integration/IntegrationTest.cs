@@ -12,13 +12,14 @@ namespace Atlassian.Jira.Test.Integration
     {
         private readonly Jira _jira;
         private readonly Random _random;
+        private readonly string _host = "http://localhost:2990/jira";
 
         public IntegrationTest()
         {
 #if SOAP
-            _jira = new Jira("http://localhost:2990/jira", "admin", "admin");
+            _jira = new Jira(_host, "admin", "admin");
 #else
-            _jira = Jira.CreateRestClient("http://localhost:2990/jira", "admin", "admin");
+            _jira = Jira.CreateRestClient(_host, "admin", "admin");
 #endif
             _random = new Random();
         }
@@ -47,6 +48,24 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Equal(2, users.Length);
             Assert.True(users.Any(u => u.Name == "admin"));
+        }
+
+        [Fact]
+        public void ExecuteRawRestRequest()
+        {
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test Summary " + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+
+            issue.SaveChanges();
+
+            var rawBody = String.Format("{{ \"jql\": \"Key=\\\"{0}\\\"\" }}", issue.Key.Value);
+            var json = _jira.RestClient.ExecuteRequest(Method.POST, "rest/api/2/search", rawBody);
+
+            Assert.Equal(issue.Key.Value, json["issues"][0]["key"].ToString());
         }
 
         [Fact]
