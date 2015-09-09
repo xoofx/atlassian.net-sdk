@@ -56,7 +56,7 @@ namespace Atlassian.Jira.Remote
 
         public JToken ToJson(string[] values)
         {
-            return long.Parse(values[0]);
+            return float.Parse(values[0]);
         }
     }
 

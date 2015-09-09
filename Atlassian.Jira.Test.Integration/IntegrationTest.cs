@@ -700,7 +700,7 @@ namespace Atlassian.Jira.Test.Integration
             issue["Custom Project Field"] = "TST";
             issue["Custom Version Field"] = "1.0";
             issue["Custom Radio Field"] = "option1";
-            issue["Custom Number Field"] = "1234";
+            issue["Custom Number Field"] = "12.34";
             issue.CustomFields.AddArray("Custom Labels Field", "label1", "label2");
             issue.CustomFields.AddArray("Custom Multi Group Field", "jira-developers", "jira-users");
             issue.CustomFields.AddArray("Custom Multi Select Field", "option1", "option2");
@@ -720,7 +720,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("TST", newIssue["Custom Project Field"]);
             Assert.Equal("1.0", newIssue["Custom Version Field"]);
             Assert.Equal("option1", newIssue["Custom Radio Field"]);
-            Assert.Equal("1234", newIssue["Custom Number Field"]);
+            Assert.Equal("12.34", newIssue["Custom Number Field"]);
 
             Assert.Equal(new string[2] { "label1", "label2" }, newIssue.CustomFields["Custom Labels Field"].Values);
             Assert.Equal(new string[2] { "jira-developers", "jira-users" }, newIssue.CustomFields["Custom Multi Group Field"].Values);
