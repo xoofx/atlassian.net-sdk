@@ -1,27 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Globalization;
+using System.Text;
 
 namespace Atlassian.Jira.Linq
 {
-    public class JqlExpressionVisitor: ExpressionVisitor, IJqlExpressionVisitor
+    public class JqlExpressionVisitor : ExpressionVisitor, IJqlExpressionVisitor
     {
         private StringBuilder _jqlWhere;
         private StringBuilder _jqlOrderBy;
         private int? _numberOfResults;
         private List<Expression> _whereExpressions;
 
-        public string Jql 
-        { 
+        public string Jql
+        {
             get
             {
                 return _jqlWhere.ToString() + _jqlOrderBy.ToString();
-            } 
+            }
         }
 
         public int? NumberOfResults
@@ -46,7 +46,7 @@ namespace Atlassian.Jira.Linq
         private string GetFieldNameFromBinaryExpression(BinaryExpression expression)
         {
             PropertyInfo propertyInfo = null;
-            if(TryGetPropertyInfoFromBinaryExpression(expression, out propertyInfo))
+            if (TryGetPropertyInfoFromBinaryExpression(expression, out propertyInfo))
             {
                 var attributes = propertyInfo.GetCustomAttributes(typeof(JqlFieldNameAttribute), true);
                 if (attributes.Count() > 0)
@@ -173,7 +173,7 @@ namespace Atlassian.Jira.Linq
             if (value == null || value.Equals(""))
             {
                 _jqlWhere.Append(" ");
-                _jqlWhere.Append(equal? JiraOperators.IS : JiraOperators.ISNOT);
+                _jqlWhere.Append(equal ? JiraOperators.IS : JiraOperators.ISNOT);
                 _jqlWhere.Append(" ");
                 _jqlWhere.Append(value == null ? "null" : "empty");
                 return;
@@ -182,14 +182,14 @@ namespace Atlassian.Jira.Linq
             // operator
             var operatorString = String.Empty;
             PropertyInfo propertyInfo = null;
-            if(TryGetPropertyInfoFromBinaryExpression(expression, out propertyInfo)
+            if (TryGetPropertyInfoFromBinaryExpression(expression, out propertyInfo)
                 && propertyInfo.GetCustomAttributes(typeof(JqlContainsEqualityAttribute), true).Count() > 0)
             {
-                operatorString = equal? JiraOperators.CONTAINS: JiraOperators.NOTCONTAINS;
+                operatorString = equal ? JiraOperators.CONTAINS : JiraOperators.NOTCONTAINS;
             }
             else
             {
-                operatorString = equal? JiraOperators.EQUALS: JiraOperators.NOTEQUALS;
+                operatorString = equal ? JiraOperators.EQUALS : JiraOperators.NOTEQUALS;
             }
             _jqlWhere.Append(String.Format(" {0} ", operatorString));
 
@@ -210,7 +210,7 @@ namespace Atlassian.Jira.Linq
             else if (valueType == typeof(DateTime))
             {
                 /* Using "en-us" culture to conform to formats of JIRA.
-                 * See https://bitbucket.org/farmas/atlassian.net-sdk/issue/31 
+                 * See https://bitbucket.org/farmas/atlassian.net-sdk/issue/31
                  */
                 var dateString = ((DateTime)value).ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo);
                 _jqlWhere.Append(String.Format("\"{0}\"", dateString));
@@ -233,7 +233,7 @@ namespace Atlassian.Jira.Linq
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            if (node.Method.Name == "OrderBy" 
+            if (node.Method.Name == "OrderBy"
                 || node.Method.Name == "OrderByDescending"
                 || node.Method.Name == "ThenBy"
                 || node.Method.Name == "ThenByDescending")
@@ -266,28 +266,30 @@ namespace Atlassian.Jira.Linq
         private void ProcessOrderBy(MethodCallExpression node)
         {
             var firstOrderBy = _jqlOrderBy.Length == 0;
+            var orderByDirection = "asc";
             if (firstOrderBy)
             {
                 _jqlOrderBy.Append(" order by ");
             }
-           
+
+            if (node.Method.Name == "OrderByDescending" || node.Method.Name == "ThenByDescending")
+            {
+                orderByDirection = "desc";
+            }
+
             var member = ((LambdaExpression)((UnaryExpression)node.Arguments[1]).Operand).Body as MemberExpression;
             if (member != null)
             {
+                var orderClause = String.Format("{0} {1}", member.Member.Name, orderByDirection);
+
                 if (firstOrderBy)
                 {
-                    _jqlOrderBy.Append(member.Member.Name);
+                    _jqlOrderBy.Append(orderClause);
                 }
                 else
                 {
-                    _jqlOrderBy.Insert(10, member.Member.Name + ", ");
+                    _jqlOrderBy.Insert(10, orderClause + ", ");
                 }
-            }
-
-            if (node.Method.Name == "OrderByDescending"
-                || node.Method.Name == "ThenByDescending")
-            {
-                _jqlOrderBy.Append(" desc");
             }
         }
 

@@ -255,7 +255,7 @@ namespace Atlassian.Jira.Test
                           orderby i.Created
                           select i).ToArray();
 
-            Assert.Equal("Priority = \"1\" order by Created", _translator.Jql);
+            Assert.Equal("Priority = \"1\" order by Created asc", _translator.Jql);
         }
 
         [Fact]
@@ -281,7 +281,7 @@ namespace Atlassian.Jira.Test
                           orderby i.Created, i.DueDate
                           select i).ToArray();
 
-            Assert.Equal("Priority = \"1\" order by Created, DueDate", _translator.Jql);
+            Assert.Equal("Priority = \"1\" order by Created asc, DueDate asc", _translator.Jql);
         }
 
         [Fact]
@@ -294,7 +294,7 @@ namespace Atlassian.Jira.Test
                           orderby i.Created, i.DueDate descending
                           select i).ToArray();
 
-            Assert.Equal("Priority = \"1\" order by Created, DueDate desc", _translator.Jql);
+            Assert.Equal("Priority = \"1\" order by Created asc, DueDate desc", _translator.Jql);
         }
 
         [Fact]
