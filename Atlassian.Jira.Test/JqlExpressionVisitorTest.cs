@@ -505,6 +505,28 @@ namespace Atlassian.Jira.Test
                           select i).ToArray();
 
             Assert.Equal("(\"Foo\" > \"foo\" and \"Bar\" > \"2012/01/01\")", _translator.Jql);
-        }       
+        }
+
+        [Fact]
+        public void MultipleSeparateWheres()
+        {
+            var jira = CreateJiraInstance();
+
+            var issues = from i in jira.Issues
+                         where i.Votes == 5
+                         select i;
+
+            issues = from i in issues
+                     where i.Status == "Open" && i.Assignee == "admin"
+                     select i;
+
+            issues = from i in issues
+                     where i.Priority == "1"
+                     select i;
+
+            var issuesArray = issues.ToArray();
+
+            Assert.Equal("Votes = 5 and (Status = \"Open\" and Assignee = \"admin\") and Priority = \"1\"", _translator.Jql);
+        }
     }
 }
