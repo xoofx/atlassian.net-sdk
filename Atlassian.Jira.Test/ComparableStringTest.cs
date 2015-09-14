@@ -21,7 +21,7 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void StringEqualsOperator()
             {
-                Assert.False(new ComparableString("2012/05/01") == new DateTime(2012, 4,1));
+                Assert.False(new ComparableString("2012/05/01") == new DateTime(2012, 4, 1));
                 Assert.True(new ComparableString("2012/04/01") == new DateTime(2012, 4, 1));
             }
 
@@ -86,6 +86,5 @@ namespace Atlassian.Jira.Test
             }
         }
 
-       
     }
 }

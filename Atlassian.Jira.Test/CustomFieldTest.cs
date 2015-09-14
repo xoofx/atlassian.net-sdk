@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using Atlassian.Jira.Remote;
-using Moq;
 
 namespace Atlassian.Jira.Test
 {
@@ -15,7 +15,7 @@ namespace Atlassian.Jira.Test
         {
             //arrange
             var jira = TestableJira.Create();
-            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] {
                 new RemoteField(){ id="123", name= "CustomField" }});
 
             var issue = new RemoteIssue()

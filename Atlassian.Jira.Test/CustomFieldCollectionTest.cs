@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using Atlassian.Jira.Remote;
-using Moq;
 
 namespace Atlassian.Jira.Test
 {
@@ -16,7 +16,7 @@ namespace Atlassian.Jira.Test
             var jira = TestableJira.Create();
             jira.SoapService
                .Setup(c => c.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
-               .Returns(new RemoteIssue[] 
+               .Returns(new RemoteIssue[]
                 {
                     new RemoteIssue() { key = "123" }
                 });
@@ -33,7 +33,7 @@ namespace Atlassian.Jira.Test
                             }
             }.ToLocal(jira);
 
-            Assert.Throws(typeof (InvalidOperationException), () => issue["CustomField"]);
+            Assert.Throws(typeof(InvalidOperationException), () => issue["CustomField"]);
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace Atlassian.Jira.Test
         {
             //arrange
             var jira = TestableJira.Create();
-            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] {
                 new RemoteField(){ id="123", name= "CustomField" }});
 
             var issue = new RemoteIssue()
@@ -69,9 +69,9 @@ namespace Atlassian.Jira.Test
         {
             // Arrange
             var jira = TestableJira.Create();
-            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] {
                 new RemoteField(){ id="editField1", name= "EditCustomField" }});
-            jira.SoapService.Setup(c => c.GetFieldsForAction(It.IsAny<string>(), "issueKey", "action1")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForAction(It.IsAny<string>(), "issueKey", "action1")).Returns(new RemoteField[] {
                 new RemoteField(){ id="actionField1", name= "ActionCustomField" }});
 
             var issue = new RemoteIssue()
@@ -101,9 +101,9 @@ namespace Atlassian.Jira.Test
         {
             // Arrange
             var jira = TestableJira.Create();
-            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] {
                 new RemoteField(){ id="editField1", name= "EditCustomField" }});
-            jira.SoapService.Setup(c => c.GetFieldsForAction(It.IsAny<string>(), "issueKey", "action1")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForAction(It.IsAny<string>(), "issueKey", "action1")).Returns(new RemoteField[] {
                 new RemoteField(){ id="actionField1", name= "ActionCustomField" }});
 
             var issue = new RemoteIssue()
@@ -127,9 +127,9 @@ namespace Atlassian.Jira.Test
         {
             // Arrange
             var jira = TestableJira.Create();
-            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] {
                 new RemoteField(){ id="editField1", name= "EditCustomField" }});
-            jira.SoapService.Setup(c => c.GetFieldsForAction(It.IsAny<string>(), "issueKey", "action1")).Returns(new RemoteField[] { 
+            jira.SoapService.Setup(c => c.GetFieldsForAction(It.IsAny<string>(), "issueKey", "action1")).Returns(new RemoteField[] {
                 new RemoteField(){ id="actionField1", name= "ActionCustomField" }});
 
             var issue = new RemoteIssue()

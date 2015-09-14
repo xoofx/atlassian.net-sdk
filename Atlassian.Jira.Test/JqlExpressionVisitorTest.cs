@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Atlassian.Jira.Linq;
-using Atlassian.Jira.Remote;
-using Moq;
 using Xunit;
 
 namespace Atlassian.Jira.Test
@@ -35,9 +35,8 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
 
             var issues = (from i in jira.Issues
-                         where i.Votes == 5
-                         select i).ToArray();
-
+                          where i.Votes == 5
+                          select i).ToArray();
 
             Assert.Equal("Votes = 5", _translator.Jql);
         }
@@ -51,7 +50,6 @@ namespace Atlassian.Jira.Test
                           where i.Summary == "Foo"
                           select i).ToArray();
 
-
             Assert.Equal("Summary ~ \"Foo\"", _translator.Jql);
         }
 
@@ -64,11 +62,8 @@ namespace Atlassian.Jira.Test
                           where i.Assignee == "Foo"
                           select i).ToArray();
 
-
             Assert.Equal("Assignee = \"Foo\"", _translator.Jql);
         }
-
-
 
         [Fact]
         public void NotEqualsOperatorForNonString()
@@ -78,7 +73,6 @@ namespace Atlassian.Jira.Test
             var issues = (from i in jira.Issues
                           where i.Votes != 5
                           select i).ToArray();
-
 
             Assert.Equal("Votes != 5", _translator.Jql);
         }
@@ -115,7 +109,6 @@ namespace Atlassian.Jira.Test
             var issues = (from i in jira.Issues
                           where i.Votes > 5
                           select i).ToArray();
-
 
             Assert.Equal("Votes > 5", _translator.Jql);
         }
@@ -162,7 +155,7 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
 
             var issues = (from i in jira.Issues
-                          where i.Votes > 5 && i.Votes < 10 
+                          where i.Votes > 5 && i.Votes < 10
                           select i).ToArray();
 
             Assert.Equal("(Votes > 5 and Votes < 10)", _translator.Jql);
@@ -252,8 +245,6 @@ namespace Atlassian.Jira.Test
             Assert.Equal("Priority = \"foo\"", _translator.Jql);
         }
 
-        
-
         [Fact]
         public void OrderBy()
         {
@@ -312,7 +303,7 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
 
             var issues = (from i in jira.Issues
-                          where i.Created > new DateTime(2011,1,1)
+                          where i.Created > new DateTime(2011, 1, 1)
                           select i).ToArray();
 
             Assert.Equal("Created > \"2011/01/01\"", _translator.Jql);
@@ -324,7 +315,7 @@ namespace Atlassian.Jira.Test
             var jira = CreateJiraInstance();
 
             var issues = (from i in jira.Issues
-                          where i.Created > new DateTime(2011, 1, 1) && i.Created < new DateTime(2012,1,1) 
+                          where i.Created > new DateTime(2011, 1, 1) && i.Created < new DateTime(2012, 1, 1)
                           select i).ToArray();
 
             Assert.Equal("(Created > \"2011/01/01\" and Created < \"2012/01/01\")", _translator.Jql);
@@ -350,7 +341,7 @@ namespace Atlassian.Jira.Test
             var date = new DateTime(2011, 1, 1);
 
             var issues = (from i in jira.Issues
-                          where i.Created >  date
+                          where i.Created > date
                           select i).ToArray();
 
             Assert.Equal("Created > \"2011/01/01\"", _translator.Jql);
@@ -479,7 +470,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
             var issues = (from i in jira.Issues
-                          where i["Foo"] == "foo" && i["Bar"] == new DateTime(2012,1,1) && i["Baz"] == new LiteralMatch("baz")
+                          where i["Foo"] == "foo" && i["Bar"] == new DateTime(2012, 1, 1) && i["Baz"] == new LiteralMatch("baz")
                           select i).ToArray();
 
             Assert.Equal("((\"Foo\" ~ \"foo\" and \"Bar\" = \"2012/01/01\") and \"Baz\" = \"baz\")", _translator.Jql);
@@ -490,7 +481,7 @@ namespace Atlassian.Jira.Test
         {
             var jira = CreateJiraInstance();
             var issues = (from i in jira.Issues
-                          where i["Foo"] != "foo" && i["Bar"] != new DateTime(2012,1,1) && i["Baz"] != new LiteralMatch("baz")
+                          where i["Foo"] != "foo" && i["Bar"] != new DateTime(2012, 1, 1) && i["Baz"] != new LiteralMatch("baz")
                           select i).ToArray();
 
             Assert.Equal("((\"Foo\" !~ \"foo\" and \"Bar\" != \"2012/01/01\") and \"Baz\" != \"baz\")", _translator.Jql);
