@@ -14,6 +14,7 @@ namespace Atlassian.Jira.Linq
         private StringBuilder _jqlWhere;
         private StringBuilder _jqlOrderBy;
         private int? _numberOfResults;
+        private List<Expression> _whereExpressions;
 
         public string Jql 
         { 
@@ -36,6 +37,7 @@ namespace Atlassian.Jira.Linq
             expression = ExpressionEvaluator.PartialEval(expression);
             _jqlWhere = new StringBuilder();
             _jqlOrderBy = new StringBuilder();
+            _whereExpressions = new List<Expression>();
 
             this.Visit(expression);
             return new JqlData { Expression = Jql, NumberOfResults = _numberOfResults };
@@ -242,8 +244,18 @@ namespace Atlassian.Jira.Linq
             {
                 ProcessTake(node);
             }
+            else if (node.Method.Name == "Where")
+            {
+                ProcessWhere(node);
+            }
 
-            return base.VisitMethodCall(node) ;
+            return base.VisitMethodCall(node);
+        }
+
+        private void ProcessWhere(MethodCallExpression node)
+        {
+            var member = ((LambdaExpression)((UnaryExpression)node.Arguments[1]).Operand).Body;
+            _whereExpressions.Add(member);
         }
 
         private void ProcessTake(MethodCallExpression node)
@@ -281,6 +293,14 @@ namespace Atlassian.Jira.Linq
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
+            var isWhere = _whereExpressions.Contains(node);
+            var firstWhere = _jqlWhere.Length == 0;
+            if (isWhere && !firstWhere)
+            {
+                _jqlWhere.Append(" and ");
+                _whereExpressions.Remove(node);
+            }
+
             switch (node.NodeType)
             {
                 case ExpressionType.GreaterThan:
