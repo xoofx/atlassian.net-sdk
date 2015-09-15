@@ -141,7 +141,7 @@ namespace Atlassian.Jira
         /// <param name="password">Password used to authenticate.</param>
         /// <param name="settings">Settings to configure the rest client.</param>
         /// <returns>Jira object configured to use REST API.</returns>
-        public static Jira CreateRestClient(string url, string username, string password, JiraRestClientSettings settings = null)
+        public static Jira CreateRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
             settings = settings ?? new JiraRestClientSettings();
             var restClient = new JiraRestServiceClient(url, username, password, settings);
