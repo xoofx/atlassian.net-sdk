@@ -237,12 +237,13 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var queriedIssues = (from i in _jira.Issues
-                                 where i.Key == issue.Key
-                                 select i).ToArray();
+            var queriedIssue = (from i in _jira.Issues
+                                where i.Key == issue.Key
+                                select i).ToArray().First();
 
-            Assert.Equal(summaryValue, queriedIssues[0].Summary);
-            Assert.NotNull(queriedIssues[0].JiraIdentifier);
+            Assert.Equal(summaryValue, queriedIssue.Summary);
+            Assert.NotNull(queriedIssue.JiraIdentifier);
+            Assert.Equal(new DateTime(2011, 12, 12), queriedIssue.DueDate.Value);
         }
 
         [Fact]
