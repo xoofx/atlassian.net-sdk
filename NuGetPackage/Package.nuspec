@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Atlassian.SDK</id>
+    <id>Atlassian.SDK.Signed</id>
     <version>4.6.0</version>
     <authors>Federico Silva Armas</authors>
     <owners>Federico Silva Armas</owners>
@@ -16,7 +16,7 @@
     <dependencies>
       <group>
         <dependency id="Newtonsoft.Json" version="7.0.1" />
-        <dependency id="RestSharp" version="105.1.0" />
+        <dependency id="RestSharpSigned" version="105.2.3" />
       </group>
     </dependencies>
   </metadata>
