@@ -51,12 +51,17 @@ namespace Atlassian.Jira
         /// <param name="method">Request method.</param>
         /// <param name="resource">Request resource url.</param>
         /// <param name="requestBody">Request body to be serialized.</param>
-        Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null);      
+        Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null);
 
         /// <summary>
         /// Gets time tracking information for an issue.
         /// </summary>
         /// <param name="issueKey">The issue key.</param>
         IssueTimeTrackingData GetTimeTrackingData(string issueKey);
+
+        /// <summary>
+        /// Returns all custom fields within JIRA.
+        /// </summary>
+        Task<IEnumerable<CustomField>> GetCustomFieldsAsync();
     }
 }

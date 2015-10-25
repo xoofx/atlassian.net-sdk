@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Atlassian.Jira.Remote
@@ -17,18 +18,16 @@ namespace Atlassian.Jira.Remote
     internal class JiraRestServiceClient : IJiraServiceClient, IJiraRestClient
     {
         private readonly RestClient _restClient;
-        private readonly JsonSerializerSettings _serializerSettings;
-        private readonly RestClientSettings _clientSettings;
+        private readonly JiraRestClientSettings _clientSettings;
 
+        private JsonSerializerSettings _serializerSettings;
         private RemoteField[] _customFields;
 
-        public JiraRestServiceClient(string jiraBaseUrl, string username = null, string password = null, RestClientSettings settings = null)
+        public JiraRestServiceClient(string jiraBaseUrl, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
             var url = jiraBaseUrl.EndsWith("/") ? jiraBaseUrl : jiraBaseUrl += "/";
 
-            this._clientSettings = settings ?? new RestClientSettings();
-            this._serializerSettings = new JsonSerializerSettings();
-            this._serializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            this._clientSettings = settings ?? new JiraRestClientSettings();
             this._restClient = new RestClient(url);
 
             if (!String.IsNullOrEmpty(username) && !String.IsNullOrEmpty(password))
@@ -37,11 +36,19 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        public void InitializeCustomFieldSerializers(IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers)
+        private JsonSerializerSettings GetSerializerSettings()
         {
-            var serializers = new Dictionary<string, ICustomFieldValueSerializer>(customFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
-            var customFields = this.GetCustomFields(null);
-            this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(customFields, customFieldSerializers));
+            if (this._serializerSettings == null)
+            {
+                var serializers = new Dictionary<string, ICustomFieldValueSerializer>(this._clientSettings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
+                var customFields = this.GetCustomFields(null);
+
+                this._serializerSettings = new JsonSerializerSettings();
+                this._serializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(customFields, serializers));
+            }
+
+            return this._serializerSettings;
         }
 
         #region IJiraRestClient
@@ -63,7 +70,7 @@ namespace Atlassian.Jira.Remote
             }
             else if (requestBody != null)
             {
-                request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(this._serializerSettings));
+                request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(this.GetSerializerSettings()));
                 request.AddJsonBody(requestBody);
             }
 
@@ -188,7 +195,7 @@ namespace Atlassian.Jira.Remote
             });
 
             var issues = (JArray)responseObj["issues"];
-            return issues.Cast<JObject>().Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this._serializerSettings).RemoteIssue).ToArray();
+            return issues.Cast<JObject>().Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue).ToArray();
         }
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
@@ -228,6 +235,24 @@ namespace Atlassian.Jira.Remote
             }
 
             return this._customFields;
+        }
+
+        public Task<IEnumerable<CustomField>> GetCustomFieldsAsync()
+        {
+            if (this._customFields == null)
+            {
+                return this.ExecuteRequestAsync<RemoteField[]>(Method.GET, "rest/api/2/field").ContinueWith<IEnumerable<CustomField>>(task =>
+                {
+                    this._customFields = task.Result.Where(f => f.IsCustomField).ToArray();
+                    return this._customFields.Select(f => new CustomField(f));
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<CustomField>>();
+                taskSource.SetResult(this._customFields.Select(f => new CustomField(f)));
+                return taskSource.Task;
+            }
         }
 
         public RemoteField[] GetFieldsForEdit(string token, string key)
@@ -296,7 +321,7 @@ namespace Atlassian.Jira.Remote
             var issueJson = this.ExecuteRequest(Method.GET, resource);
             var comments = issueJson["fields"]["comment"]["comments"];
 
-            return JsonConvert.DeserializeObject<RemoteComment[]>(comments.ToString(), this._serializerSettings);
+            return JsonConvert.DeserializeObject<RemoteComment[]>(comments.ToString(), this.GetSerializerSettings());
         }
 
         public void AddComment(string token, string key, RemoteComment comment)
@@ -311,7 +336,7 @@ namespace Atlassian.Jira.Remote
             var issueJson = this.ExecuteRequest(Method.GET, resource);
             var attachments = issueJson["fields"]["attachment"];
 
-            return JsonConvert.DeserializeObject<RemoteAttachment[]>(attachments.ToString(), this._serializerSettings);
+            return JsonConvert.DeserializeObject<RemoteAttachment[]>(attachments.ToString(), this.GetSerializerSettings());
         }
 
         public bool AddBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData)
@@ -337,7 +362,7 @@ namespace Atlassian.Jira.Remote
         {
             var resource = String.Format("rest/api/2/issue/{0}/transitions", issueKey);
             var transitions = this.ExecuteRequest(Method.GET, resource)["transitions"];
-            return JsonConvert.DeserializeObject<RemoteNamedObject[]>(transitions.ToString(), this._serializerSettings);
+            return JsonConvert.DeserializeObject<RemoteNamedObject[]>(transitions.ToString(), this.GetSerializerSettings());
         }
 
         public void AddLabels(string token, RemoteIssue remoteIssue, string[] labels)
@@ -356,7 +381,7 @@ namespace Atlassian.Jira.Remote
         private JObject BuildFieldsObjectFromIssue(RemoteIssue remoteIssue, RemoteFieldValue[] remoteFields)
         {
             var issueWrapper = new RemoteIssueWrapper(remoteIssue);
-            var issueJson = JsonConvert.SerializeObject(issueWrapper, this._serializerSettings);
+            var issueJson = JsonConvert.SerializeObject(issueWrapper, this.GetSerializerSettings());
             var issueFields = JObject.Parse(issueJson)["fields"] as JObject;
             var updateFields = new JObject();
 
@@ -411,7 +436,7 @@ namespace Atlassian.Jira.Remote
             var resource = String.Format("rest/api/2/issue/{0}/worklog", key);
             var worklogs = this.ExecuteRequest(Method.GET, resource)["worklogs"];
 
-            return JsonConvert.DeserializeObject<RemoteWorklog[]>(worklogs.ToString(), this._serializerSettings);
+            return JsonConvert.DeserializeObject<RemoteWorklog[]>(worklogs.ToString(), this.GetSerializerSettings());
         }
 
         public RemoteWorklog AddWorklog(string token, string key, RemoteWorklog worklog, string queryString = null)

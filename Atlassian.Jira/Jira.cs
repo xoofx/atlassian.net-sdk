@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.ServiceModel;
 using System.Text;
+using System.Threading.Tasks;
 using Util.DoubleKeyDictionary;
 
 namespace Atlassian.Jira
@@ -145,7 +146,6 @@ namespace Atlassian.Jira
         {
             settings = settings ?? new JiraRestClientSettings();
             var restClient = new JiraRestServiceClient(url, username, password, settings);
-            restClient.InitializeCustomFieldSerializers(settings.CustomFieldSerializers);
 
             return new Jira(
                 new JqlExpressionVisitor(),
@@ -467,6 +467,20 @@ namespace Atlassian.Jira
                 });
             }
             return _cachedCustomFields;
+        }
+
+        /// <summary>
+        /// Returns all custom fields within JIRA.
+        /// </summary>
+        /// <returns>Collection of JIRA custom fields</returns>
+        public Task<IEnumerable<CustomField>> GetCustomFieldsAsync()
+        {
+            if (this.RestClient == null)
+            {
+                throw new NotSupportedException("This method is only supported with REST provider.");
+            }
+
+            return this.RestClient.GetCustomFieldsAsync();
         }
 
         /// <summary>

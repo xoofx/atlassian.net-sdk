@@ -110,7 +110,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Remote\RemoteIssueJsonConverter.cs" />
-    <Compile Include="Remote\RestClientSettings.cs" />
     <Compile Include="Remote\RestSharpJsonSerializer.cs" />
     <Compile Include="Remote\NestedValueJsonConverter.cs" />
     <Compile Include="Remote\RemoteFieldNameAttribute.cs" />

@@ -9,8 +9,13 @@ namespace Atlassian.Jira
     /// <summary>
     /// Settings to configure the JIRA REST client.
     /// </summary>
-    public class JiraRestClientSettings : RestClientSettings
+    public class JiraRestClientSettings
     {
+        /// <summary>
+        /// Whether to trace each request.
+        /// </summary>
+        public bool EnableRequestTrace { get; set; }
+
         /// <summary>
         /// Dictionary of serializers for custom fields.
         /// </summary>
