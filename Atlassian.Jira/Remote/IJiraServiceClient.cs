@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira.Remote
 {
@@ -14,6 +16,9 @@ namespace Atlassian.Jira.Remote
         string Login(string username, string password);
         void AddLabels(string token, RemoteIssue issue, string[] labels);
         RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxResults, int startAt = 0);
+        Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt = 0);
+        Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt, CancellationToken token);
+
         RemoteIssue CreateIssue(string token, RemoteIssue newIssue);
         RemoteIssue CreateIssueWithParent(string token, RemoteIssue newIssue, string parentIssueKey);
         RemoteIssue UpdateIssue(string token, RemoteIssue issue, RemoteFieldValue[] fields);

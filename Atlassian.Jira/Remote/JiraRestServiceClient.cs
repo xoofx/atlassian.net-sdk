@@ -52,48 +52,6 @@ namespace Atlassian.Jira.Remote
         }
 
         #region IJiraRestClient
-        public Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null)
-        {
-            var request = new RestRequest();
-            request.Method = method;
-            request.Resource = resource;
-            request.RequestFormat = DataFormat.Json;
-
-            if (requestBody is string)
-            {
-                request.AddParameter(new Parameter
-                {
-                    Name = "application/json",
-                    Type = ParameterType.RequestBody,
-                    Value = requestBody
-                });
-            }
-            else if (requestBody != null)
-            {
-                request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(this.GetSerializerSettings()));
-                request.AddJsonBody(requestBody);
-            }
-
-            LogRequest(request, requestBody);
-            return this._restClient.ExecuteTaskAsync(request).ContinueWith<JToken>(responseTask =>
-            {
-                var response = responseTask.Result;
-
-                EnsureValidResponse(response);
-
-                return response.StatusCode != HttpStatusCode.NoContent ? JToken.Parse(response.Content) : new JObject();
-
-            });
-        }
-
-        public Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null)
-        {
-            return ExecuteRequestAsync(method, resource, requestBody).ContinueWith<T>(responseTask =>
-            {
-                return JsonConvert.DeserializeObject<T>(responseTask.Result.ToString(), _serializerSettings);
-            });
-        }
-
         public JToken ExecuteRequest(Method method, string resource, object requestBody = null)
         {
             try
@@ -116,6 +74,58 @@ namespace Atlassian.Jira.Remote
             {
                 throw ex.Flatten().InnerException;
             }
+        }
+
+        public Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null)
+        {
+            return this.ExecuteRequestAsync<T>(method, resource, requestBody, CancellationToken.None);
+        }
+
+        public Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody, CancellationToken token)
+        {
+            return ExecuteRequestAsync(method, resource, requestBody, token).ContinueWith<T>(responseTask =>
+            {
+                return JsonConvert.DeserializeObject<T>(responseTask.Result.ToString(), _serializerSettings);
+            });
+        }
+
+        public Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null)
+        {
+            return this.ExecuteRequestAsync(method, resource, requestBody, CancellationToken.None);
+        }
+
+        public Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody, CancellationToken token)
+        {
+            var request = new RestRequest();
+            request.Method = method;
+            request.Resource = resource;
+            request.RequestFormat = DataFormat.Json;
+
+            if (requestBody is string)
+            {
+                request.AddParameter(new Parameter
+                {
+                    Name = "application/json",
+                    Type = ParameterType.RequestBody,
+                    Value = requestBody
+                });
+            }
+            else if (requestBody != null)
+            {
+                request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(this.GetSerializerSettings()));
+                request.AddJsonBody(requestBody);
+            }
+
+            LogRequest(request, requestBody);
+            return this._restClient.ExecuteTaskAsync(request, token).ContinueWith<JToken>(responseTask =>
+            {
+                var response = responseTask.Result;
+
+                EnsureValidResponse(response);
+
+                return response.StatusCode != HttpStatusCode.NoContent ? JToken.Parse(response.Content) : new JObject();
+
+            });
         }
 
         public IRestResponse ExecuteRequest(IRestRequest request)
@@ -198,6 +208,31 @@ namespace Atlassian.Jira.Remote
             return issues.Cast<JObject>().Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue).ToArray();
         }
 
+        public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt = 0)
+        {
+            return this.GetIssuesFromJqlSearchAsync(jqlSearch, maxResults, startAt);
+        }
+
+        public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt, CancellationToken token)
+        {
+            var parameters = new
+            {
+                jql = jqlSearch,
+                startAt = startAt,
+                maxResults = maxResults,
+            };
+
+            return this.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ContinueWith<RemoteIssue[]>(task =>
+            {
+                var issues = (JArray)task.Result["issues"];
+
+                return issues
+                    .Cast<JObject>()
+                    .Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue)
+                    .ToArray();
+            });
+        }
+
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
         {
             return CreateIssueWithParent(token, newIssue, null);
@@ -224,6 +259,14 @@ namespace Atlassian.Jira.Remote
         public RemotePriority[] GetPriorities(string token)
         {
             return this.ExecuteRequest<RemotePriority[]>(Method.GET, "rest/api/2/priority");
+        }
+
+        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync()
+        {
+            return this.ExecuteRequestAsync<RemotePriority[]>(Method.GET, "rest/api/2/priority").ContinueWith(task =>
+            {
+                return task.Result.Select(p => new IssuePriority(p));
+            });
         }
 
         public RemoteField[] GetCustomFields(string token)
@@ -282,6 +325,14 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequest<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype");
         }
 
+        public Task<IEnumerable<IssueType>> GetIssueTypesAsync()
+        {
+            return this.ExecuteRequestAsync<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype").ContinueWith(task =>
+            {
+                return task.Result.Select(t => new IssueType(t));
+            });
+        }
+
         public DateTime GetResolutionDateByKey(string token, string issueKey)
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=resolutiondate", issueKey);
@@ -297,6 +348,16 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequest<RemoteFilter[]>(Method.GET, "rest/api/2/filter/favourite");
         }
 
+        public Task<IEnumerable<JiraFilter>> GetFavouriteFiltersAsync()
+        {
+            return this.GetFavouriteFiltersAsync(CancellationToken.None);
+        }
+
+        public Task<IEnumerable<JiraFilter>> GetFavouriteFiltersAsync(CancellationToken token)
+        {
+            return this.ExecuteRequestAsync<IEnumerable<JiraFilter>>(Method.GET, "rest/api/2/filter/favourite", null, token);
+        }
+
         public RemoteIssue[] GetIssuesFromFilterWithLimit(string token, string filterId, int offset, int maxResults)
         {
             var resource = String.Format("rest/api/2/filter/{0}", filterId);
@@ -310,9 +371,25 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequest<RemoteStatus[]>(Method.GET, "rest/api/2/status");
         }
 
+        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync()
+        {
+            return this.ExecuteRequestAsync<RemoteStatus[]>(Method.GET, "rest/api/2/status").ContinueWith(task =>
+            {
+                return task.Result.Select(s => new IssueStatus(s));
+            });
+        }
+
         public RemoteResolution[] GetResolutions(string token)
         {
             return this.ExecuteRequest<RemoteResolution[]>(Method.GET, "rest/api/2/resolution");
+        }
+
+        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync()
+        {
+            return this.ExecuteRequestAsync<RemoteResolution[]>(Method.GET, "rest/api/2/resolution").ContinueWith(task =>
+            {
+                return task.Result.Select(r => new IssueResolution(r));
+            });
         }
 
         public RemoteComment[] GetCommentsFromIssue(string token, string key)

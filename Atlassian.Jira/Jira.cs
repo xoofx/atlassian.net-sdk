@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.ServiceModel;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Util.DoubleKeyDictionary;
 
@@ -275,22 +276,46 @@ namespace Atlassian.Jira
         /// <returns>Collection of Issues that match the search query</returns>
         public IEnumerable<Issue> GetIssuesFromJql(string jql, int? maxIssues = null, int startAt = 0)
         {
+            try
+            {
+                return this.GetIssuesFromJqlAsync(jql, maxIssues, startAt).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
+        /// <summary>
+        /// Execute a specific JQL query and return the resulting issues
+        /// </summary>
+        /// <param name="jql">JQL search query</param>
+        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="startAt">Index of the first issue to return (0-based)</param>
+        /// <returns>Collection of Issues that match the search query</returns>
+        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0)
+        {
+            return this.GetIssuesFromJqlAsync(jql, maxIssues ?? MaxIssuesPerRequest, startAt, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Execute a specific JQL query and return the resulting issues.
+        /// </summary>
+        /// <param name="jql">JQL search query</param>
+        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="startAt">Index of the first issue to return (0-based)</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int maxIssues, int startAt, CancellationToken token)
+        {
             if (this.Debug)
             {
                 Trace.WriteLine("JQL: " + jql);
             }
 
-            IList<Issue> issues = new List<Issue>();
-
-            WithToken(token =>
+            return this._jiraService.GetIssuesFromJqlSearchAsync(jql, maxIssues, startAt, token).ContinueWith<IEnumerable<Issue>>(task =>
             {
-                foreach (RemoteIssue remoteIssue in _jiraService.GetIssuesFromJqlSearch(token, jql, maxIssues ?? MaxIssuesPerRequest, startAt))
-                {
-                    issues.Add(new Issue(this, remoteIssue));
-                }
+                return task.Result.Select(remoteIssue => new Issue(this, remoteIssue));
             });
-
-            return issues;
         }
 
         /// <summary>
@@ -367,6 +392,29 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns all the issue types within JIRA.
+        /// </summary>
+        public Task<IEnumerable<IssueType>> GetIssueTypesAsync()
+        {
+            EnsureRestClient();
+
+            if (!_cachedIssueTypes.ContainsKey(ALL_PROJECTS_KEY))
+            {
+                return this.RestClient.GetIssueTypesAsync().ContinueWith(task =>
+                {
+                    this._cachedIssueTypes.Add(ALL_PROJECTS_KEY, task.Result);
+                    return task.Result;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<IssueType>>();
+                taskSource.SetResult(this._cachedIssueTypes[ALL_PROJECTS_KEY]);
+                return taskSource.Task;
+            }
+        }
+
+        /// <summary>
         /// Returns all versions defined on a JIRA project
         /// </summary>
         /// <param name="projectKey">The project to retrieve the versions from</param>
@@ -420,6 +468,30 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns all the issue priorities within JIRA.
+        /// </summary>
+        /// <returns>Collection of JIRA issue priorities.</returns>
+        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync()
+        {
+            EnsureRestClient();
+
+            if (_cachedPriorities == null)
+            {
+                return this.RestClient.GetIssuePrioritiesAsync().ContinueWith(task =>
+                {
+                    this._cachedPriorities = task.Result;
+                    return this._cachedPriorities;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<IssuePriority>>();
+                taskSource.SetResult(this._cachedPriorities);
+                return taskSource.Task;
+            }
+        }
+
+        /// <summary>
         /// Returns all the issue statuses within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue statuses</returns>
@@ -434,6 +506,30 @@ namespace Atlassian.Jira
             }
 
             return _cachedStatuses;
+        }
+
+        /// <summary>
+        /// Returns all the issue statuses within JIRA.
+        /// </summary>
+        /// <returns>Collection of JIRA issue statuses.</returns>
+        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync()
+        {
+            EnsureRestClient();
+
+            if (_cachedStatuses == null)
+            {
+                return this.RestClient.GetIssueStatusesAsync().ContinueWith(task =>
+                {
+                    this._cachedStatuses = task.Result;
+                    return this._cachedStatuses;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<IssueStatus>>();
+                taskSource.SetResult(this._cachedStatuses);
+                return taskSource.Task;
+            }
         }
 
         /// <summary>
@@ -454,6 +550,30 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns all the issue resolutions within JIRA
+        /// </summary>
+        /// <returns>Collection of JIRA issue resolutions</returns>
+        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync()
+        {
+            EnsureRestClient();
+
+            if (_cachedResolutions == null)
+            {
+                return this.RestClient.GetIssueResolutionsAsync().ContinueWith(task =>
+                {
+                    this._cachedResolutions = task.Result;
+                    return this._cachedResolutions;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<IssueResolution>>();
+                taskSource.SetResult(this._cachedResolutions);
+                return taskSource.Task;
+            }
+        }
+
+        /// <summary>
         /// Returns all custom fields within JIRA
         /// </summary>
         /// <returns>Collection of JIRA custom fields</returns>
@@ -467,20 +587,6 @@ namespace Atlassian.Jira
                 });
             }
             return _cachedCustomFields;
-        }
-
-        /// <summary>
-        /// Returns all custom fields within JIRA.
-        /// </summary>
-        /// <returns>Collection of JIRA custom fields</returns>
-        public Task<IEnumerable<CustomField>> GetCustomFieldsAsync()
-        {
-            if (this.RestClient == null)
-            {
-                throw new NotSupportedException("This method is only supported with REST provider.");
-            }
-
-            return this.RestClient.GetCustomFieldsAsync();
         }
 
         /// <summary>
@@ -653,6 +759,14 @@ namespace Atlassian.Jira
             }
 
             return this._cachedIssues[projectKey];
+        }
+
+        private void EnsureRestClient()
+        {
+            if (this.RestClient == null)
+            {
+                throw new NotSupportedException("Operation is only supported by REST API.");
+            }
         }
     }
 }

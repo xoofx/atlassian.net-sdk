@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Atlassian.Jira.Remote
@@ -56,6 +57,16 @@ namespace Atlassian.Jira.Remote
             {
                 return _client.getIssuesFromJqlSearch(token, jqlSearch, maxResults);
             }
+        }
+
+        public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt = 0)
+        {
+            throw new NotSupportedException("This method is only supported by REST API.");
+        }
+
+        public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt, System.Threading.CancellationToken token)
+        {
+            throw new NotSupportedException("This method is only supported by REST API.");
         }
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
