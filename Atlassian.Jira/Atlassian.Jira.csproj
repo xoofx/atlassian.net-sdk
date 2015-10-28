@@ -61,7 +61,8 @@
     <Compile Include="ComparableString.cs" />
     <Compile Include="CustomField.cs" />
     <Compile Include="ICustomFieldValueSerializer.cs" />
-    <Compile Include="IJiraRestClient.cs" />
+    <Compile Include="Remote\IJiraClient.cs" />
+    <Compile Include="Remote\IJiraRestClient.cs" />
     <Compile Include="IssueStatus.cs" />
     <Compile Include="IssueResolution.cs" />
     <Compile Include="IssuePriority.cs" />
@@ -93,11 +94,11 @@
     <Compile Include="Remote\CustomFieldValueSerializers.cs" />
     <Compile Include="Remote\DateFixupJsonConverter.cs" />
     <Compile Include="Remote\ExtensionMethods.cs" />
-    <Compile Include="Remote\IJiraServiceClient.cs" />
+    <Compile Include="Remote\IJiraSoapClient.cs" />
     <Compile Include="Linq\IJqlExpressionVisitor.cs" />
     <Compile Include="Linq\JiraQueryable.cs" />
     <Compile Include="Linq\JiraQueryProvider.cs" />
-    <Compile Include="Remote\JiraRestServiceClient.cs" />
+    <Compile Include="Remote\JiraRestClient.cs" />
     <Compile Include="Remote\JiraSoapService.cs" />
     <Compile Include="Remote\JiraSoapServiceClientFactory.cs" />
     <Compile Include="Remote\JiraSoapServiceClientWrapper.cs" />

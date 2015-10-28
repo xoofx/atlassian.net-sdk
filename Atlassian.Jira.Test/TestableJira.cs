@@ -9,17 +9,17 @@ namespace Atlassian.Jira.Test
 {
     public class TestableJira : Jira
     {
-        public Mock<IJiraServiceClient> SoapService;
+        public Mock<IJiraSoapClient> SoapService;
         public Mock<IFileSystem> FileSystem;
 
-        private TestableJira(Mock<IJiraServiceClient> soapService, Mock<IFileSystem> fileSystem, JiraCredentials credentials, string token)
+        private TestableJira(Mock<IJiraSoapClient> soapService, Mock<IFileSystem> fileSystem, JiraCredentials credentials, string token)
             : base(null, soapService.Object, fileSystem.Object, credentials, token)
         {
             SoapService = soapService;
             FileSystem = fileSystem;
         }
 
-        private TestableJira(Mock<IJiraServiceClient> soapService, Mock<IFileSystem> fileSystem)
+        private TestableJira(Mock<IJiraSoapClient> soapService, Mock<IFileSystem> fileSystem)
             : base(null, soapService.Object, fileSystem.Object)
         {
             SoapService = soapService;
@@ -28,12 +28,12 @@ namespace Atlassian.Jira.Test
 
         public static TestableJira Create(string token = "token", JiraCredentials credentials = null)
         {
-            return new TestableJira(new Mock<IJiraServiceClient>(), new Mock<IFileSystem>(), credentials, token);
+            return new TestableJira(new Mock<IJiraSoapClient>(), new Mock<IFileSystem>(), credentials, token);
         }
 
         public static TestableJira CreateAnonymous()
         {
-            return new TestableJira(new Mock<IJiraServiceClient>(), new Mock<IFileSystem>());
+            return new TestableJira(new Mock<IJiraSoapClient>(), new Mock<IFileSystem>());
         }
     }
 }

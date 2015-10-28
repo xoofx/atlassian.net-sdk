@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -13,8 +13,11 @@ namespace Atlassian.Jira
     {
         private bool? _isSubTask;
 
-        internal IssueType(RemoteIssueType remoteIssueType)
-             : base(remoteIssueType)
+        /// <summary>
+        /// Creates an instance of the IssuePriority based on a remote entity.
+        /// </summary>
+        public IssueType(RemoteIssueType remoteIssueType)
+            : base(remoteIssueType)
         {
             _isSubTask = remoteIssueType.subTask;
         }
@@ -46,7 +49,6 @@ namespace Atlassian.Jira
                     _isSubTask = this.Jira.GetSubTaskIssueTypes().Any(issueType => issueType.Id.Equals(this.Id, StringComparison.OrdinalIgnoreCase));
                 }
 
-
                 return _isSubTask.Value;
             }
         }
@@ -75,7 +77,7 @@ namespace Atlassian.Jira
                 }
                 else
                 {
-                    return new IssueType(name);                    
+                    return new IssueType(name);
                 }
             }
             else

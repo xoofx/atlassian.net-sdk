@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -11,8 +11,11 @@ namespace Atlassian.Jira
     /// </summary>
     public class IssuePriority : JiraNamedEntity
     {
-         internal IssuePriority(AbstractNamedRemoteEntity remoteEntity)
-             : base(remoteEntity)
+        /// <summary>
+        /// Creates an instance of the IssuePriority based on a remote entity.
+        /// </summary>
+        public IssuePriority(AbstractNamedRemoteEntity remoteEntity)
+            : base(remoteEntity)
         {
         }
 
@@ -45,7 +48,7 @@ namespace Atlassian.Jira
                 }
                 else
                 {
-                    return new IssuePriority(name);                    
+                    return new IssuePriority(name);
                 }
             }
             else
@@ -53,7 +56,7 @@ namespace Atlassian.Jira
                 return null;
             }
         }
-        
+
         /// <summary>
         /// Operator overload to simplify LINQ queries
         /// </summary>

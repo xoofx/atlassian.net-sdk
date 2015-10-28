@@ -11,7 +11,7 @@ namespace Atlassian.Jira.Remote
     /// <summary>
     /// Wraps the auto-generated JiraSoapServiceClient proxy
     /// </summary>
-    internal class JiraSoapServiceClientWrapper : IJiraServiceClient
+    internal class JiraSoapServiceClientWrapper : IJiraSoapClient
     {
         private readonly JiraSoapServiceClient _client;
         private readonly string _url;
@@ -57,16 +57,6 @@ namespace Atlassian.Jira.Remote
             {
                 return _client.getIssuesFromJqlSearch(token, jqlSearch, maxResults);
             }
-        }
-
-        public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt = 0)
-        {
-            throw new NotSupportedException("This method is only supported by REST API.");
-        }
-
-        public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt, System.Threading.CancellationToken token)
-        {
-            throw new NotSupportedException("This method is only supported by REST API.");
         }
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)

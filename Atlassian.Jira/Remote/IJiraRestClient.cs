@@ -7,10 +7,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Atlassian.Jira
+namespace Atlassian.Jira.Remote
 {
     /// <summary>
-    /// Contract for a client that iteracts with Jira via rest.
+    /// Contract for a client that iteracts with JIRA via rest.
     /// </summary>
     public interface IJiraRestClient
     {
@@ -72,6 +72,23 @@ namespace Atlassian.Jira
         /// <param name="requestBody">Request body to be serialized.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody, CancellationToken token);
+
+        /// <summary>
+        /// Execute a specific JQL query and return the resulting issues.
+        /// </summary>
+        /// <param name="jql">JQL search query</param>
+        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="startAt">Index of the first issue to return (0-based)</param>
+        Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt = 0);
+
+        /// <summary>
+        /// Execute a specific JQL query and return the resulting issues.
+        /// </summary>
+        /// <param name="jql">JQL search query</param>
+        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="startAt">Index of the first issue to return (0-based)</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt, CancellationToken token);
 
         /// <summary>
         /// Gets time tracking information for an issue.

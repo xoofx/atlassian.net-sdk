@@ -81,7 +81,7 @@ namespace Atlassian.Jira.Test
             public void WillThrowExceptionIfNoCredentialsProviderExists()
             {
                 // Arrange
-                var soapService = new Mock<IJiraServiceClient>();
+                var soapService = new Mock<IJiraSoapClient>();
                 var jira = new Jira(null, soapService.Object, null, null, null);
 
                 // Act
@@ -92,7 +92,7 @@ namespace Atlassian.Jira.Test
             public void WillThrowExceptionIfCredentialsProviderReturnsNull()
             {
                 // Arrange
-                var soapService = new Mock<IJiraServiceClient>();
+                var soapService = new Mock<IJiraSoapClient>();
                 var jira = new Jira(null, soapService.Object, null, null, null);
 
                 // Act

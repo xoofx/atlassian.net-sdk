@@ -8,16 +8,14 @@ using System.Threading.Tasks;
 namespace Atlassian.Jira.Remote
 {
     /// <summary>
-    /// Abstract the service client implementation.
+    /// Contract for a client that interacts with JIRA via SOAP.
     /// </summary>
-    public interface IJiraServiceClient
+    public interface IJiraSoapClient
     {
         string Url { get; }
         string Login(string username, string password);
         void AddLabels(string token, RemoteIssue issue, string[] labels);
         RemoteIssue[] GetIssuesFromJqlSearch(string token, string jqlSearch, int maxResults, int startAt = 0);
-        Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt = 0);
-        Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt, CancellationToken token);
 
         RemoteIssue CreateIssue(string token, RemoteIssue newIssue);
         RemoteIssue CreateIssueWithParent(string token, RemoteIssue newIssue, string parentIssueKey);

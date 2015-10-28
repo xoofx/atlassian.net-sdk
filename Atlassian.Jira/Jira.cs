@@ -26,7 +26,7 @@ namespace Atlassian.Jira
         private const string REMOTE_AUTH_EXCEPTION_STRING = "com.atlassian.jira.rpc.exception.RemoteAuthenticationException";
 
         private readonly JiraQueryProvider _provider;
-        private readonly IJiraServiceClient _jiraService;
+        private readonly IJiraSoapClient _jiraService;
         private readonly IFileSystem _fileSystem;
         private readonly IJiraRestClient _restClient;
         private readonly JiraCredentials _credentials;
@@ -107,7 +107,7 @@ namespace Atlassian.Jira
         /// Create a proxy that connects with a JIRA server with specified access token and dependencies.
         /// </summary>
         public Jira(IJqlExpressionVisitor translator,
-                    IJiraServiceClient jiraService,
+                    IJiraSoapClient jiraService,
                     IFileSystem fileSystem,
                     JiraCredentials credentials = null,
                     string accessToken = null)
@@ -126,11 +126,11 @@ namespace Atlassian.Jira
             {
                 if (this._credentials == null)
                 {
-                    this._restClient = new JiraRestServiceClient(jiraService.Url);
+                    this._restClient = new JiraRestClient(jiraService.Url);
                 }
                 else
                 {
-                    this._restClient = new JiraRestServiceClient(jiraService.Url, _credentials.UserName, _credentials.Password);
+                    this._restClient = new JiraRestClient(jiraService.Url, _credentials.UserName, _credentials.Password);
                 }
             }
         }
@@ -146,13 +146,21 @@ namespace Atlassian.Jira
         public static Jira CreateRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
             settings = settings ?? new JiraRestClientSettings();
-            var restClient = new JiraRestServiceClient(url, username, password, settings);
+            var restClient = new JiraRestClient(url, username, password, settings);
 
+            return CreateRestClient(restClient, new JiraCredentials(username, password));
+        }
+
+        /// <summary>
+        /// Creates a JIRA client with service dependency.
+        /// </summary>
+        public static Jira CreateRestClient(IJiraClient jiraClient, JiraCredentials credentials = null)
+        {
             return new Jira(
                 new JqlExpressionVisitor(),
-                restClient,
+                jiraClient,
                 new FileSystem(),
-                new JiraCredentials(username, password));
+                credentials);
         }
 
         private bool IsAnonymous
@@ -163,7 +171,7 @@ namespace Atlassian.Jira
             }
         }
 
-        internal IJiraServiceClient RemoteService
+        internal IJiraSoapClient RemoteService
         {
             get
             {
@@ -307,12 +315,14 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int maxIssues, int startAt, CancellationToken token)
         {
+            EnsureRestClient();
+
             if (this.Debug)
             {
                 Trace.WriteLine("JQL: " + jql);
             }
 
-            return this._jiraService.GetIssuesFromJqlSearchAsync(jql, maxIssues, startAt, token).ContinueWith<IEnumerable<Issue>>(task =>
+            return this.RestClient.GetIssuesFromJqlSearchAsync(jql, maxIssues, startAt, token).ContinueWith<IEnumerable<Issue>>(task =>
             {
                 return task.Result.Select(remoteIssue => new Issue(this, remoteIssue));
             });
@@ -644,7 +654,7 @@ namespace Atlassian.Jira
         /// If action fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
         /// a new token will be requested from server and the action called again.
         /// </remarks>
-        public void WithToken(Action<string, IJiraServiceClient> action)
+        public void WithToken(Action<string, IJiraSoapClient> action)
         {
             WithToken<object>((token, client) =>
             {
@@ -672,7 +682,7 @@ namespace Atlassian.Jira
         /// If function fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
         /// a new token will be requested from server and the function called again.
         /// </remarks>
-        public TResult WithToken<TResult>(Func<string, IJiraServiceClient, TResult> function)
+        public TResult WithToken<TResult>(Func<string, IJiraSoapClient, TResult> function)
         {
             if (!IsAnonymous && String.IsNullOrEmpty(_token))
             {
