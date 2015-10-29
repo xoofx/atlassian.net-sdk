@@ -284,14 +284,22 @@ namespace Atlassian.Jira
         /// <returns>Collection of Issues that match the search query</returns>
         public IEnumerable<Issue> GetIssuesFromJql(string jql, int? maxIssues = null, int startAt = 0)
         {
-            try
+            if (this.Debug)
             {
-                return this.GetIssuesFromJqlAsync(jql, maxIssues, startAt).Result;
+                Trace.WriteLine("JQL: " + jql);
             }
-            catch (AggregateException ex)
+
+            IList<Issue> issues = new List<Issue>();
+
+            WithToken(token =>
             {
-                throw ex.Flatten().InnerException;
-            }
+                foreach (RemoteIssue remoteIssue in _jiraService.GetIssuesFromJqlSearch(token, jql, maxIssues ?? MaxIssuesPerRequest, startAt))
+                {
+                    issues.Add(new Issue(this, remoteIssue));
+                }
+            });
+
+            return issues;
         }
 
         /// <summary>
@@ -315,8 +323,6 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int maxIssues, int startAt, CancellationToken token)
         {
-            EnsureRestClient();
-
             if (this.Debug)
             {
                 Trace.WriteLine("JQL: " + jql);
@@ -404,13 +410,11 @@ namespace Atlassian.Jira
         /// <summary>
         /// Returns all the issue types within JIRA.
         /// </summary>
-        public Task<IEnumerable<IssueType>> GetIssueTypesAsync()
+        public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token)
         {
-            EnsureRestClient();
-
             if (!_cachedIssueTypes.ContainsKey(ALL_PROJECTS_KEY))
             {
-                return this.RestClient.GetIssueTypesAsync().ContinueWith(task =>
+                return this.RestClient.GetIssueTypesAsync(token).ContinueWith(task =>
                 {
                     this._cachedIssueTypes.Add(ALL_PROJECTS_KEY, task.Result);
                     return task.Result;
@@ -481,13 +485,11 @@ namespace Atlassian.Jira
         /// Returns all the issue priorities within JIRA.
         /// </summary>
         /// <returns>Collection of JIRA issue priorities.</returns>
-        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync()
+        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token)
         {
-            EnsureRestClient();
-
             if (_cachedPriorities == null)
             {
-                return this.RestClient.GetIssuePrioritiesAsync().ContinueWith(task =>
+                return this.RestClient.GetIssuePrioritiesAsync(token).ContinueWith(task =>
                 {
                     this._cachedPriorities = task.Result;
                     return this._cachedPriorities;
@@ -522,13 +524,11 @@ namespace Atlassian.Jira
         /// Returns all the issue statuses within JIRA.
         /// </summary>
         /// <returns>Collection of JIRA issue statuses.</returns>
-        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync()
+        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)
         {
-            EnsureRestClient();
-
             if (_cachedStatuses == null)
             {
-                return this.RestClient.GetIssueStatusesAsync().ContinueWith(task =>
+                return this.RestClient.GetIssueStatusesAsync(token).ContinueWith(task =>
                 {
                     this._cachedStatuses = task.Result;
                     return this._cachedStatuses;
@@ -563,13 +563,11 @@ namespace Atlassian.Jira
         /// Returns all the issue resolutions within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue resolutions</returns>
-        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync()
+        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token)
         {
-            EnsureRestClient();
-
             if (_cachedResolutions == null)
             {
-                return this.RestClient.GetIssueResolutionsAsync().ContinueWith(task =>
+                return this.RestClient.GetIssueResolutionsAsync(token).ContinueWith(task =>
                 {
                     this._cachedResolutions = task.Result;
                     return this._cachedResolutions;
@@ -769,14 +767,6 @@ namespace Atlassian.Jira
             }
 
             return this._cachedIssues[projectKey];
-        }
-
-        private void EnsureRestClient()
-        {
-            if (this.RestClient == null)
-            {
-                throw new NotSupportedException("Operation is only supported by REST API.");
-            }
         }
     }
 }

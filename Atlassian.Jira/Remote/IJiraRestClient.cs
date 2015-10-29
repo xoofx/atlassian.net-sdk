@@ -99,12 +99,7 @@ namespace Atlassian.Jira.Remote
         /// <summary>
         /// Returns all custom fields within JIRA.
         /// </summary>
-        Task<IEnumerable<CustomField>> GetCustomFieldsAsync();
-
-        /// <summary>
-        /// Returns the favourite filters for the user.
-        /// </summary>
-        Task<IEnumerable<JiraFilter>> GetFavouriteFiltersAsync();
+        Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CancellationToken token);
 
         /// <summary>
         /// Returns the favourite filters for the user.
@@ -115,21 +110,21 @@ namespace Atlassian.Jira.Remote
         /// <summary>
         /// Returns all the issue priorities within JIRA.
         /// </summary>
-        Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync();
+        Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token);
 
         /// <summary>
         /// Returns all the issue resolutions within JIRA
         /// </summary>
-        Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync();
+        Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token);
 
         /// <summary>
         /// Returns all the issue statuses within JIRA.
         /// </summary>
-        Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync();
+        Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token);
 
         /// <summary>
         /// Returns all the issue types within JIRA.
         /// </summary>
-        Task<IEnumerable<IssueType>> GetIssueTypesAsync();
+        Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token);
     }
 }

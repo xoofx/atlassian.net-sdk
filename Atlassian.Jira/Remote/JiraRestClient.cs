@@ -145,6 +145,61 @@ namespace Atlassian.Jira.Remote
             return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), _serializerSettings);
         }
 
+        public Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CancellationToken token)
+        {
+            if (this._customFields == null)
+            {
+                return this.ExecuteRequestAsync<RemoteField[]>(Method.GET, "rest/api/2/field", null, token).ContinueWith<IEnumerable<CustomField>>(task =>
+                {
+                    this._customFields = task.Result.Where(f => f.IsCustomField).ToArray();
+                    return this._customFields.Select(f => new CustomField(f));
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<CustomField>>();
+                taskSource.SetResult(this._customFields.Select(f => new CustomField(f)));
+                return taskSource.Task;
+            }
+        }
+
+        public Task<IEnumerable<JiraFilter>> GetFavouriteFiltersAsync(CancellationToken token)
+        {
+            return this.ExecuteRequestAsync<IEnumerable<JiraFilter>>(Method.GET, "rest/api/2/filter/favourite", null, token);
+        }
+
+        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token)
+        {
+            return this.ExecuteRequestAsync<RemotePriority[]>(Method.GET, "rest/api/2/priority", null, token).ContinueWith(task =>
+            {
+                return task.Result.Select(p => new IssuePriority(p));
+            });
+        }
+
+        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token)
+        {
+            return this.ExecuteRequestAsync<RemoteResolution[]>(Method.GET, "rest/api/2/resolution", null, token).ContinueWith(task =>
+            {
+                return task.Result.Select(r => new IssueResolution(r));
+            });
+        }
+
+        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)
+        {
+            return this.ExecuteRequestAsync<RemoteStatus[]>(Method.GET, "rest/api/2/status", null, token).ContinueWith(task =>
+            {
+                return task.Result.Select(s => new IssueStatus(s));
+            });
+        }
+
+        public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token)
+        {
+            return this.ExecuteRequestAsync<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype", null, token).ContinueWith(task =>
+            {
+                return task.Result.Select(t => new IssueType(t));
+            });
+        }
+
         private void LogRequest(RestRequest request, object body = null)
         {
             if (this._clientSettings.EnableRequestTrace)
@@ -261,14 +316,6 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequest<RemotePriority[]>(Method.GET, "rest/api/2/priority");
         }
 
-        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync()
-        {
-            return this.ExecuteRequestAsync<RemotePriority[]>(Method.GET, "rest/api/2/priority").ContinueWith(task =>
-            {
-                return task.Result.Select(p => new IssuePriority(p));
-            });
-        }
-
         public RemoteField[] GetCustomFields(string token)
         {
             if (this._customFields == null)
@@ -278,24 +325,6 @@ namespace Atlassian.Jira.Remote
             }
 
             return this._customFields;
-        }
-
-        public Task<IEnumerable<CustomField>> GetCustomFieldsAsync()
-        {
-            if (this._customFields == null)
-            {
-                return this.ExecuteRequestAsync<RemoteField[]>(Method.GET, "rest/api/2/field").ContinueWith<IEnumerable<CustomField>>(task =>
-                {
-                    this._customFields = task.Result.Where(f => f.IsCustomField).ToArray();
-                    return this._customFields.Select(f => new CustomField(f));
-                });
-            }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<CustomField>>();
-                taskSource.SetResult(this._customFields.Select(f => new CustomField(f)));
-                return taskSource.Task;
-            }
         }
 
         public RemoteField[] GetFieldsForEdit(string token, string key)
@@ -325,14 +354,6 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequest<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype");
         }
 
-        public Task<IEnumerable<IssueType>> GetIssueTypesAsync()
-        {
-            return this.ExecuteRequestAsync<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype").ContinueWith(task =>
-            {
-                return task.Result.Select(t => new IssueType(t));
-            });
-        }
-
         public DateTime GetResolutionDateByKey(string token, string issueKey)
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=resolutiondate", issueKey);
@@ -348,16 +369,6 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequest<RemoteFilter[]>(Method.GET, "rest/api/2/filter/favourite");
         }
 
-        public Task<IEnumerable<JiraFilter>> GetFavouriteFiltersAsync()
-        {
-            return this.GetFavouriteFiltersAsync(CancellationToken.None);
-        }
-
-        public Task<IEnumerable<JiraFilter>> GetFavouriteFiltersAsync(CancellationToken token)
-        {
-            return this.ExecuteRequestAsync<IEnumerable<JiraFilter>>(Method.GET, "rest/api/2/filter/favourite", null, token);
-        }
-
         public RemoteIssue[] GetIssuesFromFilterWithLimit(string token, string filterId, int offset, int maxResults)
         {
             var resource = String.Format("rest/api/2/filter/{0}", filterId);
@@ -371,25 +382,9 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequest<RemoteStatus[]>(Method.GET, "rest/api/2/status");
         }
 
-        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync()
-        {
-            return this.ExecuteRequestAsync<RemoteStatus[]>(Method.GET, "rest/api/2/status").ContinueWith(task =>
-            {
-                return task.Result.Select(s => new IssueStatus(s));
-            });
-        }
-
         public RemoteResolution[] GetResolutions(string token)
         {
             return this.ExecuteRequest<RemoteResolution[]>(Method.GET, "rest/api/2/resolution");
-        }
-
-        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync()
-        {
-            return this.ExecuteRequestAsync<RemoteResolution[]>(Method.GET, "rest/api/2/resolution").ContinueWith(task =>
-            {
-                return task.Result.Select(r => new IssueResolution(r));
-            });
         }
 
         public RemoteComment[] GetCommentsFromIssue(string token, string key)
