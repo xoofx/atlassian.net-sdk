@@ -265,7 +265,7 @@ namespace Atlassian.Jira.Remote
 
         public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt = 0)
         {
-            return this.GetIssuesFromJqlSearchAsync(jqlSearch, maxResults, startAt);
+            return this.GetIssuesFromJqlSearchAsync(jqlSearch, maxResults, startAt, CancellationToken.None);
         }
 
         public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt, CancellationToken token)
