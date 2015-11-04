@@ -818,8 +818,8 @@ namespace Atlassian.Jira.Test.Integration
         {
             var filters = _jira.GetFilters();
 
-            Assert.Equal(1, filters.Count());
-            Assert.Equal("One Issue Filter", filters.First().Name);
+            Assert.True(filters.Count() > 1);
+            Assert.True(filters.Any(f => f.Name == "One Issue Filter"));
         }
 
         [Fact]
