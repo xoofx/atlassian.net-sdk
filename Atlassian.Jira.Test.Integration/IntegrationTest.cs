@@ -295,7 +295,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public async Task GetIssuesFromJqlAsync()
         {
-            var issues = await _jira.GetIssuesFromJqlAsync("key = TST-1");
+            var issues = await _jira.RestClient.GetIssuesFromJqlAsync("key = TST-1");
             Assert.Equal(issues.Count(), 1);
         }
         #endregion

@@ -74,13 +74,13 @@ namespace Atlassian.Jira.Remote
         Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody, CancellationToken token);
 
         /// <summary>
-        /// Execute a specific JQL query and return the resulting issues.
+        /// Execute a specific JQL query and return the resulting issues
         /// </summary>
         /// <param name="jql">JQL search query</param>
         /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
-        Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt = 0);
-
+        /// <returns>Collection of Issues that match the search query</returns>
+        Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0);
         /// <summary>
         /// Execute a specific JQL query and return the resulting issues.
         /// </summary>
@@ -88,7 +88,7 @@ namespace Atlassian.Jira.Remote
         /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt, CancellationToken token);
+        Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token);
 
         /// <summary>
         /// Gets time tracking information for an issue.

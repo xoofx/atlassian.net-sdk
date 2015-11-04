@@ -124,14 +124,19 @@ namespace Atlassian.Jira
 
             if (_restClient == null && !String.IsNullOrEmpty(jiraService.Url))
             {
-                if (this._credentials == null)
+                var options = new JiraRestClient.Options()
                 {
-                    this._restClient = new JiraRestClient(jiraService.Url);
-                }
-                else
+                    Url = jiraService.Url,
+                    GetCurrentJiraFunc = () => this
+                };
+
+                if (this._credentials != null)
                 {
-                    this._restClient = new JiraRestClient(jiraService.Url, _credentials.UserName, _credentials.Password);
+                    options.Username = _credentials.UserName;
+                    options.Password = _credentials.Password;
                 }
+
+                this._restClient = new JiraRestClient(options);
             }
         }
 
@@ -145,10 +150,20 @@ namespace Atlassian.Jira
         /// <returns>Jira object configured to use REST API.</returns>
         public static Jira CreateRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
-            settings = settings ?? new JiraRestClientSettings();
-            var restClient = new JiraRestClient(url, username, password, settings);
+            Jira jira = null;
+            var options = new JiraRestClient.Options()
+            {
+                Url = url,
+                Username = username,
+                Password = password,
+                RestClientSettings = settings ?? new JiraRestClientSettings(),
+                GetCurrentJiraFunc = () => jira
+            };
 
-            return CreateRestClient(restClient, new JiraCredentials(username, password));
+            var restClient = new JiraRestClient(options);
+            jira = CreateRestClient(restClient, new JiraCredentials(username, password));
+
+            return jira;
         }
 
         /// <summary>
@@ -300,38 +315,6 @@ namespace Atlassian.Jira
             });
 
             return issues;
-        }
-
-        /// <summary>
-        /// Execute a specific JQL query and return the resulting issues
-        /// </summary>
-        /// <param name="jql">JQL search query</param>
-        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
-        /// <param name="startAt">Index of the first issue to return (0-based)</param>
-        /// <returns>Collection of Issues that match the search query</returns>
-        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0)
-        {
-            return this.GetIssuesFromJqlAsync(jql, maxIssues ?? MaxIssuesPerRequest, startAt, CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Execute a specific JQL query and return the resulting issues.
-        /// </summary>
-        /// <param name="jql">JQL search query</param>
-        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
-        /// <param name="startAt">Index of the first issue to return (0-based)</param>
-        /// <param name="token">Cancellation token for this operation.</param>
-        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int maxIssues, int startAt, CancellationToken token)
-        {
-            if (this.Debug)
-            {
-                Trace.WriteLine("JQL: " + jql);
-            }
-
-            return this.RestClient.GetIssuesFromJqlSearchAsync(jql, maxIssues, startAt, token).ContinueWith<IEnumerable<Issue>>(task =>
-            {
-                return task.Result.Select(remoteIssue => new Issue(this, remoteIssue));
-            });
         }
 
         /// <summary>

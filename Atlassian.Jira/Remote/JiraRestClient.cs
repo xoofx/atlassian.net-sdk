@@ -17,22 +17,33 @@ namespace Atlassian.Jira.Remote
     /// </summary>
     internal class JiraRestClient : IJiraClient
     {
+        public class Options
+        {
+            public JiraRestClientSettings RestClientSettings { get; set; }
+            public string Username { get; set; }
+            public string Password { get; set; }
+            public string Url { get; set; }
+            public Func<Jira> GetCurrentJiraFunc { get; set; }
+        }
+
         private readonly RestClient _restClient;
         private readonly JiraRestClientSettings _clientSettings;
+        private readonly Options _options;
 
         private JsonSerializerSettings _serializerSettings;
         private RemoteField[] _customFields;
 
-        public JiraRestClient(string jiraBaseUrl, string username = null, string password = null, JiraRestClientSettings settings = null)
+        public JiraRestClient(Options options)
         {
-            var url = jiraBaseUrl.EndsWith("/") ? jiraBaseUrl : jiraBaseUrl += "/";
+            var url = options.Url.EndsWith("/") ? options.Url : options.Url += "/";
 
-            this._clientSettings = settings ?? new JiraRestClientSettings();
+            this._clientSettings = options.RestClientSettings ?? new JiraRestClientSettings();
+            this._options = options;
             this._restClient = new RestClient(url);
 
-            if (!String.IsNullOrEmpty(username) && !String.IsNullOrEmpty(password))
+            if (!String.IsNullOrEmpty(options.Username) && !String.IsNullOrEmpty(options.Password))
             {
-                this._restClient.Authenticator = new HttpBasicAuthenticator(username, password);
+                this._restClient.Authenticator = new HttpBasicAuthenticator(options.Username, options.Password);
             }
         }
 
@@ -135,9 +146,36 @@ namespace Atlassian.Jira.Remote
             return response;
         }
 
-        /// <summary>
-        /// Gets time tracking information for this issue.
-        /// </summary>
+        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0)
+        {
+            return this.GetIssuesFromJqlAsync(jql, maxIssues, startAt, CancellationToken.None);
+        }
+
+        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
+        {
+            var jira = this._options.GetCurrentJiraFunc();
+            var parameters = new
+            {
+                jql = jql,
+                startAt = startAt,
+                maxResults = maxIssues ?? jira.MaxIssuesPerRequest,
+            };
+
+            return this.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ContinueWith<IEnumerable<Issue>>(task =>
+            {
+                var issues = (JArray)task.Result["issues"];
+
+                return issues
+                    .Cast<JObject>()
+                    .Select(issueJson =>
+                    {
+                        var remoteIssue = JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue;
+                        return new Issue(jira, remoteIssue);
+                    })
+                    .ToArray();
+            });
+        }
+
         public IssueTimeTrackingData GetTimeTrackingData(string issueKey)
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=timetracking", issueKey);
@@ -261,31 +299,6 @@ namespace Atlassian.Jira.Remote
 
             var issues = (JArray)responseObj["issues"];
             return issues.Cast<JObject>().Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue).ToArray();
-        }
-
-        public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt = 0)
-        {
-            return this.GetIssuesFromJqlSearchAsync(jqlSearch, maxResults, startAt, CancellationToken.None);
-        }
-
-        public Task<RemoteIssue[]> GetIssuesFromJqlSearchAsync(string jqlSearch, int maxResults, int startAt, CancellationToken token)
-        {
-            var parameters = new
-            {
-                jql = jqlSearch,
-                startAt = startAt,
-                maxResults = maxResults,
-            };
-
-            return this.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ContinueWith<RemoteIssue[]>(task =>
-            {
-                var issues = (JArray)task.Result["issues"];
-
-                return issues
-                    .Cast<JObject>()
-                    .Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue)
-                    .ToArray();
-            });
         }
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
