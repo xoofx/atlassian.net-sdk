@@ -12,7 +12,7 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IntegrationTest
     {
-        private const string HOST = "http://40.118.246.128:8080/";
+        private const string HOST = "http://40.118.250.172:8080/";
 
         private readonly Jira _jira;
         private readonly Random _random;
@@ -903,11 +903,11 @@ namespace Atlassian.Jira.Test.Integration
         {
             // First request.
             var jira = CreateJiraClient();
-            var result1 = await _jira.GetIssueStatusesAsync(CancellationToken.None);
+            var result1 = await _jira.RestClient.GetIssueStatusesAsync(CancellationToken.None);
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.GetIssueStatusesAsync(CancellationToken.None);
+            var result2 = await _jira.RestClient.GetIssueStatusesAsync(CancellationToken.None);
             Assert.Equal(result1.Count(), result2.Count());
         }
 
@@ -916,11 +916,11 @@ namespace Atlassian.Jira.Test.Integration
         {
             // First request.
             var jira = CreateJiraClient();
-            var result1 = await _jira.GetIssueTypesAsync(CancellationToken.None);
+            var result1 = await _jira.RestClient.GetIssueTypesAsync(CancellationToken.None);
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.GetIssueTypesAsync(CancellationToken.None);
+            var result2 = await _jira.RestClient.GetIssueTypesAsync(CancellationToken.None);
             Assert.Equal(result1.Count(), result2.Count());
         }
 
@@ -929,11 +929,11 @@ namespace Atlassian.Jira.Test.Integration
         {
             // First request.
             var jira = CreateJiraClient();
-            var result1 = await _jira.GetIssuePrioritiesAsync(CancellationToken.None);
+            var result1 = await _jira.RestClient.GetIssuePrioritiesAsync(CancellationToken.None);
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.GetIssuePrioritiesAsync(CancellationToken.None);
+            var result2 = await _jira.RestClient.GetIssuePrioritiesAsync(CancellationToken.None);
             Assert.Equal(result1.Count(), result2.Count());
         }
 
@@ -942,11 +942,11 @@ namespace Atlassian.Jira.Test.Integration
         {
             // First request.
             var jira = CreateJiraClient();
-            var result1 = await _jira.GetIssueResolutionsAsync(CancellationToken.None);
+            var result1 = await _jira.RestClient.GetIssueResolutionsAsync(CancellationToken.None);
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.GetIssueResolutionsAsync(CancellationToken.None);
+            var result2 = await _jira.RestClient.GetIssueResolutionsAsync(CancellationToken.None);
             Assert.Equal(result1.Count(), result2.Count());
         }
 

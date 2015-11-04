@@ -31,7 +31,6 @@ namespace Atlassian.Jira.Remote
         private readonly Options _options;
 
         private JsonSerializerSettings _serializerSettings;
-        private RemoteField[] _customFields;
 
         public JiraRestClient(Options options)
         {
@@ -183,20 +182,35 @@ namespace Atlassian.Jira.Remote
             return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), _serializerSettings);
         }
 
+        public RemoteField[] GetCustomFields(string token)
+        {
+            try
+            {
+                return GetCustomFieldsAsync(CancellationToken.None).Result.Select(field => field.RemoteField).ToArray();
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
         public Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CancellationToken token)
         {
-            if (this._customFields == null)
+            var cache = this._options.RestClientSettings.Cache;
+
+            if (!cache.CustomFields.Any())
             {
                 return this.ExecuteRequestAsync<RemoteField[]>(Method.GET, "rest/api/2/field", null, token).ContinueWith<IEnumerable<CustomField>>(task =>
                 {
-                    this._customFields = task.Result.Where(f => f.IsCustomField).ToArray();
-                    return this._customFields.Select(f => new CustomField(f));
+                    var results = task.Result.Where(f => f.IsCustomField).Select(f => new CustomField(f));
+                    cache.CustomFields.AddIfMIssing(results);
+                    return results;
                 });
             }
             else
             {
                 var taskSource = new TaskCompletionSource<IEnumerable<CustomField>>();
-                taskSource.SetResult(this._customFields.Select(f => new CustomField(f)));
+                taskSource.SetResult(cache.CustomFields.Values);
                 return taskSource.Task;
             }
         }
@@ -208,34 +222,86 @@ namespace Atlassian.Jira.Remote
 
         public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token)
         {
-            return this.ExecuteRequestAsync<RemotePriority[]>(Method.GET, "rest/api/2/priority", null, token).ContinueWith(task =>
+            var cache = this._options.RestClientSettings.Cache;
+
+            if (!cache.Priorities.Any())
             {
-                return task.Result.Select(p => new IssuePriority(p));
-            });
+                return this.ExecuteRequestAsync<RemotePriority[]>(Method.GET, "rest/api/2/priority", null, token).ContinueWith(task =>
+                {
+                    var results = task.Result.Select(p => new IssuePriority(p));
+                    cache.Priorities.AddIfMIssing(results);
+                    return results;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<IssuePriority>>();
+                taskSource.SetResult(cache.Priorities.Values);
+                return taskSource.Task;
+            }
         }
 
         public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token)
         {
-            return this.ExecuteRequestAsync<RemoteResolution[]>(Method.GET, "rest/api/2/resolution", null, token).ContinueWith(task =>
+            var cache = this._options.RestClientSettings.Cache;
+
+            if (!cache.Resolutions.Any())
             {
-                return task.Result.Select(r => new IssueResolution(r));
-            });
+                return this.ExecuteRequestAsync<RemoteResolution[]>(Method.GET, "rest/api/2/resolution", null, token).ContinueWith(task =>
+                {
+                    var results = task.Result.Select(r => new IssueResolution(r));
+                    cache.Resolutions.AddIfMIssing(results);
+                    return results;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<IssueResolution>>();
+                taskSource.SetResult(cache.Resolutions.Values);
+                return taskSource.Task;
+            }
         }
 
         public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)
         {
-            return this.ExecuteRequestAsync<RemoteStatus[]>(Method.GET, "rest/api/2/status", null, token).ContinueWith(task =>
+            var cache = this._options.RestClientSettings.Cache;
+
+            if (!cache.Statuses.Any())
             {
-                return task.Result.Select(s => new IssueStatus(s));
-            });
+                return this.ExecuteRequestAsync<RemoteStatus[]>(Method.GET, "rest/api/2/status", null, token).ContinueWith(task =>
+                {
+                    var results = task.Result.Select(s => new IssueStatus(s));
+                    cache.Statuses.AddIfMIssing(results);
+                    return results;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<IssueStatus>>();
+                taskSource.SetResult(cache.Statuses.Values);
+                return taskSource.Task;
+            }
         }
 
         public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token)
         {
-            return this.ExecuteRequestAsync<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype", null, token).ContinueWith(task =>
+            var cache = _options.RestClientSettings.Cache;
+
+            if (!cache.IssueTypes.ContainsKey(Jira.ALL_PROJECTS_KEY))
             {
-                return task.Result.Select(t => new IssueType(t));
-            });
+                return this.ExecuteRequestAsync<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype", null, token).ContinueWith<IEnumerable<IssueType>>(task =>
+                {
+                    var results = task.Result.Select(t => new IssueType(t));
+                    cache.IssueTypes.AddIfMIssing(new JiraEntityDictionary<IssueType>(Jira.ALL_PROJECTS_KEY, results));
+                    return results;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<IssueType>>();
+                taskSource.SetResult(cache.IssueTypes[Jira.ALL_PROJECTS_KEY].Values);
+                return taskSource.Task;
+            }
         }
 
         private void LogRequest(RestRequest request, object body = null)
@@ -327,17 +393,6 @@ namespace Atlassian.Jira.Remote
         public RemotePriority[] GetPriorities(string token)
         {
             return this.ExecuteRequest<RemotePriority[]>(Method.GET, "rest/api/2/priority");
-        }
-
-        public RemoteField[] GetCustomFields(string token)
-        {
-            if (this._customFields == null)
-            {
-                this._customFields = this.ExecuteRequest<RemoteField[]>(Method.GET, "rest/api/2/field")
-                    .Where(f => f.IsCustomField).ToArray();
-            }
-
-            return this._customFields;
         }
 
         public RemoteField[] GetFieldsForEdit(string token, string key)

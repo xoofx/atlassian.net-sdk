@@ -61,6 +61,8 @@
     <Compile Include="ComparableString.cs" />
     <Compile Include="CustomField.cs" />
     <Compile Include="ICustomFieldValueSerializer.cs" />
+    <Compile Include="IJiraEntity.cs" />
+    <Compile Include="JiraCache.cs" />
     <Compile Include="Remote\IJiraClient.cs" />
     <Compile Include="Remote\IJiraRestClient.cs" />
     <Compile Include="IssueStatus.cs" />
@@ -98,6 +100,7 @@
     <Compile Include="Linq\IJqlExpressionVisitor.cs" />
     <Compile Include="Linq\JiraQueryable.cs" />
     <Compile Include="Linq\JiraQueryProvider.cs" />
+    <Compile Include="JiraEntityDictionary.cs" />
     <Compile Include="Remote\JiraRestClient.cs" />
     <Compile Include="Remote\JiraSoapService.cs" />
     <Compile Include="Remote\JiraSoapServiceClientFactory.cs" />

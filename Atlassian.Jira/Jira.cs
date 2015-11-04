@@ -19,10 +19,10 @@ namespace Atlassian.Jira
     public class Jira
     {
         internal const string DEFAULT_DATE_FORMAT = "yyyy/MM/dd";
+        internal const string ALL_PROJECTS_KEY = "[ALL_PROJECTS]";
         internal static CultureInfo DefaultCultureInfo = CultureInfo.GetCultureInfo("en-us");
 
         private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
-        private const string ALL_PROJECTS_KEY = "[ALL_PROJECTS]";
         private const string REMOTE_AUTH_EXCEPTION_STRING = "com.atlassian.jira.rpc.exception.RemoteAuthenticationException";
 
         private readonly JiraQueryProvider _provider;
@@ -30,22 +30,13 @@ namespace Atlassian.Jira
         private readonly IFileSystem _fileSystem;
         private readonly IJiraRestClient _restClient;
         private readonly JiraCredentials _credentials;
+        private readonly JiraCache _cache;
 
         private string _token = String.Empty;
-        private Dictionary<string, IEnumerable<ProjectVersion>> _cachedVersions = new Dictionary<string, IEnumerable<ProjectVersion>>();
-        private Dictionary<string, IEnumerable<ProjectComponent>> _cachedComponents = new Dictionary<string, IEnumerable<ProjectComponent>>();
-        private Dictionary<string, IEnumerable<IssueType>> _cachedIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
-        private Dictionary<string, IEnumerable<IssueType>> _cachedSubTaskIssueTypes = new Dictionary<string, IEnumerable<IssueType>>();
         private Dictionary<string, Issue> _cachedIssues = new Dictionary<string, Issue>();
-        private IEnumerable<JiraNamedEntity> _cachedFilters = null;
-        private IEnumerable<IssuePriority> _cachedPriorities = null;
-        private IEnumerable<IssueStatus> _cachedStatuses = null;
-        private IEnumerable<IssueResolution> _cachedResolutions = null;
-        private IEnumerable<Project> _cachedProjects = null;
-
-        private IEnumerable<CustomField> _cachedCustomFields = null;
         private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
         private DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>> _cachedFieldsForAction = new DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>>();
+        private IEnumerable<JiraNamedEntity> _cachedFilters = null;
 
         /// <summary>
         /// Create a proxy that connects with a JIRA server with anonymous access.
@@ -110,7 +101,8 @@ namespace Atlassian.Jira
                     IJiraSoapClient jiraService,
                     IFileSystem fileSystem,
                     JiraCredentials credentials = null,
-                    string accessToken = null)
+                    string accessToken = null,
+                    JiraCache cache = null)
         {
             _provider = new JiraQueryProvider(translator, this);
             _jiraService = jiraService;
@@ -118,6 +110,7 @@ namespace Atlassian.Jira
             _token = accessToken;
             _credentials = credentials;
             _restClient = jiraService as IJiraRestClient;
+            _cache = cache ?? new JiraCache();
 
             this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
@@ -161,7 +154,7 @@ namespace Atlassian.Jira
             };
 
             var restClient = new JiraRestClient(options);
-            jira = CreateRestClient(restClient, new JiraCredentials(username, password));
+            jira = CreateRestClient(restClient, new JiraCredentials(username, password), options.RestClientSettings.Cache);
 
             return jira;
         }
@@ -169,13 +162,15 @@ namespace Atlassian.Jira
         /// <summary>
         /// Creates a JIRA client with service dependency.
         /// </summary>
-        public static Jira CreateRestClient(IJiraClient jiraClient, JiraCredentials credentials = null)
+        public static Jira CreateRestClient(IJiraClient jiraClient, JiraCredentials credentials = null, JiraCache cache = null)
         {
             return new Jira(
                 new JqlExpressionVisitor(),
                 jiraClient,
                 new FileSystem(),
-                credentials);
+                credentials,
+                null,
+                cache);
         }
 
         private bool IsAnonymous
@@ -347,17 +342,16 @@ namespace Atlassian.Jira
         /// </summary>
         public IEnumerable<IssueType> GetSubTaskIssueTypes()
         {
-            if (!_cachedSubTaskIssueTypes.ContainsKey(ALL_PROJECTS_KEY))
+            if (!_cache.SubTaskIssueTypes.ContainsKey(ALL_PROJECTS_KEY))
             {
                 WithToken(token =>
                 {
-                    _cachedSubTaskIssueTypes.Add(
-                        ALL_PROJECTS_KEY,
-                        _jiraService.GetSubTaskIssueTypes(token).Select(remoteIssueType => new IssueType(remoteIssueType)));
+                    var results = _jiraService.GetSubTaskIssueTypes(token).Select(remoteIssueType => new IssueType(remoteIssueType));
+                    _cache.SubTaskIssueTypes.AddIfMIssing(new JiraEntityDictionary<IssueType>(ALL_PROJECTS_KEY, results));
                 });
             }
 
-            return _cachedSubTaskIssueTypes[ALL_PROJECTS_KEY];
+            return _cache.SubTaskIssueTypes[ALL_PROJECTS_KEY].Values;
         }
 
         /// <summary>
@@ -379,36 +373,16 @@ namespace Atlassian.Jira
 
             projectKey = projectKey ?? ALL_PROJECTS_KEY;
 
-            if (!_cachedIssueTypes.ContainsKey(projectKey))
+            if (!_cache.IssueTypes.ContainsKey(projectKey))
             {
                 WithToken(token =>
                 {
-                    _cachedIssueTypes.Add(projectKey, _jiraService.GetIssueTypes(token, projectId).Select(remoteIssueType => new IssueType(remoteIssueType)));
+                    var result = _jiraService.GetIssueTypes(token, projectId).Select(remoteIssueType => new IssueType(remoteIssueType));
+                    _cache.IssueTypes.AddIfMIssing(new JiraEntityDictionary<IssueType>(projectKey, result));
                 });
             }
 
-            return _cachedIssueTypes[projectKey];
-        }
-
-        /// <summary>
-        /// Returns all the issue types within JIRA.
-        /// </summary>
-        public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token)
-        {
-            if (!_cachedIssueTypes.ContainsKey(ALL_PROJECTS_KEY))
-            {
-                return this.RestClient.GetIssueTypesAsync(token).ContinueWith(task =>
-                {
-                    this._cachedIssueTypes.Add(ALL_PROJECTS_KEY, task.Result);
-                    return task.Result;
-                });
-            }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<IssueType>>();
-                taskSource.SetResult(this._cachedIssueTypes[ALL_PROJECTS_KEY]);
-                return taskSource.Task;
-            }
+            return _cache.IssueTypes[projectKey].Values;
         }
 
         /// <summary>
@@ -418,15 +392,16 @@ namespace Atlassian.Jira
         /// <returns>Collection of JIRA versions.</returns>
         public IEnumerable<ProjectVersion> GetProjectVersions(string projectKey)
         {
-            if (!_cachedVersions.ContainsKey(projectKey))
+            if (!_cache.Versions.ContainsKey(projectKey))
             {
                 WithToken(token =>
                 {
-                    _cachedVersions.Add(projectKey, _jiraService.GetVersions(token, projectKey).Select(v => new ProjectVersion(v)));
+                    var results = _jiraService.GetVersions(token, projectKey).Select(v => new ProjectVersion(v));
+                    _cache.Versions.AddIfMIssing(new JiraEntityDictionary<ProjectVersion>(projectKey, results));
                 });
             }
 
-            return _cachedVersions[projectKey];
+            return _cache.Versions[projectKey].Values;
         }
 
         /// <summary>
@@ -436,15 +411,16 @@ namespace Atlassian.Jira
         /// <returns>Collection of JIRA components</returns>
         public IEnumerable<ProjectComponent> GetProjectComponents(string projectKey)
         {
-            if (!_cachedComponents.ContainsKey(projectKey))
+            if (!_cache.Components.ContainsKey(projectKey))
             {
                 WithToken(token =>
                 {
-                    _cachedComponents.Add(projectKey, _jiraService.GetComponents(token, projectKey).Select(c => new ProjectComponent(c)));
+                    var results = _jiraService.GetComponents(token, projectKey).Select(c => new ProjectComponent(c));
+                    _cache.Components.AddIfMIssing(new JiraEntityDictionary<ProjectComponent>(projectKey, results));
                 });
             }
 
-            return _cachedComponents[projectKey];
+            return _cache.Components[projectKey].Values;
         }
 
         /// <summary>
@@ -453,37 +429,15 @@ namespace Atlassian.Jira
         /// <returns>Collection of JIRA issue priorities</returns>
         public IEnumerable<IssuePriority> GetIssuePriorities()
         {
-            if (_cachedPriorities == null)
+            if (!_cache.Priorities.Any())
             {
                 WithToken(token =>
                 {
-                    _cachedPriorities = _jiraService.GetPriorities(token).Select(p => new IssuePriority(p));
+                    _cache.Priorities.AddIfMIssing(_jiraService.GetPriorities(token).Select(p => new IssuePriority(p)));
                 });
             }
 
-            return _cachedPriorities;
-        }
-
-        /// <summary>
-        /// Returns all the issue priorities within JIRA.
-        /// </summary>
-        /// <returns>Collection of JIRA issue priorities.</returns>
-        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token)
-        {
-            if (_cachedPriorities == null)
-            {
-                return this.RestClient.GetIssuePrioritiesAsync(token).ContinueWith(task =>
-                {
-                    this._cachedPriorities = task.Result;
-                    return this._cachedPriorities;
-                });
-            }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<IssuePriority>>();
-                taskSource.SetResult(this._cachedPriorities);
-                return taskSource.Task;
-            }
+            return _cache.Priorities.Values;
         }
 
         /// <summary>
@@ -492,37 +446,15 @@ namespace Atlassian.Jira
         /// <returns>Collection of JIRA issue statuses</returns>
         public IEnumerable<IssueStatus> GetIssueStatuses()
         {
-            if (_cachedStatuses == null)
+            if (!_cache.Statuses.Any())
             {
                 WithToken(token =>
                 {
-                    _cachedStatuses = _jiraService.GetStatuses(token).Select(s => new IssueStatus(s));
+                    _cache.Statuses.AddIfMIssing(_jiraService.GetStatuses(token).Select(s => new IssueStatus(s)));
                 });
             }
 
-            return _cachedStatuses;
-        }
-
-        /// <summary>
-        /// Returns all the issue statuses within JIRA.
-        /// </summary>
-        /// <returns>Collection of JIRA issue statuses.</returns>
-        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)
-        {
-            if (_cachedStatuses == null)
-            {
-                return this.RestClient.GetIssueStatusesAsync(token).ContinueWith(task =>
-                {
-                    this._cachedStatuses = task.Result;
-                    return this._cachedStatuses;
-                });
-            }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<IssueStatus>>();
-                taskSource.SetResult(this._cachedStatuses);
-                return taskSource.Task;
-            }
+            return _cache.Statuses.Values;
         }
 
         /// <summary>
@@ -531,37 +463,15 @@ namespace Atlassian.Jira
         /// <returns>Collection of JIRA issue resolutions</returns>
         public IEnumerable<IssueResolution> GetIssueResolutions()
         {
-            if (_cachedResolutions == null)
+            if (!_cache.Resolutions.Any())
             {
                 WithToken(token =>
                 {
-                    _cachedResolutions = _jiraService.GetResolutions(token).Select(r => new IssueResolution(r));
+                    _cache.Resolutions.AddIfMIssing(_jiraService.GetResolutions(token).Select(r => new IssueResolution(r)));
                 });
             }
 
-            return _cachedResolutions;
-        }
-
-        /// <summary>
-        /// Returns all the issue resolutions within JIRA
-        /// </summary>
-        /// <returns>Collection of JIRA issue resolutions</returns>
-        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token)
-        {
-            if (_cachedResolutions == null)
-            {
-                return this.RestClient.GetIssueResolutionsAsync(token).ContinueWith(task =>
-                {
-                    this._cachedResolutions = task.Result;
-                    return this._cachedResolutions;
-                });
-            }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<IssueResolution>>();
-                taskSource.SetResult(this._cachedResolutions);
-                return taskSource.Task;
-            }
+            return _cache.Resolutions.Values;
         }
 
         /// <summary>
@@ -570,14 +480,14 @@ namespace Atlassian.Jira
         /// <returns>Collection of JIRA custom fields</returns>
         public IEnumerable<CustomField> GetCustomFields()
         {
-            if (_cachedCustomFields == null)
+            if (!_cache.CustomFields.Any())
             {
                 WithToken(token =>
                 {
-                    _cachedCustomFields = _jiraService.GetCustomFields(token).Select(f => new CustomField(f));
+                    _cache.CustomFields.AddIfMIssing(_jiraService.GetCustomFields(token).Select(f => new CustomField(f)));
                 });
             }
-            return _cachedCustomFields;
+            return _cache.CustomFields.Values;
         }
 
         /// <summary>
@@ -601,15 +511,15 @@ namespace Atlassian.Jira
         /// </summary>
         public IEnumerable<Project> GetProjects()
         {
-            if (_cachedProjects == null)
+            if (!_cache.Projects.Any())
             {
                 WithToken(token =>
                 {
-                    _cachedProjects = _jiraService.GetProjects(token).Select(p => new Project(p));
+                    _cache.Projects.AddIfMIssing(_jiraService.GetProjects(token).Select(p => new Project(p)));
                 });
             }
 
-            return _cachedProjects;
+            return _cache.Projects.Values;
         }
 
         /// <summary>
