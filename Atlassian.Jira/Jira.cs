@@ -123,6 +123,7 @@ namespace Atlassian.Jira
                 var options = new JiraRestClient.Options()
                 {
                     Url = jiraService.Url,
+                    RestClientSettings = new JiraRestClientSettings(),
                     GetCurrentJiraFunc = () => this
                 };
 

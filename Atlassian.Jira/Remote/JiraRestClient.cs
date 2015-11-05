@@ -28,7 +28,7 @@ namespace Atlassian.Jira.Remote
 
         private readonly RestClient _restClient;
         private readonly JiraRestClientSettings _clientSettings;
-        private readonly Options _options;
+        private readonly Func<Jira> _getCurrentJiraFunc;
 
         private JsonSerializerSettings _serializerSettings;
 
@@ -37,7 +37,7 @@ namespace Atlassian.Jira.Remote
             var url = options.Url.EndsWith("/") ? options.Url : options.Url += "/";
 
             this._clientSettings = options.RestClientSettings ?? new JiraRestClientSettings();
-            this._options = options;
+            this._getCurrentJiraFunc = options.GetCurrentJiraFunc;
             this._restClient = new RestClient(url);
 
             if (!String.IsNullOrEmpty(options.Username) && !String.IsNullOrEmpty(options.Password))
@@ -152,7 +152,7 @@ namespace Atlassian.Jira.Remote
 
         public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
         {
-            var jira = this._options.GetCurrentJiraFunc();
+            var jira = this._getCurrentJiraFunc();
             var parameters = new
             {
                 jql = jql,
@@ -196,7 +196,7 @@ namespace Atlassian.Jira.Remote
 
         public Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CancellationToken token)
         {
-            var cache = this._options.RestClientSettings.Cache;
+            var cache = this._clientSettings.Cache;
 
             if (!cache.CustomFields.Any())
             {
@@ -222,7 +222,7 @@ namespace Atlassian.Jira.Remote
 
         public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token)
         {
-            var cache = this._options.RestClientSettings.Cache;
+            var cache = this._clientSettings.Cache;
 
             if (!cache.Priorities.Any())
             {
@@ -243,7 +243,7 @@ namespace Atlassian.Jira.Remote
 
         public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token)
         {
-            var cache = this._options.RestClientSettings.Cache;
+            var cache = this._clientSettings.Cache;
 
             if (!cache.Resolutions.Any())
             {
@@ -264,7 +264,7 @@ namespace Atlassian.Jira.Remote
 
         public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)
         {
-            var cache = this._options.RestClientSettings.Cache;
+            var cache = this._clientSettings.Cache;
 
             if (!cache.Statuses.Any())
             {
@@ -285,7 +285,7 @@ namespace Atlassian.Jira.Remote
 
         public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token)
         {
-            var cache = _options.RestClientSettings.Cache;
+            var cache = this._clientSettings.Cache;
 
             if (!cache.IssueTypes.ContainsKey(Jira.ALL_PROJECTS_KEY))
             {
