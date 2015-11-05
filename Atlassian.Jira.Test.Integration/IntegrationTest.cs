@@ -12,7 +12,7 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IntegrationTest
     {
-        private const string HOST = "http://40.118.250.172:8080/";
+        private const string HOST = "http://localhost:2990/jira";
 
         private readonly Jira _jira;
         private readonly Random _random;
@@ -1003,7 +1003,7 @@ namespace Atlassian.Jira.Test.Integration
             var accessToken = _jira.GetAccessToken();
 
             // create a new jira instance using access token only
-            var jiraAccessToken = Jira.CreateSoapClient("http://localhost:2990/jira", accessToken, new JiraCredentials(null));
+            var jiraAccessToken = Jira.CreateSoapClient(HOST, accessToken, new JiraCredentials(null));
 
             // create and query issues
             var summaryValue = "Test Summary from JIRA with access token " + _random.Next(int.MaxValue);
