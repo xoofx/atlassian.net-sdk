@@ -26,7 +26,7 @@ namespace Atlassian.Jira.Test.Integration
         public Jira CreateJiraClient()
         {
 #if SOAP
-            return new Jira(HOST, "admin", "admin");
+            return Jira.CreateSoapClient(HOST, "admin", "admin");
 #else
             return Jira.CreateRestClient(HOST, "admin", "admin");
 #endif
@@ -1003,7 +1003,7 @@ namespace Atlassian.Jira.Test.Integration
             var accessToken = _jira.GetAccessToken();
 
             // create a new jira instance using access token only
-            var jiraAccessToken = new Jira("http://localhost:2990/jira", accessToken);
+            var jiraAccessToken = Jira.CreateSoapClient("http://localhost:2990/jira", accessToken, new JiraCredentials(null));
 
             // create and query issues
             var summaryValue = "Test Summary from JIRA with access token " + _random.Next(int.MaxValue);
