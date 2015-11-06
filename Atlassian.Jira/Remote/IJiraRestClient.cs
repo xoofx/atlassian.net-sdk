@@ -81,6 +81,7 @@ namespace Atlassian.Jira.Remote
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <returns>Collection of Issues that match the search query</returns>
         Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0);
+
         /// <summary>
         /// Execute a specific JQL query and return the resulting issues.
         /// </summary>

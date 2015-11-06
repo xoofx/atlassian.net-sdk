@@ -346,6 +346,18 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Execute a specific JQL query and return the resulting issues.
+        /// </summary>
+        /// <param name="jql">JQL search query</param>
+        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="startAt">Index of the first issue to return (0-based)</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
+        {
+            return this.RestClient.GetIssuesFromJqlAsync(jql, maxIssues, startAt, token);
+        }
+
+        /// <summary>
         /// Returns a new issue that when saved will be created on the remote JIRA server
         /// </summary>
         public Issue CreateIssue(string project, string parentIssueKey = null)
@@ -419,6 +431,14 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns all the issue types within JIRA.
+        /// </summary>
+        public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token)
+        {
+            return this.RestClient.GetIssueTypesAsync(token);
+        }
+
+        /// <summary>
         /// Returns all versions defined on a JIRA project
         /// </summary>
         /// <param name="projectKey">The project to retrieve the versions from</param>
@@ -474,6 +494,14 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns all the issue priorities within JIRA.
+        /// </summary>
+        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token)
+        {
+            return this.RestClient.GetIssuePrioritiesAsync(token);
+        }
+
+        /// <summary>
         /// Returns all the issue statuses within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue statuses</returns>
@@ -488,6 +516,14 @@ namespace Atlassian.Jira
             }
 
             return _cache.Statuses.Values;
+        }
+
+        /// <summary>
+        /// Returns all the issue statuses within JIRA.
+        /// </summary>
+        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)
+        {
+            return this.RestClient.GetIssueStatusesAsync(token);
         }
 
         /// <summary>
@@ -508,6 +544,14 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns all the issue resolutions within JIRA
+        /// </summary>
+        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token)
+        {
+            return this.RestClient.GetIssueResolutionsAsync(token);
+        }
+
+        /// <summary>
         /// Returns all custom fields within JIRA
         /// </summary>
         /// <returns>Collection of JIRA custom fields</returns>
@@ -521,6 +565,14 @@ namespace Atlassian.Jira
                 });
             }
             return _cache.CustomFields.Values;
+        }
+
+        /// <summary>
+        /// Returns all custom fields within JIRA.
+        /// </summary>
+        public Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CancellationToken token)
+        {
+            return this.RestClient.GetCustomFieldsAsync(token);
         }
 
         /// <summary>
