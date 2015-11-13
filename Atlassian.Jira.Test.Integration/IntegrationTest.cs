@@ -102,7 +102,7 @@ namespace Atlassian.Jira.Test.Integration
             subTask.SaveChanges();
 
             Assert.False(parentTask.Type.IsSubTask);
-            Assert.True(subTask.Type.IsSubTask);            
+            Assert.True(subTask.Type.IsSubTask);
             Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
 
             // query the subtask again to make sure it loads everything from server.
@@ -520,10 +520,16 @@ namespace Atlassian.Jira.Test.Integration
             issue.Type = "Bug";
             issue.SaveChanges();
 
+            Assert.Null(issue.ResolutionDate);
+
             issue.WorkflowTransition(WorkflowActions.Resolve);
 
             Assert.Equal("Resolved", issue.Status.Name);
             Assert.Equal("Fixed", issue.Resolution.Name);
+
+#if !SOAP
+            Assert.NotNull(issue.ResolutionDate);
+#endif
         }
 
         [Fact]

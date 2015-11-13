@@ -2457,6 +2457,10 @@ namespace Atlassian.Jira.Remote
         [JsonConverter(typeof(NestedValueJsonConverter), "key")]
         public string parentKey { get; set; }
 
+        [System.Xml.Serialization.SoapIgnore]
+        [JsonProperty("resolutiondate")]
+        public System.Nullable<System.DateTime> resolutionDateReadOnly { get; set; }
+
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
         [JsonConverter(typeof(NestedValueJsonConverter), "name")]
