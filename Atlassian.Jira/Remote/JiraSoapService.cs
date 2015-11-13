@@ -2452,6 +2452,11 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        [System.Xml.Serialization.SoapIgnore]        
+        [JsonProperty("parent")]
+        [JsonConverter(typeof(NestedValueJsonConverter), "key")]
+        public string parentKey { get; set; }
+
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
         [JsonConverter(typeof(NestedValueJsonConverter), "name")]

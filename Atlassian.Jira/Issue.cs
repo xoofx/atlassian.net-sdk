@@ -21,7 +21,6 @@ namespace Atlassian.Jira
     public class Issue : IRemoteIssueFieldProvider
     {
         private readonly Jira _jira;
-        private readonly string _parentIssueKey;
 
         private ComparableString _key;
         private string _project;
@@ -34,6 +33,7 @@ namespace Atlassian.Jira
         private ProjectComponentCollection _components = null;
         private CustomFieldValueCollection _customFields = null;
         private IssueStatus _status;
+        private string _parentIssueKey;       
 
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
             : this(jira, new RemoteIssue() { project = projectKey }, parentIssueKey)
@@ -64,6 +64,11 @@ namespace Atlassian.Jira
             Summary = remoteIssue.summary;
             Votes = remoteIssue.votes;
 
+            if (!String.IsNullOrEmpty(remoteIssue.parentKey))
+            {
+                _parentIssueKey = remoteIssue.parentKey;
+            }
+
             // named entities
             _status = String.IsNullOrEmpty(remoteIssue.status) ? null : new IssueStatus(_jira, remoteIssue.status);
             Priority = String.IsNullOrEmpty(remoteIssue.priority) ? null : new IssuePriority(_jira, remoteIssue.priority);
@@ -90,6 +95,17 @@ namespace Atlassian.Jira
             {
                 return this._originalIssue;
             }
+        }
+
+        /// <summary>
+        /// The parent key if this issue is a subtask.
+        /// </summary>
+        /// <remarks>
+        /// Only available if issue was retrieved using REST API.
+        /// </remarks>
+        public string ParentIssueKey
+        {
+            get { return _parentIssueKey; }
         }
 
         /// <summary>

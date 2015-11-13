@@ -102,7 +102,18 @@ namespace Atlassian.Jira.Test.Integration
             subTask.SaveChanges();
 
             Assert.False(parentTask.Type.IsSubTask);
+            Assert.True(subTask.Type.IsSubTask);            
+            Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
+
+            // query the subtask again to make sure it loads everything from server.
+            subTask = _jira.GetIssue(subTask.Key.Value);
+            Assert.False(parentTask.Type.IsSubTask);
             Assert.True(subTask.Type.IsSubTask);
+
+#if !SOAP
+
+            Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
+#endif
         }
 
         [Fact]
