@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -10,7 +10,7 @@ namespace Atlassian.Jira
     /// Represents a named entity within JIRA. Abstracts the Version and Component used on issues
     /// </summary>
     /// <remarks>http://docs.atlassian.com/rpc-jira-plugin/latest/com/atlassian/jira/rpc/soap/beans/AbstractNamedRemoteEntity.html</remarks>
-    public class JiraNamedEntity
+    public class JiraNamedEntity : IJiraEntity
     {
         private Jira _jira;
         private string _id;
@@ -36,7 +36,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Id of the entity
         /// </summary>
-        public string Id 
+        public string Id
         {
             get
             {
@@ -47,7 +47,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Name of the entity
         /// </summary>
-        public string Name 
+        public string Name
         {
             get
             {

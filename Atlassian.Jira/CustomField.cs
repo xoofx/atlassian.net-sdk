@@ -16,6 +16,14 @@ namespace Atlassian.Jira
             _remoteField = remoteField;
         }
 
+        internal RemoteField RemoteField
+        {
+            get
+            {
+                return this._remoteField;
+            }
+        }
+
         public string CustomType
         {
             get

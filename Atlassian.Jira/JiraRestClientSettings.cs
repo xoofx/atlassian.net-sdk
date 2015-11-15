@@ -22,10 +22,17 @@ namespace Atlassian.Jira
         public IDictionary<string, ICustomFieldValueSerializer> CustomFieldSerializers { get; set; }
 
         /// <summary>
+        /// Cache to store frequently accessed server items.
+        /// </summary>
+        public JiraCache Cache { get; set; }
+
+        /// <summary>
         /// Create a new instance of the settings.
         /// </summary>
         public JiraRestClientSettings()
         {
+            this.Cache = new JiraCache();
+
             this.CustomFieldSerializers = new Dictionary<string, ICustomFieldValueSerializer>();
             this.CustomFieldSerializers.Add(GetBuiltInType("labels"), new MultiStringCustomFieldValueSerializer());
             this.CustomFieldSerializers.Add(GetBuiltInType("float"), new FloatCustomFieldValueSerializer());

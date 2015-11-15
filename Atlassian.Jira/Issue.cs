@@ -21,7 +21,6 @@ namespace Atlassian.Jira
     public class Issue : IRemoteIssueFieldProvider
     {
         private readonly Jira _jira;
-        private readonly string _parentIssueKey;
 
         private ComparableString _key;
         private string _project;
@@ -29,11 +28,13 @@ namespace Atlassian.Jira
         private DateTime? _createDate;
         private DateTime? _updateDate;
         private DateTime? _dueDate;
+        private DateTime? _resolutionDate;
         private ProjectVersionCollection _affectsVersions = null;
         private ProjectVersionCollection _fixVersions = null;
         private ProjectComponentCollection _components = null;
         private CustomFieldValueCollection _customFields = null;
         private IssueStatus _status;
+        private string _parentIssueKey;
 
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
             : this(jira, new RemoteIssue() { project = projectKey }, parentIssueKey)
@@ -56,6 +57,7 @@ namespace Atlassian.Jira
             _createDate = remoteIssue.created;
             _dueDate = remoteIssue.duedate;
             _updateDate = remoteIssue.updated;
+            _resolutionDate = remoteIssue.resolutionDateReadOnly;
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -63,6 +65,11 @@ namespace Atlassian.Jira
             Reporter = remoteIssue.reporter;
             Summary = remoteIssue.summary;
             Votes = remoteIssue.votes;
+
+            if (!String.IsNullOrEmpty(remoteIssue.parentKey))
+            {
+                _parentIssueKey = remoteIssue.parentKey;
+            }
 
             // named entities
             _status = String.IsNullOrEmpty(remoteIssue.status) ? null : new IssueStatus(_jira, remoteIssue.status);
@@ -90,6 +97,17 @@ namespace Atlassian.Jira
             {
                 return this._originalIssue;
             }
+        }
+
+        /// <summary>
+        /// The parent key if this issue is a subtask.
+        /// </summary>
+        /// <remarks>
+        /// Only available if issue was retrieved using REST API.
+        /// </remarks>
+        public string ParentIssueKey
+        {
+            get { return _parentIssueKey; }
         }
 
         /// <summary>
@@ -235,6 +253,21 @@ namespace Atlassian.Jira
             get
             {
                 return _updateDate;
+            }
+        }
+
+        /// <summary>
+        /// Time and date on which this issue was resolved.
+        /// </summary>
+        /// <remarks>
+        /// Only available if issue was retrieved using REST API, use GetResolutionDate
+        /// method for SOAP clients.
+        /// </remarks>
+        public DateTime? ResolutionDate
+        {
+            get
+            {
+                return _resolutionDate;
             }
         }
 
@@ -608,7 +641,8 @@ namespace Atlassian.Jira
             return _jira.WithToken(token =>
             {
                 var date = _jira.RemoteService.GetResolutionDateByKey(token, _originalIssue.key);
-                return date.Ticks > 0 ? date : (DateTime?)null;
+                this._resolutionDate = date.Ticks > 0 ? date : (DateTime?)null;
+                return this._resolutionDate;
             });
         }
 
