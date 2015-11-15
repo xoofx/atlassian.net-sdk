@@ -62,7 +62,9 @@
     <Compile Include="CustomField.cs" />
     <Compile Include="ICustomFieldValueSerializer.cs" />
     <Compile Include="IJiraEntity.cs" />
+    <Compile Include="IPagedQueryResult.cs" />
     <Compile Include="JiraCache.cs" />
+    <Compile Include="PagedQueryResult.cs" />
     <Compile Include="Remote\IJiraClient.cs" />
     <Compile Include="Remote\IJiraRestClient.cs" />
     <Compile Include="IssueStatus.cs" />

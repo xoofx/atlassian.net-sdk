@@ -241,6 +241,32 @@ namespace Atlassian.Jira.Test.Integration
 
         #region Query Issues
         [Fact]
+        public void GetIssuesWithPagingMetadata()
+        {
+            // Arrange: Create 3 issues to query.
+            var summaryValue = "Test-Summary-" + Guid.NewGuid().ToString();
+            for (int i = 0; i < 3; i++)
+            {
+                new Issue(_jira, "TST")
+                {
+                    Type = "1",
+                    Summary = summaryValue,
+                    Assignee = "admin"
+                }.SaveChanges();
+            }
+
+            // Act: Query for paged issues.
+            var jql = String.Format("summary ~ \"{0}\"", summaryValue);
+            var result = _jira.RestClient.GetIssuesFromJqlAsync(jql, 5, 1).Result as IPagedQueryResult<Issue>;
+
+            // Assert
+            Assert.Equal(1, result.StartAt);
+            Assert.Equal(2, result.Count());
+            Assert.Equal(3, result.TotalItems);
+            Assert.Equal(5, result.ItemsPerPage);
+        }
+
+        [Fact]
         public void GetIssuesFromFilter()
         {
             var issues = _jira.GetIssuesFromFilter("One Issue Filter");

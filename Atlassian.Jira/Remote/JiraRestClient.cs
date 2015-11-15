@@ -162,16 +162,15 @@ namespace Atlassian.Jira.Remote
 
             return this.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ContinueWith<IEnumerable<Issue>>(task =>
             {
-                var issues = (JArray)task.Result["issues"];
-
-                return issues
+                var issues = task.Result["issues"]
                     .Cast<JObject>()
                     .Select(issueJson =>
                     {
                         var remoteIssue = JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue;
                         return new Issue(jira, remoteIssue);
-                    })
-                    .ToArray();
+                    });
+
+                return PagedQueryResult<Issue>.FromJson((JObject)task.Result, issues);
             });
         }
 
