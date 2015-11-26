@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="Attachment.cs" />
     <Compile Include="AttachmentInfo.cs" />
+    <Compile Include="CascadingSelectCustomField.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableString.cs" />
     <Compile Include="CustomField.cs" />
