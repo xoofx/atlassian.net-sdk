@@ -339,6 +339,25 @@ namespace Atlassian.Jira.Test.Integration
 
         #region Update Issues
         [Fact]
+        public async Task UpdateIssueAsync()
+        {
+            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+            issue.SaveChanges();
+
+            //retrieve the issue from server and update
+            issue = await _jira.RestClient.GetIssueAsync(issue.Key.Value, CancellationToken.None);
+            issue.Type = "2";
+            issue = await _jira.RestClient.UpdateIssueAsync(issue, CancellationToken.None);
+            Assert.Equal("2", issue.Type.Id);
+        }
+
+        [Fact]
         public void UpdateNamedEntities_ById()
         {
             var issue = _jira.CreateIssue("TST");

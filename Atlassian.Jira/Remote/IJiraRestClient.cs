@@ -74,6 +74,20 @@ namespace Atlassian.Jira.Remote
         Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody, CancellationToken token);
 
         /// <summary>
+        /// Retrieves an issue by its key.
+        /// </summary>
+        /// <param name="issueKey">The issue key to retrieve</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<Issue> GetIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Updates an issue and returns a new instance populated from server.
+        /// </summary>
+        /// <param name="issue">Issue to update.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<Issue> UpdateIssueAsync(Issue issue, CancellationToken token);
+
+        /// <summary>
         /// Execute a specific JQL query and return the resulting issues
         /// </summary>
         /// <param name="jql">JQL search query</param>

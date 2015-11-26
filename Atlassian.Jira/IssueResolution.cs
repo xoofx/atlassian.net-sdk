@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -11,8 +11,11 @@ namespace Atlassian.Jira
     /// </summary>
     public class IssueResolution : JiraNamedEntity
     {
-         internal IssueResolution(AbstractNamedRemoteEntity remoteEntity)
-             : base(remoteEntity)
+        /// <summary>
+        /// Creates an instance of the IssueResolution based on a remote entity.
+        /// </summary>
+        public IssueResolution(AbstractNamedRemoteEntity remoteEntity)
+            : base(remoteEntity)
         {
         }
 
@@ -45,7 +48,7 @@ namespace Atlassian.Jira
                 }
                 else
                 {
-                    return new IssueResolution(name);                    
+                    return new IssueResolution(name);
                 }
             }
             else

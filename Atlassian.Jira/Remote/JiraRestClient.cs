@@ -146,6 +146,30 @@ namespace Atlassian.Jira.Remote
             return response;
         }
 
+        public Task<Issue> GetIssueAsync(string issueKey, CancellationToken token)
+        {
+            var jira = this._getCurrentJiraFunc();
+            var resource = String.Format("rest/api/2/issue/{0}", issueKey);
+            return this.ExecuteRequestAsync<RemoteIssueWrapper>(Method.GET, resource, null, token).ContinueWith(task =>
+            {
+                return new Issue(jira, task.Result.RemoteIssue);
+            });
+        }
+
+        public Task<Issue> UpdateIssueAsync(Issue issue, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}", issue.Key.Value);
+            var fieldProvider = issue as IRemoteIssueFieldProvider;
+            var remoteFields = fieldProvider.GetRemoteFields();
+            var remoteIssue = issue.ToRemote();
+            var fields = BuildFieldsObjectFromIssue(remoteIssue, remoteFields);
+
+            return this.ExecuteRequestAsync(Method.PUT, resource, new { fields = fields }, token).ContinueWith(task =>
+            {
+                return this.GetIssueAsync(issue.Key.Value, token);
+            }).Unwrap();
+        }
+
         public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0)
         {
             return this.GetIssuesFromJqlAsync(jql, maxIssues, startAt, CancellationToken.None);
@@ -999,5 +1023,6 @@ namespace Atlassian.Jira.Remote
             throw new NotImplementedException();
         }
         #endregion
+
     }
 }
