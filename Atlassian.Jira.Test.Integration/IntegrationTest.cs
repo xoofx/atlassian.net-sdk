@@ -702,7 +702,31 @@ namespace Atlassian.Jira.Test.Integration
             var comments = issue.GetComments();
             Assert.Equal(1, comments.Count);
             Assert.Equal("new comment", comments[0].Body);
+        }
 
+        [Fact]
+        public async Task AddAndGetCommentsAsync()
+        {
+            var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            // create an issue, verify no comments
+            issue.SaveChanges();
+            var comments = await issue.GetCommentsAsync();
+            Assert.Equal(0, comments.Count());
+
+            // Add a comment
+            await issue.AddCommentAsync("new comment");
+
+            // Verify comment retrieval
+            comments = await issue.GetCommentsAsync();
+            Assert.Equal(1, comments.Count());
+            Assert.Equal("new comment", comments.First().Body);
         }
 
         [Fact]

@@ -141,5 +141,22 @@ namespace Atlassian.Jira.Remote
         /// Returns all the issue types within JIRA.
         /// </summary>
         Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token);
+
+        /// <summary>
+        /// Adds a comment to an issue.
+        /// </summary>
+        /// <param name="issueKey">Issue key to add the comment to.</param>
+        /// <param name="comment">Comment object to add.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<Comment> AddCommentToIssueAsync(string issueKey, Comment comment, CancellationToken token);
+
+        /// <summary>
+        /// Returns the comments of an issue.
+        /// </summary>
+        /// <param name="issueKey">Issue key to retrieve comments from.</param>
+        /// <param name="maxComments">Maximum number of comments to retrieve.</param>
+        /// <param name="startAt">Index of the first comment to return (0-based).</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IPagedQueryResult<Comment>> GetCommentsFromIssueAsync(string issueKey, int maxComments, int startAt, CancellationToken token);
     }
 }

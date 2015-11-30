@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -13,12 +13,19 @@ namespace Atlassian.Jira
     {
         private readonly RemoteComment _remoteComment;
 
-        public Comment():
+        /// <summary>
+        /// Create a new Comment.
+        /// </summary>
+        public Comment() :
             this(new RemoteComment())
         {
         }
 
-        internal Comment(RemoteComment remoteComment)
+        /// <summary>
+        /// Create a new Comment from a remote intance object.
+        /// </summary>
+        /// <param name="remoteComment">The remote comment.</param>
+        public Comment(RemoteComment remoteComment)
         {
             _remoteComment = remoteComment;
         }

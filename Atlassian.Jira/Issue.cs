@@ -549,6 +549,32 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Get the comments for this issue.
+        /// </summary>
+        /// <param name="maxComments">Maximum number of comments to retrieve.</param>
+        /// <param name="startAt">Index of the first comment to return (0-based).</param>
+        public Task<IPagedQueryResult<Comment>> GetCommentsAsync(int? maxComments = null, int startAt = 0)
+        {
+            return this.GetCommentsAsync(maxComments ?? this.Jira.MaxIssuesPerRequest, startAt, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Get the comments for this issue.
+        /// </summary>
+        /// <param name="maxComments">Maximum number of comments to retrieve.</param>
+        /// <param name="startAt">Index of the first comment to return (0-based).</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IPagedQueryResult<Comment>> GetCommentsAsync(int maxComments, int startAt, CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve comments from server, issue has not been created.");
+            }
+
+            return this.Jira.RestClient.GetCommentsFromIssueAsync(this.Key.Value, maxComments, startAt, token);
+        }
+
+        /// <summary>
         /// Add a comment to this issue.
         /// </summary>
         /// <param name="comment">Comment text to add.</param>
@@ -580,6 +606,36 @@ namespace Atlassian.Jira
             {
                 _jira.RemoteService.AddComment(token, _originalIssue.key, comment.toRemote());
             });
+        }
+
+        /// <summary>
+        /// Add a comment to this issue.
+        /// </summary>
+        /// <param name="comment">Comment text to add.</param>
+        public Task AddCommentAsync(string comment)
+        {
+            var credentials = _jira.GetCredentials();
+            return this.AddCommentAsync(new Comment() { Author = credentials.UserName, Body = comment }, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Add a comment to this issue.
+        /// </summary>
+        /// <param name="comment">Comment object to add.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task AddCommentAsync(Comment comment, CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to add comment to issue, issue has not been created.");
+            }
+
+            if (String.IsNullOrEmpty(comment.Author))
+            {
+                throw new InvalidOperationException("Unable to add comment due to missing author field.");
+            }
+
+            return this.Jira.RestClient.AddCommentToIssueAsync(this.Key.Value, comment, token);
         }
 
         /// <summary>
