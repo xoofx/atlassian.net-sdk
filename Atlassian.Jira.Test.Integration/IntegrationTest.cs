@@ -558,6 +558,24 @@ namespace Atlassian.Jira.Test.Integration
 
         #region Operation on Issues
         [Fact]
+        void GetSubTasks()
+        {
+            var parentTask = _jira.CreateIssue("TST");
+            parentTask.Type = "1";
+            parentTask.Summary = "Test issue with SubTask" + _random.Next(int.MaxValue);
+            parentTask.SaveChanges();
+
+            var subTask = _jira.CreateIssue("TST", parentTask.Key.Value);
+            subTask.Type = "5"; // SubTask issue type.
+            subTask.Summary = "Test SubTask" + _random.Next(int.MaxValue);
+            subTask.SaveChanges();
+
+            var results = parentTask.GetSubTaks();
+            Assert.Equal(results.Count(), 1);
+            Assert.Equal(results.First().Summary, subTask.Summary);
+        }
+
+        [Fact]
         void Transition_ResolveIssue()
         {
             var issue = _jira.CreateIssue("TST");
