@@ -813,6 +813,29 @@ namespace Atlassian.Jira.Test.Integration
         #region Complex Custom Fields
 #if !SOAP
         [Fact]
+        public void CreateIssueWithCascadingSelectFieldWithOnlyParentOptionSet()
+        {
+            var summaryValue = "Test issue with cascading select" + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            // Add cascading select with only parent set.
+            issue.CustomFields.AddCascadingSelectField("Custom Cascading Select Field", "Option3");
+            issue.SaveChanges();
+
+            var newIssue = _jira.GetIssue(issue.Key.Value);
+
+            var cascadingSelect = newIssue.CustomFields.GetCascadingSelectField("Custom Cascading Select Field");
+            Assert.Equal(cascadingSelect.ParentOption, "Option3");
+            Assert.Null(cascadingSelect.ChildOption);
+            Assert.Equal(cascadingSelect.Name, "Custom Cascading Select Field");
+        }
+
+        [Fact]
         public void CreateAndQueryIssueWithComplexCustomFields()
         {
             var summaryValue = "Test issue with lots of custom fields (Created)" + _random.Next(int.MaxValue);
@@ -862,9 +885,9 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(new string[2] { "2.0", "3.0" }, newIssue.CustomFields["Custom Multi Version Field"].Values);
 
             var cascadingSelect = newIssue.CustomFields.GetCascadingSelectField("Custom Cascading Select Field");
-            Assert.Equal(cascadingSelect.ParentOption, "Option2");
-            Assert.Equal(cascadingSelect.ChildOption, "Option2.2");
-            Assert.Equal(cascadingSelect.Name, "Custom Cascading Select Field");
+            Assert.Equal("Option2", cascadingSelect.ParentOption);
+            Assert.Equal("Option2.2", cascadingSelect.ChildOption);
+            Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
 
         }
 

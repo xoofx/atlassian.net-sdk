@@ -65,13 +65,16 @@ namespace Atlassian.Jira
         /// <param name="fieldName">The name of the custom field as defined in JIRA.</param>
         /// <param name="parentOption">The value of the parent option.</param>
         /// <param name="childOption">The value of the child option.</param>
-        public CustomFieldValueCollection AddCascadingSelectField(string fieldName, string parentOption, string childOption)
+        public CustomFieldValueCollection AddCascadingSelectField(string fieldName, string parentOption, string childOption = null)
         {
-            if (string.IsNullOrEmpty(childOption))
+            var options = new List<string>() { parentOption };
+
+            if (!string.IsNullOrEmpty(childOption))
             {
-                return AddArray(fieldName, parentOption);
+                options.Add(childOption);
             }
-            return AddArray(fieldName, parentOption, childOption);
+
+            return AddArray(fieldName, options.ToArray());
         }
 
         /// <summary>

@@ -80,42 +80,43 @@ namespace Atlassian.Jira.Remote
             var parentOption = json["value"];
             var childOption = json["child"];
 
-            if (parentOption != null && childOption != null && childOption["value"] != null)
+            if (parentOption == null)
             {
-                return new string[2] { parentOption.ToString(), childOption["value"].ToString() };
+                throw new InvalidOperationException(String.Format(
+                    "Unable to deserialize custom field as a cascading select list. The parent value is required. Json: {0}",
+                    json.ToString()));
             }
-            else if (parentOption != null && childOption == null)
+            else if (childOption == null || childOption["value"] == null)
             {
-                return new string[] {parentOption.ToString()};
+                return new string[] { parentOption.ToString() };
             }
             else
             {
-                throw new InvalidOperationException(String.Format(
-                    "Unable to deserialize custom field as a cascading select list. The parent and child values are required. Json: {0}",
-                    json.ToString()));
+                return new string[2] { parentOption.ToString(), childOption["value"].ToString() };
             }
         }
 
         public JToken ToJson(string[] values)
         {
-            if (values == null)
+            if (values == null || values.Length < 1)
             {
-                throw new InvalidOperationException("Unable to serialize the custom field as a cascading select list. At least 2 values (the parent and the child) are required.");
+                throw new InvalidOperationException("Unable to serialize the custom field as a cascading select list. At least the parent value is required.");
             }
-
-            if (values.Length == 1)
+            else if (values.Length == 1)
             {
-                return JToken.FromObject(new {value = values[0]});
+                return JToken.FromObject(new { value = values[0] });
             }
-
-            return JToken.FromObject(new
+            else
             {
-                value = values[0],
-                child = new
+                return JToken.FromObject(new
                 {
-                    value = values[1]
-                }
-            });
+                    value = values[0],
+                    child = new
+                    {
+                        value = values[1]
+                    }
+                });
+            }
         }
     }
 
