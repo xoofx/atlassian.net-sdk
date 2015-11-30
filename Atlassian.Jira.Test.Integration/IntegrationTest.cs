@@ -558,6 +558,24 @@ namespace Atlassian.Jira.Test.Integration
 
         #region Operation on Issues
         [Fact]
+        void GetSubTasks()
+        {
+            var parentTask = _jira.CreateIssue("TST");
+            parentTask.Type = "1";
+            parentTask.Summary = "Test issue with SubTask" + _random.Next(int.MaxValue);
+            parentTask.SaveChanges();
+
+            var subTask = _jira.CreateIssue("TST", parentTask.Key.Value);
+            subTask.Type = "5"; // SubTask issue type.
+            subTask.Summary = "Test SubTask" + _random.Next(int.MaxValue);
+            subTask.SaveChanges();
+
+            var results = parentTask.GetSubTaks();
+            Assert.Equal(results.Count(), 1);
+            Assert.Equal(results.First().Summary, subTask.Summary);
+        }
+
+        [Fact]
         void Transition_ResolveIssue()
         {
             var issue = _jira.CreateIssue("TST");
@@ -684,7 +702,31 @@ namespace Atlassian.Jira.Test.Integration
             var comments = issue.GetComments();
             Assert.Equal(1, comments.Count);
             Assert.Equal("new comment", comments[0].Body);
+        }
 
+        [Fact]
+        public async Task AddAndGetCommentsAsync()
+        {
+            var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            // create an issue, verify no comments
+            issue.SaveChanges();
+            var comments = await issue.GetCommentsAsync();
+            Assert.Equal(0, comments.Count());
+
+            // Add a comment
+            await issue.AddCommentAsync("new comment");
+
+            // Verify comment retrieval
+            comments = await issue.GetCommentsAsync();
+            Assert.Equal(1, comments.Count());
+            Assert.Equal("new comment", comments.First().Body);
         }
 
         [Fact]
@@ -796,6 +838,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.CustomFields.AddArray("Custom Multi User Field", "admin", "test");
             issue.CustomFields.AddArray("Custom Checkboxes Field", "option1", "option2");
             issue.CustomFields.AddArray("Custom Multi Version Field", "2.0", "3.0");
+            issue.CustomFields.AddCascadingSelectField("Custom Cascading Select Field", "Option2", "Option2.2");
 
             issue.SaveChanges();
 
@@ -817,6 +860,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(new string[2] { "admin", "test" }, newIssue.CustomFields["Custom Multi User Field"].Values);
             Assert.Equal(new string[2] { "option1", "option2" }, newIssue.CustomFields["Custom Checkboxes Field"].Values);
             Assert.Equal(new string[2] { "2.0", "3.0" }, newIssue.CustomFields["Custom Multi Version Field"].Values);
+
+            var cascadingSelect = newIssue.CustomFields.GetCascadingSelectField("Custom Cascading Select Field");
+            Assert.Equal(cascadingSelect.ParentOption, "Option2");
+            Assert.Equal(cascadingSelect.ChildOption, "Option2.2");
+            Assert.Equal(cascadingSelect.Name, "Custom Cascading Select Field");
+
         }
 
         [Fact]
@@ -849,6 +898,7 @@ namespace Atlassian.Jira.Test.Integration
             newIssue.CustomFields.AddArray("Custom Multi User Field", "admin", "test");
             newIssue.CustomFields.AddArray("Custom Checkboxes Field", "option1", "option2");
             newIssue.CustomFields.AddArray("Custom Multi Version Field", "2.0", "3.0");
+            newIssue.CustomFields.AddCascadingSelectField("Custom Cascading Select Field", "Option2", "Option2.2");
 
             newIssue.SaveChanges();
 
@@ -870,6 +920,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(new string[2] { "admin", "test" }, updatedIssue.CustomFields["Custom Multi User Field"].Values);
             Assert.Equal(new string[2] { "option1", "option2" }, updatedIssue.CustomFields["Custom Checkboxes Field"].Values);
             Assert.Equal(new string[2] { "2.0", "3.0" }, updatedIssue.CustomFields["Custom Multi Version Field"].Values);
+
+            var cascadingSelect = updatedIssue.CustomFields.GetCascadingSelectField("Custom Cascading Select Field");
+            Assert.Equal(cascadingSelect.ParentOption, "Option2");
+            Assert.Equal(cascadingSelect.ChildOption, "Option2.2");
+            Assert.Equal(cascadingSelect.Name, "Custom Cascading Select Field");
         }
 #endif
         #endregion

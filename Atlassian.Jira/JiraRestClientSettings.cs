@@ -49,6 +49,8 @@ namespace Atlassian.Jira
             this.CustomFieldSerializers.Add(GetBuiltInType("multiselect"), new MultiObjectCustomFieldValueSerializer("value"));
             this.CustomFieldSerializers.Add(GetBuiltInType("multiversion"), new MultiObjectCustomFieldValueSerializer("name"));
             this.CustomFieldSerializers.Add(GetBuiltInType("multicheckboxes"), new MultiObjectCustomFieldValueSerializer("value"));
+
+            this.CustomFieldSerializers.Add(GetBuiltInType("cascadingselect"), new CascadingSelectCustomFieldValueSerializer());
         }
 
         private static string GetBuiltInType(string name)

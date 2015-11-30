@@ -328,6 +328,38 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        public Task<Comment> AddCommentToIssueAsync(string issueKey, Comment comment, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}/comment", issueKey);
+            return this.ExecuteRequestAsync<RemoteComment>(Method.POST, resource, comment.toRemote(), token).ContinueWith(task =>
+            {
+                return new Comment(task.Result);
+            });
+        }
+
+        public Task<IPagedQueryResult<Comment>> GetCommentsFromIssueAsync(string issueKey, int maxComments, int startAt, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}/comment", issueKey);
+            var parameters = new
+            {
+                startAt = startAt,
+                maxResults = maxComments,
+            };
+
+            return this.ExecuteRequestAsync(Method.GET, resource, parameters).ContinueWith<IPagedQueryResult<Comment>>(task =>
+            {
+                var comments = task.Result["comments"]
+                    .Cast<JObject>()
+                    .Select(commentJson =>
+                    {
+                        var remoteComment = JsonConvert.DeserializeObject<RemoteComment>(commentJson.ToString(), this.GetSerializerSettings());
+                        return new Comment(remoteComment);
+                    });
+
+                return PagedQueryResult<Comment>.FromJson((JObject)task.Result, comments);
+            });
+        }
+
         private void LogRequest(RestRequest request, object body = null)
         {
             if (this._clientSettings.EnableRequestTrace)
@@ -1023,6 +1055,5 @@ namespace Atlassian.Jira.Remote
             throw new NotImplementedException();
         }
         #endregion
-
     }
 }

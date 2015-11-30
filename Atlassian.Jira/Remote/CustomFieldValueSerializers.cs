@@ -72,4 +72,42 @@ namespace Atlassian.Jira.Remote
             return JArray.FromObject(values);
         }
     }
+
+    public class CascadingSelectCustomFieldValueSerializer : ICustomFieldValueSerializer
+    {
+        public string[] FromJson(JToken json)
+        {
+            var parentOption = json["value"];
+            var childOption = json["child"];
+
+            if (parentOption != null && childOption != null && childOption["value"] != null)
+            {
+                return new string[2] { parentOption.ToString(), childOption["value"].ToString() };
+            }
+            else
+            {
+                throw new InvalidOperationException(String.Format(
+                    "Unable to deserialize custom field as a cascading select list. The parent and child values are required. Json: {0}",
+                    json.ToString()));
+            }
+        }
+
+        public JToken ToJson(string[] values)
+        {
+            if (values == null || values.Length < 2)
+            {
+                throw new InvalidOperationException("Unable to serialize the custom field as a cascading select list. At least 2 values (the parent and the child) are required.");
+            }
+
+            return JToken.FromObject(new
+            {
+                value = values[0],
+                child = new
+                {
+                    value = values[1]
+                }
+            });
+        }
+    }
+
 }

@@ -51,6 +51,26 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Add a cascading select field.
+        /// </summary>
+        /// <param name="cascadingSelectField">Cascading select field to add.</param>
+        public CustomFieldValueCollection AddCascadingSelectField(CascadingSelectCustomField cascadingSelectField)
+        {
+            return AddCascadingSelectField(cascadingSelectField.Name, cascadingSelectField.ParentOption, cascadingSelectField.ChildOption);
+        }
+
+        /// <summary>
+        /// Add a cascading select field.
+        /// </summary>
+        /// <param name="fieldName">The name of the custom field as defined in JIRA.</param>
+        /// <param name="parentOption">The value of the parent option.</param>
+        /// <param name="childOption">The value of the child option.</param>
+        public CustomFieldValueCollection AddCascadingSelectField(string fieldName, string parentOption, string childOption)
+        {
+            return AddArray(fieldName, parentOption, childOption);
+        }
+
+        /// <summary>
         /// Add a custom field by name
         /// </summary>
         /// <param name="fieldName">The name of the custom field as defined in JIRA</param>
@@ -60,6 +80,27 @@ namespace Atlassian.Jira
             var fieldId = _getFieldIdProvider(fieldName);
             this.Items.Add(new CustomFieldValue(fieldId, fieldName, _issue) { Values = fieldValues });
             return this;
+        }
+
+        /// <summary>
+        /// Gets a cascading select custom field by name.
+        /// </summary>
+        /// <param name="fieldName">Name of the custom field as defined in JIRA.</param>
+        /// <returns>CascadingSelectCustomField instance if the field has been set on the issue, null otherwise</returns>
+        public CascadingSelectCustomField GetCascadingSelectField(string fieldName)
+        {
+            CascadingSelectCustomField result = null;
+            var fieldValue = this[fieldName];
+
+            if (fieldValue != null && fieldValue.Values != null)
+            {
+                var parentOption = fieldValue.Values.Length > 0 ? fieldValue.Values[0] : null;
+                var childOption = fieldValue.Values.Length > 1 ? fieldValue.Values[1] : null;
+
+                result = new CascadingSelectCustomField(fieldName, parentOption, childOption);
+            }
+
+            return result;
         }
 
         /// <summary>
