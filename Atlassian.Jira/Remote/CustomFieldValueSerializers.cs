@@ -84,6 +84,10 @@ namespace Atlassian.Jira.Remote
             {
                 return new string[2] { parentOption.ToString(), childOption["value"].ToString() };
             }
+            else if (parentOption != null && childOption == null)
+            {
+                return new string[] {parentOption.ToString()};
+            }
             else
             {
                 throw new InvalidOperationException(String.Format(
@@ -94,9 +98,14 @@ namespace Atlassian.Jira.Remote
 
         public JToken ToJson(string[] values)
         {
-            if (values == null || values.Length < 2)
+            if (values == null)
             {
                 throw new InvalidOperationException("Unable to serialize the custom field as a cascading select list. At least 2 values (the parent and the child) are required.");
+            }
+
+            if (values.Length == 1)
+            {
+                return JToken.FromObject(new {value = values[0]});
             }
 
             return JToken.FromObject(new
