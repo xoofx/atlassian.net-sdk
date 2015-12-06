@@ -88,6 +88,14 @@ namespace Atlassian.Jira.Remote
         Task<Issue> UpdateIssueAsync(Issue issue, CancellationToken token);
 
         /// <summary>
+        /// Transition an issue through a workflow action.
+        /// </summary>
+        /// <param name="issue">Issue to transition.</param>
+        /// <param name="actionId">The workflow action to transition to.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, CancellationToken token);
+
+        /// <summary>
         /// Execute a specific JQL query and return the resulting issues
         /// </summary>
         /// <param name="jql">JQL search query</param>
@@ -158,5 +166,12 @@ namespace Atlassian.Jira.Remote
         /// <param name="startAt">Index of the first comment to return (0-based).</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IPagedQueryResult<Comment>> GetCommentsFromIssueAsync(string issueKey, int maxComments, int startAt, CancellationToken token);
+
+        /// <summary>
+        /// Returns the workflow actions that an issue can be transitioned to.
+        /// </summary>
+        /// <param name="issueKey">The issue key</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<JiraNamedEntity>> GetActionsForIssueAsync(string issueKey, CancellationToken token);
     }
 }

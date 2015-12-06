@@ -169,6 +169,29 @@ namespace Atlassian.Jira.Remote
             }).Unwrap();
         }
 
+        public Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}/transitions", issue.Key.Value);
+            var fieldProvider = issue as IRemoteIssueFieldProvider;
+            var remoteFields = fieldProvider.GetRemoteFields();
+            var remoteIssue = issue.ToRemote();
+            var fields = BuildFieldsObjectFromIssue(remoteIssue, remoteFields);
+            var body = new
+            {
+                transition = new
+                {
+                    id = actionId
+                },
+                fields = fields
+
+            };
+
+            return this.ExecuteRequestAsync(Method.POST, resource, body, token).ContinueWith(task =>
+            {
+                return this.GetIssueAsync(issue.Key.Value, token);
+            }).Unwrap();
+        }
+
         public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0)
         {
             return this.GetIssuesFromJqlAsync(jql, maxIssues, startAt, CancellationToken.None);
@@ -356,6 +379,19 @@ namespace Atlassian.Jira.Remote
                     });
 
                 return PagedQueryResult<Comment>.FromJson((JObject)task.Result, comments);
+            });
+        }
+
+        public Task<IEnumerable<JiraNamedEntity>> GetActionsForIssueAsync(string issueKey, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}/transitions", issueKey);
+
+            return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(task =>
+            {
+                var transitionsJson = task.Result["transitions"];
+                var remoteTransitions = JsonConvert.DeserializeObject<RemoteNamedObject[]>(transitionsJson.ToString(), this.GetSerializerSettings());
+
+                return remoteTransitions.Select(transition => new JiraNamedEntity(transition));
             });
         }
 

@@ -382,9 +382,9 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Transition an issue through a workflow
+        /// Transition an issue through a workflow action.
         /// </summary>
-        /// <param name="actionName">The workflow action to transition to</param>
+        /// <param name="actionName">The workflow action to transition to.</param>
         public void WorkflowTransition(string actionName)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
@@ -407,6 +407,34 @@ namespace Atlassian.Jira
                                                                 ((IRemoteIssueFieldProvider)this).GetRemoteFields());
                 Initialize(remoteIssue);
             });
+        }
+
+        /// <summary>
+        /// Transition an issue through a workflow action.
+        /// </summary>
+        /// <param name="actionName">The workflow action to transition to.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task WorkflowTransitionAsync(string actionName, CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to execute workflow transition, issue has not been created.");
+            }
+
+            return this.GetAvailableActionsAsync(token).ContinueWith(actionsTask =>
+            {
+                var action = actionsTask.Result.FirstOrDefault(a => a.Name.Equals(actionName, StringComparison.OrdinalIgnoreCase));
+
+                if (action == null)
+                {
+                    throw new InvalidOperationException(String.Format("Worflow action with name '{0}' not found.", actionName));
+                }
+
+                return this._jira.RestClient.ExecuteIssueWorkflowActionAsync(this, action.Id, token).ContinueWith(issueTask =>
+                {
+                    Initialize(issueTask.Result.OriginalRemoteIssue);
+                });
+            }).Unwrap();
         }
 
         private void UpdateRemoteFields(RemoteFieldValue[] remoteFields)
@@ -848,7 +876,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Gets the workflow actions that the issue can be transitioned to
+        /// Gets the workflow actions that the issue can be transitioned to.
         /// </summary>
         /// <returns></returns>
         public IEnumerable<JiraNamedEntity> GetAvailableActions()
@@ -862,6 +890,20 @@ namespace Atlassian.Jira
             {
                 return _jira.RemoteService.GetAvailableActions(token, _originalIssue.key).Select(a => new JiraNamedEntity(a));
             });
+        }
+
+        /// <summary>
+        /// Gets the workflow actions that the issue can be transitioned to.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<JiraNamedEntity>> GetAvailableActionsAsync(CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve actions, issue has not been saved to server.");
+            }
+
+            return this._jira.RestClient.GetActionsForIssueAsync(_originalIssue.key, token);
         }
 
         /// <summary>
