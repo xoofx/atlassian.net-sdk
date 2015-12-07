@@ -1,10 +1,8 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
+﻿using System;
 using Newtonsoft.Json.Linq;
 using RestSharp;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -131,6 +129,12 @@ namespace Atlassian.Jira.Remote
         /// </summary>
         /// <param name="issueKey">The issue key.</param>
         IssueTimeTrackingData GetTimeTrackingData(string issueKey);
+
+        /// <summary>
+        /// Gets metadata object containing dictionary with issuefields identifiers as keys and their metadata as values 
+        /// </summary>
+        /// <param name="issueKey">The issue key.</param>
+        IDictionary<String, IssueFieldEditMetadata> GetIssueFieldsEditMetadata(string issueKey);
 
         /// <summary>
         /// Returns all custom fields within JIRA.

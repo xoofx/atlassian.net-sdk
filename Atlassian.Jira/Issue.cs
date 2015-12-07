@@ -670,6 +670,18 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets metadata object containing dictionary with issuefields identifiers as keys and their metadata as values 
+        /// </summary>
+        public IDictionary<String, IssueFieldEditMetadata> GetIssueFieldsEditMetadata()
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve issue fields from server, issue has not been created.");
+            }
+            return _jira.RestClient.GetIssueFieldsEditMetadata(_originalIssue.key);
+        }
+
+        /// <summary>
         /// Retrieve change logs from server for this issue.
         /// </summary>
         public IEnumerable<IssueChangeLog> GetChangeLogs()

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -309,6 +308,15 @@ namespace Atlassian.Jira.Remote
             var resource = String.Format("rest/api/2/issue/{0}?fields=timetracking", issueKey);
             var timeTrackingJson = ExecuteRequest(Method.GET, resource)["fields"]["timetracking"];
             return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), _serializerSettings);
+        }
+
+        public IDictionary<String, IssueFieldEditMetadata> GetIssueFieldsEditMetadata(string issueKey)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}/editmeta", issueKey);
+            JToken outer = ExecuteRequest(Method.GET, resource);
+            JObject fields = outer["fields"].Value<JObject>();
+           
+            return fields.ToObject<Dictionary<String, IssueFieldEditMetadata>>();
         }
 
         public RemoteField[] GetCustomFields(string token)
