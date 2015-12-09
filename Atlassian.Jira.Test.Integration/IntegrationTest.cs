@@ -337,7 +337,7 @@ namespace Atlassian.Jira.Test.Integration
         }
         #endregion
 
-        #region Update Issues
+        #region Update Issue Fields
         [Fact]
         public async Task UpdateIssueAsync()
         {
@@ -573,6 +573,43 @@ namespace Atlassian.Jira.Test.Integration
             var results = parentTask.GetSubTaks();
             Assert.Equal(results.Count(), 1);
             Assert.Equal(results.First().Summary, subTask.Summary);
+        }
+
+        [Fact]
+        public async Task TransitionIssueAsync()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue to resolve with async" + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            Assert.Null(issue.ResolutionDate);
+
+            await issue.WorkflowTransitionAsync(WorkflowActions.Resolve, CancellationToken.None);
+
+            Assert.Equal("Resolved", issue.Status.Name);
+            Assert.Equal("Fixed", issue.Resolution.Name);
+        }
+
+        [Fact]
+        public async Task TransitionIssueAsyncWithComment()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue to resolve with async" + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            Assert.Null(issue.ResolutionDate);
+            var updates = new WorkflowTransitionUpdates() { Comment = "Comment with transition" };
+
+            await issue.WorkflowTransitionAsync(WorkflowActions.Resolve, updates, CancellationToken.None);
+
+            Assert.Equal("Resolved", issue.Status.Name);
+            Assert.Equal("Fixed", issue.Resolution.Name);
+
+            var comments = issue.GetComments();
+            Assert.Equal(1, comments.Count);
+            Assert.Equal("Comment with transition", comments[0].Body);
         }
 
         [Fact]

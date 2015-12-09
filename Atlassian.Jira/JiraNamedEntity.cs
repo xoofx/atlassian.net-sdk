@@ -16,7 +16,10 @@ namespace Atlassian.Jira
         private string _id;
         protected string _name;
 
-        internal JiraNamedEntity(AbstractNamedRemoteEntity remoteEntity)
+        /// <summary>
+        /// Creates an instance of a JiraNamedEntity base on a remote entity.
+        /// </summary>
+        public JiraNamedEntity(AbstractNamedRemoteEntity remoteEntity)
         {
             _id = remoteEntity.id;
             _name = remoteEntity.name;

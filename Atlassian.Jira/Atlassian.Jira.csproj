@@ -128,6 +128,7 @@
     <Compile Include="Remote\NestedValueJsonConverter.cs" />
     <Compile Include="Remote\RemoteFieldNameAttribute.cs" />
     <Compile Include="Remote\RemoteWorklogPatchBehavior.cs" />
+    <Compile Include="WorkflowTransitionUpdates.cs" />
     <Compile Include="Utils\DoubleKeyDictionary.cs" />
     <Compile Include="Utils\DoubleKeyPairValue.cs" />
     <Compile Include="WebClientWrapper.cs" />
