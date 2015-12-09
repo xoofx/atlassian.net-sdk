@@ -416,6 +416,17 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public Task WorkflowTransitionAsync(string actionName, CancellationToken token)
         {
+            return this.WorkflowTransitionAsync(actionName, null, token);
+        }
+
+        /// <summary>
+        /// Transition an issue through a workflow action.
+        /// </summary>
+        /// <param name="actionName">The workflow action to transition to.</param>
+        /// <param name="additionalUpdates">Additional updates to perform when transitioning the issue.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task WorkflowTransitionAsync(string actionName, WorkflowTransitionUpdates additionalUpdates, CancellationToken token)
+        {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to execute workflow transition, issue has not been created.");
@@ -430,7 +441,7 @@ namespace Atlassian.Jira
                     throw new InvalidOperationException(String.Format("Worflow action with name '{0}' not found.", actionName));
                 }
 
-                return this._jira.RestClient.ExecuteIssueWorkflowActionAsync(this, action.Id, token).ContinueWith(issueTask =>
+                return this._jira.RestClient.ExecuteIssueWorkflowActionAsync(this, action.Id, additionalUpdates, token).ContinueWith(issueTask =>
                 {
                     Initialize(issueTask.Result.OriginalRemoteIssue);
                 });

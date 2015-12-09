@@ -169,24 +169,37 @@ namespace Atlassian.Jira.Remote
             }).Unwrap();
         }
 
-        public Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, CancellationToken token)
+        public Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, WorkflowTransitionUpdates updates, CancellationToken token)
         {
+            updates = updates ?? new WorkflowTransitionUpdates();
+
             var resource = String.Format("rest/api/2/issue/{0}/transitions", issue.Key.Value);
             var fieldProvider = issue as IRemoteIssueFieldProvider;
             var remoteFields = fieldProvider.GetRemoteFields();
             var remoteIssue = issue.ToRemote();
             var fields = BuildFieldsObjectFromIssue(remoteIssue, remoteFields);
-            var body = new
+            var updatesObject = new JObject();
+
+            if (!String.IsNullOrEmpty(updates.Comment))
+            {
+                updatesObject.Add("comment", new JArray(new JObject[]
+                {
+                    new JObject(new JProperty("add",
+                        new JObject(new JProperty("body", updates.Comment))))
+                }));
+            }
+
+            var requestBody = new
             {
                 transition = new
                 {
                     id = actionId
                 },
+                update = updatesObject,
                 fields = fields
-
             };
 
-            return this.ExecuteRequestAsync(Method.POST, resource, body, token).ContinueWith(task =>
+            return this.ExecuteRequestAsync(Method.POST, resource, requestBody, token).ContinueWith(task =>
             {
                 return this.GetIssueAsync(issue.Key.Value, token);
             }).Unwrap();

@@ -92,8 +92,9 @@ namespace Atlassian.Jira.Remote
         /// </summary>
         /// <param name="issue">Issue to transition.</param>
         /// <param name="actionId">The workflow action to transition to.</param>
+        /// <param name="updates">Additional updates to perform when transitioning the issue.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, CancellationToken token);
+        Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, WorkflowTransitionUpdates updates, CancellationToken token);
 
         /// <summary>
         /// Execute a specific JQL query and return the resulting issues
