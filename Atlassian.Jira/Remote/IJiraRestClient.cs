@@ -91,9 +91,8 @@ namespace Atlassian.Jira.Remote
         /// Creates an issue and returns a new instance populated from server.
         /// </summary>
         /// <param name="issue">Issue to create.</param>
-        /// <param name="parentIssueKey">If this is a sub-task, identifies the parent issue.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<Issue> CreateIssueAsyc(Issue issue, string parentIssueKey, CancellationToken token);
+        Task<Issue> CreateIssueAsyc(Issue issue, CancellationToken token);
 
         /// <summary>
         /// Transition an issue through a workflow action.
@@ -182,5 +181,11 @@ namespace Atlassian.Jira.Remote
         /// <param name="issueKey">The issue key</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IEnumerable<JiraNamedEntity>> GetActionsForIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Returns all projects defined in JIRA.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token);
     }
 }

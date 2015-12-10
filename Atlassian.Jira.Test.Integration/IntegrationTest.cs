@@ -44,11 +44,23 @@ namespace Atlassian.Jira.Test.Integration
                 Assignee = "admin"
             };
 
-            var newIssue = await _jira.RestClient.CreateIssueAsyc(issue, null, CancellationToken.None);
+            var newIssue = await _jira.RestClient.CreateIssueAsyc(issue, CancellationToken.None);
 
             Assert.Equal(summaryValue, newIssue.Summary);
             Assert.Equal("TST", newIssue.Project);
             Assert.Equal("1", newIssue.Type.Id);
+
+            // Create a subtask async.
+            var subTask = new Issue(_jira, "TST", newIssue.Key.Value)
+            {
+                Type = "5",
+                Summary = "My Subtask",
+                Assignee = "admin"
+            };
+
+            var newSubTask = await _jira.RestClient.CreateIssueAsyc(subTask, CancellationToken.None);
+
+            Assert.Equal(newIssue.Key.Value, newSubTask.ParentIssueKey);
         }
 
         public void CreateAndQueryIssueWithMinimumFieldsSet()
@@ -1090,6 +1102,14 @@ namespace Atlassian.Jira.Test.Integration
         public void GetProjects()
         {
             Assert.Equal(1, _jira.GetProjects().Count());
+        }
+
+        [Fact]
+        public async Task GetProjectsAsync()
+        {
+            var projects = await _jira.GetProjectsAsync(CancellationToken.None);
+
+            Assert.Equal(1, projects.Count());
         }
 
         [Fact]

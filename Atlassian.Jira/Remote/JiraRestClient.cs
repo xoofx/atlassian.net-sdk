@@ -170,9 +170,9 @@ namespace Atlassian.Jira.Remote
             }).Unwrap();
         }
 
-        public Task<Issue> CreateIssueAsyc(Issue issue, string parentIssueKey, CancellationToken token)
+        public Task<Issue> CreateIssueAsyc(Issue issue, CancellationToken token)
         {
-            var remoteIssueWrapper = new RemoteIssueWrapper(issue.ToRemote(), parentIssueKey);
+            var remoteIssueWrapper = new RemoteIssueWrapper(issue.ToRemote(), issue.ParentIssueKey);
 
             return this.ExecuteRequestAsync(Method.POST, "rest/api/2/issue", remoteIssueWrapper, token).ContinueWith(task =>
             {
@@ -417,6 +417,27 @@ namespace Atlassian.Jira.Remote
 
                 return remoteTransitions.Select(transition => new JiraNamedEntity(transition));
             });
+        }
+
+        public Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token)
+        {
+            var cache = this._clientSettings.Cache;
+
+            if (!cache.Projects.Any())
+            {
+                return this.ExecuteRequestAsync<RemoteProject[]>(Method.GET, "rest/api/2/project", null, token).ContinueWith(task =>
+                {
+                    var results = task.Result.Select(p => new Project(p));
+                    cache.Projects.AddIfMIssing(results);
+                    return results;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<Project>>();
+                taskSource.SetResult(cache.Projects.Values);
+                return taskSource.Task;
+            }
         }
 
         private void LogRequest(RestRequest request, object body = null)
