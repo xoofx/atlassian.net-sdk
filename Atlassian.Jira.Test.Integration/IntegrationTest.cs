@@ -44,7 +44,7 @@ namespace Atlassian.Jira.Test.Integration
                 Assignee = "admin"
             };
 
-            var newIssue = await _jira.RestClient.CreateIssueAsyc(issue, null, CancellationToken.None);
+            var newIssue = await _jira.RestClient.CreateIssueAsyc(issue, CancellationToken.None);
 
             Assert.Equal(summaryValue, newIssue.Summary);
             Assert.Equal("TST", newIssue.Project);
