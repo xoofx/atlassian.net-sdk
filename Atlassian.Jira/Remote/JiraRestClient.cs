@@ -418,6 +418,27 @@ namespace Atlassian.Jira.Remote
             });
         }
 
+        public Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token)
+        {
+            var cache = this._clientSettings.Cache;
+
+            if (!cache.Projects.Any())
+            {
+                return this.ExecuteRequestAsync<RemoteProject[]>(Method.GET, "rest/api/2/project", null, token).ContinueWith(task =>
+                {
+                    var results = task.Result.Select(p => new Project(p));
+                    cache.Projects.AddIfMIssing(results);
+                    return results;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<Project>>();
+                taskSource.SetResult(cache.Projects.Values);
+                return taskSource.Task;
+            }
+        }
+
         private void LogRequest(RestRequest request, object body = null)
         {
             if (this._clientSettings.EnableRequestTrace)

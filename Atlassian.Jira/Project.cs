@@ -1,19 +1,23 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
     /// <summary>
     /// A JIRA project
     /// </summary>
-    public class Project: JiraNamedEntity
+    public class Project : JiraNamedEntity
     {
         private readonly RemoteProject _remoteProject;
 
-        internal Project(RemoteProject remoteProject)
+        /// <summary>
+        /// Createa a new Project instance using a remote project.
+        /// </summary>
+        /// <param name="remoteProject">Remote project.</param>
+        public Project(RemoteProject remoteProject)
             : base(remoteProject)
         {
             _remoteProject = remoteProject;
@@ -27,7 +31,7 @@ namespace Atlassian.Jira
             }
         }
 
-        public string Key 
+        public string Key
         {
             get
             {

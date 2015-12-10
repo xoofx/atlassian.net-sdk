@@ -181,5 +181,11 @@ namespace Atlassian.Jira.Remote
         /// <param name="issueKey">The issue key</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IEnumerable<JiraNamedEntity>> GetActionsForIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Returns all projects defined in JIRA.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token);
     }
 }

@@ -592,7 +592,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Returns all projects defined in JIRA
+        /// Returns all projects defined in JIRA.
         /// </summary>
         public IEnumerable<Project> GetProjects()
         {
@@ -605,6 +605,15 @@ namespace Atlassian.Jira
             }
 
             return _cache.Projects.Values;
+        }
+
+        /// <summary>
+        /// Returns all projects defined in JIRA.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token)
+        {
+            return this.RestClient.GetProjectsAsync(token);
         }
 
         /// <summary>
