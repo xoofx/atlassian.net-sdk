@@ -34,6 +34,23 @@ namespace Atlassian.Jira.Test.Integration
 
         #region Create Issues
         [Fact]
+        public async Task CreateIssueAsync()
+        {
+            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            var newIssue = await _jira.RestClient.CreateIssueAsyc(issue, null, CancellationToken.None);
+
+            Assert.Equal(summaryValue, newIssue.Summary);
+            Assert.Equal("TST", newIssue.Project);
+            Assert.Equal("1", newIssue.Type.Id);
+        }
+
         public void CreateAndQueryIssueWithMinimumFieldsSet()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
