@@ -170,6 +170,16 @@ namespace Atlassian.Jira.Remote
             }).Unwrap();
         }
 
+        public Task<Issue> CreateIssueAsyc(Issue issue, string parentIssueKey, CancellationToken token)
+        {
+            var remoteIssueWrapper = new RemoteIssueWrapper(issue.ToRemote(), parentIssueKey);
+
+            return this.ExecuteRequestAsync(Method.POST, "rest/api/2/issue", remoteIssueWrapper, token).ContinueWith(task =>
+            {
+                return this.GetIssueAsync((string)task.Result["key"], token);
+            }).Unwrap();
+        }
+
         public Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, WorkflowTransitionUpdates updates, CancellationToken token)
         {
             updates = updates ?? new WorkflowTransitionUpdates();
