@@ -439,6 +439,21 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        public Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKye, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}?fields=attachment", issueKye);
+
+            return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(task =>
+            {
+                var jira = this._getCurrentJiraFunc();
+                var webClient = new WebClientWrapper();
+                var attachmentsJson = task.Result["fields"]["attachment"];
+                var attachments = JsonConvert.DeserializeObject<RemoteAttachment[]>(attachmentsJson.ToString(), this.GetSerializerSettings());
+
+                return attachments.Select(remoteAttachment => new Attachment(jira, webClient, remoteAttachment));
+            });
+        }
+
         private void LogRequest(RestRequest request, object body = null)
         {
             if (this._clientSettings.EnableRequestTrace)
