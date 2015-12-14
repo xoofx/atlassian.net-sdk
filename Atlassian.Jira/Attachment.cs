@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Remote;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
@@ -20,7 +21,13 @@ namespace Atlassian.Jira
         private readonly Jira _jira;
         private readonly IWebClient _webClient;
 
-        internal Attachment(Jira jira, IWebClient webClient, RemoteAttachment remoteAttachment)
+        /// <summary>
+        /// Creates a new instance of an Attachment from a remote entity.
+        /// </summary>
+        /// <param name="jira">Object used to interact with JIRA.</param>
+        /// <param name="webClient">WebClient to use to download attachment.</param>
+        /// <param name="remoteAttachment">Remote attachment entity.</param>
+        public Attachment(Jira jira, IWebClient webClient, RemoteAttachment remoteAttachment)
         {
             _jira = jira;
             _author = remoteAttachment.author;
@@ -38,7 +45,7 @@ namespace Atlassian.Jira
         public string Id
         {
             get { return _id; }
-        } 
+        }
 
         /// <summary>
         /// Author of attachment (user that uploaded the file)
@@ -81,27 +88,48 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Downloads attachment to specified file.
+        /// </summary>
+        /// <param name="fullFileName">Full file name where attachment will be downloaded.</param>
+        public Task DownloadAsync(string fullFileName)
+        {
+            AddAuthenticationToRequest(_webClient, _jira);
+            var url = GetRequestUrl();
+
+            return _webClient.DownloadAsync(url, fullFileName);
+        }
+
+        /// <summary>
         /// Downloads attachment to specified file
         /// </summary>
         /// <param name="fullFileName">Full file name where attachment will be downloaded</param>
         public void Download(string fullFileName)
         {
-            var credentials = _jira.GetCredentials();
+            AddAuthenticationToRequest(_webClient, _jira);
+            var url = GetRequestUrl();
+
+            _webClient.Download(url, fullFileName);
+        }
+
+        private string GetRequestUrl()
+        {
+            return String.Format("{0}secure/attachment/{1}/{2}",
+                _jira.Url.EndsWith("/") ? _jira.Url : _jira.Url + "/",
+                this.Id,
+                this.FileName);
+        }
+
+        private static void AddAuthenticationToRequest(IWebClient webClient, Jira jira)
+        {
+            var credentials = jira.GetCredentials();
 
             if (String.IsNullOrEmpty(credentials.UserName) || String.IsNullOrEmpty(credentials.Password))
             {
                 throw new InvalidOperationException("Unable to download attachment, user and/or password are missing. You can specify a provider for credentials when constructing the Jira instance.");
             }
 
-            _webClient.AddQueryString("os_username", Uri.EscapeDataString(credentials.UserName));
-            _webClient.AddQueryString("os_password", Uri.EscapeDataString(credentials.Password));
-
-            var url = String.Format("{0}secure/attachment/{1}/{2}",
-                _jira.Url.EndsWith("/") ? _jira.Url : _jira.Url + "/",
-                this.Id,
-                this.FileName);
-
-            _webClient.Download(url, fullFileName);
+            webClient.AddQueryString("os_username", Uri.EscapeDataString(credentials.UserName));
+            webClient.AddQueryString("os_password", Uri.EscapeDataString(credentials.Password));
         }
     }
 }

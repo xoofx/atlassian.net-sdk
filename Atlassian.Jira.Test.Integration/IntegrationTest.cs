@@ -748,6 +748,36 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public async Task DownloadAttachmentsAsync()
+        {
+            // create an issue
+            var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+            issue.SaveChanges();
+
+            // upload multiple attachments
+            File.WriteAllText("testfile1.txt", "Test File Content 1");
+            File.WriteAllText("testfile2.txt", "Test File Content 2");
+            issue.AddAttachment("testfile1.txt", "testfile2.txt");
+
+            // Get attachment metadata
+            var attachments = await issue.GetAttachmentsAsync(CancellationToken.None);
+            Assert.Equal(2, attachments.Count());
+            Assert.True(attachments.Any(a => a.FileName.Equals("testfile1.txt")), "'testfile1.txt' was not downloaded from server");
+            Assert.True(attachments.Any(a => a.FileName.Equals("testfile2.txt")), "'testfile2.txt' was not downloaded from server");
+
+            // download an attachment
+            var tempFile = Path.GetTempFileName();
+            await attachments.First(a => a.FileName.Equals("testfile1.txt")).DownloadAsync(tempFile);
+            Assert.Equal("Test File Content 1", File.ReadAllText(tempFile));
+        }
+
+        [Fact]
         public void AddAndGetComments()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);

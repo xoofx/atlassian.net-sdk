@@ -187,5 +187,12 @@ namespace Atlassian.Jira.Remote
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token);
+
+        /// <summary>
+        /// Retrieve attachment metadata from server for this issue
+        /// </summary>
+        /// <param name="issueKye">The issue key to get attachments from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKye, CancellationToken token);
     }
 }

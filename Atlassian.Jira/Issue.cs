@@ -522,6 +522,19 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Retrieve attachment metadata from server for this issue
+        /// </summary>
+        public Task<IEnumerable<Attachment>> GetAttachmentsAsync(CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve attachments from server, issue has not been created.");
+            }
+
+            return this.Jira.RestClient.GetAttachmentsFromIssueAsync(this.Key.Value, token);
+        }
+
+        /// <summary>
         /// Add one or more attachments to this issue
         /// </summary>
         /// <param name="filePaths">Full paths of files to upload</param>
