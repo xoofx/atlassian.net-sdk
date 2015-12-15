@@ -446,11 +446,10 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(task =>
             {
                 var jira = this._getCurrentJiraFunc();
-                var webClient = new WebClientWrapper();
                 var attachmentsJson = task.Result["fields"]["attachment"];
                 var attachments = JsonConvert.DeserializeObject<RemoteAttachment[]>(attachmentsJson.ToString(), this.GetSerializerSettings());
 
-                return attachments.Select(remoteAttachment => new Attachment(jira, webClient, remoteAttachment));
+                return attachments.Select(remoteAttachment => new Attachment(jira, new WebClientWrapper(), remoteAttachment));
             });
         }
 

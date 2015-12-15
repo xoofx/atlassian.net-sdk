@@ -10,34 +10,40 @@ namespace Atlassian.Jira
     internal class WebClientWrapper : IWebClient
     {
         private readonly WebClient _webClient;
-        private TaskCompletionSource<object> _completionSource;
 
         public WebClientWrapper()
         {
-            _completionSource = new TaskCompletionSource<object>();
             _webClient = new WebClient();
             _webClient.DownloadFileCompleted += _webClient_DownloadFileCompleted;
         }
 
         void _webClient_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
-            if (e.Cancelled)
+            var completionSource = e.UserState as TaskCompletionSource<object>;
+
+            if (completionSource != null)
             {
-                _completionSource.SetCanceled();
-            }
-            else if (e.Error != null)
-            {
-                _completionSource.SetException(e.Error);
-            }
-            else
-            {
-                _completionSource.SetResult(null);
+                if (e.Cancelled)
+                {
+                    completionSource.TrySetCanceled();
+                }
+                else if (e.Error != null)
+                {
+                    completionSource.TrySetException(e.Error);
+                }
+                else
+                {
+                    completionSource.TrySetResult(null);
+                }
             }
         }
 
         public void AddQueryString(string key, string value)
         {
-            _webClient.QueryString.Add(key, value);
+            if (!_webClient.QueryString.AllKeys.Contains(key))
+            {
+                _webClient.QueryString.Add(key, value);
+            }
         }
 
         public void Download(string url, string fileName)
@@ -47,12 +53,12 @@ namespace Atlassian.Jira
 
         public Task DownloadAsync(string url, string fileName)
         {
-            _completionSource.SetCanceled();
-            _completionSource = new TaskCompletionSource<object>();
+            _webClient.CancelAsync();
 
-            _webClient.DownloadFileAsync(new Uri(url), fileName);
+            var completionSource = new TaskCompletionSource<object>();
+            _webClient.DownloadFileAsync(new Uri(url), fileName, completionSource);
 
-            return _completionSource.Task;
+            return completionSource.Task;
         }
     }
 }
