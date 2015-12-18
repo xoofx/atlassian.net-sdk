@@ -502,6 +502,29 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns all available issue link types.
+        /// </summary>
+        public IEnumerable<IssueLinkType> GetIssueLinkTypes()
+        {
+            try
+            {
+                return this.GetIssueLinkTypesAsync(CancellationToken.None).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
+        /// <summary>
+        /// Returns all available issue link types.
+        /// </summary>
+        public Task<IEnumerable<IssueLinkType>> GetIssueLinkTypesAsync(CancellationToken token)
+        {
+            return this.RestClient.GetIssueLinkTypesAsync(token);
+        }
+
+        /// <summary>
         /// Returns all the issue statuses within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue statuses</returns>

@@ -244,6 +244,62 @@ namespace Atlassian.Jira.Remote
             });
         }
 
+        private Task<IDictionary<string, Issue>> GetIssuesMapAsync(params string[] issueKeys)
+        {
+            if (issueKeys.Any())
+            {
+                var jql = String.Format("key in ({0})", String.Join(",", issueKeys.Distinct()));
+                return this.GetIssuesFromJqlAsync(jql).ContinueWith<IDictionary<string, Issue>>(task =>
+                {
+                    return task.Result.ToDictionary<Issue, string>(i => i.Key.Value);
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IDictionary<string, Issue>>();
+                taskSource.SetResult(new Dictionary<string, Issue>());
+                return taskSource.Task;
+            }
+        }
+
+        public Task<IEnumerable<IssueLink>> GetIssueLinksAsync(Issue issue, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}?fields=issuelinks", issue.Key.Value);
+            var serializerSettings = this.GetSerializerSettings();
+
+            if (String.IsNullOrEmpty(issue.OriginalRemoteIssue.key))
+            {
+                throw new InvalidOperationException("Unable to get issue links issues, issue has not been created.");
+            }
+
+            return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(issueLinksTask =>
+            {
+                var issueLinksJson = issueLinksTask.Result["fields"]["issuelinks"].Cast<JObject>();
+                var linkedIssueKeys = issueLinksJson.Select(issueLink =>
+                    {
+                        var issueJson = issueLink["outwardIssue"] ?? issueLink["inwardIssue"];
+                        return issueJson["key"].Value<string>();
+                    }).ToArray();
+
+                return this.GetIssuesMapAsync(linkedIssueKeys).ContinueWith(issuesTask =>
+                {
+                    var issuesMap = issuesTask.Result;
+                    return issueLinksJson.Select(issueLink =>
+                    {
+                        var linkType = JsonConvert.DeserializeObject<IssueLinkType>(issueLink["type"].ToString(), serializerSettings);
+                        var outwardIssue = issueLink["outwardIssue"];
+                        var inwardIssue = issueLink["inwardIssue"];
+                        var outwardIssueKey = outwardIssue != null ? (string)outwardIssue["key"] : null;
+                        var inwardIssueKey = inwardIssue != null ? (string)inwardIssue["key"] : null;
+                        return new IssueLink(
+                            linkType,
+                            outwardIssueKey == null ? issue : issuesMap[outwardIssueKey],
+                            inwardIssueKey == null ? issue : issuesMap[inwardIssueKey]);
+                    });
+                });
+            }).Unwrap();
+        }
+
         public IssueTimeTrackingData GetTimeTrackingData(string issueKey)
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=timetracking", issueKey);
@@ -329,6 +385,46 @@ namespace Atlassian.Jira.Remote
                 taskSource.SetResult(cache.Resolutions.Values);
                 return taskSource.Task;
             }
+        }
+
+        public Task<IEnumerable<IssueLinkType>> GetIssueLinkTypesAsync(CancellationToken token)
+        {
+            var cache = this._clientSettings.Cache;
+            var serializerSettings = this.GetSerializerSettings();
+
+            if (!cache.LinkTypes.Any())
+            {
+                return this.ExecuteRequestAsync(Method.GET, "rest/api/2/issueLinkType", null, token).ContinueWith<IEnumerable<IssueLinkType>>(task =>
+                {
+                    var linkTypes = task.Result["issueLinkTypes"]
+                        .Cast<JObject>()
+                        .Select(issueLinkJson => JsonConvert.DeserializeObject<IssueLinkType>(issueLinkJson.ToString(), serializerSettings));
+
+                    cache.LinkTypes.AddIfMIssing(linkTypes);
+                    return linkTypes;
+                });
+            }
+            else
+            {
+                var taskSource = new TaskCompletionSource<IEnumerable<IssueLinkType>>();
+                taskSource.SetResult(cache.LinkTypes.Values);
+                return taskSource.Task;
+            }
+        }
+
+        public Task LinkIssuesAsync(string outwardIssueKey, string inwardIssueKey, string linkName, string comment, CancellationToken token)
+        {
+            var bodyObject = new JObject();
+            bodyObject.Add("type", new JObject(new JProperty("name", linkName)));
+            bodyObject.Add("inwardIssue", new JObject(new JProperty("key", inwardIssueKey)));
+            bodyObject.Add("outwardIssue", new JObject(new JProperty("key", outwardIssueKey)));
+
+            if (!String.IsNullOrEmpty(comment))
+            {
+                bodyObject.Add("comment", new JObject(new JProperty("body", comment)));
+            }
+
+            return this.ExecuteRequestAsync(Method.POST, "rest/api/2/issueLink", bodyObject, token);
         }
 
         public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)

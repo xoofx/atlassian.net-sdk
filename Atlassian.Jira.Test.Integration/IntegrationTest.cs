@@ -605,6 +605,67 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        void RetrieveEmptyIssueLinks()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue with no links " + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            Assert.Empty(issue.GetIssueLinks());
+        }
+
+        [Fact]
+        void CreateAndRetrieveIssueLinks()
+        {
+            var issue1 = _jira.CreateIssue("TST");
+            issue1.Summary = "Issue to link from" + _random.Next(int.MaxValue);
+            issue1.Type = "Bug";
+            issue1.SaveChanges();
+
+            var issue2 = _jira.CreateIssue("TST");
+            issue2.Summary = "Issue to link to " + _random.Next(int.MaxValue);
+            issue2.Type = "Bug";
+            issue2.SaveChanges();
+
+            var issue3 = _jira.CreateIssue("TST");
+            issue3.Summary = "Issue to link to " + _random.Next(int.MaxValue);
+            issue3.Type = "Bug";
+            issue3.SaveChanges();
+
+            // link the first issue to the second.
+            issue1.LinkToIssue(issue2.Key.Value, "Duplicate");
+            issue1.LinkToIssue(issue3.Key.Value, "Duplicate");
+
+            // reindex
+            var requestBody = new
+            {
+                jql = String.Format("key in ({0},{1},{2})", issue1.Key.Value, issue2.Key.Value, issue3.Key.Value)
+            };
+            _jira.RestClient.ExecuteRequest(Method.POST, "rest/api/2/reindex", requestBody);
+
+            // Verify links of first issue.
+            var issueLinks = issue1.GetIssueLinks();
+            Assert.Equal(2, issueLinks.Count());
+            Assert.True(issueLinks.All(l => l.OutwardIssue.Key.Value == issue1.Key.Value));
+            Assert.True(issueLinks.All(l => l.LinkType.Name == "Duplicate"));
+            Assert.True(issueLinks.Any(l => l.InwardIssue.Key.Value == issue2.Key.Value));
+            Assert.True(issueLinks.Any(l => l.InwardIssue.Key.Value == issue3.Key.Value));
+
+            // Verify link of second issue.
+            var issueLink = issue2.GetIssueLinks().Single();
+            Assert.Equal("Duplicate", issueLink.LinkType.Name);
+            Assert.Equal(issue1.Key.Value, issueLink.OutwardIssue.Key.Value);
+            Assert.Equal(issue2.Key.Value, issueLink.InwardIssue.Key.Value);
+
+            // Verify link of third issue.
+            issueLink = issue3.GetIssueLinks().Single();
+            Assert.Equal("Duplicate", issueLink.LinkType.Name);
+            Assert.Equal(issue1.Key.Value, issueLink.OutwardIssue.Key.Value);
+            Assert.Equal(issue3.Key.Value, issueLink.InwardIssue.Key.Value);
+        }
+
+        [Fact]
         public async Task TransitionIssueAsync()
         {
             var issue = _jira.CreateIssue("TST");
@@ -1139,6 +1200,13 @@ namespace Atlassian.Jira.Test.Integration
         public void GetProjects()
         {
             Assert.Equal(1, _jira.GetProjects().Count());
+        }
+
+        [Fact]
+        public void GetIssueLinkTypes()
+        {
+            var linkTypes = _jira.GetIssueLinkTypes();
+            Assert.True(linkTypes.Any(l => l.Name.Equals("Duplicate")));
         }
 
         [Fact]

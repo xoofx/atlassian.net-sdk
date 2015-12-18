@@ -159,6 +159,28 @@ namespace Atlassian.Jira.Remote
         Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token);
 
         /// <summary>
+        /// Returns all available issue link types.
+        /// </summary>
+        Task<IEnumerable<IssueLinkType>> GetIssueLinkTypesAsync(CancellationToken token);
+
+        /// <summary>
+        /// Creates an issue link between two issues.
+        /// </summary>
+        /// <param name="outwardIssueKey">Key of the outward issue.</param>
+        /// <param name="inwardIssueKey">Key of the inward issue.</param>
+        /// <param name="linkName">Name of the issue link.</param>
+        /// <param name="comment">Comment to add to the outward issue.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task LinkIssuesAsync(string outwardIssueKey, string inwardIssueKey, string linkName, string comment, CancellationToken token);
+
+        /// <summary>
+        /// Returns all issue links associated with a given issue.
+        /// </summary>
+        /// <param name="issue">The issue to retrieve links for.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<IssueLink>> GetIssueLinksAsync(Issue issue, CancellationToken token);
+
+        /// <summary>
         /// Adds a comment to an issue.
         /// </summary>
         /// <param name="issueKey">Issue key to add the comment to.</param>

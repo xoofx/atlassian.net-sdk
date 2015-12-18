@@ -410,6 +410,65 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Creates a link between this issue and the issue specified.
+        /// </summary>
+        /// <param name="inwardIssueKey">Key of the issue to link.</param>
+        /// <param name="linkName">Name of the issue link type.</param>
+        /// <param name="comment">Comment to add to this issue.</param>
+        public void LinkToIssue(string inwardIssueKey, string linkName, string comment = null)
+        {
+            try
+            {
+                this.LinkToIssueAsync(inwardIssueKey, linkName, comment, CancellationToken.None);
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
+        /// <summary>
+        /// Creates a link between this issue and the issue specified.
+        /// </summary>
+        /// <param name="inwardIssueKey">Key of the issue to link.</param>
+        /// <param name="linkName">Name of the issue link type.</param>
+        /// <param name="comment">Comment to add to this issue.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task LinkToIssueAsync(string inwardIssueKey, string linkName, string comment, CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to link issue, issue has not been created.");
+            }
+
+            return this.Jira.RestClient.LinkIssuesAsync(this.Key.Value, inwardIssueKey, linkName, comment, token);
+        }
+
+        /// <summary>
+        /// Gets the issue links associated with this issue.
+        /// </summary>
+        public IEnumerable<IssueLink> GetIssueLinks()
+        {
+            try
+            {
+                return this.GetIssueLinksAsync(CancellationToken.None).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
+        /// <summary>
+        /// Gets the issue links associated with this issue.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<IssueLink>> GetIssueLinksAsync(CancellationToken token)
+        {
+            return this.Jira.RestClient.GetIssueLinksAsync(this, token);
+        }
+
+        /// <summary>
         /// Transition an issue through a workflow action.
         /// </summary>
         /// <param name="actionName">The workflow action to transition to.</param>
