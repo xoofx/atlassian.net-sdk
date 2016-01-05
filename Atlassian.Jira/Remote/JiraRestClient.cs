@@ -664,7 +664,20 @@ namespace Atlassian.Jira.Remote
 
         public RemoteIssueType[] GetIssueTypes(string token, string projectId)
         {
-            return this.ExecuteRequest<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype");
+            if (String.IsNullOrEmpty(projectId))
+            {
+                return this.ExecuteRequest<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype");
+            }
+            else
+            {
+                var resource = String.Format("rest/api/2/project/{0}", projectId);
+                var projectJson = this.ExecuteRequest(Method.GET, resource);
+                var serializerSettings = GetSerializerSettings();
+
+                return projectJson["issueTypes"]
+                    .Select(issueTypeJson => JsonConvert.DeserializeObject<RemoteIssueType>(issueTypeJson.ToString(), serializerSettings))
+                    .ToArray();
+            }
         }
 
         public DateTime GetResolutionDateByKey(string token, string issueKey)
