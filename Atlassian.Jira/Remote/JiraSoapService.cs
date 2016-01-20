@@ -2755,6 +2755,8 @@ namespace Atlassian.Jira.Remote
 
         private System.Nullable<long> sequenceField;
 
+        private string descriptionField;
+
         /// <remarks/>
         public bool archived
         {
@@ -2806,6 +2808,19 @@ namespace Atlassian.Jira.Remote
             set
             {
                 this.sequenceField = value;
+            }
+        }
+
+        /// <remarks/>
+        public string description
+        {
+            get
+            {
+                return this.descriptionField;
+            }
+            set
+            {
+                this.descriptionField = value;
             }
         }
     }

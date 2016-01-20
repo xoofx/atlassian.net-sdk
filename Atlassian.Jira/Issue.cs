@@ -81,10 +81,10 @@ namespace Atlassian.Jira
 
             // collections
             _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection("versions", _jira, Project)
-                : new ProjectVersionCollection("versions", _jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
+                : new ProjectVersionCollection("versions", _jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(_jira, v)).ToList());
 
             _fixVersions = _originalIssue.fixVersions == null ? new ProjectVersionCollection("fixVersions", _jira, Project)
-                : new ProjectVersionCollection("fixVersions", _jira, Project, _originalIssue.fixVersions.Select(v => new ProjectVersion(v)).ToList());
+                : new ProjectVersionCollection("fixVersions", _jira, Project, _originalIssue.fixVersions.Select(v => new ProjectVersion(_jira, v)).ToList());
 
             _components = _originalIssue.components == null ? new ProjectComponentCollection("components", _jira, Project)
                 : new ProjectComponentCollection("components", _jira, Project, _originalIssue.components.Select(c => new ProjectComponent(c)).ToList());

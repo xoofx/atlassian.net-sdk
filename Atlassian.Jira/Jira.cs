@@ -449,7 +449,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    var results = _jiraService.GetVersions(token, projectKey).Select(v => new ProjectVersion(v));
+                    var results = _jiraService.GetVersions(token, projectKey).Select(v => new ProjectVersion(this, v));
                     _cache.Versions.AddIfMIssing(new JiraEntityDictionary<ProjectVersion>(projectKey, results));
                 });
             }

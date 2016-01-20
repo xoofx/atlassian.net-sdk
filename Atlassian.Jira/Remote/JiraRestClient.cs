@@ -879,6 +879,22 @@ namespace Atlassian.Jira.Remote
         {
             DeleteWorklog(token, issueKey, worklogId, "adjustEstimate=new&newEstimate=" + newRemainingEstimate);
         }
+
+        public Task<RemoteVersion> GetVersionAsync(string versionId, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/version/{0}", versionId);
+            return this.ExecuteRequestAsync<RemoteVersion>(Method.GET, resource, null, token);
+        }
+
+        public Task<RemoteVersion> UpdateVersionAsync(RemoteVersion version, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/version/{0}", version.id);
+            var versionJson = JsonConvert.SerializeObject(version, this._serializerSettings);
+            return this.ExecuteRequestAsync(Method.PUT, resource, versionJson, token).ContinueWith(task =>
+            {
+                return this.GetVersionAsync(version.id, token);
+            }).Unwrap();
+        }
         #endregion
 
         #region IJiraServiceClient - Unsupported

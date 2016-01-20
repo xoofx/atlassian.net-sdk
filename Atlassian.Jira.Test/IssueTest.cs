@@ -118,7 +118,7 @@ namespace Atlassian.Jira.Test
             public void IfFieldsSet_ShouldPopulateFields()
             {
                 var issue = CreateIssue("ProjectKey");
-                var version = new RemoteVersion().ToLocal();
+                var version = new RemoteVersion().ToLocal(null);
                 var component = new RemoteComponent().ToLocal();
 
                 issue.AffectsVersions.Add(version);
@@ -428,7 +428,7 @@ namespace Atlassian.Jira.Test
             {
                 var issue = new RemoteIssue() { key = "foo" }.ToLocal();
                 var version = new RemoteVersion() { id = "1", name = "1.0" };
-                issue.FixVersions.Add(version.ToLocal());
+                issue.FixVersions.Add(version.ToLocal(null));
 
                 var fields = GetUpdatedFieldsForIssue(issue);
                 Assert.Equal(1, fields.Length);
@@ -441,7 +441,7 @@ namespace Atlassian.Jira.Test
             {
                 var issue = new RemoteIssue() { key = "foo" }.ToLocal();
                 var version = new RemoteVersion() { id = "1", name = "1.0" };
-                issue.AffectsVersions.Add(version.ToLocal());
+                issue.AffectsVersions.Add(version.ToLocal(null));
 
                 var fields = GetUpdatedFieldsForIssue(issue);
                 Assert.Equal(1, fields.Length);

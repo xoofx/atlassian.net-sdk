@@ -216,5 +216,19 @@ namespace Atlassian.Jira.Remote
         /// <param name="issueKye">The issue key to get attachments from.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKye, CancellationToken token);
+
+        /// <summary>
+        /// Retrieves a version by its id.
+        /// </summary>
+        /// <param name="versionId">The version id to retrieve</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<RemoteVersion> GetVersionAsync(string versionId, CancellationToken token);
+
+        /// <summary>
+        /// Updates a version and returns a new instance populated from server.
+        /// </summary>
+        /// <param name="version">Version to update.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<RemoteVersion> UpdateVersionAsync(RemoteVersion version, CancellationToken token);
     }
 }
