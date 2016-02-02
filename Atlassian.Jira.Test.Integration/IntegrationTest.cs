@@ -91,6 +91,11 @@ namespace Atlassian.Jira.Test.Integration
         public void CreateAndQueryIssueWithAllFieldsSet()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var expectedDueDate = new DateTime(2011, 12, 12);
+
+#if SOAP
+            expectedDueDate = expectedDueDate.ToUniversalTime();
+#endif
 
             var issue = _jira.CreateIssue("TST");
             issue.AffectsVersions.Add("1.0");
@@ -98,7 +103,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.Components.Add("Server");
             issue["Custom Text Field"] = "Test Value";  // custom field
             issue.Description = "Test Description";
-            issue.DueDate = new DateTime(2011, 12, 12);
+            issue.DueDate = expectedDueDate;
             issue.Environment = "Test Environment";
             issue.FixVersions.Add("2.0");
             issue.Priority = "Major";
@@ -114,7 +119,7 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Equal(summaryValue, queriedIssue.Summary);
             Assert.NotNull(queriedIssue.JiraIdentifier);
-            Assert.Equal(new DateTime(2011, 12, 12), queriedIssue.DueDate.Value);
+            Assert.Equal(expectedDueDate, queriedIssue.DueDate.Value);
         }
 
         [Fact]
@@ -367,6 +372,7 @@ namespace Atlassian.Jira.Test.Integration
         #endregion
 
         #region Update Issue Fields
+#if !SOAP
         [Fact]
         public async Task UpdateIssueAsync()
         {
@@ -385,6 +391,7 @@ namespace Atlassian.Jira.Test.Integration
             issue = await _jira.RestClient.UpdateIssueAsync(issue, CancellationToken.None);
             Assert.Equal("2", issue.Type.Id);
         }
+#endif
 
         [Fact]
         public void UpdateNamedEntities_ById()
@@ -1122,7 +1129,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var filters = _jira.GetFilters();
 
-            Assert.True(filters.Count() > 1);
+            Assert.True(filters.Count() >= 1);
             Assert.True(filters.Any(f => f.Name == "One Issue Filter"));
         }
 
