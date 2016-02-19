@@ -213,8 +213,23 @@ namespace Atlassian.Jira.Remote
         /// <summary>
         /// Retrieve attachment metadata from server for this issue
         /// </summary>
-        /// <param name="issueKye">The issue key to get attachments from.</param>
+        /// <param name="issueKey">The issue key to get attachments from.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKye, CancellationToken token);
+        Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Retrieve the labels from server for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to get labels from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<string[]> GetLabelsFromIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Sets the labels for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to set the labels.</param>
+        /// <param name="labels">The list of labels to set on the issue.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task SetLabelsForIssueAsync(string issueKey, string[] labels, CancellationToken token);
     }
 }

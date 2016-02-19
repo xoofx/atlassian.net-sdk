@@ -535,9 +535,9 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        public Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKye, CancellationToken token)
+        public Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKey, CancellationToken token)
         {
-            var resource = String.Format("rest/api/2/issue/{0}?fields=attachment", issueKye);
+            var resource = String.Format("rest/api/2/issue/{0}?fields=attachment", issueKey);
 
             return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(task =>
             {
@@ -547,6 +547,28 @@ namespace Atlassian.Jira.Remote
 
                 return attachments.Select(remoteAttachment => new Attachment(jira, new WebClientWrapper(), remoteAttachment));
             });
+        }
+
+        public Task<string[]> GetLabelsFromIssueAsync(string issueKey, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}?fields=labels", issueKey);
+            return this.ExecuteRequestAsync<RemoteIssueWrapper>(Method.GET, resource).ContinueWith(task =>
+            {
+                return task.Result.RemoteIssue.labelsReadOnly ?? new string[0];
+            });
+        }
+
+        public Task SetLabelsForIssueAsync(string issueKey, string[] labels, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/issue/{0}", issueKey);
+            return this.ExecuteRequestAsync(Method.PUT, resource, new
+            {
+                fields = new
+                {
+                    labels = labels
+                }
+
+            }, token);
         }
 
         private void LogRequest(RestRequest request, object body = null)

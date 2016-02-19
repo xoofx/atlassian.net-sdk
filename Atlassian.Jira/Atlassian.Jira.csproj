@@ -64,6 +64,7 @@
     <Compile Include="ICustomFieldValueSerializer.cs" />
     <Compile Include="IJiraEntity.cs" />
     <Compile Include="IPagedQueryResult.cs" />
+    <Compile Include="IssueLabels.cs" />
     <Compile Include="IssueLink.cs" />
     <Compile Include="IssueLinkType.cs" />
     <Compile Include="JiraCache.cs" />

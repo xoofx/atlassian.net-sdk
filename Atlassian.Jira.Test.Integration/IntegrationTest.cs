@@ -253,8 +253,10 @@ namespace Atlassian.Jira.Test.Integration
                 String.Format("'{0}' was not found as a sub-task of TST-1", summaryValue));
         }
 
+#if SOAP
         /// <summary>
         /// https://bitbucket.org/farmas/atlassian.net-sdk/issue/3/serialization-error-when-querying-some
+        /// Note that this is disabled for REST because JIRA 7.0 throws the following error: "The entered text is too long. It exceeds the allowed limit of 32,767 characters."
         /// </summary>
         [Fact]
         public void HandleRetrievalOfMessagesWithLargeContentStrings()
@@ -271,6 +273,7 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Contains("Second stack trace:", issue.Description);
         }
+#endif
         #endregion
 
         #region Query Issues
@@ -920,7 +923,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void AddLabelsToIssue()
+        public void AddAndRetriveLabelsFromIssue()
         {
             var summaryValue = "Test issue with labels (Updated)" + _random.Next(int.MaxValue);
 
@@ -932,8 +935,13 @@ namespace Atlassian.Jira.Test.Integration
             };
 
             issue.SaveChanges();
+            issue.Labels.Set("label1", "label2");
 
-            issue.AddLabels("label1", "label2");
+            issue = _jira.GetIssue(issue.Key.Value);
+            Assert.Equal(2, issue.Labels.Cached.Length);
+
+            issue.Labels.Set("label1", "label2", "label3");
+            Assert.Equal(3, issue.Labels.Get().Length);
         }
 
         [Fact]
@@ -1153,7 +1161,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(4, issueTypes.Count());
 #else
             // In addition, rest API contains "Sub-Task" as an issue type.
-            Assert.Equal(5, issueTypes.Count());
+            Assert.True(issueTypes.Count() >= 5);
 #endif
             Assert.True(issueTypes.Any(i => i.Name == "Bug"));
         }
@@ -1186,7 +1194,7 @@ namespace Atlassian.Jira.Test.Integration
         public void GetCustomFields()
         {
             var fields = _jira.GetCustomFields();
-            Assert.Equal(19, fields.Count());
+            Assert.True(fields.Count() >= 19);
         }
 
         [Fact]

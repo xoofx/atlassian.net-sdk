@@ -37,6 +37,7 @@ namespace Atlassian.Jira
         private CustomFieldValueCollection _customFields = null;
         private IssueStatus _status;
         private string _parentIssueKey;
+        private IssueLabels _labels;
 
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
             : this(jira, new RemoteIssue() { project = projectKey }, parentIssueKey)
@@ -60,6 +61,7 @@ namespace Atlassian.Jira
             _dueDate = remoteIssue.duedate;
             _updateDate = remoteIssue.updated;
             _resolutionDate = remoteIssue.resolutionDateReadOnly;
+            _labels = new IssueLabels(this._jira.RestClient, remoteIssue);
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -98,6 +100,17 @@ namespace Atlassian.Jira
             get
             {
                 return this._originalIssue;
+            }
+        }
+
+        /// <summary>
+        /// Get an object to interact with the labels of this issue.
+        /// </summary>
+        public IssueLabels Labels
+        {
+            get
+            {
+                return _labels;
             }
         }
 
@@ -753,6 +766,7 @@ namespace Atlassian.Jira
         /// Add labels to this issue
         /// </summary>
         /// <param name="labels">Label(s) to add</param>
+        [Obsolete("Use the Issue.Labels object to interact with the labels of an issue.")]
         public void AddLabels(params string[] labels)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
