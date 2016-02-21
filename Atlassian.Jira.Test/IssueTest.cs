@@ -62,7 +62,7 @@ namespace Atlassian.Jira.Test
                     votes = 1
                 };
 
-                var issue = remoteIssue.ToLocal();
+                var issue = remoteIssue.ToLocal(TestableJira.Create());
 
                 Assert.Equal(1, issue.AffectsVersions.Count);
                 Assert.Equal("assignee", issue.Assignee);
@@ -355,7 +355,7 @@ namespace Atlassian.Jira.Test
                     summary = "Summary"
                 };
 
-                var issue = remoteIssue.ToLocal();
+                var issue = remoteIssue.ToLocal(TestableJira.Create());
 
                 issue.Summary = "Summary";
 
@@ -370,7 +370,7 @@ namespace Atlassian.Jira.Test
                     priority = "5",
                 };
 
-                var issue = remoteIssue.ToLocal();
+                var issue = remoteIssue.ToLocal(TestableJira.Create());
 
                 issue.Priority = "5";
 
@@ -406,14 +406,14 @@ namespace Atlassian.Jira.Test
                     duedate = new DateTime(2011, 1, 1)
                 };
 
-                var issue = remoteIssue.ToLocal();
+                var issue = remoteIssue.ToLocal(TestableJira.Create());
                 Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
             }
 
             [Fact]
             public void IfComponentsAdded_ReturnsFields()
             {
-                var issue = new RemoteIssue() { key = "foo" }.ToLocal();
+                var issue = new RemoteIssue() { key = "foo" }.ToLocal(TestableJira.Create());
                 var component = new RemoteComponent() { id = "1", name = "1.0" };
                 issue.Components.Add(component.ToLocal());
 
@@ -426,7 +426,7 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void IfAddFixVersion_ReturnAllFieldsThatChanged()
             {
-                var issue = new RemoteIssue() { key = "foo" }.ToLocal();
+                var issue = new RemoteIssue() { key = "foo" }.ToLocal(TestableJira.Create());
                 var version = new RemoteVersion() { id = "1", name = "1.0" };
                 issue.FixVersions.Add(version.ToLocal());
 
@@ -439,7 +439,7 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void IfAddAffectsVersion_ReturnAllFieldsThatChanged()
             {
-                var issue = new RemoteIssue() { key = "foo" }.ToLocal();
+                var issue = new RemoteIssue() { key = "foo" }.ToLocal(TestableJira.Create());
                 var version = new RemoteVersion() { id = "1", name = "1.0" };
                 issue.AffectsVersions.Add(version.ToLocal());
 
