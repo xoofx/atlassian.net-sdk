@@ -597,6 +597,27 @@ namespace Atlassian.Jira.Test.Integration
 
         #region Operation on Issues
         [Fact]
+        void AddAndRemoveWatchersToIssue()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Type = "1";
+            issue.Summary = "Test issue with watchers" + _random.Next(int.MaxValue);
+            issue.SaveChanges();
+
+            issue.Watchers.Add("test");
+            Assert.Equal(2, issue.Watchers.Get().Count());
+
+            issue.Watchers.Remove("admin");
+            Assert.Equal(1, issue.Watchers.Get().Count());
+
+            var user = issue.Watchers.Get().First();
+            Assert.Equal("test", user.Username);
+            Assert.True(user.IsActive);
+            Assert.Equal("Tester", user.DisplayName);
+            Assert.Equal("test@qa.com", user.Email);
+        }
+
+        [Fact]
         void GetSubTasks()
         {
             var parentTask = _jira.CreateIssue("TST");

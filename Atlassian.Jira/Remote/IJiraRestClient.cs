@@ -231,5 +231,12 @@ namespace Atlassian.Jira.Remote
         /// <param name="labels">The list of labels to set on the issue.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task SetLabelsForIssueAsync(string issueKey, string[] labels, CancellationToken token);
+
+        /// <summary>
+        /// Retrieve the watchers from server for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to get watchers from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<JiraUser>> GetWatchersFromIssueAsync(string issueKey, CancellationToken token);
     }
 }

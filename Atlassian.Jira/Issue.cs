@@ -38,6 +38,7 @@ namespace Atlassian.Jira
         private IssueStatus _status;
         private string _parentIssueKey;
         private IssueLabels _labels;
+        private IssueWatchers _watchers;
 
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
             : this(jira, new RemoteIssue() { project = projectKey }, parentIssueKey)
@@ -62,6 +63,7 @@ namespace Atlassian.Jira
             _updateDate = remoteIssue.updated;
             _resolutionDate = remoteIssue.resolutionDateReadOnly;
             _labels = new IssueLabels(this._jira.RestClient, remoteIssue);
+            _watchers = new IssueWatchers(this._jira.RestClient, remoteIssue.key);
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -111,6 +113,17 @@ namespace Atlassian.Jira
             get
             {
                 return _labels;
+            }
+        }
+
+        /// <summary>
+        /// Get an object to interact with the watchers of this issue.
+        /// </summary>
+        public IssueWatchers Watchers
+        {
+            get
+            {
+                return _watchers;
             }
         }
 

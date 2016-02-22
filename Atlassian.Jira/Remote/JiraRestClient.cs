@@ -571,6 +571,17 @@ namespace Atlassian.Jira.Remote
             }, token);
         }
 
+        public Task<IEnumerable<JiraUser>> GetWatchersFromIssueAsync(string issueKey, CancellationToken token)
+        {
+            var resourceUrl = String.Format("rest/api/2/issue/{0}/watchers", issueKey);
+
+            return this.ExecuteRequestAsync(Method.GET, resourceUrl, null, token).ContinueWith(task =>
+            {
+                var watchersJson = task.Result["watchers"];
+                return watchersJson.Select(watcherJson => JsonConvert.DeserializeObject<JiraUser>(watcherJson.ToString(), this.GetSerializerSettings()));
+            });
+        }
+
         private void LogRequest(RestRequest request, object body = null)
         {
             if (this._clientSettings.EnableRequestTrace)

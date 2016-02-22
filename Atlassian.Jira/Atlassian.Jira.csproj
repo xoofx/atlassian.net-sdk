@@ -67,7 +67,9 @@
     <Compile Include="IssueLabels.cs" />
     <Compile Include="IssueLink.cs" />
     <Compile Include="IssueLinkType.cs" />
+    <Compile Include="IssueWatchers.cs" />
     <Compile Include="JiraCache.cs" />
+    <Compile Include="JiraUser.cs" />
     <Compile Include="PagedQueryResult.cs" />
     <Compile Include="Remote\IJiraClient.cs" />
     <Compile Include="Remote\IJiraRestClient.cs" />
