@@ -131,17 +131,14 @@ namespace Atlassian.Jira.Remote
             {
                 var response = responseTask.Result;
 
-                EnsureValidResponse(response);
-
-                return response.StatusCode != HttpStatusCode.NoContent ? JToken.Parse(response.Content) : new JObject();
-
+                return GetValidJsonFromResponse(response);
             });
         }
 
         public IRestResponse ExecuteRequest(IRestRequest request)
         {
             var response = this._restClient.Execute(request);
-            EnsureValidResponse(response);
+            GetValidJsonFromResponse(response);
             return response;
         }
 
@@ -264,7 +261,7 @@ namespace Atlassian.Jira.Remote
 
         public Task<IEnumerable<IssueLink>> GetIssueLinksAsync(Issue issue, CancellationToken token)
         {
-            var resource = String.Format("rest/api/2/issue/{0}?fields=issuelinks", issue.Key.Value);
+            var resource = String.Format("rest/api/2/issue/{0}?fields=issuelinks,created", issue.Key.Value);
             var serializerSettings = this.GetSerializerSettings();
 
             if (String.IsNullOrEmpty(issue.OriginalRemoteIssue.key))
@@ -274,8 +271,15 @@ namespace Atlassian.Jira.Remote
 
             return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(issueLinksTask =>
             {
-                var issueLinksJson = issueLinksTask.Result["fields"]["issuelinks"].Cast<JObject>();
-                var linkedIssueKeys = issueLinksJson.Select(issueLink =>
+                var issueLinksJson = issueLinksTask.Result["fields"]["issuelinks"];
+
+                if (issueLinksJson == null)
+                {
+                    throw new InvalidOperationException("There is no 'issueLinks' field on the issue data, make sure issue linking is turned on in JIRA.");
+                }
+
+                var issueLinks = issueLinksJson.Cast<JObject>();
+                var linkedIssueKeys = issueLinks.Select(issueLink =>
                     {
                         var issueJson = issueLink["outwardIssue"] ?? issueLink["inwardIssue"];
                         return issueJson["key"].Value<string>();
@@ -284,7 +288,7 @@ namespace Atlassian.Jira.Remote
                 return this.GetIssuesMapAsync(linkedIssueKeys).ContinueWith(issuesTask =>
                 {
                     var issuesMap = issuesTask.Result;
-                    return issueLinksJson.Select(issueLink =>
+                    return issueLinks.Select(issueLink =>
                     {
                         var linkType = JsonConvert.DeserializeObject<IssueLinkType>(issueLink["type"].ToString(), serializerSettings);
                         var outwardIssue = issueLink["outwardIssue"];
@@ -603,16 +607,50 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        private void EnsureValidResponse(IRestResponse response)
+        private JToken GetValidJsonFromResponse(IRestResponse response)
         {
+            var content = response.Content != null ? response.Content.Trim() : string.Empty;
+
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
                 throw new InvalidOperationException(response.ErrorMessage);
             }
-            else if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError
-                || response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            else if (response.StatusCode == HttpStatusCode.InternalServerError
+                || response.StatusCode == HttpStatusCode.BadRequest)
             {
-                throw new InvalidOperationException(response.Content);
+                throw new InvalidOperationException(String.Format("Response Content: {0}", content));
+            }
+            else if (response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                throw new System.Security.Authentication.AuthenticationException(string.Format("Response Content: {0}", content));
+            }
+            else if (string.IsNullOrWhiteSpace(content))
+            {
+                return new JObject();
+            }
+            else if (!content.StartsWith("{") && !content.StartsWith("["))
+            {
+                throw new InvalidOperationException(String.Format("Response was not recognized as JSON. Content: {0}", content));
+            }
+            else
+            {
+                JToken parsedContent;
+
+                try
+                {
+                    parsedContent = JToken.Parse(content);
+                }
+                catch (JsonReaderException ex)
+                {
+                    throw new InvalidOperationException(String.Format("Failed to parse response as JSON. Content: {0}", content), ex);
+                }
+
+                if (parsedContent != null && parsedContent.Type == JTokenType.Object && parsedContent["errorMessages"] != null)
+                {
+                    throw new InvalidOperationException(string.Format("Response reported error(s) from JIRA: {0}", parsedContent["errorMessages"].ToString()));
+                }
+
+                return parsedContent;
             }
         }
         #endregion
