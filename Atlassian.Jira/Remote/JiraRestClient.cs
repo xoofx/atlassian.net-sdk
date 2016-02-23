@@ -215,12 +215,12 @@ namespace Atlassian.Jira.Remote
             }).Unwrap();
         }
 
-        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0)
+        public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0)
         {
             return this.GetIssuesFromJqlAsync(jql, maxIssues, startAt, CancellationToken.None);
         }
 
-        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
+        public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
         {
             var jira = this._getCurrentJiraFunc();
             var parameters = new
@@ -230,7 +230,7 @@ namespace Atlassian.Jira.Remote
                 maxResults = maxIssues ?? jira.MaxIssuesPerRequest,
             };
 
-            return this.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ContinueWith<IEnumerable<Issue>>(task =>
+            return this.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ContinueWith<IPagedQueryResult<Issue>>(task =>
             {
                 var issues = task.Result["issues"]
                     .Cast<JObject>()
