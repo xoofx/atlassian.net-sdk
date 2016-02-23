@@ -42,7 +42,7 @@ namespace Atlassian.Jira
         /// Create a SOAP client that connects with a JIRA server with anonymous access.
         /// </summary>
         /// <param name="url">Url to the JIRA server</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.")]
+        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
         public Jira(string url)
             : this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
@@ -56,7 +56,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server</param>
         /// <param name="username">Username used to authenticate</param>
         /// <param name="password">Password used to authenticate</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.")]
+        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
         public Jira(string url, string username, string password)
             : this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
@@ -71,7 +71,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="token">JIRA access token to use.</param>
         /// <param name="credentialsProvider">Provider of credentials needed to re-generate token.</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.")]
+        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
         public Jira(string url, string token, Func<JiraCredentials> credentialsProvider = null)
             : this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
@@ -87,7 +87,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="token">JIRA access token to use.</param>
         /// <param name="credentials">Credentials used to re-generate token.</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.")]
+        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
         public Jira(string url, string token, JiraCredentials credentials)
             : this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
