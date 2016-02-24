@@ -445,7 +445,7 @@ namespace Atlassian.Jira
         {
             try
             {
-                this.LinkToIssueAsync(inwardIssueKey, linkName, comment, CancellationToken.None);
+                this.LinkToIssueAsync(inwardIssueKey, linkName, comment, CancellationToken.None).Wait();
             }
             catch (AggregateException ex)
             {

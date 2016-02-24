@@ -84,13 +84,6 @@ namespace Atlassian.Jira.Test.Integration
             issue1.LinkToIssue(issue2.Key.Value, "Duplicate");
             issue1.LinkToIssue(issue3.Key.Value, "Duplicate");
 
-            // reindex
-            var requestBody = new
-            {
-                jql = String.Format("key in ({0},{1},{2})", issue1.Key.Value, issue2.Key.Value, issue3.Key.Value)
-            };
-            _jira.RestClient.ExecuteRequest(Method.POST, "rest/api/2/reindex", requestBody);
-
             // Verify links of first issue.
             var issueLinks = issue1.GetIssueLinks();
             Assert.Equal(2, issueLinks.Count());
