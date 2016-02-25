@@ -586,6 +586,27 @@ namespace Atlassian.Jira.Remote
             });
         }
 
+        public Task<IEnumerable<IssueChangeLog>> GetChangeLogsFromIssueAsync(string issueKey, CancellationToken token)
+        {
+            var resourceUrl = String.Format("rest/api/2/issue/{0}?fields=created&expand=changelog", issueKey);
+
+            return this.ExecuteRequestAsync(Method.GET, resourceUrl, null, token).ContinueWith(task =>
+            {
+                var result = Enumerable.Empty<IssueChangeLog>();
+                var changeLogs = task.Result["changelog"];
+                if (changeLogs != null)
+                {
+                    var histories = changeLogs["histories"];
+                    if (histories != null)
+                    {
+                        result = histories.Select(history => JsonConvert.DeserializeObject<IssueChangeLog>(history.ToString(), GetSerializerSettings()));
+                    }
+                }
+
+                return result;
+            });
+        }
+
         private void LogRequest(RestRequest request, object body = null)
         {
             if (this._clientSettings.EnableRequestTrace)

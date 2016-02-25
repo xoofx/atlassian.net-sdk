@@ -13,6 +13,26 @@ namespace Atlassian.Jira.Test.Integration
     public class IssueOperationsTest : BaseIntegrationTest
     {
         [Fact]
+        void GetChangeLogsForIssue()
+        {
+            var changelogs = _jira.GetIssue("TST-1").GetChangeLogs().OrderBy(log => log.CreatedDate);
+            Assert.Equal(4, changelogs.Count());
+
+            var firstChangeLog = changelogs.First();
+            Assert.Equal("admin", firstChangeLog.Author.Username);
+            Assert.NotNull(firstChangeLog.CreatedDate);
+            Assert.Equal(2, firstChangeLog.Items.Count());
+
+            var firstItem = firstChangeLog.Items.First();
+            Assert.Equal("Attachment", firstItem.FieldName);
+            Assert.Equal("jira", firstItem.FieldType);
+            Assert.Null(firstItem.FromValue);
+            Assert.Null(firstItem.FromId);
+            Assert.NotNull(firstItem.ToId);
+            Assert.Equal("SampleImage.png", firstItem.ToValue);
+        }
+
+        [Fact]
         void AddAndRemoveWatchersToIssue()
         {
             var issue = _jira.CreateIssue("TST");

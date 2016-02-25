@@ -237,5 +237,12 @@ namespace Atlassian.Jira.Remote
         /// <param name="issueKey">The issue key to get watchers from.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IEnumerable<JiraUser>> GetWatchersFromIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Retrieve the change logs from server for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to get watchers from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<IssueChangeLog>> GetChangeLogsFromIssueAsync(string issueKey, CancellationToken token);
     }
 }

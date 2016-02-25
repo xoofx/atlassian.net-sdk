@@ -670,6 +670,35 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Retrieve change logs from server for this issue.
+        /// </summary>
+        public IEnumerable<IssueChangeLog> GetChangeLogs()
+        {
+            try
+            {
+                return GetChangeLogsAsync(CancellationToken.None).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
+        /// <summary>
+        /// Retrieve change logs from server for this issue.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<IssueChangeLog>> GetChangeLogsAsync(CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve change logs from server, issue has not been created.");
+            }
+
+            return _jira.RestClient.GetChangeLogsFromIssueAsync(_originalIssue.key, token);
+        }
+
+        /// <summary>
         /// Retrieve comments from server for this issue
         /// </summary>
         public ReadOnlyCollection<Comment> GetComments()
