@@ -183,6 +183,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="username">Username used to authenticate.</param>
         /// <param name="password">Password used to authenticate.</param>
+        [Obsolete("SOAP API has been deprecated and removed from JIRA, migrate to use the REST API instead.")]
         public static Jira CreateSoapClient(string url, string username = null, string password = null)
         {
             return new Jira(new JqlExpressionVisitor(),
@@ -197,6 +198,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="token">JIRA access token to use.</param>
         /// <param name="credentials">Credentials used to re-generate token.</param>
+        [Obsolete("SOAP API has been deprecated and removed from JIRA, migrate to use the REST API instead.")]
         public static Jira CreateSoapClient(string url, string token, JiraCredentials credentials = null)
         {
             return new Jira(new JqlExpressionVisitor(),
