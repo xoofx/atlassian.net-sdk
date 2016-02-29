@@ -2403,7 +2403,7 @@ namespace Atlassian.Jira.Remote
 
         private string[] attachmentNamesField;
 
-        private RemoteComponent[] componentsField;
+        private RemoteComponent[] componentsField = new RemoteComponent[0];
 
         private System.Nullable<System.DateTime> createdField;
 

@@ -96,7 +96,7 @@ namespace Atlassian.Jira.Test
 
                 Assert.Null(remoteIssue.affectsVersions);
                 Assert.Null(remoteIssue.assignee);
-                Assert.Null(remoteIssue.components);
+                Assert.Empty(remoteIssue.components); // Field has empty collection by default because JIRA REST API does not accept a null value.
                 Assert.Null(remoteIssue.created);
                 Assert.Null(remoteIssue.customFieldValues);
                 Assert.Null(remoteIssue.description);

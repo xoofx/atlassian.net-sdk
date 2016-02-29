@@ -154,7 +154,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void UpdateVersions()
+        public void AddAndRemoveVersions()
         {
             var summaryValue = "Test issue with versions (Updated)" + _random.Next(int.MaxValue);
 
@@ -168,11 +168,33 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             issue.AffectsVersions.Add("1.0");
-            issue.AffectsVersions.Add("2.0");
-
-            issue.FixVersions.Add("3.0");
             issue.FixVersions.Add("2.0");
+            issue.SaveChanges();
+            Assert.Equal(1, issue.AffectsVersions.Count);
+            Assert.Equal(1, issue.FixVersions.Count);
+            Assert.Equal("1.0", issue.AffectsVersions.First().Name);
+            Assert.Equal("2.0", issue.FixVersions.First().Name);
 
+            issue.AffectsVersions.Remove("1.0");
+            issue.AffectsVersions.Add("2.0");
+            issue.FixVersions.Remove("2.0");
+            issue.FixVersions.Add("3.0");
+            issue.SaveChanges();
+            Assert.Equal(1, issue.AffectsVersions.Count);
+            Assert.Equal(1, issue.FixVersions.Count);
+            Assert.Equal("2.0", issue.AffectsVersions.First().Name);
+            Assert.Equal("3.0", issue.FixVersions.First().Name);
+
+            issue.AffectsVersions.Remove("2.0");
+            issue.FixVersions.Remove("3.0");
+            issue.SaveChanges();
+            Assert.Equal(0, issue.AffectsVersions.Count);
+            Assert.Equal(0, issue.FixVersions.Count);
+
+            issue.AffectsVersions.Add("1.0");
+            issue.AffectsVersions.Add("2.0");
+            issue.FixVersions.Add("2.0");
+            issue.FixVersions.Add("3.0");
             issue.SaveChanges();
 
             Assert.Equal(2, issue.FixVersions.Count);
@@ -185,7 +207,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void UpdateComponents()
+        public void AddAndRemoveComponents()
         {
             var summaryValue = "Test issue with components (Updated)" + _random.Next(int.MaxValue);
 
@@ -198,11 +220,24 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            issue.Components.Add("Server");
             issue.Components.Add("Client");
-
             issue.SaveChanges();
+            Assert.Equal(1, issue.Components.Count);
+            Assert.Equal("Client", issue.Components.First().Name);
 
+            issue.Components.Remove("Client");
+            issue.Components.Add("Server");
+            issue.SaveChanges();
+            Assert.Equal(1, issue.Components.Count);
+            Assert.Equal("Server", issue.Components.First().Name);
+
+            issue.Components.Remove("Server");
+            issue.SaveChanges();
+            Assert.Equal(0, issue.Components.Count);
+
+            issue.Components.Add("Client");
+            issue.Components.Add("Server");
+            issue.SaveChanges();
             Assert.Equal(2, issue.Components.Count);
             Assert.True(issue.Components.Any(c => c.Name == "Server"));
             Assert.True(issue.Components.Any(c => c.Name == "Client"));
