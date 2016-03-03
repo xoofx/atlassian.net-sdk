@@ -109,8 +109,7 @@ namespace Atlassian.Jira.Remote
         /// <param name="jql">JQL search query</param>
         /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
-        /// <returns>Collection of Issues that match the search query</returns>
-        Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0);
+        Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0);
 
         /// <summary>
         /// Execute a specific JQL query and return the resulting issues.
@@ -119,7 +118,7 @@ namespace Atlassian.Jira.Remote
         /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token);
+        Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token);
 
         /// <summary>
         /// Gets time tracking information for an issue.
@@ -213,11 +212,40 @@ namespace Atlassian.Jira.Remote
         /// <summary>
         /// Retrieve attachment metadata from server for this issue
         /// </summary>
-        /// <param name="issueKye">The issue key to get attachments from.</param>
+        /// <param name="issueKey">The issue key to get attachments from.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKye, CancellationToken token);
+        Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKey, CancellationToken token);
 
         /// <summary>
+        /// Retrieve the labels from server for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to get labels from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<string[]> GetLabelsFromIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Sets the labels for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to set the labels.</param>
+        /// <param name="labels">The list of labels to set on the issue.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task SetLabelsForIssueAsync(string issueKey, string[] labels, CancellationToken token);
+
+        /// <summary>
+        /// Retrieve the watchers from server for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to get watchers from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<JiraUser>> GetWatchersFromIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Retrieve the change logs from server for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to get watchers from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<IssueChangeLog>> GetChangeLogsFromIssueAsync(string issueKey, CancellationToken token);
+
+		/// <summary>
         /// Retrieves a version by its id.
         /// </summary>
         /// <param name="versionId">The version id to retrieve</param>

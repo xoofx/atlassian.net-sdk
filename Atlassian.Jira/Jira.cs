@@ -42,7 +42,7 @@ namespace Atlassian.Jira
         /// Create a SOAP client that connects with a JIRA server with anonymous access.
         /// </summary>
         /// <param name="url">Url to the JIRA server</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.")]
+        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
         public Jira(string url)
             : this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
@@ -56,7 +56,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server</param>
         /// <param name="username">Username used to authenticate</param>
         /// <param name="password">Password used to authenticate</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.")]
+        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
         public Jira(string url, string username, string password)
             : this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
@@ -71,7 +71,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="token">JIRA access token to use.</param>
         /// <param name="credentialsProvider">Provider of credentials needed to re-generate token.</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.")]
+        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
         public Jira(string url, string token, Func<JiraCredentials> credentialsProvider = null)
             : this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
@@ -87,7 +87,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="token">JIRA access token to use.</param>
         /// <param name="credentials">Credentials used to re-generate token.</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.")]
+        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
         public Jira(string url, string token, JiraCredentials credentials)
             : this(new JqlExpressionVisitor(),
                   new JiraSoapServiceClientWrapper(url),
@@ -183,6 +183,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="username">Username used to authenticate.</param>
         /// <param name="password">Password used to authenticate.</param>
+        [Obsolete("SOAP API has been deprecated and removed from JIRA, migrate to use the REST API instead.")]
         public static Jira CreateSoapClient(string url, string username = null, string password = null)
         {
             return new Jira(new JqlExpressionVisitor(),
@@ -197,6 +198,7 @@ namespace Atlassian.Jira
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="token">JIRA access token to use.</param>
         /// <param name="credentials">Credentials used to re-generate token.</param>
+        [Obsolete("SOAP API has been deprecated and removed from JIRA, migrate to use the REST API instead.")]
         public static Jira CreateSoapClient(string url, string token, JiraCredentials credentials = null)
         {
             return new Jira(new JqlExpressionVisitor(),
@@ -352,7 +354,7 @@ namespace Atlassian.Jira
         /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
+        public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
         {
             return this.RestClient.GetIssuesFromJqlAsync(jql, maxIssues, startAt, token);
         }

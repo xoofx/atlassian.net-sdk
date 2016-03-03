@@ -37,6 +37,8 @@ namespace Atlassian.Jira
         private CustomFieldValueCollection _customFields = null;
         private IssueStatus _status;
         private string _parentIssueKey;
+        private IssueLabels _labels;
+        private IssueWatchers _watchers;
 
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
             : this(jira, new RemoteIssue() { project = projectKey }, parentIssueKey)
@@ -60,6 +62,8 @@ namespace Atlassian.Jira
             _dueDate = remoteIssue.duedate;
             _updateDate = remoteIssue.updated;
             _resolutionDate = remoteIssue.resolutionDateReadOnly;
+            _labels = new IssueLabels(this._jira.RestClient, remoteIssue);
+            _watchers = new IssueWatchers(this._jira.RestClient, remoteIssue.key);
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -98,6 +102,28 @@ namespace Atlassian.Jira
             get
             {
                 return this._originalIssue;
+            }
+        }
+
+        /// <summary>
+        /// Get an object to interact with the labels of this issue.
+        /// </summary>
+        public IssueLabels Labels
+        {
+            get
+            {
+                return _labels;
+            }
+        }
+
+        /// <summary>
+        /// Get an object to interact with the watchers of this issue.
+        /// </summary>
+        public IssueWatchers Watchers
+        {
+            get
+            {
+                return _watchers;
             }
         }
 
@@ -419,7 +445,7 @@ namespace Atlassian.Jira
         {
             try
             {
-                this.LinkToIssueAsync(inwardIssueKey, linkName, comment, CancellationToken.None);
+                this.LinkToIssueAsync(inwardIssueKey, linkName, comment, CancellationToken.None).Wait();
             }
             catch (AggregateException ex)
             {
@@ -644,6 +670,35 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Retrieve change logs from server for this issue.
+        /// </summary>
+        public IEnumerable<IssueChangeLog> GetChangeLogs()
+        {
+            try
+            {
+                return GetChangeLogsAsync(CancellationToken.None).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
+        /// <summary>
+        /// Retrieve change logs from server for this issue.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<IssueChangeLog>> GetChangeLogsAsync(CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve change logs from server, issue has not been created.");
+            }
+
+            return _jira.RestClient.GetChangeLogsFromIssueAsync(_originalIssue.key, token);
+        }
+
+        /// <summary>
         /// Retrieve comments from server for this issue
         /// </summary>
         public ReadOnlyCollection<Comment> GetComments()
@@ -753,6 +808,7 @@ namespace Atlassian.Jira
         /// Add labels to this issue
         /// </summary>
         /// <param name="labels">Label(s) to add</param>
+        [Obsolete("Use the Issue.Labels object to interact with the labels of an issue.")]
         public void AddLabels(params string[] labels)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
