@@ -2815,6 +2815,7 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        [System.Xml.Serialization.SoapIgnore]
         /// <remarks/>
         public string description
         {

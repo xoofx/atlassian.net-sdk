@@ -76,10 +76,19 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void GetProjectVersions()
+        public void GetAndUpdateProjectVersions()
         {
             var versions = _jira.GetProjectVersions("TST");
             Assert.Equal(3, versions.Count());
+
+            var version1 = versions.First(v => v.Name == "1.0");
+            var newDescription = "1.0 Release " + _random.Next(int.MaxValue);
+            version1.Description = newDescription;
+            version1.SaveChanges();
+
+            Assert.Equal(newDescription, version1.Description);
+            version1 = _jira.GetProjectVersions("TST").First(v => v.Name == "1.0");
+            Assert.Equal(newDescription, version1.Description);
         }
 
         [Fact]

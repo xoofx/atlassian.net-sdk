@@ -1,22 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Atlassian.Jira.Remote;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
     /// <summary>
     /// A version associated with a project
     /// </summary>
-    public class ProjectVersion: JiraNamedEntity
+    public class ProjectVersion : JiraNamedEntity
     {
-        private readonly RemoteVersion _remoteVersion;
+        private RemoteVersion _remoteVersion;
 
         internal ProjectVersion(Jira jira, RemoteVersion remoteVersion)
-            :base(jira, remoteVersion.id)
+            : base(jira, remoteVersion.id)
         {
+            if (jira == null)
+            {
+                throw new ArgumentNullException("jira");
+            }
+
             _name = remoteVersion.name;
             _remoteVersion = remoteVersion;
         }
@@ -53,10 +56,10 @@ namespace Atlassian.Jira
             {
                 return _remoteVersion.released;
             }
-			set
-			{
-				_remoteVersion.released = value;
-			}
+            set
+            {
+                _remoteVersion.released = value;
+            }
         }
 
         /// <summary>
@@ -89,14 +92,31 @@ namespace Atlassian.Jira
             }
         }
 
-        public void SaveChanges(CancellationToken token = default(CancellationToken))
+        /// <summary>
+        /// Save field changes to the server.
+        /// </summary>
+        public void SaveChanges()
         {
-            if (Jira.RestClient == null)
+            try
             {
-                throw new NotImplementedException();
+                SaveChangesAsync().Wait();
             }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
 
-            Jira.RestClient.UpdateVersionAsync(_remoteVersion, token);
+        /// <summary>
+        /// Save field changes to the server.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task SaveChangesAsync(CancellationToken token = default(CancellationToken))
+        {
+            return Jira.RestClient.UpdateVersionAsync(_remoteVersion, token).ContinueWith(task =>
+            {
+                _remoteVersion = task.Result;
+            });
         }
     }
 }

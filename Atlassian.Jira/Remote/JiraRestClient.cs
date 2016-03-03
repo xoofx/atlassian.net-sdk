@@ -981,7 +981,7 @@ namespace Atlassian.Jira.Remote
         public Task<RemoteVersion> UpdateVersionAsync(RemoteVersion version, CancellationToken token)
         {
             var resource = String.Format("rest/api/2/version/{0}", version.id);
-            var versionJson = JsonConvert.SerializeObject(version, this._serializerSettings);
+            var versionJson = JsonConvert.SerializeObject(version, GetSerializerSettings());
             return this.ExecuteRequestAsync(Method.PUT, resource, versionJson, token).ContinueWith(task =>
             {
                 return this.GetVersionAsync(version.id, token);
