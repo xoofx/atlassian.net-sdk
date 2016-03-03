@@ -76,10 +76,29 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void AddAndRemoveProjectVersions()
+        {
+            var versionName = "New Version " + _random.Next(int.MaxValue);
+            var projectInfo = new ProjectVersionCreationInfo(versionName);
+            var project = _jira.GetProjects().First();
+
+            // Add a project version.
+            var version = project.Versions.Add(projectInfo);
+            Assert.Equal(versionName, version.Name);
+
+            // Retrive project versions.
+            Assert.True(project.Versions.Get().Any(p => p.Name == versionName));
+
+            // Delete project version
+            project.Versions.Delete(version.Name);
+            Assert.False(project.Versions.Get().Any(p => p.Name == versionName));
+        }
+
+        [Fact]
         public void GetAndUpdateProjectVersions()
         {
             var versions = _jira.GetProjectVersions("TST");
-            Assert.Equal(3, versions.Count());
+            Assert.True(versions.Count() >= 3);
 
             var version1 = versions.First(v => v.Name == "1.0");
             var newDescription = "1.0 Release " + _random.Next(int.MaxValue);

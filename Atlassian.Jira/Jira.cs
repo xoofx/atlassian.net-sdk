@@ -225,6 +225,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets the cache for frequently retrieved server items from JIRA.
+        /// </summary>
+        public JiraCache Cache
+        {
+            get
+            {
+                return _cache;
+            }
+        }
+
+        /// <summary>
         /// Gets a client configured to interact with JIRA's REST API.
         /// </summary>
         public IJiraRestClient RestClient
@@ -625,7 +636,7 @@ namespace Atlassian.Jira
             {
                 WithToken(token =>
                 {
-                    _cache.Projects.AddIfMIssing(_jiraService.GetProjects(token).Select(p => new Project(p)));
+                    _cache.Projects.AddIfMIssing(_jiraService.GetProjects(token).Select(p => new Project(this, p)));
                 });
             }
 

@@ -46,7 +46,7 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        private JsonSerializerSettings GetSerializerSettings()
+        public JsonSerializerSettings GetSerializerSettings()
         {
             if (this._serializerSettings == null)
             {
@@ -526,7 +526,8 @@ namespace Atlassian.Jira.Remote
             {
                 return this.ExecuteRequestAsync<RemoteProject[]>(Method.GET, "rest/api/2/project", null, token).ContinueWith(task =>
                 {
-                    var results = task.Result.Select(p => new Project(p));
+                    var jira = this._getCurrentJiraFunc();
+                    var results = task.Result.Select(p => new Project(jira, p));
                     cache.Projects.AddIfMIssing(results);
                     return results;
                 });

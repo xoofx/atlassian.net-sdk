@@ -73,6 +73,8 @@
     <Compile Include="JiraCache.cs" />
     <Compile Include="JiraUser.cs" />
     <Compile Include="PagedQueryResult.cs" />
+    <Compile Include="ProjectVersionCreationInfo.cs" />
+    <Compile Include="ProjectVersionsEditableResource.cs" />
     <Compile Include="Remote\IJiraClient.cs" />
     <Compile Include="Remote\IJiraRestClient.cs" />
     <Compile Include="IssueStatus.cs" />

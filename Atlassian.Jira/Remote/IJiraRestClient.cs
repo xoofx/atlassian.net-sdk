@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,11 @@ namespace Atlassian.Jira.Remote
     /// </summary>
     public interface IJiraRestClient
     {
+        /// <summary>
+        /// Gets the global serializer settings to use.
+        /// </summary>
+        JsonSerializerSettings GetSerializerSettings();
+
         /// <summary>
         /// Executes a request.
         /// </summary>
@@ -245,7 +251,7 @@ namespace Atlassian.Jira.Remote
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IEnumerable<IssueChangeLog>> GetChangeLogsFromIssueAsync(string issueKey, CancellationToken token);
 
-		/// <summary>
+        /// <summary>
         /// Retrieves a version by its id.
         /// </summary>
         /// <param name="versionId">The version id to retrieve</param>
