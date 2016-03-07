@@ -15,7 +15,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var users = _jira.RestClient.ExecuteRequest<JiraNamedResource[]>(Method.GET, "rest/api/2/user/assignable/multiProjectSearch?projectKeys=TST");
 
-            Assert.Equal(2, users.Length);
+            Assert.True(users.Length >= 2);
             Assert.True(users.Any(u => u.Name == "admin"));
         }
 
