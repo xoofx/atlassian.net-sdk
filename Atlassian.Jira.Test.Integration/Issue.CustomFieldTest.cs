@@ -1,12 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
@@ -152,55 +149,43 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(cascadingSelect.Name, "Custom Cascading Select Field");
         }
 
-        public class IssueFieldMetadataCustomFieldOption 
+        public class IssueFieldMetadataCustomFieldOption
         {
-            /// <summary>
-            /// Identifier of this resource.
-            /// </summary>
             [JsonProperty("id")]
             public long Id { get; set; }
 
-            /// <summary>
-            /// Name of this resource.
-            /// </summary>
             [JsonProperty("value")]
             public string Value { get; set; }
 
-            /// <summary>
-            /// Url to access this resource.
-            /// </summary>
             [JsonProperty("self")]
             public string Self { get; set; }
         }
 
         [Fact]
-        public void TestCustomFieldOptions()
+        public async Task TestCustomFieldOptions()
         {
             // prepare
             Issue iss = _jira.GetIssue("TST-1");
 
             // exercise
-            IDictionary<string, IssueFieldEditMetadata> issueFields = iss.GetIssueFieldsEditMetadata();
+            var issueFields = await iss.GetIssueFieldsEditMetadataAsync();
 
             //assert: IssueFieldEditMetadata of issue
-            Assert.Equal(34, issueFields.Count());
-            IssueFieldEditMetadata customfield_10307 = issueFields["customfield_10307"];
-            Assert.Equal("Custom Radio Field", customfield_10307.Name);
-            Assert.False(customfield_10307.IsRequired);
-            Assert.Contains(IssueFieldEditMetadataOperation.SET, customfield_10307.Operations);
-            Assert.Equal(1, customfield_10307.Operations.Count);
-            Assert.Equal("string", customfield_10307.Schema.Type);
-            Assert.Equal("com.atlassian.jira.plugin.system.customfieldtypes:radiobuttons",
-                customfield_10307.Schema.Custom);
-            Assert.Equal(10307, customfield_10307.Schema.CustomId);
+            Assert.True(issueFields.Count() >= 34);
+            IssueFieldEditMetadata customRadioField = issueFields["Custom Radio Field"];
+            Assert.Equal("Custom Radio Field", customRadioField.Name);
+            Assert.False(customRadioField.IsRequired);
+            Assert.Contains(IssueFieldEditMetadataOperation.SET, customRadioField.Operations);
+            Assert.Equal(1, customRadioField.Operations.Count);
+            Assert.Equal("option", customRadioField.Schema.Type);
+            Assert.Equal("com.atlassian.jira.plugin.system.customfieldtypes:radiobuttons", customRadioField.Schema.Custom);
+            Assert.Equal(10307, customRadioField.Schema.CustomId);
 
             // assert: allowed values
             // warning : AllowedValues on IssueFieldEditMetadata could be various kind of objects. One can determine the kind of object
-            // by looking at it's proprties. Issue TST-26 and it's field "Custom Radio Field" used for this test has
+            // by looking at it's properties. Issue TST-1 and it's field "Custom Radio Field" used for this test has
             // AllowedValues elements are objects of type CustomFieldOption
-            IEnumerable<IssueFieldMetadataCustomFieldOption> options =
-                customfield_10307.AllowedValuesAs<IssueFieldMetadataCustomFieldOption>();
-
+            var options = customRadioField.AllowedValuesAs<IssueFieldMetadataCustomFieldOption>();
             IssueFieldMetadataCustomFieldOption option1 = options.FirstOrDefault(x => x.Value == "option1");
             IssueFieldMetadataCustomFieldOption option2 = options.FirstOrDefault(x => x.Value == "option2");
             IssueFieldMetadataCustomFieldOption option3 = options.FirstOrDefault(x => x.Value == "option3");
@@ -209,8 +194,7 @@ namespace Atlassian.Jira.Test.Integration
             AssertCustomFieldOption(option3, 10105, "option3", @".*/rest/api/2/customFieldOption/10105");
         }
 
-        private void AssertCustomFieldOption(IssueFieldMetadataCustomFieldOption option, int id, string value,
-            string selfRegex)
+        private void AssertCustomFieldOption(IssueFieldMetadataCustomFieldOption option, int id, string value, string selfRegex)
         {
             Assert.NotNull(option);
             Assert.Equal(id, option.Id);

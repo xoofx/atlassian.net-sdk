@@ -670,15 +670,16 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Gets metadata object containing dictionary with issuefields identifiers as keys and their metadata as values 
+        /// Gets a dictionary with issue field names as keys and their metadata as values.
         /// </summary>
-        public IDictionary<String, IssueFieldEditMetadata> GetIssueFieldsEditMetadata()
+        public Task<IDictionary<String, IssueFieldEditMetadata>> GetIssueFieldsEditMetadataAsync(CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to retrieve issue fields from server, issue has not been created.");
             }
-            return _jira.RestClient.GetIssueFieldsEditMetadata(_originalIssue.key);
+
+            return _jira.RestClient.GetIssueFieldsEditMetadataAsync(_originalIssue.key, token);
         }
 
         /// <summary>

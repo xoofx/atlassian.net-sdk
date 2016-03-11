@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Runtime.Serialization;
 
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// Possible values of operations property in IssueFieldEditMetadata
+    /// Possible values of operations property in IssueFieldEditMetadata.
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
     public enum IssueFieldEditMetadataOperation

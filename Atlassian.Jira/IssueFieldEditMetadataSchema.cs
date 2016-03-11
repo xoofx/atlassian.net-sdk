@@ -1,44 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// Represents schema object of issuefield
+    /// Represents the schema of an issue field.
     /// </summary>
     public class IssueFieldEditMetadataSchema
     {
         /// <summary>
-        /// Type of the field ( for example array )
-        /// </summary>  
+        /// Type of the field ( for example array ).
+        /// </summary>
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public string Type { get; private set; }
 
         /// <summary>
-        /// Type of individual value ( for example user, string, ... )
+        /// Type of individual values ( for example user, string, ... ).
         /// </summary>
         [JsonProperty("items")]
-        public string Items { get; set; }
+        public string Items { get; private set; }
 
         /// <summary>
-        /// System name of the field
+        /// System name of the field.
         /// </summary>
         [JsonProperty("system")]
-        public string System { get; set; }
+        public string System { get; private set; }
 
         /// <summary>
+        /// The JIRA internal custom type of this field.
         /// Example: custom="com.atlassian.jira.plugin.system.customfieldtypes:select"
         /// </summary>
         [JsonProperty("custom")]
-        public string Custom { get; set; }
+        public string Custom { get; private set; }
 
         /// <summary>
-        /// Id of the Custom
+        /// Id of the custom field.
         /// </summary>
         [JsonProperty("customId")]
-        public int CustomId { get; set; }
+        public int CustomId { get; private set; }
     }
 }

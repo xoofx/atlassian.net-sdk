@@ -310,13 +310,24 @@ namespace Atlassian.Jira.Remote
             return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), _serializerSettings);
         }
 
-        public IDictionary<String, IssueFieldEditMetadata> GetIssueFieldsEditMetadata(string issueKey)
+        public Task<IDictionary<String, IssueFieldEditMetadata>> GetIssueFieldsEditMetadataAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format("rest/api/2/issue/{0}/editmeta", issueKey);
-            JToken outer = ExecuteRequest(Method.GET, resource);
-            JObject fields = outer["fields"].Value<JObject>();
-           
-            return fields.ToObject<Dictionary<String, IssueFieldEditMetadata>>();
+
+            return ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith<IDictionary<String, IssueFieldEditMetadata>>(task =>
+            {
+                var dict = new Dictionary<string, IssueFieldEditMetadata>();
+                var serializer = JsonSerializer.Create(this.GetSerializerSettings());
+                JObject fields = task.Result["fields"].Value<JObject>();
+
+                foreach (var prop in fields.Properties())
+                {
+                    var fieldName = (prop.Value["name"] ?? prop.Name).ToString();
+                    dict.Add(fieldName, prop.Value.ToObject<IssueFieldEditMetadata>(serializer));
+                }
+
+                return dict;
+            });
         }
 
         public RemoteField[] GetCustomFields(string token)
