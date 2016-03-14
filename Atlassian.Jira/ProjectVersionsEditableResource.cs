@@ -63,7 +63,7 @@ namespace Atlassian.Jira
                     });
 
                 return PagedQueryResult<ProjectVersion>.FromJson((JObject)task.Result, versions);
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Atlassian.Jira
                 }
 
                 return version;
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Atlassian.Jira
                 {
                     cacheEntry.Remove(version.Id);
                 }
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         private T ExecuteAndGuard<T>(Func<T> execute)

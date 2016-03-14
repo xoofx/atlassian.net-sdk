@@ -116,7 +116,7 @@ namespace Atlassian.Jira
             return Jira.RestClient.UpdateVersionAsync(_remoteVersion, token).ContinueWith(task =>
             {
                 _remoteVersion = task.Result;
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
     }
 }

@@ -95,7 +95,7 @@ namespace Atlassian.Jira.Remote
             return ExecuteRequestAsync(method, resource, requestBody, token).ContinueWith<T>(responseTask =>
             {
                 return JsonConvert.DeserializeObject<T>(responseTask.Result.ToString(), _serializerSettings);
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null)
@@ -131,7 +131,7 @@ namespace Atlassian.Jira.Remote
                 var response = responseTask.Result;
 
                 return GetValidJsonFromResponse(response);
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public IRestResponse ExecuteRequest(IRestRequest request)
@@ -148,7 +148,7 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync<RemoteIssueWrapper>(Method.GET, resource, null, token).ContinueWith(task =>
             {
                 return new Issue(jira, task.Result.RemoteIssue);
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public Task<Issue> UpdateIssueAsync(Issue issue, CancellationToken token)
@@ -162,7 +162,7 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync(Method.PUT, resource, new { fields = fields }, token).ContinueWith(task =>
             {
                 return this.GetIssueAsync(issue.Key.Value, token);
-            }).Unwrap();
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
         }
 
         public Task<Issue> CreateIssueAsyc(Issue issue, CancellationToken token)
@@ -172,7 +172,7 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync(Method.POST, "rest/api/2/issue", remoteIssueWrapper, token).ContinueWith(task =>
             {
                 return this.GetIssueAsync((string)task.Result["key"], token);
-            }).Unwrap();
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
         }
 
         public Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, WorkflowTransitionUpdates updates, CancellationToken token)
@@ -208,7 +208,7 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync(Method.POST, resource, requestBody, token).ContinueWith(task =>
             {
                 return this.GetIssueAsync(issue.Key.Value, token);
-            }).Unwrap();
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
         }
 
         public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0)
@@ -237,10 +237,10 @@ namespace Atlassian.Jira.Remote
                     });
 
                 return PagedQueryResult<Issue>.FromJson((JObject)task.Result, issues);
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
-        private Task<IDictionary<string, Issue>> GetIssuesMapAsync(params string[] issueKeys)
+        private Task<IDictionary<string, Issue>> GetIssuesMapAsync(string[] issueKeys, CancellationToken token)
         {
             if (issueKeys.Any())
             {
@@ -248,7 +248,7 @@ namespace Atlassian.Jira.Remote
                 return this.GetIssuesFromJqlAsync(jql).ContinueWith<IDictionary<string, Issue>>(task =>
                 {
                     return task.Result.ToDictionary<Issue, string>(i => i.Key.Value);
-                });
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
             }
             else
             {
@@ -284,7 +284,7 @@ namespace Atlassian.Jira.Remote
                         return issueJson["key"].Value<string>();
                     }).ToArray();
 
-                return this.GetIssuesMapAsync(linkedIssueKeys).ContinueWith(issuesTask =>
+                return this.GetIssuesMapAsync(linkedIssueKeys, token).ContinueWith(issuesTask =>
                 {
                     var issuesMap = issuesTask.Result;
                     return issueLinks.Select(issueLink =>
@@ -299,8 +299,8 @@ namespace Atlassian.Jira.Remote
                             outwardIssueKey == null ? issue : issuesMap[outwardIssueKey],
                             inwardIssueKey == null ? issue : issuesMap[inwardIssueKey]);
                     });
-                });
-            }).Unwrap();
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
         }
 
         public IssueTimeTrackingData GetTimeTrackingData(string issueKey)
@@ -327,7 +327,7 @@ namespace Atlassian.Jira.Remote
                 }
 
                 return dict;
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public RemoteField[] GetCustomFields(string token)
@@ -353,7 +353,7 @@ namespace Atlassian.Jira.Remote
                     var results = task.Result.Where(f => f.IsCustomField).Select(f => new CustomField(f));
                     cache.CustomFields.AddIfMIssing(results);
                     return results;
-                });
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
             }
             else
             {
@@ -379,7 +379,7 @@ namespace Atlassian.Jira.Remote
                     var results = task.Result.Select(p => new IssuePriority(p));
                     cache.Priorities.AddIfMIssing(results);
                     return results;
-                });
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
             }
             else
             {
@@ -400,7 +400,7 @@ namespace Atlassian.Jira.Remote
                     var results = task.Result.Select(r => new IssueResolution(r));
                     cache.Resolutions.AddIfMIssing(results);
                     return results;
-                });
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
             }
             else
             {
@@ -425,7 +425,7 @@ namespace Atlassian.Jira.Remote
 
                     cache.LinkTypes.AddIfMIssing(linkTypes);
                     return linkTypes;
-                });
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
             }
             else
             {
@@ -461,7 +461,7 @@ namespace Atlassian.Jira.Remote
                     var results = task.Result.Select(s => new IssueStatus(s));
                     cache.Statuses.AddIfMIssing(results);
                     return results;
-                });
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
             }
             else
             {
@@ -482,7 +482,7 @@ namespace Atlassian.Jira.Remote
                     var results = task.Result.Select(t => new IssueType(t));
                     cache.IssueTypes.AddIfMIssing(new JiraEntityDictionary<IssueType>(Jira.ALL_PROJECTS_KEY, results));
                     return results;
-                });
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
             }
             else
             {
@@ -498,7 +498,7 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync<RemoteComment>(Method.POST, resource, comment.toRemote(), token).ContinueWith(task =>
             {
                 return new Comment(task.Result);
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public Task<IPagedQueryResult<Comment>> GetCommentsFromIssueAsync(string issueKey, int maxComments, int startAt, CancellationToken token)
@@ -521,7 +521,7 @@ namespace Atlassian.Jira.Remote
                     });
 
                 return PagedQueryResult<Comment>.FromJson((JObject)task.Result, comments);
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public Task<IEnumerable<JiraNamedEntity>> GetActionsForIssueAsync(string issueKey, CancellationToken token)
@@ -534,7 +534,7 @@ namespace Atlassian.Jira.Remote
                 var remoteTransitions = JsonConvert.DeserializeObject<RemoteNamedObject[]>(transitionsJson.ToString(), this.GetSerializerSettings());
 
                 return remoteTransitions.Select(transition => new JiraNamedEntity(transition));
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token)
@@ -549,7 +549,7 @@ namespace Atlassian.Jira.Remote
                     var results = task.Result.Select(p => new Project(jira, p));
                     cache.Projects.AddIfMIssing(results);
                     return results;
-                });
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
             }
             else
             {
@@ -570,7 +570,7 @@ namespace Atlassian.Jira.Remote
                 var attachments = JsonConvert.DeserializeObject<RemoteAttachment[]>(attachmentsJson.ToString(), this.GetSerializerSettings());
 
                 return attachments.Select(remoteAttachment => new Attachment(jira, new WebClientWrapper(), remoteAttachment));
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public Task<string[]> GetLabelsFromIssueAsync(string issueKey, CancellationToken token)
@@ -579,7 +579,7 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync<RemoteIssueWrapper>(Method.GET, resource).ContinueWith(task =>
             {
                 return task.Result.RemoteIssue.labelsReadOnly ?? new string[0];
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public Task SetLabelsForIssueAsync(string issueKey, string[] labels, CancellationToken token)
@@ -603,7 +603,7 @@ namespace Atlassian.Jira.Remote
             {
                 var watchersJson = task.Result["watchers"];
                 return watchersJson.Select(watcherJson => JsonConvert.DeserializeObject<JiraUser>(watcherJson.ToString(), this.GetSerializerSettings()));
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         public Task<IEnumerable<IssueChangeLog>> GetChangeLogsFromIssueAsync(string issueKey, CancellationToken token)
@@ -624,7 +624,7 @@ namespace Atlassian.Jira.Remote
                 }
 
                 return result;
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         private void LogRequest(RestRequest request, object body = null)
@@ -1005,7 +1005,7 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync(Method.PUT, resource, versionJson, token).ContinueWith(task =>
             {
                 return this.GetVersionAsync(version.id, token);
-            }).Unwrap();
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
         }
         #endregion
 

@@ -529,8 +529,8 @@ namespace Atlassian.Jira
                 return this._jira.RestClient.ExecuteIssueWorkflowActionAsync(this, action.Id, additionalUpdates, token).ContinueWith(issueTask =>
                 {
                     Initialize(issueTask.Result.OriginalRemoteIssue);
-                });
-            }).Unwrap();
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
         }
 
         private void UpdateRemoteFields(RemoteFieldValue[] remoteFields)
@@ -586,7 +586,7 @@ namespace Atlassian.Jira
             return this.Jira.RestClient.GetIssuesFromJqlAsync(jql, maxIssues, startAt, token).ContinueWith(task =>
             {
                 return task.Result as IPagedQueryResult<Issue>;
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         /// <summary>
