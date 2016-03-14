@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
-    public class IssueFieldOptionsTest : BaseIntegrationTest
+    public class IssueFieldMetadataTest : BaseIntegrationTest
     {
-
         [Fact]
         public async Task TestNonCustomFieldOption()
         {
