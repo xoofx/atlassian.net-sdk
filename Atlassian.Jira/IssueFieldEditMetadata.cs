@@ -10,8 +10,21 @@ namespace Atlassian.Jira
     ///  </summary>
     public class IssueFieldEditMetadata
     {
+        public IssueFieldEditMetadata()
+        {
+            AllowedValues = new JArray();
+        }
+
         /// <summary>
-        /// Whether the field is required.
+        /// Is field custom.
+        /// </summary>
+        public bool IsCustom
+        {
+            get { return Schema.Custom != null;  }
+        }
+
+        /// <summary>
+        /// Is field required.
         /// </summary>
         [JsonProperty("required")]
         public bool IsRequired { get; private set; }

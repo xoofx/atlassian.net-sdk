@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseIntegrationTest.cs" />
+    <Compile Include="Issue.FieldOptionsTest.cs" />
     <Compile Include="Issue.CustomFieldTest.cs" />
     <Compile Include="Issue.CreateTest.cs" />
     <Compile Include="Issue.OperationTest.cs" />
