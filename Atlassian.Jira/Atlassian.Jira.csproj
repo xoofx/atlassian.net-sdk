@@ -47,7 +47,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp, Version=100.0.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
-      <HintPath>..\..\VSJiraExtension\packages\RestSharpSigned.105.2.3\lib\net4\RestSharp.dll</HintPath>
+      <HintPath>..\packages\RestSharpSigned.105.2.3\lib\net4\RestSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
