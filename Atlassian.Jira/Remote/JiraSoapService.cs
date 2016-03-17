@@ -2403,7 +2403,7 @@ namespace Atlassian.Jira.Remote
 
         private string[] attachmentNamesField;
 
-        private RemoteComponent[] componentsField;
+        private RemoteComponent[] componentsField = new RemoteComponent[0];
 
         private System.Nullable<System.DateTime> createdField;
 
@@ -2452,7 +2452,7 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        [System.Xml.Serialization.SoapIgnore]        
+        [System.Xml.Serialization.SoapIgnore]
         [JsonProperty("parent")]
         [JsonConverter(typeof(NestedValueJsonConverter), "key")]
         public string parentKey { get; set; }
@@ -2460,6 +2460,10 @@ namespace Atlassian.Jira.Remote
         [System.Xml.Serialization.SoapIgnore]
         [JsonProperty("resolutiondate")]
         public System.Nullable<System.DateTime> resolutionDateReadOnly { get; set; }
+
+        [System.Xml.Serialization.SoapIgnore]
+        [JsonProperty("labels")]
+        public string[] labelsReadOnly { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -2755,6 +2759,8 @@ namespace Atlassian.Jira.Remote
 
         private System.Nullable<long> sequenceField;
 
+        private string descriptionField;
+
         /// <remarks/>
         public bool archived
         {
@@ -2806,6 +2812,20 @@ namespace Atlassian.Jira.Remote
             set
             {
                 this.sequenceField = value;
+            }
+        }
+
+        [System.Xml.Serialization.SoapIgnore]
+        /// <remarks/>
+        public string description
+        {
+            get
+            {
+                return this.descriptionField;
+            }
+            set
+            {
+                this.descriptionField = value;
             }
         }
     }

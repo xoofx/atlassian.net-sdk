@@ -43,23 +43,29 @@ namespace Atlassian.Jira
         /// <summary>
         /// Adds an entity to the dictionary if it missing, otherwise no-op.
         /// </summary>
-        public void AddIfMIssing(T entity)
+        /// <returns>True if entity was added, false otherwise.</returns>
+        public bool AddIfMIssing(T entity)
         {
-            this.AddIfMIssing(new T[1] { entity });
+            return this.AddIfMIssing(new T[1] { entity });
         }
 
         /// <summary>
         /// Adds a list of entities to the dictionary if their are missing.
         /// </summary>
-        public void AddIfMIssing(IEnumerable<T> entities)
+        /// <returns>True if at least one entity was added, false otherwise.</returns>
+        public bool AddIfMIssing(IEnumerable<T> entities)
         {
+            var result = false;
             foreach (var entity in entities)
             {
                 if (!this.ContainsKey(entity.Id))
                 {
+                    result = true;
                     this.Add(entity.Id, entity);
                 }
             }
+
+            return result;
         }
 
         /// <summary>

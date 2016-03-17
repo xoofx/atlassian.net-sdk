@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +13,11 @@ namespace Atlassian.Jira.Remote
     /// </summary>
     public interface IJiraRestClient
     {
+        /// <summary>
+        /// Gets the global serializer settings to use.
+        /// </summary>
+        JsonSerializerSettings GetSerializerSettings();
+
         /// <summary>
         /// Executes a request.
         /// </summary>
@@ -109,8 +113,7 @@ namespace Atlassian.Jira.Remote
         /// <param name="jql">JQL search query</param>
         /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
-        /// <returns>Collection of Issues that match the search query</returns>
-        Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0);
+        Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0);
 
         /// <summary>
         /// Execute a specific JQL query and return the resulting issues.
@@ -119,13 +122,20 @@ namespace Atlassian.Jira.Remote
         /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<IEnumerable<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token);
+        Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token);
 
         /// <summary>
         /// Gets time tracking information for an issue.
         /// </summary>
         /// <param name="issueKey">The issue key.</param>
         IssueTimeTrackingData GetTimeTrackingData(string issueKey);
+
+        /// <summary>
+        /// Gets metadata object containing dictionary with issuefields identifiers as keys and their metadata as values
+        /// </summary>
+        /// <param name="issueKey">The issue key.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IDictionary<String, IssueFieldEditMetadata>> GetIssueFieldsEditMetadataAsync(string issueKey, CancellationToken token);
 
         /// <summary>
         /// Returns all custom fields within JIRA.
@@ -157,6 +167,28 @@ namespace Atlassian.Jira.Remote
         /// Returns all the issue types within JIRA.
         /// </summary>
         Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token);
+
+        /// <summary>
+        /// Returns all available issue link types.
+        /// </summary>
+        Task<IEnumerable<IssueLinkType>> GetIssueLinkTypesAsync(CancellationToken token);
+
+        /// <summary>
+        /// Creates an issue link between two issues.
+        /// </summary>
+        /// <param name="outwardIssueKey">Key of the outward issue.</param>
+        /// <param name="inwardIssueKey">Key of the inward issue.</param>
+        /// <param name="linkName">Name of the issue link.</param>
+        /// <param name="comment">Comment to add to the outward issue.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task LinkIssuesAsync(string outwardIssueKey, string inwardIssueKey, string linkName, string comment, CancellationToken token);
+
+        /// <summary>
+        /// Returns all issue links associated with a given issue.
+        /// </summary>
+        /// <param name="issue">The issue to retrieve links for.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<IssueLink>> GetIssueLinksAsync(Issue issue, CancellationToken token);
 
         /// <summary>
         /// Adds a comment to an issue.
@@ -191,8 +223,51 @@ namespace Atlassian.Jira.Remote
         /// <summary>
         /// Retrieve attachment metadata from server for this issue
         /// </summary>
-        /// <param name="issueKye">The issue key to get attachments from.</param>
+        /// <param name="issueKey">The issue key to get attachments from.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKye, CancellationToken token);
+        Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Retrieve the labels from server for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to get labels from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<string[]> GetLabelsFromIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Sets the labels for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to set the labels.</param>
+        /// <param name="labels">The list of labels to set on the issue.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task SetLabelsForIssueAsync(string issueKey, string[] labels, CancellationToken token);
+
+        /// <summary>
+        /// Retrieve the watchers from server for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to get watchers from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<JiraUser>> GetWatchersFromIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Retrieve the change logs from server for the issue specified.
+        /// </summary>
+        /// <param name="issueKey">The issue key to get watchers from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<IssueChangeLog>> GetChangeLogsFromIssueAsync(string issueKey, CancellationToken token);
+
+        /// <summary>
+        /// Retrieves a version by its id.
+        /// </summary>
+        /// <param name="versionId">The version id to retrieve</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<RemoteVersion> GetVersionAsync(string versionId, CancellationToken token);
+
+        /// <summary>
+        /// Updates a version and returns a new instance populated from server.
+        /// </summary>
+        /// <param name="version">Version to update.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<RemoteVersion> UpdateVersionAsync(RemoteVersion version, CancellationToken token);
     }
 }

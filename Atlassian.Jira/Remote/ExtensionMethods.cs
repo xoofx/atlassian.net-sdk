@@ -35,9 +35,9 @@ namespace Atlassian.Jira.Remote
         /// <summary>
         /// Creates a new Version from RemoteVersion
         /// </summary>
-        public static ProjectVersion ToLocal(this RemoteVersion remoteVersion)
+        public static ProjectVersion ToLocal(this RemoteVersion remoteVersion, Jira jira)
         {
-            return new ProjectVersion(remoteVersion);
+            return new ProjectVersion(jira, remoteVersion);
         }
 
         /// <summary>

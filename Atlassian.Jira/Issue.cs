@@ -37,6 +37,8 @@ namespace Atlassian.Jira
         private CustomFieldValueCollection _customFields = null;
         private IssueStatus _status;
         private string _parentIssueKey;
+        private IssueLabels _labels;
+        private IssueWatchers _watchers;
 
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
             : this(jira, new RemoteIssue() { project = projectKey }, parentIssueKey)
@@ -60,6 +62,8 @@ namespace Atlassian.Jira
             _dueDate = remoteIssue.duedate;
             _updateDate = remoteIssue.updated;
             _resolutionDate = remoteIssue.resolutionDateReadOnly;
+            _labels = new IssueLabels(this._jira.RestClient, remoteIssue);
+            _watchers = new IssueWatchers(this._jira.RestClient, remoteIssue.key);
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -81,10 +85,10 @@ namespace Atlassian.Jira
 
             // collections
             _affectsVersions = _originalIssue.affectsVersions == null ? new ProjectVersionCollection("versions", _jira, Project)
-                : new ProjectVersionCollection("versions", _jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(v)).ToList());
+                : new ProjectVersionCollection("versions", _jira, Project, _originalIssue.affectsVersions.Select(v => new ProjectVersion(_jira, v)).ToList());
 
             _fixVersions = _originalIssue.fixVersions == null ? new ProjectVersionCollection("fixVersions", _jira, Project)
-                : new ProjectVersionCollection("fixVersions", _jira, Project, _originalIssue.fixVersions.Select(v => new ProjectVersion(v)).ToList());
+                : new ProjectVersionCollection("fixVersions", _jira, Project, _originalIssue.fixVersions.Select(v => new ProjectVersion(_jira, v)).ToList());
 
             _components = _originalIssue.components == null ? new ProjectComponentCollection("components", _jira, Project)
                 : new ProjectComponentCollection("components", _jira, Project, _originalIssue.components.Select(c => new ProjectComponent(c)).ToList());
@@ -98,6 +102,28 @@ namespace Atlassian.Jira
             get
             {
                 return this._originalIssue;
+            }
+        }
+
+        /// <summary>
+        /// Get an object to interact with the labels of this issue.
+        /// </summary>
+        public IssueLabels Labels
+        {
+            get
+            {
+                return _labels;
+            }
+        }
+
+        /// <summary>
+        /// Get an object to interact with the watchers of this issue.
+        /// </summary>
+        public IssueWatchers Watchers
+        {
+            get
+            {
+                return _watchers;
             }
         }
 
@@ -410,6 +436,65 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Creates a link between this issue and the issue specified.
+        /// </summary>
+        /// <param name="inwardIssueKey">Key of the issue to link.</param>
+        /// <param name="linkName">Name of the issue link type.</param>
+        /// <param name="comment">Comment to add to this issue.</param>
+        public void LinkToIssue(string inwardIssueKey, string linkName, string comment = null)
+        {
+            try
+            {
+                this.LinkToIssueAsync(inwardIssueKey, linkName, comment, CancellationToken.None).Wait();
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
+        /// <summary>
+        /// Creates a link between this issue and the issue specified.
+        /// </summary>
+        /// <param name="inwardIssueKey">Key of the issue to link.</param>
+        /// <param name="linkName">Name of the issue link type.</param>
+        /// <param name="comment">Comment to add to this issue.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task LinkToIssueAsync(string inwardIssueKey, string linkName, string comment, CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to link issue, issue has not been created.");
+            }
+
+            return this.Jira.RestClient.LinkIssuesAsync(this.Key.Value, inwardIssueKey, linkName, comment, token);
+        }
+
+        /// <summary>
+        /// Gets the issue links associated with this issue.
+        /// </summary>
+        public IEnumerable<IssueLink> GetIssueLinks()
+        {
+            try
+            {
+                return this.GetIssueLinksAsync(CancellationToken.None).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
+        /// <summary>
+        /// Gets the issue links associated with this issue.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<IssueLink>> GetIssueLinksAsync(CancellationToken token)
+        {
+            return this.Jira.RestClient.GetIssueLinksAsync(this, token);
+        }
+
+        /// <summary>
         /// Transition an issue through a workflow action.
         /// </summary>
         /// <param name="actionName">The workflow action to transition to.</param>
@@ -444,8 +529,8 @@ namespace Atlassian.Jira
                 return this._jira.RestClient.ExecuteIssueWorkflowActionAsync(this, action.Id, additionalUpdates, token).ContinueWith(issueTask =>
                 {
                     Initialize(issueTask.Result.OriginalRemoteIssue);
-                });
-            }).Unwrap();
+                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
         }
 
         private void UpdateRemoteFields(RemoteFieldValue[] remoteFields)
@@ -501,7 +586,7 @@ namespace Atlassian.Jira
             return this.Jira.RestClient.GetIssuesFromJqlAsync(jql, maxIssues, startAt, token).ContinueWith(task =>
             {
                 return task.Result as IPagedQueryResult<Issue>;
-            });
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
         /// <summary>
@@ -582,6 +667,48 @@ namespace Atlassian.Jira
                     names.ToArray(),
                     content.ToArray());
             });
+        }
+
+        /// <summary>
+        /// Gets a dictionary with issue field names as keys and their metadata as values.
+        /// </summary>
+        public Task<IDictionary<String, IssueFieldEditMetadata>> GetIssueFieldsEditMetadataAsync(CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve issue fields from server, issue has not been created.");
+            }
+
+            return _jira.RestClient.GetIssueFieldsEditMetadataAsync(_originalIssue.key, token);
+        }
+
+        /// <summary>
+        /// Retrieve change logs from server for this issue.
+        /// </summary>
+        public IEnumerable<IssueChangeLog> GetChangeLogs()
+        {
+            try
+            {
+                return GetChangeLogsAsync(CancellationToken.None).Result;
+            }
+            catch (AggregateException ex)
+            {
+                throw ex.Flatten().InnerException;
+            }
+        }
+
+        /// <summary>
+        /// Retrieve change logs from server for this issue.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<IssueChangeLog>> GetChangeLogsAsync(CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve change logs from server, issue has not been created.");
+            }
+
+            return _jira.RestClient.GetChangeLogsFromIssueAsync(_originalIssue.key, token);
         }
 
         /// <summary>
@@ -694,6 +821,7 @@ namespace Atlassian.Jira
         /// Add labels to this issue
         /// </summary>
         /// <param name="labels">Label(s) to add</param>
+        [Obsolete("Use the Issue.Labels object to interact with the labels of an issue.")]
         public void AddLabels(params string[] labels)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))

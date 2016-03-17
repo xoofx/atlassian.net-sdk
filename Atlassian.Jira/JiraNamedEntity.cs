@@ -25,6 +25,15 @@ namespace Atlassian.Jira
             _name = remoteEntity.name;
         }
 
+        /// <summary>
+        /// Creates an instance of a JiraNamedEntity base on a remote entity.
+        /// </summary>
+        public JiraNamedEntity(Jira jira, AbstractNamedRemoteEntity remoteEntity)
+            : this(remoteEntity)
+        {
+            _jira = jira;
+        }
+
         internal JiraNamedEntity(Jira jira, string id)
         {
             _jira = jira;

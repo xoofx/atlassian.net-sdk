@@ -68,8 +68,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IntegrationTest.cs" />
+    <Compile Include="BaseIntegrationTest.cs" />
+    <Compile Include="Issue.FieldMetadataTest.cs" />
+    <Compile Include="Issue.CustomFieldTest.cs" />
+    <Compile Include="Issue.CreateTest.cs" />
+    <Compile Include="Issue.OperationTest.cs" />
+    <Compile Include="JiraTypesTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Issue.QueryTest.cs" />
+    <Compile Include="RestTest.cs" />
+    <Compile Include="SoapTests.cs" />
+    <Compile Include="Issue.UpdateTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Atlassian.Jira\Atlassian.Jira.csproj">
