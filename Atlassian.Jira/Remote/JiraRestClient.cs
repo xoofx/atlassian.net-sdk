@@ -244,8 +244,9 @@ namespace Atlassian.Jira.Remote
         {
             if (issueKeys.Any())
             {
-                var jql = String.Format("key in ({0})", String.Join(",", issueKeys.Distinct()));
-                return this.GetIssuesFromJqlAsync(jql).ContinueWith<IDictionary<string, Issue>>(task =>
+                var distinctKeys = issueKeys.Distinct();
+                var jql = String.Format("key in ({0})", String.Join(",", distinctKeys));
+                return this.GetIssuesFromJqlAsync(jql, distinctKeys.Count()).ContinueWith<IDictionary<string, Issue>>(task =>
                 {
                     return task.Result.ToDictionary<Issue, string>(i => i.Key.Value);
                 }, token, TaskContinuationOptions.None, TaskScheduler.Default);
