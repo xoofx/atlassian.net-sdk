@@ -898,7 +898,17 @@ namespace Atlassian.Jira.Remote
 
             foreach (var field in remoteFields)
             {
-                updateFields.Add(field.id, issueFields[field.id]);
+                var issueFieldName = field.id;
+                var issueFieldValue = issueFields[issueFieldName];
+
+                if (issueFieldValue == null && issueFieldName.Equals("components", StringComparison.OrdinalIgnoreCase))
+                {
+                    // JIRA does not accept 'null' as a valid value for the 'components' field.
+                    //   So if the components field has been cleared it must be set to empty array instead.
+                    issueFieldValue = new JArray();
+                }
+
+                updateFields.Add(issueFieldName, issueFieldValue);
             }
 
             return updateFields;
