@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
@@ -1017,6 +1018,18 @@ namespace Atlassian.Jira.Remote
             {
                 return this.GetVersionAsync(version.id, token);
             }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+        }
+
+        /// <summary>
+        /// Returns user by username
+        /// </summary>
+        /// <param name="userName">Username of the user</param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public Task<JiraUser> GetUser(string userName, CancellationToken token)
+        {
+            var resource = String.Format("rest/api/2/user?username={0}", userName);
+            return this.ExecuteRequestAsync<JiraUser>(Method.GET, resource, null, token);
         }
         #endregion
 

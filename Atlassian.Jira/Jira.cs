@@ -644,6 +644,22 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Returns user by username
+        /// </summary>
+        /// <param name="userName">The username of the seeken user</param>
+        /// <param name="token">Cancelation token</param>
+        /// <exception cref="ArgumentException">ArgumentException is thrown if passed username is null or empty string</exception>
+        /// <returns></returns>
+        public Task<JiraUser> GetUserAsync(string userName, CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(userName))
+            {
+                throw new ArgumentException("Provided username was null or empty.");
+            }
+            return _restClient.GetUser(userName, token);
+        }
+
+        /// <summary>
         /// Returns all projects defined in JIRA.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
