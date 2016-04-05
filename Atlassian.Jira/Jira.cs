@@ -644,12 +644,11 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Returns user by username
+        /// Returns user by username.
         /// </summary>
-        /// <param name="userName">The username of the seeken user</param>
-        /// <param name="token">Cancelation token</param>
-        /// <exception cref="ArgumentException">ArgumentException is thrown if passed username is null or empty string</exception>
-        /// <returns></returns>
+        /// <param name="userName">The username of the user to get.</param>
+        /// <param name="token">Cancelation token for this operation.</param>
+        /// <exception cref="ArgumentException">ArgumentException is thrown if passed username is null or empty string.</exception>
         public Task<JiraUser> GetUserAsync(string userName, CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(userName))

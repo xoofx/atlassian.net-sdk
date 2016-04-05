@@ -250,9 +250,9 @@ namespace Atlassian.Jira.Remote
         Task<IEnumerable<JiraUser>> GetWatchersFromIssueAsync(string issueKey, CancellationToken token);
 
         /// <summary>
-        /// Retrieve user specified by username
+        /// Retrieve user specified by username.
         /// </summary>
-        /// <param name="userName">The username of seeked user</param>
+        /// <param name="userName">The username of the user to get.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<JiraUser> GetUser(string userName, CancellationToken token);
 

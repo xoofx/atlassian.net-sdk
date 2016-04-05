@@ -79,7 +79,6 @@
     <Compile Include="RestTest.cs" />
     <Compile Include="SoapTests.cs" />
     <Compile Include="Issue.UpdateTest.cs" />
-    <Compile Include="User.Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Atlassian.Jira\Atlassian.Jira.csproj">
