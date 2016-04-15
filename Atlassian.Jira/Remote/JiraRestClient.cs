@@ -662,7 +662,8 @@ namespace Atlassian.Jira.Remote
             {
                 throw new InvalidOperationException(String.Format("Response Content: {0}", content));
             }
-            else if (response.StatusCode == HttpStatusCode.Forbidden)
+            else if (response.StatusCode == HttpStatusCode.Forbidden
+                || response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 throw new System.Security.Authentication.AuthenticationException(string.Format("Response Content: {0}", content));
             }
