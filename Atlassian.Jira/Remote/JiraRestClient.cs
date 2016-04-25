@@ -773,7 +773,7 @@ namespace Atlassian.Jira.Remote
 
         public RemoteProject[] GetProjects(string token)
         {
-            return this.ExecuteRequest<RemoteProject[]>(Method.GET, "rest/api/2/project");
+            return this.ExecuteRequest<RemoteProject[]>(Method.GET, "rest/api/2/project?expand=lead");
         }
 
         public RemoteIssueType[] GetIssueTypes(string token, string projectId)

@@ -1964,6 +1964,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
         public string lead
         {
             get

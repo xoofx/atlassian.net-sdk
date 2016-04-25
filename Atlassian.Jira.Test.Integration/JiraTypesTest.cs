@@ -120,7 +120,9 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void GetProjects()
         {
-            Assert.Equal(1, _jira.GetProjects().Count());
+            var projects = _jira.GetProjects();
+            Assert.Equal(1, projects.Count());
+            Assert.Equal("admin", projects.First().Lead);
         }
 
         [Fact]
