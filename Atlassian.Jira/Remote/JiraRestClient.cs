@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Atlassian.Jira.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
@@ -16,36 +17,47 @@ namespace Atlassian.Jira.Remote
     /// </summary>
     internal class JiraRestClient : IJiraClient
     {
-        public class Options
-        {
-            public JiraRestClientSettings RestClientSettings { get; set; }
-            public string Username { get; set; }
-            public string Password { get; set; }
-            public string Url { get; set; }
-            public Func<Jira> GetCurrentJiraFunc { get; set; }
-        }
-
         private readonly RestClient _restClient;
         private readonly JiraRestClientSettings _clientSettings;
-        private readonly Func<Jira> _getCurrentJiraFunc;
+        private readonly Jira _jira;
 
         private JsonSerializerSettings _serializerSettings;
 
-        public JiraRestClient(Options options)
+        /// <summary>
+        /// Creates a new instance of JiraRestClient
+        /// </summary>
+        /// <param name="url">Url to the JIRA server.</param>
+        /// <param name="username">Username used to authenticate.</param>
+        /// <param name="password">Password used to authenticate.</param>
+        /// <param name="settings">Settings to configure the rest client.</param>
+        public JiraRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
-            var url = options.Url.EndsWith("/") ? options.Url : options.Url += "/";
+            url = url.EndsWith("/") ? url : url += "/";
 
-            this._clientSettings = options.RestClientSettings ?? new JiraRestClientSettings();
-            this._getCurrentJiraFunc = options.GetCurrentJiraFunc;
+            this._clientSettings = settings ?? new JiraRestClientSettings();
             this._restClient = new RestClient(url);
 
-            if (!String.IsNullOrEmpty(options.Username) && !String.IsNullOrEmpty(options.Password))
+            this._jira = new Jira(
+                new JqlExpressionVisitor(),
+                this,
+                new FileSystem(),
+                new JiraCredentials(username, password),
+                null,
+                this._clientSettings.Cache);
+
+            if (!String.IsNullOrEmpty(username) && !String.IsNullOrEmpty(password))
             {
-                this._restClient.Authenticator = new HttpBasicAuthenticator(options.Username, options.Password);
+                this._restClient.Authenticator = new HttpBasicAuthenticator(username, password);
             }
         }
 
-        public JsonSerializerSettings GetSerializerSettings()
+        internal JiraRestClient(Jira jira, string url, JiraCredentials credentials)
+            : this(url, credentials.UserName, credentials.Password, new JiraRestClientSettings())
+        {
+            this._jira = jira;
+        }
+
+        public virtual JsonSerializerSettings GetSerializerSettings()
         {
             if (this._serializerSettings == null)
             {
@@ -58,6 +70,17 @@ namespace Atlassian.Jira.Remote
             }
 
             return this._serializerSettings;
+        }
+
+        /// <summary>
+        /// Gets the Jira instance initialized with this rest client.
+        /// </summary>
+        public Jira Jira
+        {
+            get
+            {
+                return _jira;
+            }
         }
 
         #region IJiraRestClient
@@ -143,11 +166,10 @@ namespace Atlassian.Jira.Remote
 
         public Task<Issue> GetIssueAsync(string issueKey, CancellationToken token)
         {
-            var jira = this._getCurrentJiraFunc();
             var resource = String.Format("rest/api/2/issue/{0}", issueKey);
             return this.ExecuteRequestAsync<RemoteIssueWrapper>(Method.GET, resource, null, token).ContinueWith(task =>
             {
-                return new Issue(jira, task.Result.RemoteIssue);
+                return new Issue(_jira, task.Result.RemoteIssue);
             }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
@@ -218,12 +240,11 @@ namespace Atlassian.Jira.Remote
 
         public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
         {
-            var jira = this._getCurrentJiraFunc();
             var parameters = new
             {
                 jql = jql,
                 startAt = startAt,
-                maxResults = maxIssues ?? jira.MaxIssuesPerRequest,
+                maxResults = maxIssues ?? _jira.MaxIssuesPerRequest,
             };
 
             return this.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ContinueWith<IPagedQueryResult<Issue>>(task =>
@@ -233,7 +254,7 @@ namespace Atlassian.Jira.Remote
                     .Select(issueJson =>
                     {
                         var remoteIssue = JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue;
-                        return new Issue(jira, remoteIssue);
+                        return new Issue(_jira, remoteIssue);
                     });
 
                 return PagedQueryResult<Issue>.FromJson((JObject)task.Result, issues);
@@ -546,8 +567,7 @@ namespace Atlassian.Jira.Remote
             {
                 return this.ExecuteRequestAsync<RemoteProject[]>(Method.GET, "rest/api/2/project", null, token).ContinueWith(task =>
                 {
-                    var jira = this._getCurrentJiraFunc();
-                    var results = task.Result.Select(p => new Project(jira, p));
+                    var results = task.Result.Select(p => new Project(_jira, p));
                     cache.Projects.AddIfMIssing(results);
                     return results;
                 }, token, TaskContinuationOptions.None, TaskScheduler.Default);
@@ -566,11 +586,10 @@ namespace Atlassian.Jira.Remote
 
             return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(task =>
             {
-                var jira = this._getCurrentJiraFunc();
                 var attachmentsJson = task.Result["fields"]["attachment"];
                 var attachments = JsonConvert.DeserializeObject<RemoteAttachment[]>(attachmentsJson.ToString(), this.GetSerializerSettings());
 
-                return attachments.Select(remoteAttachment => new Attachment(jira, new WebClientWrapper(), remoteAttachment));
+                return attachments.Select(remoteAttachment => new Attachment(_jira, new WebClientWrapper(), remoteAttachment));
             }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 

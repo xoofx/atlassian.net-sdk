@@ -111,7 +111,7 @@ namespace Atlassian.Jira
             _jiraService = jiraService;
             _fileSystem = fileSystem;
             _token = accessToken;
-            _credentials = credentials;
+            _credentials = credentials ?? new JiraCredentials(null);
             _restClient = jiraService as IJiraRestClient;
             _cache = cache ?? new JiraCache();
 
@@ -120,20 +120,7 @@ namespace Atlassian.Jira
 
             if (_restClient == null && !String.IsNullOrEmpty(jiraService.Url))
             {
-                var options = new JiraRestClient.Options()
-                {
-                    Url = jiraService.Url,
-                    RestClientSettings = new JiraRestClientSettings(),
-                    GetCurrentJiraFunc = () => this
-                };
-
-                if (this._credentials != null)
-                {
-                    options.Username = _credentials.UserName;
-                    options.Password = _credentials.Password;
-                }
-
-                this._restClient = new JiraRestClient(options);
+                this._restClient = new JiraRestClient(this, jiraService.Url, _credentials);
             }
         }
 
@@ -147,20 +134,9 @@ namespace Atlassian.Jira
         /// <returns>Jira object configured to use REST API.</returns>
         public static Jira CreateRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
-            Jira jira = null;
-            var options = new JiraRestClient.Options()
-            {
-                Url = url,
-                Username = username,
-                Password = password,
-                RestClientSettings = settings ?? new JiraRestClientSettings(),
-                GetCurrentJiraFunc = () => jira
-            };
+            var restClient = new JiraRestClient(url, username, password, settings);
 
-            var restClient = new JiraRestClient(options);
-            jira = CreateRestClient(restClient, new JiraCredentials(username, password), options.RestClientSettings.Cache);
-
-            return jira;
+            return restClient.Jira;
         }
 
         /// <summary>
