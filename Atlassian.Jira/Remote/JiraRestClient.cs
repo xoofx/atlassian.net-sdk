@@ -58,6 +58,11 @@ namespace Atlassian.Jira.Remote
         {
             this._jira = jira;
         }
+
+        /// <summary>
+        /// Further configures the RestSharp client.
+        /// </summary>
+        /// <param name="restClient">RestSharp client to configure.</param>
         protected virtual void ConfigureRestSharpClient(RestClient restClient)
         {
             // no-op
