@@ -15,7 +15,7 @@ namespace Atlassian.Jira.Remote
     /// <summary>
     /// Implements the service client contract using REST calls.
     /// </summary>
-    internal class JiraRestClient : IJiraClient
+    public class JiraRestClient : IJiraClient
     {
         private readonly RestClient _restClient;
         private readonly JiraRestClientSettings _clientSettings;
@@ -49,12 +49,18 @@ namespace Atlassian.Jira.Remote
             {
                 this._restClient.Authenticator = new HttpBasicAuthenticator(username, password);
             }
+
+            ConfigureRestSharpClient(_restClient);
         }
 
         internal JiraRestClient(Jira jira, string url, JiraCredentials credentials)
             : this(url, credentials.UserName, credentials.Password, new JiraRestClientSettings())
         {
             this._jira = jira;
+        }
+        protected virtual void ConfigureRestSharpClient(RestClient restClient)
+        {
+            // no-op
         }
 
         public virtual JsonSerializerSettings GetSerializerSettings()
