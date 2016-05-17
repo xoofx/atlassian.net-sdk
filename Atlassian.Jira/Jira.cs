@@ -111,7 +111,7 @@ namespace Atlassian.Jira
             _jiraService = jiraService;
             _fileSystem = fileSystem;
             _token = accessToken;
-            _credentials = credentials ?? new JiraCredentials(null);
+            _credentials = credentials;
             _restClient = jiraService as IJiraRestClient;
             _cache = cache ?? new JiraCache();
 
@@ -120,7 +120,7 @@ namespace Atlassian.Jira
 
             if (_restClient == null && !String.IsNullOrEmpty(jiraService.Url))
             {
-                this._restClient = new JiraRestClient(this, jiraService.Url, _credentials);
+                this._restClient = new JiraRestClient(this, jiraService.Url, _credentials ?? new JiraCredentials(null));
             }
         }
 
