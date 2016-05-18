@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
+using RestSharp.Authenticators;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,12 +10,11 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using RestSharp.Authenticators;
 
 namespace Atlassian.Jira.Remote
 {
     /// <summary>
-    /// Implements the service client contract using REST calls.
+    /// Implements the service client contract RestShart to issue REST calls.
     /// </summary>
     public class JiraRestClient : IJiraClient
     {
@@ -50,8 +50,6 @@ namespace Atlassian.Jira.Remote
             {
                 this._restClient.Authenticator = new HttpBasicAuthenticator(username, password);
             }
-
-            ConfigureRestSharpClient(_restClient);
         }
 
         internal JiraRestClient(Jira jira, string url, JiraCredentials credentials)
@@ -61,12 +59,14 @@ namespace Atlassian.Jira.Remote
         }
 
         /// <summary>
-        /// Further configures the RestSharp client.
+        /// Underlying RestSharp client used to issue requests.
         /// </summary>
-        /// <param name="restClient">RestSharp client to configure.</param>
-        protected virtual void ConfigureRestSharpClient(RestClient restClient)
+        public RestClient RestSharpClient
         {
-            // no-op
+            get
+            {
+                return _restClient;
+            }
         }
 
         public virtual JsonSerializerSettings GetSerializerSettings()
