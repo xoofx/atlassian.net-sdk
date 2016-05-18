@@ -250,6 +250,13 @@ namespace Atlassian.Jira.Remote
         Task<IEnumerable<JiraUser>> GetWatchersFromIssueAsync(string issueKey, CancellationToken token);
 
         /// <summary>
+        /// Retrieve user specified by username.
+        /// </summary>
+        /// <param name="userName">The username of the user to get.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<JiraUser> GetUser(string userName, CancellationToken token);
+
+        /// <summary>
         /// Retrieve the change logs from server for the issue specified.
         /// </summary>
         /// <param name="issueKey">The issue key to get watchers from.</param>

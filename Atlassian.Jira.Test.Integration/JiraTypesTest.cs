@@ -120,7 +120,9 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void GetProjects()
         {
-            Assert.Equal(1, _jira.GetProjects().Count());
+            var projects = _jira.GetProjects();
+            Assert.Equal(1, projects.Count());
+            Assert.Equal("admin", projects.First().Lead);
         }
 
         [Fact]
@@ -201,6 +203,16 @@ namespace Atlassian.Jira.Test.Integration
             // Cached
             var result2 = await _jira.RestClient.GetFavouriteFiltersAsync(CancellationToken.None);
             Assert.Equal(result1.Count(), result2.Count());
+        }
+
+        [Fact]
+        public void GetUser()
+        {
+            var user = _jira.GetUserAsync("admin").Result;
+            Assert.Equal(user.Email, "admin@example.com");
+            Assert.Equal(user.DisplayName, "admin");
+            Assert.Equal(user.Username, "admin");
+            Assert.Equal(user.IsActive, true);
         }
     }
 }

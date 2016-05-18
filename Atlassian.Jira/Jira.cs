@@ -120,20 +120,7 @@ namespace Atlassian.Jira
 
             if (_restClient == null && !String.IsNullOrEmpty(jiraService.Url))
             {
-                var options = new JiraRestClient.Options()
-                {
-                    Url = jiraService.Url,
-                    RestClientSettings = new JiraRestClientSettings(),
-                    GetCurrentJiraFunc = () => this
-                };
-
-                if (this._credentials != null)
-                {
-                    options.Username = _credentials.UserName;
-                    options.Password = _credentials.Password;
-                }
-
-                this._restClient = new JiraRestClient(options);
+                this._restClient = new JiraRestClient(this, jiraService.Url, _credentials ?? new JiraCredentials(null));
             }
         }
 
@@ -147,20 +134,9 @@ namespace Atlassian.Jira
         /// <returns>Jira object configured to use REST API.</returns>
         public static Jira CreateRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
-            Jira jira = null;
-            var options = new JiraRestClient.Options()
-            {
-                Url = url,
-                Username = username,
-                Password = password,
-                RestClientSettings = settings ?? new JiraRestClientSettings(),
-                GetCurrentJiraFunc = () => jira
-            };
+            var restClient = new JiraRestClient(url, username, password, settings);
 
-            var restClient = new JiraRestClient(options);
-            jira = CreateRestClient(restClient, new JiraCredentials(username, password), options.RestClientSettings.Cache);
-
-            return jira;
+            return restClient.Jira;
         }
 
         /// <summary>
@@ -641,6 +617,21 @@ namespace Atlassian.Jira
             }
 
             return _cache.Projects.Values;
+        }
+
+        /// <summary>
+        /// Returns user by username.
+        /// </summary>
+        /// <param name="userName">The username of the user to get.</param>
+        /// <param name="token">Cancelation token for this operation.</param>
+        /// <exception cref="ArgumentException">ArgumentException is thrown if passed username is null or empty string.</exception>
+        public Task<JiraUser> GetUserAsync(string userName, CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(userName))
+            {
+                throw new ArgumentException("Provided username was null or empty.");
+            }
+            return _restClient.GetUser(userName, token);
         }
 
         /// <summary>
