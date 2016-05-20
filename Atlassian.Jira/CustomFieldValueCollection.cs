@@ -90,6 +90,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Add a custom field by id with an array of values.
+        /// </summary>
+        /// <param name="fieldName">The id of the custom field as defined in JIRA.</param>
+        /// <param name="fildValues">The values of the field.</param>
+        public CustomFieldValueCollection AddById(string fieldId, params string[] fieldValues)
+        {
+            this.Items.Add(new CustomFieldValue(fieldId, _issue) { Values = fieldValues });
+            return this;
+        }
+
+        /// <summary>
         /// Gets a cascading select custom field by name.
         /// </summary>
         /// <param name="fieldName">Name of the custom field as defined in JIRA.</param>

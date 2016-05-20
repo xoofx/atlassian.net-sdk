@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Linq;
 using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
@@ -6,6 +7,24 @@ namespace Atlassian.Jira.Test.Integration
     public class IssueCustomFieldTest : BaseIntegrationTest
     {
 #if !SOAP
+        [Fact]
+        public void AddAndReadCustomFieldById()
+        {
+            var summaryValue = "Test issue with custom text" + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            issue.CustomFields.AddById("customfield_10000", "My Sample Text");
+            issue.SaveChanges();
+
+            var newIssue = _jira.GetIssue(issue.Key.Value);
+            Assert.Equal("My Sample Text", newIssue.CustomFields.First(f => f.Id.Equals("customfield_10000")).Values.First());
+        }
+
         [Fact]
         public void CreateIssueWithCascadingSelectFieldWithOnlyParentOptionSet()
         {
