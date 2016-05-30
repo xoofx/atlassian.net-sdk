@@ -66,7 +66,7 @@ namespace Atlassian.Jira.Test.Integration
             subTask.Summary = "Test SubTask" + _random.Next(int.MaxValue);
             subTask.SaveChanges();
 
-            var results = parentTask.GetSubTaks();
+            var results = parentTask.GetSubTasks();
             Assert.Equal(results.Count(), 1);
             Assert.Equal(results.First().Summary, subTask.Summary);
         }
