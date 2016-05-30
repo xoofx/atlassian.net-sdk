@@ -95,6 +95,25 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void AddAndRemoveProjectComponent()
+        {
+            var componentName = "New Component " + _random.Next(int.MaxValue);
+            var projectInfo = new ProjectComponentCreationInfo(componentName);
+            var project = _jira.GetProjects().First();
+
+            // Add a project component.
+            var component = project.Components.Add(projectInfo);
+            Assert.Equal(componentName, component.Name);
+
+            // Retrive project components.
+            Assert.True(project.Components.Get().Any(p => p.Name == componentName));
+
+            // Delete project component
+            project.Components.Delete(component.Name);
+            Assert.False(project.Components.Get().Any(p => p.Name == componentName));
+        }
+
+        [Fact]
         public void GetAndUpdateProjectVersions()
         {
             var versions = _jira.GetProjectVersions("TST");

@@ -13,7 +13,8 @@ namespace Atlassian.Jira
     {
         private readonly RemoteProject _remoteProject;
         private readonly Jira _jira;
-        private readonly ProjectVersionsEditableResource _remoteResource;
+        private readonly ProjectVersionsEditableResource _editableVersions;
+        private readonly ProjectComponentsEditableResource _editableComponents;
 
         /// <summary>
         /// Createa a new Project instance using a remote project.
@@ -24,7 +25,8 @@ namespace Atlassian.Jira
             : base(jira, remoteProject)
         {
             _remoteProject = remoteProject;
-            _remoteResource = new ProjectVersionsEditableResource(jira, this);
+            _editableVersions = new ProjectVersionsEditableResource(jira, this);
+            _editableComponents = new ProjectComponentsEditableResource(jira, this);
         }
 
         internal RemoteProject RemoteProject
@@ -64,7 +66,18 @@ namespace Atlassian.Jira
         {
             get
             {
-                return _remoteResource;
+                return _editableVersions;
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the components of this project.
+        /// </summary>
+        public ProjectComponentsEditableResource Components
+        {
+            get
+            {
+                return _editableComponents;
             }
         }
     }
