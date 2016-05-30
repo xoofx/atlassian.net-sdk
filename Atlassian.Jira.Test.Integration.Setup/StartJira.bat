@@ -1,1 +1,1 @@
-atlas-run-standalone --product jira --http-port 2990 --version 6.4
+atlas-run-standalone --product jira --http-port 2990 --version 7.1.7
