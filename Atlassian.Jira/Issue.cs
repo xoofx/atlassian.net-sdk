@@ -547,7 +547,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="maxIssues">Maximum number of issues to retrieve.</param>
         /// <param name="startAt">Index of the first issue to return (0-based).</param>
-        public IPagedQueryResult<Issue> GetSubTaks(int? maxIssues = null, int startAt = 0)
+        public IPagedQueryResult<Issue> GetSubTasks(int? maxIssues = null, int startAt = 0)
         {
             try
             {
