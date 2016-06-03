@@ -1,15 +1,17 @@
+using Atlassian.Jira.Remote;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Atlassian.Jira.Remote;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using RestSharp;
 
 namespace Atlassian.Jira
 {
+    /// Class that encapsulates operations on the remote components collection of a project.
+
     public class ProjectComponentsEditableResource
     {
         private readonly Project _project;
@@ -35,7 +37,23 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Creates and adds a new component to a project.
+        /// Gets the components for the current project.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<ProjectComponent>> GetAsync(CancellationToken token = default(CancellationToken))
+        {
+            var resource = String.Format("rest/api/2/project/{0}/components", _project.Key);
+            return _jira.RestClient.ExecuteRequestAsync<RemoteComponent[]>(Method.GET, resource).ContinueWith(task =>
+            {
+                var components = task.Result.Select(remoteComponent => new ProjectComponent(remoteComponent));
+                _jira.Cache.Components.AddIfMIssing(new JiraEntityDictionary<ProjectComponent>(_project.Key, components));
+
+                return components;
+            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+        }
+
+        /// <summary>
+        /// Creates and adds a new component the current project.
         /// </summary>
         /// <param name="projectComponent">Information of the new component.</param>
         public ProjectComponent Add(ProjectComponentCreationInfo projectComponent)

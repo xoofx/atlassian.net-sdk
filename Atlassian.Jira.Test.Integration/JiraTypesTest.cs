@@ -110,7 +110,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // Delete project component
             project.Components.Delete(component.Name);
-            Assert.False(project.Components.Get().Any(p => p.Name == componentName));
+            Assert.False(project.Components.GetAsync().Result.Any(p => p.Name == componentName));
         }
 
         [Fact]
