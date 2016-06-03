@@ -421,7 +421,7 @@ namespace Atlassian.Jira
             var action = this.GetAvailableActions().FirstOrDefault(a => a.Name.Equals(actionName, StringComparison.OrdinalIgnoreCase));
             if (action == null)
             {
-                throw new InvalidOperationException(String.Format("Worflow action with name '{0}' not found.", actionName));
+                throw new InvalidOperationException(String.Format("Workflow action with name '{0}' not found.", actionName));
             }
 
             _jira.WithToken(token =>
@@ -523,7 +523,7 @@ namespace Atlassian.Jira
 
                 if (action == null)
                 {
-                    throw new InvalidOperationException(String.Format("Worflow action with name '{0}' not found.", actionName));
+                    throw new InvalidOperationException(String.Format("Workflow action with name '{0}' not found.", actionName));
                 }
 
                 return this._jira.RestClient.ExecuteIssueWorkflowActionAsync(this, action.Id, additionalUpdates, token).ContinueWith(issueTask =>
