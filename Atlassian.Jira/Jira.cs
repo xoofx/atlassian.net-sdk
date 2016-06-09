@@ -39,65 +39,6 @@ namespace Atlassian.Jira
         private IEnumerable<JiraNamedEntity> _cachedFilters = null;
 
         /// <summary>
-        /// Create a SOAP client that connects with a JIRA server with anonymous access.
-        /// </summary>
-        /// <param name="url">Url to the JIRA server</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
-        public Jira(string url)
-            : this(new JqlExpressionVisitor(),
-                  new JiraSoapServiceClientWrapper(url),
-                  new FileSystem())
-        {
-        }
-
-        /// <summary>
-        /// Create a SOAP client that connects with a JIRA server with specified credentials.
-        /// </summary>
-        /// <param name="url">Url to the JIRA server</param>
-        /// <param name="username">Username used to authenticate</param>
-        /// <param name="password">Password used to authenticate</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
-        public Jira(string url, string username, string password)
-            : this(new JqlExpressionVisitor(),
-                  new JiraSoapServiceClientWrapper(url),
-                  new FileSystem(),
-                  new JiraCredentials(username, password))
-        {
-        }
-
-        /// <summary>
-        /// Create a SOAP client that connects with a JIRA server with specified access token.
-        /// </summary>
-        /// <param name="url">Url to the JIRA server.</param>
-        /// <param name="token">JIRA access token to use.</param>
-        /// <param name="credentialsProvider">Provider of credentials needed to re-generate token.</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
-        public Jira(string url, string token, Func<JiraCredentials> credentialsProvider = null)
-            : this(new JqlExpressionVisitor(),
-                  new JiraSoapServiceClientWrapper(url),
-                  new FileSystem(),
-                  credentialsProvider == null ? new JiraCredentials(null) : credentialsProvider(),
-                  token)
-        {
-        }
-
-        /// <summary>
-        /// Create a SOAP client that connects with a JIRA server with specified access token.
-        /// </summary>
-        /// <param name="url">Url to the JIRA server.</param>
-        /// <param name="token">JIRA access token to use.</param>
-        /// <param name="credentials">Credentials used to re-generate token.</param>
-        [Obsolete("Use Jira.CreateSoapClient or Jira.CreateRestClient instead.", true)]
-        public Jira(string url, string token, JiraCredentials credentials)
-            : this(new JqlExpressionVisitor(),
-                  new JiraSoapServiceClientWrapper(url),
-                  new FileSystem(),
-                  credentials,
-                  token)
-        {
-        }
-
-        /// <summary>
         /// Create a client that connects with a JIRA server with specified dependencies.
         /// </summary>
         public Jira(IJqlExpressionVisitor translator,
@@ -151,37 +92,6 @@ namespace Atlassian.Jira
                 credentials,
                 null,
                 cache);
-        }
-
-        /// <summary>
-        /// Creates a JIRA client configured to use the SOAP API.
-        /// </summary>
-        /// <param name="url">Url to the JIRA server.</param>
-        /// <param name="username">Username used to authenticate.</param>
-        /// <param name="password">Password used to authenticate.</param>
-        [Obsolete("SOAP API has been deprecated and removed from JIRA, migrate to use the REST API instead.")]
-        public static Jira CreateSoapClient(string url, string username = null, string password = null)
-        {
-            return new Jira(new JqlExpressionVisitor(),
-                  new JiraSoapServiceClientWrapper(url),
-                  new FileSystem(),
-                  new JiraCredentials(username, password));
-        }
-
-        /// <summary>
-        /// Creates a JIRA client configured to use the SOAP API with specified access token.
-        /// </summary>
-        /// <param name="url">Url to the JIRA server.</param>
-        /// <param name="token">JIRA access token to use.</param>
-        /// <param name="credentials">Credentials used to re-generate token.</param>
-        [Obsolete("SOAP API has been deprecated and removed from JIRA, migrate to use the REST API instead.")]
-        public static Jira CreateSoapClient(string url, string token, JiraCredentials credentials = null)
-        {
-            return new Jira(new JqlExpressionVisitor(),
-                new JiraSoapServiceClientWrapper(url),
-                new FileSystem(),
-                credentials,
-                token);
         }
 
         private bool IsAnonymous
