@@ -509,16 +509,6 @@ namespace Atlassian.Jira.Test
             }
         }
 
-        public class AddLabels
-        {
-            [Fact]
-            public void IfIssueNotCreated_ShouldThrowAnException()
-            {
-                var issue = CreateIssue();
-                Assert.Throws(typeof(InvalidOperationException), () => issue.AddLabels());
-            }
-        }
-
         public class WorkflowTransition
         {
             [Fact]

@@ -814,7 +814,7 @@ namespace Atlassian.Jira
         /// Add labels to this issue
         /// </summary>
         /// <param name="labels">Label(s) to add</param>
-        [Obsolete("Use the Issue.Labels object to interact with the labels of an issue.")]
+        [Obsolete("Use the Issue.Labels object to interact with the labels of an issue.", true)]
         public void AddLabels(params string[] labels)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
