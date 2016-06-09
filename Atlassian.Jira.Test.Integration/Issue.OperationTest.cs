@@ -176,10 +176,7 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Equal("Resolved", issue.Status.Name);
             Assert.Equal("Fixed", issue.Resolution.Name);
-
-#if !SOAP
             Assert.NotNull(issue.ResolutionDate);
-#endif
         }
 
         [Fact]
@@ -365,11 +362,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // Delete issue and verify it is no longer found.
             _jira.DeleteIssue(issue);
-#if SOAP
-            Assert.Throws<System.ServiceModel.FaultException>(() => _jira.GetIssue(issue.Key.Value));
-#else
             Assert.Throws<InvalidOperationException>(() => _jira.GetIssue(issue.Key.Value));
-#endif
         }
 
         [Fact]

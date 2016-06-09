@@ -35,12 +35,8 @@ namespace Atlassian.Jira.Test.Integration
         {
             var issueTypes = _jira.GetIssueTypes("TST");
 
-#if SOAP
-            Assert.Equal(4, issueTypes.Count());
-#else
             // In addition, rest API contains "Sub-Task" as an issue type.
             Assert.True(issueTypes.Count() >= 5);
-#endif
             Assert.True(issueTypes.Any(i => i.Name == "Bug"));
         }
 

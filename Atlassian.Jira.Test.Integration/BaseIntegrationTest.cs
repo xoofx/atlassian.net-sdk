@@ -21,11 +21,7 @@ namespace Atlassian.Jira.Test.Integration
 
         public Jira CreateJiraClient()
         {
-#if SOAP
-            return Jira.CreateSoapClient(HOST, "admin", "admin");
-#else
             return Jira.CreateRestClient(HOST, "admin", "admin");
-#endif
         }
     }
 }

@@ -70,11 +70,6 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
             var expectedDueDate = new DateTime(2011, 12, 12);
-
-#if SOAP
-            expectedDueDate = expectedDueDate.ToUniversalTime();
-#endif
-
             var issue = _jira.CreateIssue("TST");
             issue.AffectsVersions.Add("1.0");
             issue.Assignee = "admin";
@@ -121,11 +116,7 @@ namespace Atlassian.Jira.Test.Integration
             subTask = _jira.GetIssue(subTask.Key.Value);
             Assert.False(parentTask.Type.IsSubTask);
             Assert.True(subTask.Type.IsSubTask);
-
-#if !SOAP
-
             Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
-#endif
         }
 
         [Fact]
@@ -230,27 +221,5 @@ namespace Atlassian.Jira.Test.Integration
             Assert.True(subtasks.Any(s => s.Summary.Equals(summaryValue)),
                 String.Format("'{0}' was not found as a sub-task of TST-1", summaryValue));
         }
-
-#if SOAP
-        /// <summary>
-        /// https://bitbucket.org/farmas/atlassian.net-sdk/issue/3/serialization-error-when-querying-some
-        /// Note that this is disabled for REST because JIRA 7.0 throws the following error: "The entered text is too long. It exceeds the allowed limit of 32,767 characters."
-        /// </summary>
-        [Fact]
-        public void HandleRetrievalOfMessagesWithLargeContentStrings()
-        {
-            var issue = new Issue(_jira, "TST")
-            {
-                Type = "1",
-                Summary = "Serialization nastiness",
-                Assignee = "admin"
-            };
-
-            issue.Description = File.ReadAllText("LongIssueDescription.txt");
-            issue.SaveChanges();
-
-            Assert.Contains("Second stack trace:", issue.Description);
-        }
-#endif
     }
 }

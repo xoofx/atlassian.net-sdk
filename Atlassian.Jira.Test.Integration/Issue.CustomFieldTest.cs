@@ -6,7 +6,6 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueCustomFieldTest : BaseIntegrationTest
     {
-#if !SOAP
         [Fact]
         public void AddAndReadCustomFieldById()
         {
@@ -174,6 +173,5 @@ namespace Atlassian.Jira.Test.Integration
             [JsonProperty("self")]
             public string Self { get; set; }
         }
-#endif
     }
 }

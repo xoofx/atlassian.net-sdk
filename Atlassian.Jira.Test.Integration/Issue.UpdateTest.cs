@@ -10,7 +10,6 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueUpdateTest : BaseIntegrationTest
     {
-#if !SOAP
         [Fact]
         public async Task UpdateIssueAsync()
         {
@@ -29,7 +28,6 @@ namespace Atlassian.Jira.Test.Integration
             issue = await _jira.RestClient.UpdateIssueAsync(issue, CancellationToken.None);
             Assert.Equal("2", issue.Type.Id);
         }
-#endif
 
         [Fact]
         public void UpdateNamedEntities_ById()
@@ -121,13 +119,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Updated " + summaryValue, newServerIssue.Summary);
             Assert.Equal("Updated Description", newServerIssue.Description);
             Assert.Equal("Updated Environment", newServerIssue.Environment);
-
-#if SOAP
-            // Note: Dates returned from JIRA are UTC
-            //Assert.Equal(new DateTime(2011, 10, 10).ToUniversalTime(), newServerIssue.DueDate);
-#else
             Assert.Equal(serverIssue.DueDate, newServerIssue.DueDate);
-#endif
         }
 
         [Fact]
