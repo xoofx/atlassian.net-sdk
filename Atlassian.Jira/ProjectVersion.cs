@@ -111,12 +111,9 @@ namespace Atlassian.Jira
         /// Save field changes to the server.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task SaveChangesAsync(CancellationToken token = default(CancellationToken))
+        public async Task SaveChangesAsync(CancellationToken token = default(CancellationToken))
         {
-            return Jira.RestClient.UpdateVersionAsync(_remoteVersion, token).ContinueWith(task =>
-            {
-                _remoteVersion = task.Result;
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            _remoteVersion = await Jira.RestClient.UpdateVersionAsync(_remoteVersion, token).ConfigureAwait(false);
         }
     }
 }

@@ -69,12 +69,13 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        public virtual JsonSerializerSettings GetSerializerSettings()
+        public virtual async Task<JsonSerializerSettings> GetSerializerSettingsAsync(CancellationToken token = default(CancellationToken))
         {
             if (this._serializerSettings == null)
             {
                 var serializers = new Dictionary<string, ICustomFieldValueSerializer>(this._clientSettings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
-                var customFields = this.GetCustomFields(null);
+                var remoteCustomFields = await this.GetCustomFieldsAsync(token).ConfigureAwait(false);
+                var customFields = remoteCustomFields.Select(f => f.RemoteField).ToArray();
 
                 this._serializerSettings = new JsonSerializerSettings();
                 this._serializerSettings.NullValueHandling = NullValueHandling.Ignore;
@@ -125,12 +126,10 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync<T>(method, resource, requestBody, CancellationToken.None);
         }
 
-        public Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody, CancellationToken token)
+        public async Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody, CancellationToken token)
         {
-            return ExecuteRequestAsync(method, resource, requestBody, token).ContinueWith<T>(responseTask =>
-            {
-                return JsonConvert.DeserializeObject<T>(responseTask.Result.ToString(), _serializerSettings);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            var result = await ExecuteRequestAsync(method, resource, requestBody, token).ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<T>(result.ToString(), _serializerSettings);
         }
 
         public Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null)
@@ -138,7 +137,7 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync(method, resource, requestBody, CancellationToken.None);
         }
 
-        public Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody, CancellationToken token)
+        public async Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody, CancellationToken token)
         {
             var request = new RestRequest();
             request.Method = method;
@@ -156,17 +155,14 @@ namespace Atlassian.Jira.Remote
             }
             else if (requestBody != null)
             {
-                request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(this.GetSerializerSettings()));
+                var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
+                request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(serializerSettings));
                 request.AddJsonBody(requestBody);
             }
 
             LogRequest(request, requestBody);
-            return this._restClient.ExecuteTaskAsync(request, token).ContinueWith<JToken>(responseTask =>
-            {
-                var response = responseTask.Result;
-
-                return GetValidJsonFromResponse(response);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            var response = await this._restClient.ExecuteTaskAsync(request, token).ConfigureAwait(false);
+            return GetValidJsonFromResponse(response);
         }
 
         public IRestResponse ExecuteRequest(IRestRequest request)
@@ -176,16 +172,15 @@ namespace Atlassian.Jira.Remote
             return response;
         }
 
-        public Task<Issue> GetIssueAsync(string issueKey, CancellationToken token)
+        public async Task<Issue> GetIssueAsync(string issueKey, CancellationToken token)
         {
             var resource = String.Format("rest/api/2/issue/{0}", issueKey);
-            return this.ExecuteRequestAsync<RemoteIssueWrapper>(Method.GET, resource, null, token).ContinueWith(task =>
-            {
-                return new Issue(_jira, task.Result.RemoteIssue);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            var issue = await this.ExecuteRequestAsync<RemoteIssueWrapper>(Method.GET, resource, null, token).ConfigureAwait(false);
+
+            return new Issue(_jira, issue.RemoteIssue);
         }
 
-        public Task<Issue> UpdateIssueAsync(Issue issue, CancellationToken token)
+        public async Task<Issue> UpdateIssueAsync(Issue issue, CancellationToken token)
         {
             var resource = String.Format("rest/api/2/issue/{0}", issue.Key.Value);
             var fieldProvider = issue as IRemoteIssueFieldProvider;
@@ -193,23 +188,19 @@ namespace Atlassian.Jira.Remote
             var remoteIssue = issue.ToRemote();
             var fields = BuildFieldsObjectFromIssue(remoteIssue, remoteFields);
 
-            return this.ExecuteRequestAsync(Method.PUT, resource, new { fields = fields }, token).ContinueWith(task =>
-            {
-                return this.GetIssueAsync(issue.Key.Value, token);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+            await this.ExecuteRequestAsync(Method.PUT, resource, new { fields = fields }, token).ConfigureAwait(false);
+            return await this.GetIssueAsync(issue.Key.Value, token).ConfigureAwait(false);
         }
 
-        public Task<Issue> CreateIssueAsyc(Issue issue, CancellationToken token)
+        public async Task<Issue> CreateIssueAsyc(Issue issue, CancellationToken token)
         {
             var remoteIssueWrapper = new RemoteIssueWrapper(issue.ToRemote(), issue.ParentIssueKey);
 
-            return this.ExecuteRequestAsync(Method.POST, "rest/api/2/issue", remoteIssueWrapper, token).ContinueWith(task =>
-            {
-                return this.GetIssueAsync((string)task.Result["key"], token);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+            var result = await this.ExecuteRequestAsync(Method.POST, "rest/api/2/issue", remoteIssueWrapper, token).ConfigureAwait(false);
+            return await this.GetIssueAsync((string)result["key"], token).ConfigureAwait(false);
         }
 
-        public Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, WorkflowTransitionUpdates updates, CancellationToken token)
+        public async Task<Issue> ExecuteIssueWorkflowActionAsync(Issue issue, string actionId, WorkflowTransitionUpdates updates, CancellationToken token)
         {
             updates = updates ?? new WorkflowTransitionUpdates();
 
@@ -239,10 +230,8 @@ namespace Atlassian.Jira.Remote
                 fields = fields
             };
 
-            return this.ExecuteRequestAsync(Method.POST, resource, requestBody, token).ContinueWith(task =>
-            {
-                return this.GetIssueAsync(issue.Key.Value, token);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+            await this.ExecuteRequestAsync(Method.POST, resource, requestBody, token).ConfigureAwait(false);
+            return await this.GetIssueAsync(issue.Key.Value, token).ConfigureAwait(false);
         }
 
         public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0)
@@ -250,7 +239,7 @@ namespace Atlassian.Jira.Remote
             return this.GetIssuesFromJqlAsync(jql, maxIssues, startAt, CancellationToken.None);
         }
 
-        public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
+        public async Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
         {
             var parameters = new
             {
@@ -259,82 +248,72 @@ namespace Atlassian.Jira.Remote
                 maxResults = maxIssues ?? _jira.MaxIssuesPerRequest,
             };
 
-            return this.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ContinueWith<IPagedQueryResult<Issue>>(task =>
-            {
-                var issues = task.Result["issues"]
-                    .Cast<JObject>()
-                    .Select(issueJson =>
-                    {
-                        var remoteIssue = JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue;
-                        return new Issue(_jira, remoteIssue);
-                    });
+            var result = await this.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ConfigureAwait(false);
+            var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var issues = result["issues"]
+                .Cast<JObject>()
+                .Select(issueJson =>
+                {
+                    var remoteIssue = JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), serializerSettings).RemoteIssue;
+                    return new Issue(_jira, remoteIssue);
+                });
 
-                return PagedQueryResult<Issue>.FromJson((JObject)task.Result, issues);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            return PagedQueryResult<Issue>.FromJson((JObject)result, issues);
         }
 
-        private Task<IDictionary<string, Issue>> GetIssuesMapAsync(string[] issueKeys, CancellationToken token)
+        private async Task<IDictionary<string, Issue>> GetIssuesMapAsync(string[] issueKeys, CancellationToken token)
         {
             if (issueKeys.Any())
             {
                 var distinctKeys = issueKeys.Distinct();
                 var jql = String.Format("key in ({0})", String.Join(",", distinctKeys));
-                return this.GetIssuesFromJqlAsync(jql, distinctKeys.Count()).ContinueWith<IDictionary<string, Issue>>(task =>
-                {
-                    return task.Result.ToDictionary<Issue, string>(i => i.Key.Value);
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+                var result = await this.GetIssuesFromJqlAsync(jql, distinctKeys.Count()).ConfigureAwait(false);
+                return result.ToDictionary<Issue, string>(i => i.Key.Value);
             }
             else
             {
-                var taskSource = new TaskCompletionSource<IDictionary<string, Issue>>();
-                taskSource.SetResult(new Dictionary<string, Issue>());
-                return taskSource.Task;
+                return new Dictionary<string, Issue>();
             }
         }
 
-        public Task<IEnumerable<IssueLink>> GetIssueLinksAsync(Issue issue, CancellationToken token)
+        public async Task<IEnumerable<IssueLink>> GetIssueLinksAsync(Issue issue, CancellationToken token)
         {
+            var serializerSettings = await this.GetSerializerSettingsAsync(token).ConfigureAwait(false);
             var resource = String.Format("rest/api/2/issue/{0}?fields=issuelinks,created", issue.Key.Value);
-            var serializerSettings = this.GetSerializerSettings();
 
             if (String.IsNullOrEmpty(issue.OriginalRemoteIssue.key))
             {
                 throw new InvalidOperationException("Unable to get issue links issues, issue has not been created.");
             }
 
-            return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(issueLinksTask =>
+            var issueLinksResult = await this.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
+            var issueLinksJson = issueLinksResult["fields"]["issuelinks"];
+
+            if (issueLinksJson == null)
             {
-                var issueLinksJson = issueLinksTask.Result["fields"]["issuelinks"];
+                throw new InvalidOperationException("There is no 'issueLinks' field on the issue data, make sure issue linking is turned on in JIRA.");
+            }
 
-                if (issueLinksJson == null)
+            var issueLinks = issueLinksJson.Cast<JObject>();
+            var linkedIssueKeys = issueLinks.Select(issueLink =>
                 {
-                    throw new InvalidOperationException("There is no 'issueLinks' field on the issue data, make sure issue linking is turned on in JIRA.");
-                }
+                    var issueJson = issueLink["outwardIssue"] ?? issueLink["inwardIssue"];
+                    return issueJson["key"].Value<string>();
+                }).ToArray();
 
-                var issueLinks = issueLinksJson.Cast<JObject>();
-                var linkedIssueKeys = issueLinks.Select(issueLink =>
-                    {
-                        var issueJson = issueLink["outwardIssue"] ?? issueLink["inwardIssue"];
-                        return issueJson["key"].Value<string>();
-                    }).ToArray();
-
-                return this.GetIssuesMapAsync(linkedIssueKeys, token).ContinueWith(issuesTask =>
-                {
-                    var issuesMap = issuesTask.Result;
-                    return issueLinks.Select(issueLink =>
-                    {
-                        var linkType = JsonConvert.DeserializeObject<IssueLinkType>(issueLink["type"].ToString(), serializerSettings);
-                        var outwardIssue = issueLink["outwardIssue"];
-                        var inwardIssue = issueLink["inwardIssue"];
-                        var outwardIssueKey = outwardIssue != null ? (string)outwardIssue["key"] : null;
-                        var inwardIssueKey = inwardIssue != null ? (string)inwardIssue["key"] : null;
-                        return new IssueLink(
-                            linkType,
-                            outwardIssueKey == null ? issue : issuesMap[outwardIssueKey],
-                            inwardIssueKey == null ? issue : issuesMap[inwardIssueKey]);
-                    });
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+            var issuesMap = await this.GetIssuesMapAsync(linkedIssueKeys, token).ConfigureAwait(false);
+            return issueLinks.Select(issueLink =>
+            {
+                var linkType = JsonConvert.DeserializeObject<IssueLinkType>(issueLink["type"].ToString(), serializerSettings);
+                var outwardIssue = issueLink["outwardIssue"];
+                var inwardIssue = issueLink["inwardIssue"];
+                var outwardIssueKey = outwardIssue != null ? (string)outwardIssue["key"] : null;
+                var inwardIssueKey = inwardIssue != null ? (string)inwardIssue["key"] : null;
+                return new IssueLink(
+                    linkType,
+                    outwardIssueKey == null ? issue : issuesMap[outwardIssueKey],
+                    inwardIssueKey == null ? issue : issuesMap[inwardIssueKey]);
+            });
         }
 
         public IssueTimeTrackingData GetTimeTrackingData(string issueKey)
@@ -344,24 +323,22 @@ namespace Atlassian.Jira.Remote
             return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), _serializerSettings);
         }
 
-        public Task<IDictionary<String, IssueFieldEditMetadata>> GetIssueFieldsEditMetadataAsync(string issueKey, CancellationToken token = default(CancellationToken))
+        public async Task<IDictionary<String, IssueFieldEditMetadata>> GetIssueFieldsEditMetadataAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {
+            var dict = new Dictionary<string, IssueFieldEditMetadata>();
             var resource = String.Format("rest/api/2/issue/{0}/editmeta", issueKey);
+            var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var serializer = JsonSerializer.Create(serializerSettings);
+            var result = await ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
+            JObject fields = result["fields"].Value<JObject>();
 
-            return ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith<IDictionary<String, IssueFieldEditMetadata>>(task =>
+            foreach (var prop in fields.Properties())
             {
-                var dict = new Dictionary<string, IssueFieldEditMetadata>();
-                var serializer = JsonSerializer.Create(this.GetSerializerSettings());
-                JObject fields = task.Result["fields"].Value<JObject>();
+                var fieldName = (prop.Value["name"] ?? prop.Name).ToString();
+                dict.Add(fieldName, prop.Value.ToObject<IssueFieldEditMetadata>(serializer));
+            }
 
-                foreach (var prop in fields.Properties())
-                {
-                    var fieldName = (prop.Value["name"] ?? prop.Name).ToString();
-                    dict.Add(fieldName, prop.Value.ToObject<IssueFieldEditMetadata>(serializer));
-                }
-
-                return dict;
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            return dict;
         }
 
         public RemoteField[] GetCustomFields(string token)
@@ -376,25 +353,18 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        public Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CancellationToken token)
+        public async Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CancellationToken token)
         {
             var cache = this._clientSettings.Cache;
 
             if (!cache.CustomFields.Any())
             {
-                return this.ExecuteRequestAsync<RemoteField[]>(Method.GET, "rest/api/2/field", null, token).ContinueWith<IEnumerable<CustomField>>(task =>
-                {
-                    var results = task.Result.Where(f => f.IsCustomField).Select(f => new CustomField(f));
-                    cache.CustomFields.AddIfMIssing(results);
-                    return results;
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+                var remoteFields = await this.ExecuteRequestAsync<RemoteField[]>(Method.GET, "rest/api/2/field", null, token).ConfigureAwait(false);
+                var results = remoteFields.Where(f => f.IsCustomField).Select(f => new CustomField(f));
+                cache.CustomFields.AddIfMIssing(results);
             }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<CustomField>>();
-                taskSource.SetResult(cache.CustomFields.Values);
-                return taskSource.Task;
-            }
+
+            return cache.CustomFields.Values;
         }
 
         public Task<IEnumerable<JiraFilter>> GetFavouriteFiltersAsync(CancellationToken token)
@@ -402,71 +372,48 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync<IEnumerable<JiraFilter>>(Method.GET, "rest/api/2/filter/favourite", null, token);
         }
 
-        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token)
+        public async Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token)
         {
             var cache = this._clientSettings.Cache;
 
             if (!cache.Priorities.Any())
             {
-                return this.ExecuteRequestAsync<RemotePriority[]>(Method.GET, "rest/api/2/priority", null, token).ContinueWith(task =>
-                {
-                    var results = task.Result.Select(p => new IssuePriority(p));
-                    cache.Priorities.AddIfMIssing(results);
-                    return results;
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+                var priorities = await this.ExecuteRequestAsync<RemotePriority[]>(Method.GET, "rest/api/2/priority", null, token).ConfigureAwait(false);
+                cache.Priorities.AddIfMIssing(priorities.Select(p => new IssuePriority(p)));
             }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<IssuePriority>>();
-                taskSource.SetResult(cache.Priorities.Values);
-                return taskSource.Task;
-            }
+
+            return cache.Priorities.Values;
         }
 
-        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token)
+        public async Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token)
         {
             var cache = this._clientSettings.Cache;
 
             if (!cache.Resolutions.Any())
             {
-                return this.ExecuteRequestAsync<RemoteResolution[]>(Method.GET, "rest/api/2/resolution", null, token).ContinueWith(task =>
-                {
-                    var results = task.Result.Select(r => new IssueResolution(r));
-                    cache.Resolutions.AddIfMIssing(results);
-                    return results;
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+                var resolutions = await this.ExecuteRequestAsync<RemoteResolution[]>(Method.GET, "rest/api/2/resolution", null, token).ConfigureAwait(false);
+                cache.Resolutions.AddIfMIssing(resolutions.Select(r => new IssueResolution(r)));
             }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<IssueResolution>>();
-                taskSource.SetResult(cache.Resolutions.Values);
-                return taskSource.Task;
-            }
+
+            return cache.Resolutions.Values;
         }
 
-        public Task<IEnumerable<IssueLinkType>> GetIssueLinkTypesAsync(CancellationToken token)
+        public async Task<IEnumerable<IssueLinkType>> GetIssueLinkTypesAsync(CancellationToken token)
         {
             var cache = this._clientSettings.Cache;
-            var serializerSettings = this.GetSerializerSettings();
+            var serializerSettings = await this.GetSerializerSettingsAsync(token).ConfigureAwait(false);
 
             if (!cache.LinkTypes.Any())
             {
-                return this.ExecuteRequestAsync(Method.GET, "rest/api/2/issueLinkType", null, token).ContinueWith<IEnumerable<IssueLinkType>>(task =>
-                {
-                    var linkTypes = task.Result["issueLinkTypes"]
-                        .Cast<JObject>()
-                        .Select(issueLinkJson => JsonConvert.DeserializeObject<IssueLinkType>(issueLinkJson.ToString(), serializerSettings));
+                var results = await this.ExecuteRequestAsync(Method.GET, "rest/api/2/issueLinkType", null, token).ConfigureAwait(false);
+                var linkTypes = results["issueLinkTypes"]
+                    .Cast<JObject>()
+                    .Select(issueLinkJson => JsonConvert.DeserializeObject<IssueLinkType>(issueLinkJson.ToString(), serializerSettings));
 
-                    cache.LinkTypes.AddIfMIssing(linkTypes);
-                    return linkTypes;
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+                cache.LinkTypes.AddIfMIssing(linkTypes);
             }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<IssueLinkType>>();
-                taskSource.SetResult(cache.LinkTypes.Values);
-                return taskSource.Task;
-            }
+
+            return cache.LinkTypes.Values;
         }
 
         public Task LinkIssuesAsync(string outwardIssueKey, string inwardIssueKey, string linkName, string comment, CancellationToken token)
@@ -484,58 +431,41 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync(Method.POST, "rest/api/2/issueLink", bodyObject, token);
         }
 
-        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)
+        public async Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)
         {
             var cache = this._clientSettings.Cache;
 
             if (!cache.Statuses.Any())
             {
-                return this.ExecuteRequestAsync<RemoteStatus[]>(Method.GET, "rest/api/2/status", null, token).ContinueWith(task =>
-                {
-                    var results = task.Result.Select(s => new IssueStatus(s));
-                    cache.Statuses.AddIfMIssing(results);
-                    return results;
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+                var results = await this.ExecuteRequestAsync<RemoteStatus[]>(Method.GET, "rest/api/2/status", null, token).ConfigureAwait(false);
+                cache.Statuses.AddIfMIssing(results.Select(s => new IssueStatus(s)));
             }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<IssueStatus>>();
-                taskSource.SetResult(cache.Statuses.Values);
-                return taskSource.Task;
-            }
+
+            return cache.Statuses.Values;
         }
 
-        public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token)
+        public async Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token)
         {
             var cache = this._clientSettings.Cache;
 
             if (!cache.IssueTypes.ContainsKey(Jira.ALL_PROJECTS_KEY))
             {
-                return this.ExecuteRequestAsync<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype", null, token).ContinueWith<IEnumerable<IssueType>>(task =>
-                {
-                    var results = task.Result.Select(t => new IssueType(t));
-                    cache.IssueTypes.AddIfMIssing(new JiraEntityDictionary<IssueType>(Jira.ALL_PROJECTS_KEY, results));
-                    return results;
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+                var remoteIssueTypes = await this.ExecuteRequestAsync<RemoteIssueType[]>(Method.GET, "rest/api/2/issuetype", null, token).ConfigureAwait(false);
+                var issueTypes = remoteIssueTypes.Select(t => new IssueType(t));
+                cache.IssueTypes.AddIfMIssing(new JiraEntityDictionary<IssueType>(Jira.ALL_PROJECTS_KEY, issueTypes));
             }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<IssueType>>();
-                taskSource.SetResult(cache.IssueTypes[Jira.ALL_PROJECTS_KEY].Values);
-                return taskSource.Task;
-            }
+
+            return cache.IssueTypes[Jira.ALL_PROJECTS_KEY].Values;
         }
 
-        public Task<Comment> AddCommentToIssueAsync(string issueKey, Comment comment, CancellationToken token)
+        public async Task<Comment> AddCommentToIssueAsync(string issueKey, Comment comment, CancellationToken token)
         {
             var resource = String.Format("rest/api/2/issue/{0}/comment", issueKey);
-            return this.ExecuteRequestAsync<RemoteComment>(Method.POST, resource, comment.toRemote(), token).ContinueWith(task =>
-            {
-                return new Comment(task.Result);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            var remoteComment = await this.ExecuteRequestAsync<RemoteComment>(Method.POST, resource, comment.toRemote(), token).ConfigureAwait(false);
+            return new Comment(remoteComment);
         }
 
-        public Task<IPagedQueryResult<Comment>> GetCommentsFromIssueAsync(string issueKey, int maxComments, int startAt, CancellationToken token)
+        public async Task<IPagedQueryResult<Comment>> GetCommentsFromIssueAsync(string issueKey, int maxComments, int startAt, CancellationToken token)
         {
             var resource = String.Format("rest/api/2/issue/{0}/comment", issueKey);
             var parameters = new
@@ -544,74 +474,58 @@ namespace Atlassian.Jira.Remote
                 maxResults = maxComments,
             };
 
-            return this.ExecuteRequestAsync(Method.GET, resource, parameters).ContinueWith<IPagedQueryResult<Comment>>(task =>
-            {
-                var comments = task.Result["comments"]
-                    .Cast<JObject>()
-                    .Select(commentJson =>
-                    {
-                        var remoteComment = JsonConvert.DeserializeObject<RemoteComment>(commentJson.ToString(), this.GetSerializerSettings());
-                        return new Comment(remoteComment);
-                    });
+            var result = await this.ExecuteRequestAsync(Method.GET, resource, parameters).ConfigureAwait(false);
+            var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var comments = result["comments"]
+                .Cast<JObject>()
+                .Select(commentJson =>
+                {
+                    var remoteComment = JsonConvert.DeserializeObject<RemoteComment>(commentJson.ToString(), serializerSettings);
+                    return new Comment(remoteComment);
+                });
 
-                return PagedQueryResult<Comment>.FromJson((JObject)task.Result, comments);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            return PagedQueryResult<Comment>.FromJson((JObject)result, comments);
         }
 
-        public Task<IEnumerable<JiraNamedEntity>> GetActionsForIssueAsync(string issueKey, CancellationToken token)
+        public async Task<IEnumerable<JiraNamedEntity>> GetActionsForIssueAsync(string issueKey, CancellationToken token)
         {
             var resource = String.Format("rest/api/2/issue/{0}/transitions", issueKey);
+            var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var result = await this.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
+            var remoteTransitions = JsonConvert.DeserializeObject<RemoteNamedObject[]>(result["transitions"].ToString(), serializerSettings);
 
-            return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(task =>
-            {
-                var transitionsJson = task.Result["transitions"];
-                var remoteTransitions = JsonConvert.DeserializeObject<RemoteNamedObject[]>(transitionsJson.ToString(), this.GetSerializerSettings());
-
-                return remoteTransitions.Select(transition => new JiraNamedEntity(transition));
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            return remoteTransitions.Select(transition => new JiraNamedEntity(transition));
         }
 
-        public Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token)
+        public async Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token)
         {
             var cache = this._clientSettings.Cache;
 
             if (!cache.Projects.Any())
             {
-                return this.ExecuteRequestAsync<RemoteProject[]>(Method.GET, "rest/api/2/project", null, token).ContinueWith(task =>
-                {
-                    var results = task.Result.Select(p => new Project(_jira, p));
-                    cache.Projects.AddIfMIssing(results);
-                    return results;
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+                var remoteProjects = await this.ExecuteRequestAsync<RemoteProject[]>(Method.GET, "rest/api/2/project", null, token).ConfigureAwait(false);
+                cache.Projects.AddIfMIssing(remoteProjects.Select(p => new Project(_jira, p)));
             }
-            else
-            {
-                var taskSource = new TaskCompletionSource<IEnumerable<Project>>();
-                taskSource.SetResult(cache.Projects.Values);
-                return taskSource.Task;
-            }
+
+            return cache.Projects.Values;
         }
 
-        public Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKey, CancellationToken token)
+        public async Task<IEnumerable<Attachment>> GetAttachmentsFromIssueAsync(string issueKey, CancellationToken token)
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=attachment", issueKey);
+            var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var result = await this.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
+            var attachmentsJson = result["fields"]["attachment"];
+            var attachments = JsonConvert.DeserializeObject<RemoteAttachment[]>(attachmentsJson.ToString(), serializerSettings);
 
-            return this.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith(task =>
-            {
-                var attachmentsJson = task.Result["fields"]["attachment"];
-                var attachments = JsonConvert.DeserializeObject<RemoteAttachment[]>(attachmentsJson.ToString(), this.GetSerializerSettings());
-
-                return attachments.Select(remoteAttachment => new Attachment(_jira, new WebClientWrapper(), remoteAttachment));
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            return attachments.Select(remoteAttachment => new Attachment(_jira, new WebClientWrapper(), remoteAttachment));
         }
 
-        public Task<string[]> GetLabelsFromIssueAsync(string issueKey, CancellationToken token)
+        public async Task<string[]> GetLabelsFromIssueAsync(string issueKey, CancellationToken token)
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=labels", issueKey);
-            return this.ExecuteRequestAsync<RemoteIssueWrapper>(Method.GET, resource).ContinueWith(task =>
-            {
-                return task.Result.RemoteIssue.labelsReadOnly ?? new string[0];
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            var issue = await this.ExecuteRequestAsync<RemoteIssueWrapper>(Method.GET, resource).ConfigureAwait(false);
+            return issue.RemoteIssue.labelsReadOnly ?? new string[0];
         }
 
         public Task SetLabelsForIssueAsync(string issueKey, string[] labels, CancellationToken token)
@@ -627,36 +541,62 @@ namespace Atlassian.Jira.Remote
             }, token);
         }
 
-        public Task<IEnumerable<JiraUser>> GetWatchersFromIssueAsync(string issueKey, CancellationToken token)
+        public async Task<IEnumerable<JiraUser>> GetWatchersFromIssueAsync(string issueKey, CancellationToken token)
         {
             var resourceUrl = String.Format("rest/api/2/issue/{0}/watchers", issueKey);
-
-            return this.ExecuteRequestAsync(Method.GET, resourceUrl, null, token).ContinueWith(task =>
-            {
-                var watchersJson = task.Result["watchers"];
-                return watchersJson.Select(watcherJson => JsonConvert.DeserializeObject<JiraUser>(watcherJson.ToString(), this.GetSerializerSettings()));
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var result = await this.ExecuteRequestAsync(Method.GET, resourceUrl, null, token).ConfigureAwait(false);
+            var watchersJson = result["watchers"];
+            return watchersJson.Select(watcherJson => JsonConvert.DeserializeObject<JiraUser>(watcherJson.ToString(), serializerSettings));
         }
 
-        public Task<IEnumerable<IssueChangeLog>> GetChangeLogsFromIssueAsync(string issueKey, CancellationToken token)
+        public async Task<IEnumerable<IssueChangeLog>> GetChangeLogsFromIssueAsync(string issueKey, CancellationToken token)
         {
             var resourceUrl = String.Format("rest/api/2/issue/{0}?fields=created&expand=changelog", issueKey);
-
-            return this.ExecuteRequestAsync(Method.GET, resourceUrl, null, token).ContinueWith(task =>
+            var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var response = await this.ExecuteRequestAsync(Method.GET, resourceUrl, null, token).ConfigureAwait(false);
+            var result = Enumerable.Empty<IssueChangeLog>();
+            var changeLogs = response["changelog"];
+            if (changeLogs != null)
             {
-                var result = Enumerable.Empty<IssueChangeLog>();
-                var changeLogs = task.Result["changelog"];
-                if (changeLogs != null)
+                var histories = changeLogs["histories"];
+                if (histories != null)
                 {
-                    var histories = changeLogs["histories"];
-                    if (histories != null)
-                    {
-                        result = histories.Select(history => JsonConvert.DeserializeObject<IssueChangeLog>(history.ToString(), GetSerializerSettings()));
-                    }
+                    result = histories.Select(history => JsonConvert.DeserializeObject<IssueChangeLog>(history.ToString(), serializerSettings));
                 }
+            }
 
-                return result;
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            return result;
+        }
+
+        public async Task<IEnumerable<ProjectComponent>> GetProjectComponentsAsync(string projectKey, CancellationToken token = default(CancellationToken))
+        {
+            var cache = this._clientSettings.Cache;
+
+            if (!cache.Components.ContainsKey(projectKey))
+            {
+                var resource = String.Format("rest/api/2/project/{0}/components", projectKey);
+                var remoteComponents = await this.ExecuteRequestAsync<RemoteComponent[]>(Method.GET, resource).ConfigureAwait(false);
+                var components = remoteComponents.Select(c => new ProjectComponent(c));
+                cache.Components.AddIfMIssing(new JiraEntityDictionary<ProjectComponent>(projectKey, components));
+            }
+
+            return cache.Components[projectKey].Values;
+        }
+
+        public async Task<IEnumerable<ProjectVersion>> GetProjectVersionsAsync(string projectKey, CancellationToken token)
+        {
+            var cache = _clientSettings.Cache;
+            var resource = String.Format("rest/api/2/project/{0}/versions", projectKey);
+
+            if (!cache.Versions.ContainsKey(projectKey))
+            {
+                var remoteVersions = await this.ExecuteRequestAsync<RemoteVersion[]>(Method.GET, resource, null, token).ConfigureAwait(false);
+                var versions = remoteVersions.Select(v => new ProjectVersion(_jira, v));
+                cache.Versions.AddIfMIssing(new JiraEntityDictionary<ProjectVersion>(projectKey, versions));
+            }
+
+            return cache.Versions[projectKey].Values;
         }
 
         private void LogRequest(RestRequest request, object body = null)
@@ -754,7 +694,8 @@ namespace Atlassian.Jira.Remote
             });
 
             var issues = (JArray)responseObj["issues"];
-            return issues.Cast<JObject>().Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), this.GetSerializerSettings()).RemoteIssue).ToArray();
+            var serializerSettings = GetSerializerSettingsAsync().Result;
+            return issues.Cast<JObject>().Select(issueJson => JsonConvert.DeserializeObject<RemoteIssueWrapper>(issueJson.ToString(), serializerSettings).RemoteIssue).ToArray();
         }
 
         public RemoteIssue CreateIssue(string token, RemoteIssue newIssue)
@@ -817,7 +758,7 @@ namespace Atlassian.Jira.Remote
             {
                 var resource = String.Format("rest/api/2/project/{0}", projectId);
                 var projectJson = this.ExecuteRequest(Method.GET, resource);
-                var serializerSettings = GetSerializerSettings();
+                var serializerSettings = GetSerializerSettingsAsync().Result;
 
                 return projectJson["issueTypes"]
                     .Select(issueTypeJson => JsonConvert.DeserializeObject<RemoteIssueType>(issueTypeJson.ToString(), serializerSettings))
@@ -864,7 +805,7 @@ namespace Atlassian.Jira.Remote
             var issueJson = this.ExecuteRequest(Method.GET, resource);
             var comments = issueJson["fields"]["comment"]["comments"];
 
-            return JsonConvert.DeserializeObject<RemoteComment[]>(comments.ToString(), this.GetSerializerSettings());
+            return JsonConvert.DeserializeObject<RemoteComment[]>(comments.ToString(), this.GetSerializerSettingsAsync().Result);
         }
 
         public void AddComment(string token, string key, RemoteComment comment)
@@ -879,7 +820,7 @@ namespace Atlassian.Jira.Remote
             var issueJson = this.ExecuteRequest(Method.GET, resource);
             var attachments = issueJson["fields"]["attachment"];
 
-            return JsonConvert.DeserializeObject<RemoteAttachment[]>(attachments.ToString(), this.GetSerializerSettings());
+            return JsonConvert.DeserializeObject<RemoteAttachment[]>(attachments.ToString(), this.GetSerializerSettingsAsync().Result);
         }
 
         public bool AddBase64EncodedAttachmentsToIssue(string token, string key, string[] fileNames, string[] base64EncodedAttachmentData)
@@ -905,7 +846,7 @@ namespace Atlassian.Jira.Remote
         {
             var resource = String.Format("rest/api/2/issue/{0}/transitions", issueKey);
             var transitions = this.ExecuteRequest(Method.GET, resource)["transitions"];
-            return JsonConvert.DeserializeObject<RemoteNamedObject[]>(transitions.ToString(), this.GetSerializerSettings());
+            return JsonConvert.DeserializeObject<RemoteNamedObject[]>(transitions.ToString(), this.GetSerializerSettingsAsync().Result);
         }
 
         public void AddLabels(string token, RemoteIssue remoteIssue, string[] labels)
@@ -924,7 +865,7 @@ namespace Atlassian.Jira.Remote
         private JObject BuildFieldsObjectFromIssue(RemoteIssue remoteIssue, RemoteFieldValue[] remoteFields)
         {
             var issueWrapper = new RemoteIssueWrapper(remoteIssue);
-            var issueJson = JsonConvert.SerializeObject(issueWrapper, this.GetSerializerSettings());
+            var issueJson = JsonConvert.SerializeObject(issueWrapper, this.GetSerializerSettingsAsync().Result);
             var issueFields = JObject.Parse(issueJson)["fields"] as JObject;
             var updateFields = new JObject();
 
@@ -989,7 +930,7 @@ namespace Atlassian.Jira.Remote
             var resource = String.Format("rest/api/2/issue/{0}/worklog", key);
             var worklogs = this.ExecuteRequest(Method.GET, resource)["worklogs"];
 
-            return JsonConvert.DeserializeObject<RemoteWorklog[]>(worklogs.ToString(), this.GetSerializerSettings());
+            return JsonConvert.DeserializeObject<RemoteWorklog[]>(worklogs.ToString(), this.GetSerializerSettingsAsync().Result);
         }
 
         public RemoteWorklog AddWorklog(string token, string key, RemoteWorklog worklog, string queryString = null)
@@ -1041,14 +982,15 @@ namespace Atlassian.Jira.Remote
             return this.ExecuteRequestAsync<RemoteVersion>(Method.GET, resource, null, token);
         }
 
-        public Task<RemoteVersion> UpdateVersionAsync(RemoteVersion version, CancellationToken token)
+        public async Task<RemoteVersion> UpdateVersionAsync(RemoteVersion version, CancellationToken token)
         {
             var resource = String.Format("rest/api/2/version/{0}", version.id);
-            var versionJson = JsonConvert.SerializeObject(version, GetSerializerSettings());
-            return this.ExecuteRequestAsync(Method.PUT, resource, versionJson, token).ContinueWith(task =>
-            {
-                return this.GetVersionAsync(version.id, token);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+            var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var versionJson = JsonConvert.SerializeObject(version, serializerSettings);
+
+            await this.ExecuteRequestAsync(Method.PUT, resource, versionJson, token).ConfigureAwait(false);
+
+            return await this.GetVersionAsync(version.id, token).ConfigureAwait(false);
         }
 
         public Task<JiraUser> GetUser(string userName, CancellationToken token)

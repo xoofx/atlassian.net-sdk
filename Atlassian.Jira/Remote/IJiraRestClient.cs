@@ -16,7 +16,8 @@ namespace Atlassian.Jira.Remote
         /// <summary>
         /// Gets the global serializer settings to use.
         /// </summary>
-        JsonSerializerSettings GetSerializerSettings();
+        /// <param name="token">Cancellation token for the operation.</param>
+        Task<JsonSerializerSettings> GetSerializerSettingsAsync(CancellationToken token);
 
         /// <summary>
         /// Executes a request.
@@ -76,6 +77,20 @@ namespace Atlassian.Jira.Remote
         /// <param name="requestBody">Request body to be serialized.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody, CancellationToken token);
+
+        /// <summary>
+        /// Gets the components defined on a jira project.
+        /// </summary>
+        /// <param name="projectKey">The project key to retrieve the components from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<ProjectComponent>> GetProjectComponentsAsync(string projectKey, CancellationToken token);
+
+        /// <summary>
+        /// Gets the versions defined on a jira project.
+        /// </summary>
+        /// <param name="projectKey">The project key to retrieve the versions from.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<ProjectVersion>> GetProjectVersionsAsync(string projectKey, CancellationToken token);
 
         /// <summary>
         /// Retrieves an issue by its key.

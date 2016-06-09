@@ -42,14 +42,7 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IEnumerable<ProjectComponent>> GetAsync(CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/project/{0}/components", _project.Key);
-            return _jira.RestClient.ExecuteRequestAsync<RemoteComponent[]>(Method.GET, resource).ContinueWith(task =>
-            {
-                var components = task.Result.Select(remoteComponent => new ProjectComponent(remoteComponent));
-                _jira.Cache.Components.AddIfMIssing(new JiraEntityDictionary<ProjectComponent>(_project.Key, components));
-
-                return components;
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            return _jira.RestClient.GetProjectComponentsAsync(_project.Key, token);
         }
 
         /// <summary>
@@ -66,28 +59,26 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="projectComponent">Information of the new component.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task<ProjectComponent> AddAsync(ProjectComponentCreationInfo projectComponent, CancellationToken token = default(CancellationToken))
+        public async Task<ProjectComponent> AddAsync(ProjectComponentCreationInfo projectComponent, CancellationToken token = default(CancellationToken))
         {
-            var settings = _jira.RestClient.GetSerializerSettings();
+            var settings = await _jira.RestClient.GetSerializerSettingsAsync(token).ConfigureAwait(false);
             var serializer = JsonSerializer.Create(settings);
             var resource = "/rest/api/2/component";
             var requestBody = JToken.FromObject(projectComponent, serializer);
 
             requestBody["project"] = _project.Key;
 
-            return _jira.RestClient.ExecuteRequestAsync<RemoteComponent>(Method.POST, resource, requestBody, token).ContinueWith(task =>
+            var remoteComponent = await _jira.RestClient.ExecuteRequestAsync<RemoteComponent>(Method.POST, resource, requestBody, token).ConfigureAwait(false);
+            var component = new ProjectComponent(remoteComponent);
+            var cacheEntry = new JiraEntityDictionary<ProjectComponent>(_project.Key, new ProjectComponent[1] { component });
+
+            if (!_jira.Cache.Components.AddIfMIssing(cacheEntry))
             {
-                var component = new ProjectComponent(task.Result);
-                var cacheEntry = new JiraEntityDictionary<ProjectComponent>(_project.Key, new ProjectComponent[1] { component });
+                // If there was already an entry for the project, add the component to its list.
+                _jira.Cache.Components[_project.Key].AddIfMIssing(component);
+            }
 
-                if (!_jira.Cache.Components.AddIfMIssing(cacheEntry))
-                {
-                    // If there was already an entry for the project, add the component to its list.
-                    _jira.Cache.Components[_project.Key].AddIfMIssing(component);
-                }
-
-                return component;
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            return component;
         }
 
         /// <summary>
@@ -106,23 +97,20 @@ namespace Atlassian.Jira
         /// <param name="componentName">Name of the component to remove.</param>
         /// <param name="moveIssuesTo">The component to set on issues where the deleted component is the component, If null then the component is removed.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task DeleteAsync(string componentName, string moveIssuesTo = null, CancellationToken token = default(CancellationToken))
+        public async Task DeleteAsync(string componentName, string moveIssuesTo = null, CancellationToken token = default(CancellationToken))
         {
-            var component = _jira.GetProjectComponents(_project.Key).First(v => v.Name.Equals(componentName, StringComparison.OrdinalIgnoreCase));
-
+            JiraEntityDictionary<ProjectComponent> cacheEntry;
+            var components = await this.GetAsync(token).ConfigureAwait(false);
+            var component = components.First(v => v.Name.Equals(componentName, StringComparison.OrdinalIgnoreCase));
             var resource = String.Format("/rest/api/2/component/{0}?{1}",
                 component.Id,
                 String.IsNullOrEmpty(moveIssuesTo) ? null : "moveIssuesTo=" + Uri.EscapeDataString(moveIssuesTo));
 
-            return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token).ContinueWith(task =>
+            await _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token).ConfigureAwait(false);
+            if (_jira.Cache.Components.TryGetValue(_project.Key, out cacheEntry) && cacheEntry.ContainsKey(component.Id))
             {
-                JiraEntityDictionary<ProjectComponent> cacheEntry;
-
-                if (_jira.Cache.Components.TryGetValue(_project.Key, out cacheEntry) && cacheEntry.ContainsKey(component.Id))
-                {
-                    cacheEntry.Remove(component.Id);
-                }
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+                cacheEntry.Remove(component.Id);
+            }
         }
 
         private T ExecuteAndGuard<T>(Func<T> execute)

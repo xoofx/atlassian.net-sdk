@@ -87,11 +87,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(versionName, version.Name);
 
             // Retrive project versions.
-            Assert.True(project.Versions.Get().Any(p => p.Name == versionName));
+            Assert.True(project.Versions.GetPaged().Any(p => p.Name == versionName));
 
             // Delete project version
             project.Versions.Delete(version.Name);
-            Assert.False(project.Versions.Get().Any(p => p.Name == versionName));
+            Assert.False(project.Versions.GetPaged().Any(p => p.Name == versionName));
         }
 
         [Fact]

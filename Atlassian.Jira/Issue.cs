@@ -510,27 +510,23 @@ namespace Atlassian.Jira
         /// <param name="actionName">The workflow action to transition to.</param>
         /// <param name="additionalUpdates">Additional updates to perform when transitioning the issue.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task WorkflowTransitionAsync(string actionName, WorkflowTransitionUpdates additionalUpdates, CancellationToken token)
+        public async Task WorkflowTransitionAsync(string actionName, WorkflowTransitionUpdates additionalUpdates, CancellationToken token)
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to execute workflow transition, issue has not been created.");
             }
 
-            return this.GetAvailableActionsAsync(token).ContinueWith(actionsTask =>
+            var actions = await this.GetAvailableActionsAsync(token).ConfigureAwait(false);
+            var action = actions.FirstOrDefault(a => a.Name.Equals(actionName, StringComparison.OrdinalIgnoreCase));
+
+            if (action == null)
             {
-                var action = actionsTask.Result.FirstOrDefault(a => a.Name.Equals(actionName, StringComparison.OrdinalIgnoreCase));
+                throw new InvalidOperationException(String.Format("Workflow action with name '{0}' not found.", actionName));
+            }
 
-                if (action == null)
-                {
-                    throw new InvalidOperationException(String.Format("Workflow action with name '{0}' not found.", actionName));
-                }
-
-                return this._jira.RestClient.ExecuteIssueWorkflowActionAsync(this, action.Id, additionalUpdates, token).ContinueWith(issueTask =>
-                {
-                    Initialize(issueTask.Result.OriginalRemoteIssue);
-                }, token, TaskContinuationOptions.None, TaskScheduler.Default);
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default).Unwrap();
+            var issue = await this._jira.RestClient.ExecuteIssueWorkflowActionAsync(this, action.Id, additionalUpdates, token).ConfigureAwait(false);
+            Initialize(issue.OriginalRemoteIssue);
         }
 
         private void UpdateRemoteFields(RemoteFieldValue[] remoteFields)
@@ -583,10 +579,7 @@ namespace Atlassian.Jira
             }
 
             var jql = String.Format("parent = {0}", this.Key.Value);
-            return this.Jira.RestClient.GetIssuesFromJqlAsync(jql, maxIssues, startAt, token).ContinueWith(task =>
-            {
-                return task.Result as IPagedQueryResult<Issue>;
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            return this.Jira.RestClient.GetIssuesFromJqlAsync(jql, maxIssues, startAt, token);
         }
 
         /// <summary>
