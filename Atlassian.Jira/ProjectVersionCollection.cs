@@ -1,19 +1,19 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using System.Collections.ObjectModel;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
     /// <summary>
     /// Collection of project versions
     /// </summary>
-    public class ProjectVersionCollection: JiraNamedEntityCollection<ProjectVersion>    
+    public class ProjectVersionCollection : JiraNamedEntityCollection<ProjectVersion>
     {
         internal ProjectVersionCollection(string fieldName, Jira jira, string projectKey)
-            :this(fieldName, jira, projectKey, new List<ProjectVersion>())
+            : this(fieldName, jira, projectKey, new List<ProjectVersion>())
         {
         }
 
@@ -28,9 +28,14 @@ namespace Atlassian.Jira
         /// <param name="versionName">Version name</param>
         public void Add(string versionName)
         {
-            this.Add(_jira.GetProjectVersions(_projectKey).First(v => v.Name.Equals(versionName, StringComparison.OrdinalIgnoreCase)));
+            var version = _jira.Versions.GetVersionsAsync(_projectKey).Result.FirstOrDefault(v => v.Name.Equals(versionName, StringComparison.OrdinalIgnoreCase));
+
+            if (version == null)
+            {
+                throw new InvalidOperationException(String.Format("Unable to find version with name '{0}'.", versionName));
+            }
+
+            this.Add(version);
         }
-
-
     }
 }

@@ -10,17 +10,23 @@ namespace Atlassian.Jira
     /// </summary>
     public class ProjectVersion : JiraNamedEntity
     {
+        private readonly Jira _jira;
         private RemoteVersion _remoteVersion;
 
-        internal ProjectVersion(Jira jira, RemoteVersion remoteVersion)
-            : base(jira, remoteVersion.id)
+        /// <summary>
+        /// Creates a new instance of a ProjectVersion.
+        /// </summary>
+        /// <param name="jira">The jira instance.</param>
+        /// <param name="remoteVersion">The remote version.</param>
+        public ProjectVersion(Jira jira, RemoteVersion remoteVersion)
+            : base(remoteVersion)
         {
             if (jira == null)
             {
                 throw new ArgumentNullException("jira");
             }
 
-            _name = remoteVersion.name;
+            _jira = jira;
             _remoteVersion = remoteVersion;
         }
 
@@ -29,6 +35,17 @@ namespace Atlassian.Jira
             get
             {
                 return _remoteVersion;
+            }
+        }
+
+        /// <summary>
+        /// Gets the project key associated with this version.
+        /// </summary>
+        public string ProjectKey
+        {
+            get
+            {
+                return _remoteVersion.ProjectKey;
             }
         }
 
@@ -113,7 +130,8 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public async Task SaveChangesAsync(CancellationToken token = default(CancellationToken))
         {
-            _remoteVersion = await Jira.RestClient.UpdateVersionAsync(_remoteVersion, token).ConfigureAwait(false);
+            var version = await _jira.Versions.UpdateVersionAsync(this, token).ConfigureAwait(false);
+            _remoteVersion = version.RemoteVersion;
         }
     }
 }

@@ -27,5 +27,11 @@ namespace Atlassian.Jira
         /// </summary>
         [JsonProperty("description")]
         public string Description { get; set; }
+
+        /// <summary>
+        /// Key of the project to associate with this component.
+        /// </summary>
+        [JsonProperty("project")]
+        public string ProjectKey { get; set; }
     }
 }

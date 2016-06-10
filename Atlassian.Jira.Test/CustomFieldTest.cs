@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Atlassian.Jira.Test
@@ -15,8 +17,9 @@ namespace Atlassian.Jira.Test
         {
             //arrange
             var jira = TestableJira.Create();
-            jira.SoapService.Setup(c => c.GetFieldsForEdit(It.IsAny<string>(), "issueKey")).Returns(new RemoteField[] {
-                new RemoteField(){ id="123", name= "CustomField" }});
+            var customField = new CustomField(new RemoteField() { id = "123", name = "CustomField" });
+            jira.IssueFieldService.Setup(c => c.GetCustomFieldsAsync(CancellationToken.None))
+                .Returns(Task.FromResult(Enumerable.Repeat<CustomField>(customField, 1)));
 
             var issue = new RemoteIssue()
             {

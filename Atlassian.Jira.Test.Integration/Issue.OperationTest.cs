@@ -15,7 +15,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         void GetChangeLogsForIssue()
         {
-            var changelogs = _jira.GetIssue("TST-1").GetChangeLogs().OrderBy(log => log.CreatedDate);
+            var changelogs = _jira.Issues.GetIssueAsync("TST-1").Result.GetChangeLogsAsync().Result.OrderBy(log => log.CreatedDate);
             Assert.Equal(4, changelogs.Count());
 
             var firstChangeLog = changelogs.First();
@@ -40,13 +40,13 @@ namespace Atlassian.Jira.Test.Integration
             issue.Summary = "Test issue with watchers" + _random.Next(int.MaxValue);
             issue.SaveChanges();
 
-            issue.Watchers.Add("test");
-            Assert.Equal(2, issue.Watchers.Get().Count());
+            issue.AddWatcherAsync("test").Wait();
+            Assert.Equal(2, issue.GetWatchersAsync().Result.Count());
 
-            issue.Watchers.Remove("admin");
-            Assert.Equal(1, issue.Watchers.Get().Count());
+            issue.DeleteWatcherAsync("admin").Wait();
+            Assert.Equal(1, issue.GetWatchersAsync().Result.Count());
 
-            var user = issue.Watchers.Get().First();
+            var user = issue.GetWatchersAsync().Result.First();
             Assert.Equal("test", user.Username);
             Assert.True(user.IsActive);
             Assert.Equal("Tester", user.DisplayName);
@@ -66,7 +66,7 @@ namespace Atlassian.Jira.Test.Integration
             subTask.Summary = "Test SubTask" + _random.Next(int.MaxValue);
             subTask.SaveChanges();
 
-            var results = parentTask.GetSubTasks();
+            var results = parentTask.GetSubTasksAsync().Result;
             Assert.Equal(results.Count(), 1);
             Assert.Equal(results.First().Summary, subTask.Summary);
         }
@@ -79,7 +79,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.Type = "Bug";
             issue.SaveChanges();
 
-            Assert.Empty(issue.GetIssueLinks());
+            Assert.Empty(issue.GetIssueLinksAsync().Result);
         }
 
         [Fact]
@@ -101,11 +101,11 @@ namespace Atlassian.Jira.Test.Integration
             issue3.SaveChanges();
 
             // link the first issue to the second.
-            issue1.LinkToIssue(issue2.Key.Value, "Duplicate");
-            issue1.LinkToIssue(issue3.Key.Value, "Duplicate");
+            issue1.LinkToIssueAsync(issue2.Key.Value, "Duplicate").Wait();
+            issue1.LinkToIssueAsync(issue3.Key.Value, "Duplicate").Wait();
 
             // Verify links of first issue.
-            var issueLinks = issue1.GetIssueLinks();
+            var issueLinks = issue1.GetIssueLinksAsync().Result;
             Assert.Equal(2, issueLinks.Count());
             Assert.True(issueLinks.All(l => l.OutwardIssue.Key.Value == issue1.Key.Value));
             Assert.True(issueLinks.All(l => l.LinkType.Name == "Duplicate"));
@@ -113,13 +113,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.True(issueLinks.Any(l => l.InwardIssue.Key.Value == issue3.Key.Value));
 
             // Verify link of second issue.
-            var issueLink = issue2.GetIssueLinks().Single();
+            var issueLink = issue2.GetIssueLinksAsync().Result.Single();
             Assert.Equal("Duplicate", issueLink.LinkType.Name);
             Assert.Equal(issue1.Key.Value, issueLink.OutwardIssue.Key.Value);
             Assert.Equal(issue2.Key.Value, issueLink.InwardIssue.Key.Value);
 
             // Verify link of third issue.
-            issueLink = issue3.GetIssueLinks().Single();
+            issueLink = issue3.GetIssueLinksAsync().Result.Single();
             Assert.Equal("Duplicate", issueLink.LinkType.Name);
             Assert.Equal(issue1.Key.Value, issueLink.OutwardIssue.Key.Value);
             Assert.Equal(issue3.Key.Value, issueLink.InwardIssue.Key.Value);
@@ -135,7 +135,7 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Null(issue.ResolutionDate);
 
-            await issue.WorkflowTransitionAsync(WorkflowActions.Resolve, CancellationToken.None);
+            await issue.WorkflowTransitionAsync(WorkflowActions.Resolve);
 
             Assert.Equal("Resolved", issue.Status.Name);
             Assert.Equal("Fixed", issue.Resolution.Name);
@@ -157,9 +157,9 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Resolved", issue.Status.Name);
             Assert.Equal("Fixed", issue.Resolution.Name);
 
-            var comments = issue.GetComments();
-            Assert.Equal(1, comments.Count);
-            Assert.Equal("Comment with transition", comments[0].Body);
+            var comments = issue.GetCommentsAsync().Result;
+            Assert.Equal(1, comments.Count());
+            Assert.Equal("Comment with transition", comments.First().Body);
         }
 
         [Fact]
@@ -172,7 +172,7 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Null(issue.ResolutionDate);
 
-            issue.WorkflowTransition(WorkflowActions.Resolve);
+            issue.WorkflowTransitionAsync(WorkflowActions.Resolve).Wait();
 
             Assert.Equal("Resolved", issue.Status.Name);
             Assert.Equal("Fixed", issue.Resolution.Name);
@@ -188,7 +188,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             issue.Resolution = "Won't Fix";
-            issue.WorkflowTransition(WorkflowActions.Resolve);
+            issue.WorkflowTransitionAsync(WorkflowActions.Resolve).Wait();
 
             Assert.Equal("Resolved", issue.Status.Name);
             Assert.Equal("Won't Fix", issue.Resolution.Name);
@@ -202,12 +202,12 @@ namespace Atlassian.Jira.Test.Integration
             issue.Type = "Bug";
             issue.SaveChanges();
 
-            var timetracking = issue.GetTimeTrackingData();
+            var timetracking = issue.GetTimeTrackingDataAsync().Result;
             Assert.Null(timetracking.TimeSpent);
 
-            issue.AddWorklog("2d");
+            issue.AddWorklogAsync("2d").Wait();
 
-            timetracking = issue.GetTimeTrackingData();
+            timetracking = issue.GetTimeTrackingDataAsync().Result;
             Assert.Equal("2d", timetracking.TimeSpent);
         }
 
@@ -221,17 +221,16 @@ namespace Atlassian.Jira.Test.Integration
             issue.Type = "Bug";
 
             // Act, Assert: Returns null for unsaved issue.
-            Assert.Null(issue.GetResolutionDate());
+            Assert.Null(issue.ResolutionDate);
 
             // Act, Assert: Returns null for saved unresolved issue.
             issue.SaveChanges();
-            Assert.Null(issue.GetResolutionDate());
+            Assert.Null(issue.ResolutionDate);
 
             // Act, Assert: returns date for saved resolved issue.
-            issue.WorkflowTransition(WorkflowActions.Resolve);
-            var date = issue.GetResolutionDate();
-            Assert.NotNull(date);
-            Assert.Equal(date.Value.Year, currentDate.Year);
+            issue.WorkflowTransitionAsync(WorkflowActions.Resolve).Wait();
+            Assert.NotNull(issue.ResolutionDate);
+            Assert.Equal(issue.ResolutionDate.Value.Year, currentDate.Year);
         }
 
         [Fact]
@@ -247,15 +246,15 @@ namespace Atlassian.Jira.Test.Integration
 
             // create an issue, verify no attachments
             issue.SaveChanges();
-            Assert.Equal(0, issue.GetAttachments().Count);
+            Assert.Equal(0, issue.GetAttachmentsAsync().Result.Count());
 
             // upload multiple attachments
             File.WriteAllText("testfile1.txt", "Test File Content 1");
             File.WriteAllText("testfile2.txt", "Test File Content 2");
             issue.AddAttachment("testfile1.txt", "testfile2.txt");
 
-            var attachments = issue.GetAttachments();
-            Assert.Equal(2, attachments.Count);
+            var attachments = issue.GetAttachmentsAsync().Result;
+            Assert.Equal(2, attachments.Count());
             Assert.True(attachments.Any(a => a.FileName.Equals("testfile1.txt")), "'testfile1.txt' was not downloaded from server");
             Assert.True(attachments.Any(a => a.FileName.Equals("testfile2.txt")), "'testfile2.txt' was not downloaded from server");
 
@@ -315,14 +314,14 @@ namespace Atlassian.Jira.Test.Integration
 
             // create an issue, verify no comments
             issue.SaveChanges();
-            Assert.Equal(0, issue.GetComments().Count);
+            Assert.Equal(0, issue.GetCommentsAsync().Result.Count());
 
             // Add a comment
-            issue.AddComment("new comment");
+            issue.AddCommentAsync("new comment").Wait();
 
-            var comments = issue.GetComments();
-            Assert.Equal(1, comments.Count);
-            Assert.Equal("new comment", comments[0].Body);
+            var comments = issue.GetCommentsAsync().Result;
+            Assert.Equal(1, comments.Count());
+            Assert.Equal("new comment", comments.First().Body);
         }
 
         [Fact]
@@ -338,14 +337,14 @@ namespace Atlassian.Jira.Test.Integration
 
             // create an issue, verify no comments
             issue.SaveChanges();
-            var comments = await issue.GetCommentsAsync();
+            var comments = await issue.GetPagedCommentsAsync();
             Assert.Equal(0, comments.Count());
 
             // Add a comment
             await issue.AddCommentAsync("new comment");
 
             // Verify comment retrieval
-            comments = await issue.GetCommentsAsync();
+            comments = await issue.GetPagedCommentsAsync();
             Assert.Equal(1, comments.Count());
             Assert.Equal("new comment", comments.First().Body);
         }
@@ -358,11 +357,11 @@ namespace Atlassian.Jira.Test.Integration
             issue.Type = "1";
             issue.Summary = String.Format("Issue to delete ({0})", _random.Next(int.MaxValue));
             issue.SaveChanges();
-            Assert.True(_jira.Issues.Where(i => i.Key == issue.Key).Any(), "Expected issue in server");
+            Assert.True(_jira.Issues.Queryable.Where(i => i.Key == issue.Key).Any(), "Expected issue in server");
 
             // Delete issue and verify it is no longer found.
-            _jira.DeleteIssue(issue);
-            Assert.Throws<InvalidOperationException>(() => _jira.GetIssue(issue.Key.Value));
+            _jira.Issues.DeleteIssueAsync(issue.Key.Value).Wait();
+            Assert.Throws<AggregateException>(() => _jira.Issues.GetIssueAsync(issue.Key.Value).Result);
         }
 
         [Fact]
@@ -378,13 +377,13 @@ namespace Atlassian.Jira.Test.Integration
             };
 
             issue.SaveChanges();
-            issue.Labels.Set("label1", "label2");
+            issue.SetLabelsAsync("label1", "label2").Wait();
 
-            issue = _jira.GetIssue(issue.Key.Value);
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal(2, issue.Labels.Cached.Length);
 
-            issue.Labels.Set("label1", "label2", "label3");
-            Assert.Equal(3, issue.Labels.Get().Length);
+            issue.SetLabelsAsync("label1", "label2", "label3").Wait();
+            Assert.Equal(3, issue.GetLabelsAsync().Result.Length);
         }
 
         [Fact]
@@ -400,14 +399,14 @@ namespace Atlassian.Jira.Test.Integration
             };
             issue.SaveChanges();
 
-            issue.AddWorklog("1d");
-            issue.AddWorklog("1h", WorklogStrategy.RetainRemainingEstimate);
-            issue.AddWorklog("1m", WorklogStrategy.NewRemainingEstimate, "2d");
+            issue.AddWorklogAsync("1d").Wait();
+            issue.AddWorklogAsync("1h", WorklogStrategy.RetainRemainingEstimate).Wait();
+            issue.AddWorklogAsync("1m", WorklogStrategy.NewRemainingEstimate, "2d").Wait();
 
-            issue.AddWorklog(new Worklog("2d", new DateTime(2012, 1, 1), "comment"));
+            issue.AddWorklogAsync(new Worklog("2d", new DateTime(2012, 1, 1), "comment")).Wait();
 
-            var logs = issue.GetWorklogs();
-            Assert.Equal(4, logs.Count);
+            var logs = issue.GetWorklogsAsync().Result;
+            Assert.Equal(4, logs.Count());
             Assert.Equal("comment", logs.ElementAt(3).Comment);
             Assert.Equal(new DateTime(2012, 1, 1), logs.ElementAt(3).StartDate);
         }
@@ -424,11 +423,11 @@ namespace Atlassian.Jira.Test.Integration
             };
             issue.SaveChanges();
 
-            var worklog = issue.AddWorklog("1h");
-            Assert.Equal(1, issue.GetWorklogs().Count);
+            var worklog = issue.AddWorklogAsync("1h").Result;
+            Assert.Equal(1, issue.GetWorklogsAsync().Result.Count());
 
-            issue.DeleteWorklog(worklog);
-            Assert.Equal(0, issue.GetWorklogs().Count);
+            issue.DeleteWorklogAsync(worklog).Wait();
+            Assert.Equal(0, issue.GetWorklogsAsync().Result.Count());
         }
     }
 }

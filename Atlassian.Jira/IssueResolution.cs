@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
@@ -19,19 +21,18 @@ namespace Atlassian.Jira
         {
         }
 
-        internal IssueResolution(Jira jira, string id)
-            : base(jira, id)
+        /// <summary>
+        /// Creates an instance of the IssueResolution with the given id and name.
+        /// </summary>
+        public IssueResolution(string id, string name = null)
+            : base(id, name)
         {
         }
 
-        internal IssueResolution(string name)
-            : base(name)
+        protected override async Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {
-        }
-
-        protected override IEnumerable<JiraNamedEntity> GetEntities(Jira jira, string projectKey = null)
-        {
-            return jira.GetIssueResolutions();
+            var results = await jira.Resolutions.GetResolutionsAsync(token).ConfigureAwait(false);
+            return results as IEnumerable<JiraNamedEntity>;
         }
 
         /// <summary>
@@ -44,11 +45,11 @@ namespace Atlassian.Jira
                 int id;
                 if (int.TryParse(name, out id))
                 {
-                    return new IssueResolution(null, name /*as id*/);
+                    return new IssueResolution(name /*as id*/);
                 }
                 else
                 {
-                    return new IssueResolution(name);
+                    return new IssueResolution(null, name);
                 }
             }
             else
@@ -75,7 +76,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return entity._name == name;
+                return entity.Name == name;
             }
         }
 
@@ -97,7 +98,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return entity._name != name;
+                return entity.Name != name;
             }
         }
     }

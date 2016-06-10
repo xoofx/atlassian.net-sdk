@@ -18,6 +18,12 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Key of the project to associate with this version.
+        /// </summary>
+        [JsonProperty("project")]
+        public string ProjectKey { get; set; }
+
+        /// <summary>
         /// Name of the project version.
         /// </summary>
         [JsonProperty("name")]

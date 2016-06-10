@@ -19,54 +19,29 @@ namespace Atlassian.Jira
     public class Jira
     {
         internal const string DEFAULT_DATE_FORMAT = "yyyy/MM/dd";
-        internal const string ALL_PROJECTS_KEY = "[ALL_PROJECTS]";
         internal static CultureInfo DefaultCultureInfo = CultureInfo.GetCultureInfo("en-us");
 
         private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
-        private const string REMOTE_AUTH_EXCEPTION_STRING = "com.atlassian.jira.rpc.exception.RemoteAuthenticationException";
 
-        private readonly JiraQueryProvider _provider;
-        private readonly IJiraSoapClient _jiraService;
-        private readonly IFileSystem _fileSystem;
-        private readonly IJiraRestClient _restClient;
         private readonly JiraCredentials _credentials;
         private readonly JiraCache _cache;
-
-        private string _token = String.Empty;
-        private Dictionary<string, Issue> _cachedIssues = new Dictionary<string, Issue>();
-        private Dictionary<string, IEnumerable<JiraNamedEntity>> _cachedFieldsForEdit = new Dictionary<string, IEnumerable<JiraNamedEntity>>();
-        private DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>> _cachedFieldsForAction = new DoubleKeyDictionary<string, string, IEnumerable<JiraNamedEntity>>();
-        private IEnumerable<JiraNamedEntity> _cachedFilters = null;
+        private readonly ServiceLocator _services;
 
         /// <summary>
         /// Create a client that connects with a JIRA server with specified dependencies.
         /// </summary>
-        public Jira(IJqlExpressionVisitor translator,
-                    IJiraSoapClient jiraService,
-                    IFileSystem fileSystem,
-                    JiraCredentials credentials = null,
-                    string accessToken = null,
-                    JiraCache cache = null)
+        public Jira(ServiceLocator services, JiraCredentials credentials = null, JiraCache cache = null)
         {
-            _provider = new JiraQueryProvider(translator, this);
-            _jiraService = jiraService;
-            _fileSystem = fileSystem;
-            _token = accessToken;
+            _services = services;
             _credentials = credentials;
-            _restClient = jiraService as IJiraRestClient;
             _cache = cache ?? new JiraCache();
 
             this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
-
-            if (_restClient == null && !String.IsNullOrEmpty(jiraService.Url))
-            {
-                this._restClient = new JiraRestClient(this, jiraService.Url, _credentials ?? new JiraCredentials(null));
-            }
         }
 
         /// <summary>
-        /// Creates a JIRA client configured to use the REST API.
+        /// Creates a JIRA rest client.
         /// </summary>
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="username">Username used to authenticate.</param>
@@ -75,38 +50,170 @@ namespace Atlassian.Jira
         /// <returns>Jira object configured to use REST API.</returns>
         public static Jira CreateRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
-            var restClient = new JiraRestClient(url, username, password, settings);
+            var services = new ServiceLocator();
+            settings = settings ?? new JiraRestClientSettings();
+            var jira = new Jira(services, new JiraCredentials(username, password), settings.Cache);
+            var restClient = new JiraRestClient(services, url, username, password, settings);
 
-            return restClient.Jira;
+            ConfigureDefaultServices(services, jira, restClient);
+
+            return jira;
         }
 
         /// <summary>
-        /// Creates a JIRA client with service dependency.
+        /// Creates a JIRA client with the given rest client implementation.
         /// </summary>
-        public static Jira CreateRestClient(IJiraClient jiraClient, JiraCredentials credentials = null, JiraCache cache = null)
+        /// <param name="jiraClient">Rest client to use.</param>
+        /// <param name="credentials">Credentials to use.</param>
+        /// <param name="cache">Cache to use.</param>
+        public static Jira CreateRestClient(IJiraRestClient jiraClient = null, JiraCredentials credentials = null, JiraCache cache = null)
         {
-            return new Jira(
-                new JqlExpressionVisitor(),
-                jiraClient,
-                new FileSystem(),
-                credentials,
-                null,
-                cache);
+            var services = new ServiceLocator();
+            var jira = new Jira(services, credentials, cache);
+            ConfigureDefaultServices(services, jira, jiraClient);
+            return jira;
         }
 
-        private bool IsAnonymous
+        /// <summary>
+        /// Gets the service locator for this jira instance.
+        /// </summary>
+        public ServiceLocator Services
         {
             get
             {
-                return this._credentials == null;
+                return _services;
             }
         }
 
-        internal IJiraSoapClient RemoteService
+        /// <summary>
+        /// Gets an object to interact with the projects of jira.
+        /// </summary>
+        public IProjectService Projects
         {
             get
             {
-                return _jiraService;
+                return Services.Get<IProjectService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the users of jira.
+        /// </summary>
+        public IJiraUserService Users
+        {
+            get
+            {
+                return Services.Get<IJiraUserService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the issue of jira.
+        /// </summary>
+        public IIssueService Issues
+        {
+            get
+            {
+                return Services.Get<IIssueService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the issue fields of jira.
+        /// </summary>
+        public IIssueFieldService Fields
+        {
+            get
+            {
+                return Services.Get<IIssueFieldService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the issue filters of jira.
+        /// </summary>
+        public IIssueFilterService Filters
+        {
+            get
+            {
+                return Services.Get<IIssueFilterService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the issue priorities of jira.
+        /// </summary>
+        public IIssuePriorityService Priorities
+        {
+            get
+            {
+                return Services.Get<IIssuePriorityService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the issue resolutions of jira.
+        /// </summary>
+        public IIssueResolutionService Resolutions
+        {
+            get
+            {
+                return Services.Get<IIssueResolutionService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the issue statuses of jira.
+        /// </summary>
+        public IIssueStatusService Statuses
+        {
+            get
+            {
+                return Services.Get<IIssueStatusService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the issue link types of jira.
+        /// </summary>
+        public IIssueLinkService Links
+        {
+            get
+            {
+                return Services.Get<IIssueLinkService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the issue types of jira.
+        /// </summary>
+        public IIssueTypeService IssueTypes
+        {
+            get
+            {
+                return Services.Get<IIssueTypeService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the project versions of jira.
+        /// </summary>
+        public IProjectVersionService Versions
+        {
+            get
+            {
+                return Services.Get<IProjectVersionService>();
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the project components of jira.
+        /// </summary>
+        public IProjectComponentService Components
+        {
+            get
+            {
+                return Services.Get<IProjectComponentService>();
             }
         }
 
@@ -126,7 +233,10 @@ namespace Atlassian.Jira
         /// </summary>
         public IJiraRestClient RestClient
         {
-            get { return this._restClient; }
+            get
+            {
+                return Services.Get<IJiraRestClient>();
+            }
         }
 
         /// <summary>
@@ -144,7 +254,7 @@ namespace Atlassian.Jira
         /// </summary>
         public string Url
         {
-            get { return _jiraService.Url; }
+            get { return RestClient.Url; }
         }
 
         internal JiraCredentials GetCredentials()
@@ -159,18 +269,9 @@ namespace Atlassian.Jira
 
         internal IFileSystem FileSystem
         {
-            get { return _fileSystem; }
-        }
-
-        /// <summary>
-        /// Query the issues database
-        /// </summary>
-        /// <returns>IQueryable of Issue</returns>
-        public JiraQueryable<Issue> Issues
-        {
             get
             {
-                return new JiraQueryable<Issue>(_provider);
+                return Services.Get<IFileSystem>();
             }
         }
 
@@ -178,12 +279,10 @@ namespace Atlassian.Jira
         /// Gets an issue from the JIRA server
         /// </summary>
         /// <param name="key">The key of the issue</param>
-        /// <returns></returns>
+        [Obsolete("Use Jira.Issues instead.")]
         public Issue GetIssue(string key)
         {
-            return (from i in Issues
-                    where i.Key == key
-                    select i).First();
+            return this.Issues.GetIssueAsync(key).Result;
         }
 
         /// <summary>
@@ -192,19 +291,10 @@ namespace Atlassian.Jira
         /// <param name="filterName">The name of the filter used for the search</param>
         /// <param name="start">The place in the result set to use as the first issue returned</param>
         /// <param name="maxResults">The maximum number of issues to return</param>
+        [Obsolete("Use Filters.GetIssuesFromFavoriteAsync instead.")]
         public IEnumerable<Issue> GetIssuesFromFilter(string filterName, int start = 0, int? maxResults = null)
         {
-            var filter = this.GetFilters().FirstOrDefault(f => f.Name.Equals(filterName, StringComparison.OrdinalIgnoreCase));
-
-            if (filter == null)
-            {
-                throw new InvalidOperationException(String.Format("Filter with name '{0}' was not found", filterName));
-            }
-
-            return WithToken(token =>
-            {
-                return _jiraService.GetIssuesFromFilterWithLimit(token, filter.Id, start, maxResults ?? this.MaxIssuesPerRequest).Select(i => new Issue(this, i));
-            });
+            return Filters.GetIssuesFromFavoriteAsync(filterName, maxResults, start).Result;
         }
 
         /// <summary>
@@ -212,9 +302,10 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="jql">JQL search query</param>
         /// <returns>Collection of Issues that match the search query</returns>
+        [Obsolete("Use Jira.Issues instead.")]
         public IEnumerable<Issue> GetIssuesFromJql(string jql)
         {
-            return GetIssuesFromJql(jql, null);
+            return GetIssuesFromJqlAsync(jql).Result;
         }
 
         /// <summary>
@@ -224,24 +315,10 @@ namespace Atlassian.Jira
         /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <returns>Collection of Issues that match the search query</returns>
+        [Obsolete("Use Jira.Issues instead.")]
         public IEnumerable<Issue> GetIssuesFromJql(string jql, int? maxIssues = null, int startAt = 0)
         {
-            if (this.Debug)
-            {
-                Trace.WriteLine("JQL: " + jql);
-            }
-
-            IList<Issue> issues = new List<Issue>();
-
-            WithToken(token =>
-            {
-                foreach (RemoteIssue remoteIssue in _jiraService.GetIssuesFromJqlSearch(token, jql, maxIssues ?? MaxIssuesPerRequest, startAt))
-                {
-                    issues.Add(new Issue(this, remoteIssue));
-                }
-            });
-
-            return issues;
+            return GetIssuesFromJqlAsync(jql, maxIssues, startAt).Result;
         }
 
         /// <summary>
@@ -251,9 +328,10 @@ namespace Atlassian.Jira
         /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues, int startAt, CancellationToken token)
+        [Obsolete("Use Jira.Issues instead.")]
+        public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0, CancellationToken token = default(CancellationToken))
         {
-            return this.RestClient.GetIssuesFromJqlAsync(jql, maxIssues, startAt, token);
+            return this.Issues.GetIsssuesFromJqlAsync(jql, maxIssues, startAt, token);
         }
 
         /// <summary>
@@ -268,34 +346,19 @@ namespace Atlassian.Jira
         /// Deletes the issue specified from the JIRA server.
         /// </summary>
         /// <param name="issue">Issue to delete.</param>
+        [Obsolete("Use Jira.Issues instead.")]
         public void DeleteIssue(Issue issue)
         {
-            if (issue.Key == null || String.IsNullOrEmpty(issue.Key.ToString()))
-            {
-                throw new InvalidOperationException("Unable to delete issue, it has not been created.");
-            }
-
-            WithToken(token =>
-            {
-                _jiraService.DeleteIssue(token, issue.Key.ToString());
-            });
+            Issues.DeleteIssueAsync(issue.OriginalRemoteIssue.key).Wait();
         }
 
         /// <summary>
         /// Returns all the sub-tasks issue types within JIRA.
         /// </summary>
+        [Obsolete("Use Jira.IssueTypes instead.")]
         public IEnumerable<IssueType> GetSubTaskIssueTypes()
         {
-            if (!_cache.SubTaskIssueTypes.ContainsKey(ALL_PROJECTS_KEY))
-            {
-                WithToken(token =>
-                {
-                    var results = _jiraService.GetSubTaskIssueTypes(token).Select(remoteIssueType => new IssueType(remoteIssueType));
-                    _cache.SubTaskIssueTypes.AddIfMIssing(new JiraEntityDictionary<IssueType>(ALL_PROJECTS_KEY, results));
-                });
-            }
-
-            return _cache.SubTaskIssueTypes[ALL_PROJECTS_KEY].Values;
+            return IssueTypes.GetIssueTypesAsync().Result.Where(t => t.IsSubTask);
         }
 
         /// <summary>
@@ -303,38 +366,19 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="projectKey">If provided, returns issue types only for given project</param>
         /// <returns>Collection of JIRA issue types</returns>
+        [Obsolete("Use Jira.IssueTypes instead.")]
         public IEnumerable<IssueType> GetIssueTypes(string projectKey = null)
         {
-            string projectId = null;
-            if (projectKey != null)
-            {
-                var project = this.GetProjects().FirstOrDefault(p => p.Key.Equals(projectKey, StringComparison.OrdinalIgnoreCase));
-                if (project != null)
-                {
-                    projectId = project.Id;
-                }
-            }
-
-            projectKey = projectKey ?? ALL_PROJECTS_KEY;
-
-            if (!_cache.IssueTypes.ContainsKey(projectKey))
-            {
-                WithToken(token =>
-                {
-                    var result = _jiraService.GetIssueTypes(token, projectId).Select(remoteIssueType => new IssueType(remoteIssueType));
-                    _cache.IssueTypes.AddIfMIssing(new JiraEntityDictionary<IssueType>(projectKey, result));
-                });
-            }
-
-            return _cache.IssueTypes[projectKey].Values;
+            return IssueTypes.GetIssueTypesAsync().Result;
         }
 
         /// <summary>
         /// Returns all the issue types within JIRA.
         /// </summary>
-        public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token)
+        [Obsolete("Use Jira.IssueTypes instead.")]
+        public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token = default(CancellationToken))
         {
-            return this.RestClient.GetIssueTypesAsync(token);
+            return IssueTypes.GetIssueTypesAsync(token);
         }
 
         /// <summary>
@@ -342,191 +386,133 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="projectKey">The project to retrieve the versions from</param>
         /// <returns>Collection of JIRA versions.</returns>
+        [Obsolete("Use Jira.ProjectVersions instead.")]
         public IEnumerable<ProjectVersion> GetProjectVersions(string projectKey)
         {
-            if (!_cache.Versions.ContainsKey(projectKey))
-            {
-                WithToken(token =>
-                {
-                    var results = _jiraService.GetVersions(token, projectKey).Select(v => new ProjectVersion(this, v));
-                    _cache.Versions.AddIfMIssing(new JiraEntityDictionary<ProjectVersion>(projectKey, results));
-                });
-            }
-
-            return _cache.Versions[projectKey].Values;
+            return Versions.GetVersionsAsync(projectKey).Result;
         }
 
         /// <summary>
-        /// Returns all components defined on a JIRA project
+        /// Returns all components defined on a JIRA project.
         /// </summary>
-        /// <param name="projectKey">The project to retrieve the components from</param>
+        /// <param name="projectKey">The project to retrieve the components from.</param>
         /// <returns>Collection of JIRA components</returns>
+        [Obsolete("Use Jira.ProjectComponents instead.")]
         public IEnumerable<ProjectComponent> GetProjectComponents(string projectKey)
         {
-            if (!_cache.Components.ContainsKey(projectKey))
-            {
-                WithToken(token =>
-                {
-                    var results = _jiraService.GetComponents(token, projectKey).Select(c => new ProjectComponent(c));
-                    _cache.Components.AddIfMIssing(new JiraEntityDictionary<ProjectComponent>(projectKey, results));
-                });
-            }
-
-            return _cache.Components[projectKey].Values;
+            return Components.GetComponentsAsync(projectKey).Result;
         }
 
         /// <summary>
         /// Returns all the issue priorities within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue priorities</returns>
+        [Obsolete("Please use Jira.IssuePriorities instead")]
         public IEnumerable<IssuePriority> GetIssuePriorities()
         {
-            if (!_cache.Priorities.Any())
-            {
-                WithToken(token =>
-                {
-                    _cache.Priorities.AddIfMIssing(_jiraService.GetPriorities(token).Select(p => new IssuePriority(p)));
-                });
-            }
-
-            return _cache.Priorities.Values;
+            return GetIssuePrioritiesAsync().Result;
         }
 
         /// <summary>
         /// Returns all the issue priorities within JIRA.
         /// </summary>
-        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token)
+        [Obsolete("Please use Jira.IssuePriorities instead")]
+        public Task<IEnumerable<IssuePriority>> GetIssuePrioritiesAsync(CancellationToken token = default(CancellationToken))
         {
-            return this.RestClient.GetIssuePrioritiesAsync(token);
+            return this.Priorities.GetPrioritiesAsync(token);
         }
 
         /// <summary>
         /// Returns all available issue link types.
         /// </summary>
+        [Obsolete("Use Jira.IssueLinkTypes instead.")]
         public IEnumerable<IssueLinkType> GetIssueLinkTypes()
         {
-            try
-            {
-                return this.GetIssueLinkTypesAsync(CancellationToken.None).Result;
-            }
-            catch (AggregateException ex)
-            {
-                throw ex.Flatten().InnerException;
-            }
+            return GetIssueLinkTypesAsync().Result;
         }
 
         /// <summary>
         /// Returns all available issue link types.
         /// </summary>
-        public Task<IEnumerable<IssueLinkType>> GetIssueLinkTypesAsync(CancellationToken token)
+        [Obsolete("Use Jira.IssueLinkTypes instead.")]
+        public Task<IEnumerable<IssueLinkType>> GetIssueLinkTypesAsync(CancellationToken token = default(CancellationToken))
         {
-            return this.RestClient.GetIssueLinkTypesAsync(token);
+            return Links.GetLinkTypesAsync(token);
         }
 
         /// <summary>
         /// Returns all the issue statuses within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue statuses</returns>
+        [Obsolete("Use Jira.IssueStatuses instead.")]
         public IEnumerable<IssueStatus> GetIssueStatuses()
         {
-            if (!_cache.Statuses.Any())
-            {
-                WithToken(token =>
-                {
-                    _cache.Statuses.AddIfMIssing(_jiraService.GetStatuses(token).Select(s => new IssueStatus(s)));
-                });
-            }
-
-            return _cache.Statuses.Values;
+            return this.GetIssueStatusesAsync().Result;
         }
 
         /// <summary>
         /// Returns all the issue statuses within JIRA.
         /// </summary>
-        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token)
+        [Obsolete("Use Jira.IssueStatuses instead.")]
+        public Task<IEnumerable<IssueStatus>> GetIssueStatusesAsync(CancellationToken token = default(CancellationToken))
         {
-            return this.RestClient.GetIssueStatusesAsync(token);
+            return this.Statuses.GetStatusesAsync(token);
         }
 
         /// <summary>
         /// Returns all the issue resolutions within JIRA
         /// </summary>
         /// <returns>Collection of JIRA issue resolutions</returns>
+        [Obsolete("Use Jira.IssueResolutions instead.")]
         public IEnumerable<IssueResolution> GetIssueResolutions()
         {
-            if (!_cache.Resolutions.Any())
-            {
-                WithToken(token =>
-                {
-                    _cache.Resolutions.AddIfMIssing(_jiraService.GetResolutions(token).Select(r => new IssueResolution(r)));
-                });
-            }
-
-            return _cache.Resolutions.Values;
+            return GetIssueResolutionsAsync().Result;
         }
 
         /// <summary>
         /// Returns all the issue resolutions within JIRA
         /// </summary>
-        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token)
+        [Obsolete("Use Jira.IssueResolutions instead.")]
+        public Task<IEnumerable<IssueResolution>> GetIssueResolutionsAsync(CancellationToken token = default(CancellationToken))
         {
-            return this.RestClient.GetIssueResolutionsAsync(token);
+            return this.Resolutions.GetResolutionsAsync(token);
         }
 
         /// <summary>
         /// Returns all custom fields within JIRA
         /// </summary>
         /// <returns>Collection of JIRA custom fields</returns>
+        [Obsolete("Use Jira.Fields.GetCustomFieldsAsync instead.")]
         public IEnumerable<CustomField> GetCustomFields()
         {
-            if (!_cache.CustomFields.Any())
-            {
-                WithToken(token =>
-                {
-                    _cache.CustomFields.AddIfMIssing(_jiraService.GetCustomFields(token).Select(f => new CustomField(f)));
-                });
-            }
-            return _cache.CustomFields.Values;
+            return Fields.GetCustomFieldsAsync().Result;
         }
 
         /// <summary>
         /// Returns all custom fields within JIRA.
         /// </summary>
+        [Obsolete("Use Jira.Fields.GetCustomFieldsAsync instead.")]
         public Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CancellationToken token)
         {
-            return this.RestClient.GetCustomFieldsAsync(token);
+            return Fields.GetCustomFieldsAsync(token);
         }
 
         /// <summary>
         /// Returns the favourite filters for the user
         /// </summary>
+        [Obsolete("Use Jira.IssueFilters instead.")]
         public IEnumerable<JiraNamedEntity> GetFilters()
         {
-            if (_cachedFilters == null)
-            {
-                WithToken(token =>
-                {
-                    _cachedFilters = _jiraService.GetFavouriteFilters(token).Select(f => new JiraNamedEntity(f));
-                });
-            }
-
-            return _cachedFilters;
+            return Filters.GetFavouritesAsync().Result.Cast<JiraNamedEntity>();
         }
 
         /// <summary>
         /// Returns all projects defined in JIRA.
         /// </summary>
+        [Obsolete("Use Jira.Projects instead.")]
         public IEnumerable<Project> GetProjects()
         {
-            if (!_cache.Projects.Any())
-            {
-                WithToken(token =>
-                {
-                    _cache.Projects.AddIfMIssing(_jiraService.GetProjects(token).Select(p => new Project(this, p)));
-                });
-            }
-
-            return _cache.Projects.Values;
+            return Projects.GetProjectsAsync().Result;
         }
 
         /// <summary>
@@ -535,162 +521,39 @@ namespace Atlassian.Jira
         /// <param name="userName">The username of the user to get.</param>
         /// <param name="token">Cancelation token for this operation.</param>
         /// <exception cref="ArgumentException">ArgumentException is thrown if passed username is null or empty string.</exception>
+        [Obsolete("Use Jira.Users instead.")]
         public Task<JiraUser> GetUserAsync(string userName, CancellationToken token = default(CancellationToken))
         {
-            if (String.IsNullOrEmpty(userName))
-            {
-                throw new ArgumentException("Provided username was null or empty.");
-            }
-            return _restClient.GetUser(userName, token);
+            return Users.GetUserAsync(userName, token);
         }
 
         /// <summary>
         /// Returns all projects defined in JIRA.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
+        [Obsolete("Use Jira.Projects instead.")]
         public Task<IEnumerable<Project>> GetProjectsAsync(CancellationToken token)
         {
-            return this.RestClient.GetProjectsAsync(token);
+            return this.Projects.GetProjectsAsync(token);
         }
 
-        /// <summary>
-        /// Executes an action using the user's authentication token.
-        /// </summary>
-        /// <remarks>
-        /// If action fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
-        /// a new token will be requested from server and the action called again.
-        /// </remarks>
-        public void WithToken(Action<string> action)
+        private static void ConfigureDefaultServices(ServiceLocator services, Jira jira, IJiraRestClient restClient)
         {
-            WithToken<object>(t =>
-            {
-                action(t);
-                return null;
-            });
-        }
-
-        /// <summary>
-        /// Executes an action using the user's authentication token and the jira soap client
-        /// </summary>
-        /// <remarks>
-        /// If action fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
-        /// a new token will be requested from server and the action called again.
-        /// </remarks>
-        public void WithToken(Action<string, IJiraSoapClient> action)
-        {
-            WithToken<object>((token, client) =>
-            {
-                action(token, client);
-                return null;
-            });
-        }
-
-        /// <summary>
-        /// Executes a function using the user's authentication token.
-        /// </summary>
-        /// <remarks>
-        /// If function fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
-        /// a new token will be requested from server and the function called again.
-        /// </remarks>
-        public TResult WithToken<TResult>(Func<string, TResult> function)
-        {
-            return WithToken((token, client) => function(token));
-        }
-
-        /// <summary>
-        /// Executes a function using the user's authentication token and the jira soap client
-        /// </summary>
-        /// <remarks>
-        /// If function fails with 'com.atlassian.jira.rpc.exception.RemoteAuthenticationException'
-        /// a new token will be requested from server and the function called again.
-        /// </remarks>
-        public TResult WithToken<TResult>(Func<string, IJiraSoapClient, TResult> function)
-        {
-            if (!IsAnonymous && String.IsNullOrEmpty(_token))
-            {
-                _token = GetAccessToken();
-            }
-
-            try
-            {
-                return function(_token, this.RemoteService);
-            }
-            catch (FaultException fe)
-            {
-                if (IsAnonymous
-                    || fe.Message.IndexOf(REMOTE_AUTH_EXCEPTION_STRING, StringComparison.OrdinalIgnoreCase) < 0)
-                {
-                    throw;
-                }
-
-                _token = GetAccessToken();
-                return function(_token, this.RemoteService);
-            }
-        }
-
-        /// <summary>
-        /// Retrieves an access token from server using current credentials.
-        /// </summary>
-        public string GetAccessToken()
-        {
-            var credentials = GetCredentials();
-            return _jiraService.Login(credentials.UserName, credentials.Password);
-        }
-
-        internal IEnumerable<JiraNamedEntity> GetFieldsForAction(Issue issue, string actionId)
-        {
-            if (issue.Key == null)
-            {
-                issue = GetOneIssueFromProject(issue.Project);
-            }
-
-            if (!_cachedFieldsForAction.ContainsKey(issue.Project, actionId))
-            {
-                WithToken((token, service) =>
-                {
-                    _cachedFieldsForAction.Add(issue.Project, actionId, _jiraService.GetFieldsForAction(token, issue.Key.Value, actionId)
-                        .Select(f => new JiraNamedEntity(f)));
-                });
-            }
-
-            return _cachedFieldsForAction[issue.Project, actionId];
-        }
-
-        internal IEnumerable<JiraNamedEntity> GetFieldsForEdit(Issue issue)
-        {
-            if (issue.Key == null)
-            {
-                issue = GetOneIssueFromProject(issue.Project);
-            }
-
-            if (!_cachedFieldsForEdit.ContainsKey(issue.Project))
-            {
-                WithToken(token =>
-                {
-                    _cachedFieldsForEdit.Add(issue.Project, _jiraService.GetFieldsForEdit(token, issue.Key.Value)
-                        .Select(f => new JiraNamedEntity(f)));
-                });
-            }
-
-            return _cachedFieldsForEdit[issue.Project];
-        }
-
-        private Issue GetOneIssueFromProject(string projectKey)
-        {
-            if (!this._cachedIssues.ContainsKey(projectKey))
-            {
-                var tempIssue = this.GetIssuesFromJql(String.Format("project = \"{0}\"", projectKey), 1)
-                                .FirstOrDefault();
-
-                if (tempIssue == null)
-                {
-                    throw new InvalidOperationException("Project must contain at least one issue to be able to retrieve issue fields.");
-                }
-
-                this._cachedIssues.Add(projectKey, tempIssue);
-            }
-
-            return this._cachedIssues[projectKey];
+            services.Register<IProjectVersionService>(() => new ProjectVersionService(jira));
+            services.Register<IProjectComponentService>(() => new ProjectComponentService(jira));
+            services.Register<IIssuePriorityService>(() => new IssuePriorityService(jira));
+            services.Register<IIssueResolutionService>(() => new IssueResolutionService(jira));
+            services.Register<IIssueStatusService>(() => new IssueStatusService(jira));
+            services.Register<IIssueLinkService>(() => new IssueLinkService(jira));
+            services.Register<IIssueTypeService>(() => new IssueTypeService(jira));
+            services.Register<IIssueFilterService>(() => new IssueFilterService(jira));
+            services.Register<IIssueFieldService>(() => new IssueFieldService(jira));
+            services.Register<IIssueService>(() => new IssueService(jira));
+            services.Register<IJiraUserService>(() => new JiraUserService(jira));
+            services.Register<IProjectService>(() => new ProjectService(jira));
+            services.Register<IJqlExpressionVisitor>(() => new JqlExpressionVisitor());
+            services.Register<IFileSystem>(() => new FileSystem());
+            services.Register(() => restClient);
         }
     }
 }

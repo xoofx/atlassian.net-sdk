@@ -23,9 +23,10 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             //retrieve the issue from server and update
-            issue = await _jira.RestClient.GetIssueAsync(issue.Key.Value, CancellationToken.None);
+            issue = await _jira.Issues.GetIssueAsync(issue.Key.Value, CancellationToken.None);
             issue.Type = "2";
-            issue = await _jira.RestClient.UpdateIssueAsync(issue, CancellationToken.None);
+
+            var newIssue = await issue.SaveChangesAsync();
             Assert.Equal("2", issue.Type.Id);
         }
 
@@ -74,12 +75,12 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             //retrieve the issue from server and update
-            issue = _jira.GetIssue(issue.Key.Value);
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             issue.Type = "2";
             issue.SaveChanges();
 
             //retrieve again and verify
-            issue = _jira.GetIssue(issue.Key.Value);
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("2", issue.Type.Id);
         }
 
@@ -101,7 +102,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             // act, get an issue and update it
-            var serverIssue = (from i in _jira.Issues
+            var serverIssue = (from i in _jira.Issues.Queryable
                                where i.Key == issue.Key
                                select i).ToArray().First();
 
@@ -112,7 +113,7 @@ namespace Atlassian.Jira.Test.Integration
             serverIssue.SaveChanges();
 
             // assert, get the issue again and verify
-            var newServerIssue = (from i in _jira.Issues
+            var newServerIssue = (from i in _jira.Issues.Queryable
                                   where i.Key == issue.Key
                                   select i).ToArray().First();
 

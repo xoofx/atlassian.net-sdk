@@ -14,7 +14,6 @@ namespace Atlassian.Jira
     public class CustomFieldValueCollection : ReadOnlyCollection<CustomFieldValue>, IRemoteIssueFieldProvider
     {
         private readonly Issue _issue;
-        private Func<string, string> _getFieldIdProvider;
 
         internal CustomFieldValueCollection(Issue issue)
             : this(issue, new List<CustomFieldValue>())
@@ -25,9 +24,6 @@ namespace Atlassian.Jira
             : base(list)
         {
             _issue = issue;
-
-            // By default collection operates for edit custom fields.
-            ForEdit();
         }
 
         /// <summary>
@@ -84,7 +80,7 @@ namespace Atlassian.Jira
         /// <param name="fieldValues">The values of the field</param>
         public CustomFieldValueCollection Add(string fieldName, string[] fieldValues)
         {
-            var fieldId = _getFieldIdProvider(fieldName);
+            var fieldId = GetCustomFieldId(fieldName);
             this.Items.Add(new CustomFieldValue(fieldId, fieldName, _issue) { Values = fieldValues });
             return this;
         }
@@ -130,31 +126,31 @@ namespace Atlassian.Jira
         {
             get
             {
-                var fieldId = _getFieldIdProvider(fieldName);
+                var fieldId = GetCustomFieldId(fieldName);
                 return this.Items.FirstOrDefault(f => f.Id == fieldId);
             }
+        }
+
+        private string GetCustomFieldId(string fieldName)
+        {
+            var customField = _issue.Jira.Fields.GetCustomFieldsAsync().Result
+                    .FirstOrDefault(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
+
+            if (customField == null)
+            {
+                throw new InvalidOperationException(String.Format("Could not find custom field with name '{0}' on the JIRA server.", fieldName));
+            }
+
+            return customField.Id;
         }
 
         /// <summary>
         /// Changes context of collection to operate against fields for edit.
         /// </summary>
         /// <returns>Current collection with changed context/</returns>
+        [Obsolete("CustomFieldValueCollection can now operate on all custom fields by default.")]
         public CustomFieldValueCollection ForEdit()
         {
-            _getFieldIdProvider = fieldName =>
-            {
-                var customField = _issue.Jira.GetFieldsForEdit(_issue)
-                    .FirstOrDefault(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
-
-                if (customField == null)
-                {
-                    throw new InvalidOperationException(String.Format("Could not find custom field with name '{0}' on the JIRA server. "
-                        + "Make sure this field is available when editing this issue. For more information see JRA-6857", fieldName));
-                }
-
-                return customField.Id;
-            };
-
             return this;
         }
 
@@ -163,26 +159,9 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="actionId">Id of action as defined in JIRA.</param>
         /// <returns>Current collection with changed context/</returns>
+        [Obsolete("CustomFieldValueCollection can now operate on all custom fields by default.")]
         public CustomFieldValueCollection ForAction(string actionId)
         {
-            _getFieldIdProvider = name =>
-            {
-                var customField = _issue.Jira.GetFieldsForAction(_issue, actionId)
-                    .FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-                if (customField == null)
-                {
-                    throw new InvalidOperationException(
-                        String.Format(
-                        CultureInfo.InvariantCulture,
-                        "Could not find custom field with name '{0}' and action with id '{1}' on the JIRA server. ",
-                        name,
-                        actionId));
-                }
-
-                return customField.Id;
-            };
-
             return this;
         }
 

@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
+using System.Text;
 
 namespace Atlassian.Jira.Linq
 {
-    public class JiraQueryProvider: IQueryProvider
+    public class JiraQueryProvider : IQueryProvider
     {
         private readonly IJqlExpressionVisitor _translator;
-        private readonly Jira _jiraServer;
+        private readonly IIssueService _issues;
 
-        public JiraQueryProvider(IJqlExpressionVisitor translator, Jira jiraInstance)
+        public JiraQueryProvider(IJqlExpressionVisitor translator, IIssueService issues)
         {
             _translator = translator;
-            _jiraServer = jiraInstance;
+            _issues = issues;
         }
 
         public IQueryable<T> CreateQuery<T>(Expression expression)
@@ -43,8 +43,8 @@ namespace Atlassian.Jira.Linq
         {
             var jql = _translator.Process(expression);
 
-
-            IQueryable<Issue> issues = _jiraServer.GetIssuesFromJql(jql.Expression, jql.NumberOfResults).AsQueryable();
+            var temp = _issues.GetIsssuesFromJqlAsync(jql.Expression, jql.NumberOfResults).Result;
+            IQueryable<Issue> issues = temp.AsQueryable();
 
             if (isEnumerable)
             {
@@ -54,7 +54,7 @@ namespace Atlassian.Jira.Linq
             {
                 var treeCopier = new ExpressionTreeModifier(issues);
                 Expression newExpressionTree = treeCopier.Visit(expression);
-            
+
                 return issues.Provider.Execute(newExpressionTree);
             }
         }

@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
@@ -11,7 +13,7 @@ namespace Atlassian.Jira
     /// </summary>
     public class IssueType : JiraNamedEntity
     {
-        private bool? _isSubTask;
+        private bool _isSubTask;
 
         /// <summary>
         /// Creates an instance of the IssuePriority based on a remote entity.
@@ -22,13 +24,14 @@ namespace Atlassian.Jira
             _isSubTask = remoteIssueType.subTask;
         }
 
-        internal IssueType(Jira jira, string id)
-            : base(jira, id)
-        {
-        }
-
-        internal IssueType(string name)
-            : base(name)
+        /// <summary>
+        /// Creates an instance of the IssuePriority with given id and name.
+        /// </summary>
+        /// <param name="id">Identifiers of the issue type.</param>
+        /// <param name="name">Name of the issue type.</param>
+        /// <param name="isSubTask">Whether the issue type is a sub task.</param>
+        public IssueType(string id, string name = null, bool isSubTask = false)
+            : base(id, name)
         {
         }
 
@@ -39,28 +42,14 @@ namespace Atlassian.Jira
         {
             get
             {
-                if (!_isSubTask.HasValue)
-                {
-                    if (this.Jira == null)
-                    {
-                        throw new InvalidOperationException("Unable to retrieve remote issue type information. This is not supported if the issue type has been set by user code.");
-                    }
-
-                    _isSubTask = this.Jira.GetSubTaskIssueTypes().Any(issueType => issueType.Id.Equals(this.Id, StringComparison.OrdinalIgnoreCase));
-                }
-
-                return _isSubTask.Value;
+                return _isSubTask;
             }
         }
 
-        protected override IEnumerable<JiraNamedEntity> GetEntities(Jira jira, string projectKey = null)
+        protected override async Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {
-            if (jira == null)
-            {
-                throw new ArgumentNullException("jira");
-            }
-
-            return jira.GetIssueTypes(projectKey);
+            var results = await jira.IssueTypes.GetIssueTypesAsync(token).ConfigureAwait(false);
+            return results as IEnumerable<JiraNamedEntity>;
         }
 
         /// <summary>
@@ -73,11 +62,11 @@ namespace Atlassian.Jira
                 int id;
                 if (int.TryParse(name, out id))
                 {
-                    return new IssueType(null, name /*as id*/);
+                    return new IssueType(name /*as id*/);
                 }
                 else
                 {
-                    return new IssueType(name);
+                    return new IssueType(null, name);
                 }
             }
             else
@@ -104,7 +93,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return entity._name == name;
+                return entity.Name == name;
             }
         }
 
@@ -126,7 +115,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return entity._name != name;
+                return entity.Name != name;
             }
         }
     }

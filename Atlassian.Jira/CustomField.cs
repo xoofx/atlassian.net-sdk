@@ -10,7 +10,10 @@ namespace Atlassian.Jira
     {
         private readonly RemoteField _remoteField;
 
-        internal CustomField(RemoteField remoteField)
+        /// <summary>
+        /// Creates an instance of a CustomField from a remote field definition.
+        /// </summary>
+        public CustomField(RemoteField remoteField)
             : base(remoteField)
         {
             _remoteField = remoteField;

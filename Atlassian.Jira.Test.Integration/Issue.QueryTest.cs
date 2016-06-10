@@ -26,7 +26,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // Act: Query for paged issues.
             var jql = String.Format("summary ~ \"{0}\"", summaryValue);
-            var result = _jira.RestClient.GetIssuesFromJqlAsync(jql, 5, 1).Result as IPagedQueryResult<Issue>;
+            var result = _jira.Issues.GetIsssuesFromJqlAsync(jql, 5, 1).Result as IPagedQueryResult<Issue>;
 
             // Assert
             Assert.Equal(1, result.StartAt);
@@ -38,7 +38,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void GetIssuesFromFilter()
         {
-            var issues = _jira.GetIssuesFromFilter("One Issue Filter");
+            var issues = _jira.Filters.GetIssuesFromFavoriteAsync("One Issue Filter").Result;
 
             Assert.Equal(1, issues.Count());
             Assert.Equal("TST-1", issues.First().Key.Value);
@@ -47,7 +47,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void QueryWithZeroResults()
         {
-            var issues = from i in _jira.Issues
+            var issues = from i in _jira.Issues.Queryable
                          where i.Created == new DateTime(2010, 1, 1)
                          select i;
 
@@ -57,7 +57,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void QueryIssueWithCustomDateField()
         {
-            var issue = (from i in _jira.Issues
+            var issue = (from i in _jira.Issues.Queryable
                          where i["Custom Date Field"] <= new DateTime(2012, 4, 1)
                          select i).First();
 
@@ -73,7 +73,7 @@ namespace Atlassian.Jira.Test.Integration
             (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
 
             // query with take method to only return 1
-            var issues = (from i in _jira.Issues
+            var issues = (from i in _jira.Issues.Queryable
                           where i.Summary == randomNumber.ToString()
                           select i).Take(1);
 
@@ -90,7 +90,7 @@ namespace Atlassian.Jira.Test.Integration
 
             //set maximum issues and query
             _jira.MaxIssuesPerRequest = 1;
-            var issues = from i in _jira.Issues
+            var issues = from i in _jira.Issues.Queryable
                          where i.Summary == randomNumber.ToString()
                          select i;
 
@@ -101,7 +101,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public async Task GetIssuesFromJqlAsync()
         {
-            var issues = await _jira.RestClient.GetIssuesFromJqlAsync("key = TST-1");
+            var issues = await _jira.Issues.GetIsssuesFromJqlAsync("key = TST-1");
             Assert.Equal(issues.Count(), 1);
         }
     }

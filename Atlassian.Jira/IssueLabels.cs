@@ -13,10 +13,10 @@ namespace Atlassian.Jira
     /// </summary>
     public class IssueLabels
     {
-        private readonly IJiraRestClient _restClient;
+        private readonly IIssueService _restClient;
         private readonly RemoteIssue _remoteIssue;
 
-        internal IssueLabels(IJiraRestClient restClient, RemoteIssue remoteIssue)
+        internal IssueLabels(IIssueService restClient, RemoteIssue remoteIssue)
         {
             _restClient = restClient;
             _remoteIssue = remoteIssue;
@@ -58,7 +58,7 @@ namespace Atlassian.Jira
         public Task SetAsync(string[] labels, CancellationToken token)
         {
             EnsureIssueCreated();
-            return _restClient.SetLabelsForIssueAsync(_remoteIssue.key, labels, token);
+            return _restClient.SetLabelsAsync(_remoteIssue.key, labels, token);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Atlassian.Jira
         {
             EnsureIssueCreated();
 
-            return _restClient.GetLabelsFromIssueAsync(_remoteIssue.key, token);
+            return _restClient.GetLabelsAsync(_remoteIssue.key, token);
         }
 
         private void EnsureIssueCreated()

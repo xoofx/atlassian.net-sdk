@@ -20,7 +20,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.CustomFields.AddById("customfield_10000", "My Sample Text");
             issue.SaveChanges();
 
-            var newIssue = _jira.GetIssue(issue.Key.Value);
+            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("My Sample Text", newIssue.CustomFields.First(f => f.Id.Equals("customfield_10000")).Values.First());
         }
 
@@ -39,7 +39,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.CustomFields.AddCascadingSelectField("Custom Cascading Select Field", "Option3");
             issue.SaveChanges();
 
-            var newIssue = _jira.GetIssue(issue.Key.Value);
+            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             var cascadingSelect = newIssue.CustomFields.GetCascadingSelectField("Custom Cascading Select Field");
             Assert.Equal(cascadingSelect.ParentOption, "Option3");
@@ -77,7 +77,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = _jira.GetIssue(issue.Key.Value);
+            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             Assert.Equal("My new value", newIssue["Custom Text Field"]);
             Assert.Equal("2015-10-03", newIssue["Custom Date Field"]);
@@ -116,7 +116,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = _jira.GetIssue(issue.Key.Value);
+            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             newIssue["Custom Text Field"] = "My new value";
             newIssue["Custom Date Field"] = "2015-10-03";
@@ -137,7 +137,7 @@ namespace Atlassian.Jira.Test.Integration
 
             newIssue.SaveChanges();
 
-            var updatedIssue = _jira.GetIssue(issue.Key.Value);
+            var updatedIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             Assert.Equal("My new value", updatedIssue["Custom Text Field"]);
             Assert.Equal("2015-10-03", updatedIssue["Custom Date Field"]);

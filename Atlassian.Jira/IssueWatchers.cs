@@ -14,11 +14,11 @@ namespace Atlassian.Jira
     /// </summary>
     public class IssueWatchers
     {
-        private readonly IJiraRestClient _restClient;
+        private readonly IIssueService _restClient;
         private readonly string _issueKey;
         private readonly string _resourceUrl;
 
-        internal IssueWatchers(IJiraRestClient restClient, string issueKey)
+        internal IssueWatchers(IIssueService restClient, string issueKey)
         {
             _restClient = restClient;
             _issueKey = issueKey;
@@ -41,10 +41,7 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public Task RemoveAsync(string username, CancellationToken token)
         {
-            EnsureIssueCreated();
-
-            var resourceUrl = String.Format("{0}?username={1}", _resourceUrl, System.Uri.EscapeDataString(username));
-            return _restClient.ExecuteRequestAsync(Method.DELETE, resourceUrl, null, token);
+            return _restClient.DeleteWatcherAsync(this._issueKey, username, token);
         }
 
         /// <summary>
@@ -63,11 +60,7 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public Task AddAsync(string username, CancellationToken token)
         {
-            EnsureIssueCreated();
-
-            var requestBody = String.Format("\"{0}\"", username);
-
-            return _restClient.ExecuteRequestAsync(Method.POST, _resourceUrl, requestBody, token);
+            return _restClient.AddWatcherAsync(_issueKey, username, token);
         }
 
         /// <summary>
@@ -91,9 +84,7 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IEnumerable<JiraUser>> GetAsync(CancellationToken token)
         {
-            EnsureIssueCreated();
-
-            return _restClient.GetWatchersFromIssueAsync(this._issueKey, token);
+            return _restClient.GetWatchersAsync(this._issueKey, token);
         }
 
         private void EnsureIssueCreated()

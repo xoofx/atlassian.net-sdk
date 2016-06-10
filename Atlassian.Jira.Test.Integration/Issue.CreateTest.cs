@@ -22,8 +22,7 @@ namespace Atlassian.Jira.Test.Integration
                 Assignee = "admin"
             };
 
-            var newIssue = await _jira.RestClient.CreateIssueAsyc(issue, CancellationToken.None);
-
+            var newIssue = await issue.SaveChangesAsync();
             Assert.Equal(summaryValue, newIssue.Summary);
             Assert.Equal("TST", newIssue.Project);
             Assert.Equal("1", newIssue.Type.Id);
@@ -36,7 +35,7 @@ namespace Atlassian.Jira.Test.Integration
                 Assignee = "admin"
             };
 
-            var newSubTask = await _jira.RestClient.CreateIssueAsyc(subTask, CancellationToken.None);
+            var newSubTask = await subTask.SaveChangesAsync();
 
             Assert.Equal(newIssue.Key.Value, newSubTask.ParentIssueKey);
         }
@@ -54,7 +53,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var issues = (from i in _jira.Issues
+            var issues = (from i in _jira.Issues.Queryable
                           where i.Key == issue.Key
                           select i).ToArray();
 
@@ -86,7 +85,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var queriedIssue = (from i in _jira.Issues
+            var queriedIssue = (from i in _jira.Issues.Queryable
                                 where i.Key == issue.Key
                                 select i).ToArray().First();
 
@@ -113,7 +112,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
 
             // query the subtask again to make sure it loads everything from server.
-            subTask = _jira.GetIssue(subTask.Key.Value);
+            subTask = _jira.Issues.GetIssueAsync(subTask.Key.Value).Result;
             Assert.False(parentTask.Type.IsSubTask);
             Assert.True(subTask.Type.IsSubTask);
             Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
@@ -139,7 +138,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = (from i in _jira.Issues
+            var newIssue = (from i in _jira.Issues.Queryable
                             where i.AffectsVersions == "1.0" && i.AffectsVersions == "2.0"
                                     && i.FixVersions == "2.0" && i.FixVersions == "3.0"
                             select i).First();
@@ -170,7 +169,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = (from i in _jira.Issues
+            var newIssue = (from i in _jira.Issues.Queryable
                             where i.Summary == summaryValue && i.Components == "Server" && i.Components == "Client"
                             select i).First();
 
@@ -195,7 +194,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = (from i in _jira.Issues
+            var newIssue = (from i in _jira.Issues.Queryable
                             where i.Summary == summaryValue && i["Custom Text Field"] == "My new value"
                             select i).First();
 
@@ -216,7 +215,7 @@ namespace Atlassian.Jira.Test.Integration
             };
             issue.SaveChanges();
 
-            var subtasks = _jira.GetIssuesFromJql("project = TST and parent = TST-1");
+            var subtasks = _jira.Issues.GetIsssuesFromJqlAsync("project = TST and parent = TST-1").Result;
 
             Assert.True(subtasks.Any(s => s.Summary.Equals(summaryValue)),
                 String.Format("'{0}' was not found as a sub-task of TST-1", summaryValue));
