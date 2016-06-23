@@ -33,6 +33,7 @@ namespace Atlassian.Jira.Remote
         /// Executes a request.
         /// </summary>
         /// <param name="request">Request object.</param>
+        [Obsolete("Use ExecuteRequestAsync instead.")]
         IRestResponse ExecuteRequest(IRestRequest request);
 
         /// <summary>
@@ -48,6 +49,7 @@ namespace Atlassian.Jira.Remote
         /// <param name="method">Request method.</param>
         /// <param name="resource">Request resource url.</param>
         /// <param name="requestBody">Request body to be serialized.</param>
+        [Obsolete("Use ExecuteRequestAsync instead.")]
         JToken ExecuteRequest(Method method, string resource, object requestBody = null);
 
         /// <summary>
@@ -66,6 +68,7 @@ namespace Atlassian.Jira.Remote
         /// <param name="method">Request method.</param>
         /// <param name="resource">Request resource url.</param>
         /// <param name="requestBody">Request body to be serialized.</param>
+        [Obsolete("Use ExecuteRequestAsync instead.")]
         T ExecuteRequest<T>(Method method, string resource, object requestBody = null);
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void ExecuteRestRequest()
         {
-            var users = _jira.RestClient.ExecuteRequest<JiraNamedResource[]>(Method.GET, "rest/api/2/user/assignable/multiProjectSearch?projectKeys=TST");
+            var users = _jira.RestClient.ExecuteRequestAsync<JiraNamedResource[]>(Method.GET, "rest/api/2/user/assignable/multiProjectSearch?projectKeys=TST").Result;
 
             Assert.True(users.Length >= 2);
             Assert.True(users.Any(u => u.Name == "admin"));
@@ -32,7 +32,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             var rawBody = String.Format("{{ \"jql\": \"Key=\\\"{0}\\\"\" }}", issue.Key.Value);
-            var json = _jira.RestClient.ExecuteRequest(Method.POST, "rest/api/2/search", rawBody);
+            var json = _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/search", rawBody).Result;
 
             Assert.Equal(issue.Key.Value, json["issues"][0]["key"].ToString());
         }
