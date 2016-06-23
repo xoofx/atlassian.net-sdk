@@ -560,7 +560,7 @@ namespace Atlassian.Jira.Test
 
         private static RemoteFieldValue[] GetUpdatedFieldsForIssue(Issue issue)
         {
-            return ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
+            return ((IRemoteIssueFieldProvider)issue).GetRemoteFieldValuesAsync(CancellationToken.None).Result;
         }
     }
 }

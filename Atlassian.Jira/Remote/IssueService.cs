@@ -70,7 +70,7 @@ namespace Atlassian.Jira.Remote
         {
             var resource = String.Format("rest/api/2/issue/{0}", issue.Key.Value);
             var fieldProvider = issue as IRemoteIssueFieldProvider;
-            var remoteFields = fieldProvider.GetRemoteFields();
+            var remoteFields = await fieldProvider.GetRemoteFieldValuesAsync(token).ConfigureAwait(false);
             var remoteIssue = await issue.ToRemoteAsync(token).ConfigureAwait(false);
             var fields = await this.BuildFieldsObjectFromIssueAsync(remoteIssue, remoteFields, token).ConfigureAwait(false);
 
@@ -127,7 +127,7 @@ namespace Atlassian.Jira.Remote
 
             var resource = String.Format("rest/api/2/issue/{0}/transitions", issue.Key.Value);
             var fieldProvider = issue as IRemoteIssueFieldProvider;
-            var remoteFields = fieldProvider.GetRemoteFields();
+            var remoteFields = await fieldProvider.GetRemoteFieldValuesAsync(token).ConfigureAwait(false);
             var remoteIssue = await issue.ToRemoteAsync(token).ConfigureAwait(false);
             var fields = await BuildFieldsObjectFromIssueAsync(remoteIssue, remoteFields, token).ConfigureAwait(false);
             var updatesObject = new JObject();

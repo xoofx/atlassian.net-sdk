@@ -1058,7 +1058,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
-        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
+        async Task<RemoteFieldValue[]> IRemoteIssueFieldProvider.GetRemoteFieldValuesAsync(CancellationToken token)
         {
             var fields = new List<RemoteFieldValue>();
 
@@ -1071,7 +1071,8 @@ namespace Atlassian.Jira
 
                     if (fieldsProvider != null)
                     {
-                        fields.AddRange(fieldsProvider.GetRemoteFields());
+                        var remoteFieldValues = await fieldsProvider.GetRemoteFieldValuesAsync(token).ConfigureAwait(false);
+                        fields.AddRange(remoteFieldValues);
                     }
                 }
                 else
@@ -1082,8 +1083,8 @@ namespace Atlassian.Jira
                         continue;
                     }
 
-                    var localStringValue = GetStringValueForProperty(this, localProperty);
-                    var remoteStringValue = GetStringValueForProperty(_originalIssue, remoteProperty);
+                    var localStringValue = await GetStringValueForPropertyAsync(this, localProperty, token).ConfigureAwait(false);
+                    var remoteStringValue = await GetStringValueForPropertyAsync(_originalIssue, remoteProperty, token).ConfigureAwait(false);
 
                     if (remoteStringValue != localStringValue)
                     {
@@ -1174,7 +1175,7 @@ namespace Atlassian.Jira
             return remote;
         }
 
-        private string GetStringValueForProperty(object container, PropertyInfo property)
+        private async Task<string> GetStringValueForPropertyAsync(object container, PropertyInfo property, CancellationToken token)
         {
             var value = property.GetValue(container, null);
 
@@ -1188,7 +1189,8 @@ namespace Atlassian.Jira
                 var jiraNamedEntity = property.GetValue(container, null) as JiraNamedEntity;
                 if (jiraNamedEntity != null)
                 {
-                    return jiraNamedEntity.LoadIdAndNameAsync(_jira, CancellationToken.None).Result.Id;
+                    await jiraNamedEntity.LoadIdAndNameAsync(_jira, token).ConfigureAwait(false);
+                    return jiraNamedEntity.Id;
                 }
                 return null;
             }

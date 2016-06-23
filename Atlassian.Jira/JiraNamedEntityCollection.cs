@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
@@ -41,7 +43,7 @@ namespace Atlassian.Jira
             this.Remove(this.Items.First(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase)));
         }
 
-        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
+        Task<RemoteFieldValue[]> IRemoteIssueFieldProvider.GetRemoteFieldValuesAsync(CancellationToken token)
         {
             var fields = new List<RemoteFieldValue>();
 
@@ -55,7 +57,7 @@ namespace Atlassian.Jira
                 fields.Add(field);
             }
 
-            return fields.ToArray();
+            return Task.FromResult(fields.ToArray());
         }
     }
 }

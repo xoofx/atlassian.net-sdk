@@ -5,6 +5,8 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
@@ -165,15 +167,17 @@ namespace Atlassian.Jira
             return this;
         }
 
-        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
+        Task<RemoteFieldValue[]> IRemoteIssueFieldProvider.GetRemoteFieldValuesAsync(CancellationToken token)
         {
-            return this.Items
+            var fieldValues = this.Items
                 .Where(field => IsCustomFieldNewOrUpdated(field))
                 .Select(field => new RemoteFieldValue()
                 {
                     id = field.Id,
                     values = field.Values
-                }).ToArray();
+                });
+
+            return Task.FromResult(fieldValues.ToArray());
         }
 
         private bool IsCustomFieldNewOrUpdated(CustomFieldValue customField)
