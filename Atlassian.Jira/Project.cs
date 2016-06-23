@@ -15,6 +15,8 @@ namespace Atlassian.Jira
     {
         private readonly Jira _jira;
         private readonly RemoteProject _remoteProject;
+        private readonly ProjectVersionsEditableResource _editableVersions;
+        private readonly ProjectComponentsEditableResource _editableComponents;
 
         /// <summary>
         /// Createa a new Project instance using a remote project.
@@ -26,6 +28,8 @@ namespace Atlassian.Jira
         {
             _jira = jira;
             _remoteProject = remoteProject;
+            _editableVersions = new ProjectVersionsEditableResource(jira, this);
+            _editableComponents = new ProjectComponentsEditableResource(jira, this);
         }
 
         internal RemoteProject RemoteProject
@@ -55,6 +59,30 @@ namespace Atlassian.Jira
             get
             {
                 return _remoteProject.lead;
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the versions of this project.
+        /// </summary>
+        [Obsolete("Use methods on the Project instead.")]
+        public ProjectVersionsEditableResource Versions
+        {
+            get
+            {
+                return _editableVersions;
+            }
+        }
+
+        /// <summary>
+        /// Gets an object to interact with the components of this project.
+        /// </summary>
+        [Obsolete("Use methods on the Project instead.")]
+        public ProjectComponentsEditableResource Components
+        {
+            get
+            {
+                return _editableComponents;
             }
         }
 
