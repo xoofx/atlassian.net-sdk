@@ -102,10 +102,9 @@ namespace Atlassian.Jira.Remote
             var resource = String.Format("rest/api/2/version/{0}", version.Id);
             var serializerSettings = await _jira.RestClient.GetSerializerSettingsAsync(token).ConfigureAwait(false);
             var versionJson = JsonConvert.SerializeObject(version.RemoteVersion, serializerSettings);
+            var remoteVersion = await _jira.RestClient.ExecuteRequestAsync<RemoteVersion>(Method.PUT, resource, versionJson, token).ConfigureAwait(false);
 
-            await _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, versionJson, token).ConfigureAwait(false);
-
-            return await this.GetVersionAsync(version.Id, token).ConfigureAwait(false);
+            return new ProjectVersion(_jira, remoteVersion);
         }
     }
 }

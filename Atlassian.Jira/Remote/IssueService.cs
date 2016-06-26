@@ -66,7 +66,7 @@ namespace Atlassian.Jira.Remote
             return PagedQueryResult<Issue>.FromJson((JObject)result, issues);
         }
 
-        public async Task<Issue> UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken))
+        public async Task UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format("rest/api/2/issue/{0}", issue.Key.Value);
             var fieldProvider = issue as IRemoteIssueFieldProvider;
@@ -75,16 +75,15 @@ namespace Atlassian.Jira.Remote
             var fields = await this.BuildFieldsObjectFromIssueAsync(remoteIssue, remoteFields, token).ConfigureAwait(false);
 
             await _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, new { fields = fields }, token).ConfigureAwait(false);
-            return await this.GetIssueAsync(issue.Key.Value, token).ConfigureAwait(false);
         }
 
-        public async Task<Issue> CreateIssueAsyc(Issue issue, CancellationToken token = default(CancellationToken))
+        public async Task<string> CreateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken))
         {
             var remoteIssue = await issue.ToRemoteAsync(token).ConfigureAwait(false);
             var remoteIssueWrapper = new RemoteIssueWrapper(remoteIssue, issue.ParentIssueKey);
 
             var result = await _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/issue", remoteIssueWrapper, token).ConfigureAwait(false);
-            return await this.GetIssueAsync((string)result["key"], token).ConfigureAwait(false);
+            return (string)result["key"];
         }
 
         private async Task<JObject> BuildFieldsObjectFromIssueAsync(RemoteIssue remoteIssue, RemoteFieldValue[] remoteFields, CancellationToken token)
@@ -113,7 +112,7 @@ namespace Atlassian.Jira.Remote
             return updateFields;
         }
 
-        public async Task<Issue> ExecuteWorkflowActionAsync(Issue issue, string actionName, WorkflowTransitionUpdates updates, CancellationToken token = default(CancellationToken))
+        public async Task ExecuteWorkflowActionAsync(Issue issue, string actionName, WorkflowTransitionUpdates updates, CancellationToken token = default(CancellationToken))
         {
             var actions = await this.GetActionsAsync(issue.Key.Value, token).ConfigureAwait(false);
             var action = actions.FirstOrDefault(a => a.Name.Equals(actionName, StringComparison.OrdinalIgnoreCase));
@@ -152,7 +151,6 @@ namespace Atlassian.Jira.Remote
             };
 
             await _jira.RestClient.ExecuteRequestAsync(Method.POST, resource, requestBody, token).ConfigureAwait(false);
-            return await this.GetIssueAsync(issue.Key.Value, token).ConfigureAwait(false);
         }
 
         public async Task<IssueTimeTrackingData> GetTimeTrackingDataAsync(string issueKey, CancellationToken token = default(CancellationToken))
@@ -384,8 +382,8 @@ namespace Atlassian.Jira.Remote
             }
 
             var resource = String.Format("rest/api/2/issue/{0}/worklog?{1}", issueKey, queryString);
-            var response = await _jira.RestClient.ExecuteRequestAsync(Method.POST, resource, remoteWorklog, token).ConfigureAwait(false);
-            return await this.GetWorklogAsync(issueKey, (string)response["id"], token);
+            var serverWorklog = await _jira.RestClient.ExecuteRequestAsync<RemoteWorklog>(Method.POST, resource, remoteWorklog, token).ConfigureAwait(false);
+            return new Worklog(serverWorklog);
         }
 
         public Task DeleteWorklogAsync(string issueKey, string worklogId, WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate, string newEstimate = null, CancellationToken token = default(CancellationToken))

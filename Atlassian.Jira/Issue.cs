@@ -412,11 +412,13 @@ namespace Atlassian.Jira
             Issue serverIssue = null;
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
-                serverIssue = _jira.Issues.CreateIssueAsyc(this).Result;
+                var newKey = _jira.Issues.CreateIssueAsync(this).Result;
+                serverIssue = _jira.Issues.GetIssueAsync(newKey).Result;
             }
             else
             {
-                serverIssue = _jira.Issues.UpdateIssueAsync(this).Result;
+                _jira.Issues.UpdateIssueAsync(this).Wait();
+                serverIssue = _jira.Issues.GetIssueAsync(_originalIssue.key).Result;
             }
 
             Initialize(serverIssue.OriginalRemoteIssue);
@@ -431,11 +433,13 @@ namespace Atlassian.Jira
             Issue serverIssue;
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
-                serverIssue = await _jira.Issues.CreateIssueAsyc(this, token);
+                var newKey = await _jira.Issues.CreateIssueAsync(this, token).ConfigureAwait(false);
+                serverIssue = await _jira.Issues.GetIssueAsync(newKey, token).ConfigureAwait(false);
             }
             else
             {
-                serverIssue = await _jira.Issues.UpdateIssueAsync(this, token);
+                await _jira.Issues.UpdateIssueAsync(this, token).ConfigureAwait(false);
+                serverIssue = await _jira.Issues.GetIssueAsync(_originalIssue.key, token).ConfigureAwait(false);
             }
 
             Initialize(serverIssue.OriginalRemoteIssue);
@@ -531,7 +535,8 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to execute workflow transition, issue has not been created.");
             }
 
-            var issue = await _jira.Issues.ExecuteWorkflowActionAsync(this, actionName, additionalUpdates, token).ConfigureAwait(false);
+            await _jira.Issues.ExecuteWorkflowActionAsync(this, actionName, additionalUpdates, token).ConfigureAwait(false);
+            var issue = await _jira.Issues.GetIssueAsync(_originalIssue.key, token).ConfigureAwait(false);
             Initialize(issue.OriginalRemoteIssue);
         }
 

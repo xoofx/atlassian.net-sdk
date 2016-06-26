@@ -33,18 +33,19 @@ namespace Atlassian.Jira
         Task<IDictionary<string, Issue>> GetIssuesAsync(IEnumerable<string> issueKeys, CancellationToken token = default(CancellationToken));
 
         /// <summary>
-        /// Updates an issue and returns a new instance populated from server.
+        /// Updates all fields of an issue.
         /// </summary>
         /// <param name="issue">Issue to update.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<Issue> UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken));
+        Task UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Creates an issue and returns a new instance populated from server.
         /// </summary>
         /// <param name="issue">Issue to create.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<Issue> CreateIssueAsyc(Issue issue, CancellationToken token = default(CancellationToken));
+        /// <returns>Promise that contains the new issue key when resolved.</returns>
+        Task<string> CreateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Deletes the specified issue.
@@ -69,7 +70,7 @@ namespace Atlassian.Jira
         /// <param name="actionName">The workflow action name to transition to.</param>
         /// <param name="updates">Additional updates to perform when transitioning the issue.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<Issue> ExecuteWorkflowActionAsync(Issue issue, string actionName, WorkflowTransitionUpdates updates, CancellationToken token = default(CancellationToken));
+        Task ExecuteWorkflowActionAsync(Issue issue, string actionName, WorkflowTransitionUpdates updates, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Gets time tracking information for an issue.
