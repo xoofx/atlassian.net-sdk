@@ -276,5 +276,6 @@ namespace Atlassian.Jira.Remote
         /// <param name="version">Version to update.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<RemoteVersion> UpdateVersionAsync(RemoteVersion version, CancellationToken token);
+
     }
 }

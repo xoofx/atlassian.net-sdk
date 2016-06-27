@@ -56,10 +56,13 @@
   <ItemGroup>
     <Compile Include="Attachment.cs" />
     <Compile Include="AttachmentInfo.cs" />
+    <Compile Include="BaseEditableResource.cs" />
     <Compile Include="CascadingSelectCustomField.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableString.cs" />
+    <Compile Include="CreateUserRequest.cs" />
     <Compile Include="CustomField.cs" />
+    <Compile Include="IGroupResource.cs" />
     <Compile Include="IssueFieldEditMetadata.cs" />
     <Compile Include="IssueFieldEditMetadataSchema.cs" />
     <Compile Include="IssueFieldEditMetadataOperation.cs" />
@@ -72,12 +75,15 @@
     <Compile Include="IssueLink.cs" />
     <Compile Include="IssueLinkType.cs" />
     <Compile Include="IssueWatchers.cs" />
+    <Compile Include="IUserResource.cs" />
     <Compile Include="JiraCache.cs" />
     <Compile Include="JiraUser.cs" />
     <Compile Include="PagedQueryResult.cs" />
     <Compile Include="ProjectComponentCreationInfo.cs" />
     <Compile Include="ProjectComponentsEditableResource.cs" />
     <Compile Include="ProjectVersionCreationInfo.cs" />
+    <Compile Include="GroupEditableResource.cs" />
+    <Compile Include="UserEditableResource.cs" />
     <Compile Include="ProjectVersionsEditableResource.cs" />
     <Compile Include="Remote\IJiraClient.cs" />
     <Compile Include="Remote\IJiraRestClient.cs" />

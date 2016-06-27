@@ -122,6 +122,9 @@ namespace Atlassian.Jira
             {
                 this._restClient = new JiraRestClient(this, jiraService.Url, _credentials ?? new JiraCredentials(null));
             }
+
+            Users = new UserEditableResource(this);
+            Groups = new GroupEditableResource(this);
         }
 
         /// <summary>
@@ -782,5 +785,15 @@ namespace Atlassian.Jira
 
             return this._cachedIssues[projectKey];
         }
+
+        /// <summary>
+        /// Resource to access the /api/2/user API
+        /// </summary>
+        public IUserResource Users { get; }
+
+        /// <summary>
+        /// Resource to access the /api/2/group API
+        /// </summary>
+        public IGroupResource Groups { get; }
     }
 }

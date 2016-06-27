@@ -12,7 +12,7 @@ namespace Atlassian.Jira
     /// <summary>
     /// Class that encapsulates operations on the remote version collection of a project.
     /// </summary>
-    public class ProjectVersionsEditableResource
+    public class ProjectVersionsEditableResource : BaseEditableResource
     {
         private readonly Project _project;
         private readonly Jira _jira;
@@ -142,25 +142,6 @@ namespace Atlassian.Jira
             }, token, TaskContinuationOptions.None, TaskScheduler.Default);
         }
 
-        private T ExecuteAndGuard<T>(Func<T> execute)
-        {
-            try
-            {
-                return execute();
-            }
-            catch (AggregateException ex)
-            {
-                throw ex.Flatten().InnerException;
-            }
-        }
-
-        private void ExecuteAndGuard(Action execute)
-        {
-            ExecuteAndGuard(() =>
-            {
-                execute();
-                return false;
-            });
-        }
+       
     }
 }
