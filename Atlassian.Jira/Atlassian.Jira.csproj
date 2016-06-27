@@ -63,7 +63,10 @@
     <Compile Include="CascadingSelectCustomField.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableString.cs" />
+    <Compile Include="IJiraGroupService.cs" />
+    <Compile Include="JiraUserCreationInfo.cs" />
     <Compile Include="CustomField.cs" />
+    <Compile Include="IGroupResource.cs" />
     <Compile Include="IIssueFieldService.cs" />
     <Compile Include="IIssueService.cs" />
     <Compile Include="IIssueFilterService.cs" />
@@ -87,6 +90,7 @@
     <Compile Include="IssueLabels.cs" />
     <Compile Include="IssueLink.cs" />
     <Compile Include="IssueLinkType.cs" />
+    <Compile Include="JiraUserStatus.cs" />
     <Compile Include="ProjectComponentsEditableResource.cs" />
     <Compile Include="ProjectVersionsEditableResource.cs" />
     <Compile Include="Remote\IssueFieldService.cs" />
@@ -96,6 +100,7 @@
     <Compile Include="Remote\IssueService.cs" />
     <Compile Include="Remote\IssueStatusService.cs" />
     <Compile Include="IssueWatchers.cs" />
+    <Compile Include="IUserResource.cs" />
     <Compile Include="JiraCache.cs" />
     <Compile Include="JiraUser.cs" />
     <Compile Include="PagedQueryResult.cs" />
@@ -139,6 +144,7 @@
     <Compile Include="JiraEntityDictionary.cs" />
     <Compile Include="Remote\IssueTypeService.cs" />
     <Compile Include="Remote\IssueFilterService.cs" />
+    <Compile Include="Remote\JiraGroupService.cs" />
     <Compile Include="Remote\JiraRestClient.cs" />
     <Compile Include="Remote\JiraRemoteTypes.cs" />
     <Compile Include="Linq\JqlData.cs" />

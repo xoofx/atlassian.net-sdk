@@ -108,6 +108,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets an object to interact with the user groups of jira.
+        /// </summary>
+        public IJiraGroupService Groups
+        {
+            get
+            {
+                return Services.Get<IJiraGroupService>();
+            }
+        }
+
+        /// <summary>
         /// Gets an object to interact with the issue of jira.
         /// </summary>
         public IIssueService Issues
@@ -550,6 +561,7 @@ namespace Atlassian.Jira
             services.Register<IIssueFieldService>(() => new IssueFieldService(jira));
             services.Register<IIssueService>(() => new IssueService(jira));
             services.Register<IJiraUserService>(() => new JiraUserService(jira));
+            services.Register<IJiraGroupService>(() => new JiraGroupService(jira));
             services.Register<IProjectService>(() => new ProjectService(jira));
             services.Register<IJqlExpressionVisitor>(() => new JqlExpressionVisitor());
             services.Register<IFileSystem>(() => new FileSystem());
