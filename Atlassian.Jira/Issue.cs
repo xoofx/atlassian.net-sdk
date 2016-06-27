@@ -392,14 +392,15 @@ namespace Atlassian.Jira
             set
             {
                 var customField = _customFields[customFieldName];
+                string[] customFieldValue = value == null ? null : new string[] { value.Value };
 
                 if (customField != null)
                 {
-                    customField.Values = new string[] { value.Value };
+                    customField.Values = customFieldValue;
                 }
                 else
                 {
-                    _customFields.Add(customFieldName, new string[] { value.Value });
+                    _customFields.Add(customFieldName, customFieldValue);
                 }
             }
         }

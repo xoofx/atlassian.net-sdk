@@ -100,7 +100,34 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Option2", cascadingSelect.ParentOption);
             Assert.Equal("Option2.2", cascadingSelect.ChildOption);
             Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
+        }
 
+        [Fact]
+        public void CanClearValueOfCustomField()
+        {
+            var summaryValue = "Test issue " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            issue["Custom Text Field"] = "My new value";
+            issue["Custom Date Field"] = "2015-10-03";
+            issue.SaveChanges();
+
+            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal("My new value", newIssue["Custom Text Field"]);
+            Assert.Equal("2015-10-03", newIssue["Custom Date Field"]);
+            newIssue["Custom Text Field"] = null;
+            newIssue["Custom Date Field"] = null;
+            newIssue.SaveChanges();
+
+            var updatedIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+
+            Assert.Null(updatedIssue["Custom Text Field"]);
+            Assert.Null(updatedIssue["Custom Date Field"]);
         }
 
         [Fact]

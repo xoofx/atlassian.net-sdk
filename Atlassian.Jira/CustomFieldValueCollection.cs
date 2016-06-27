@@ -201,6 +201,12 @@ namespace Atlassian.Jira
                 // The remote custom field was not initialized, include it on the payload.
                 return true;
             }
+            else if (customField.Values == null)
+            {
+                // Original field had values, but the new field has been set to null.
+                //  User means to clear the value, include it on the payload.
+                return true;
+            }
             else
             {
                 return !originalField.values.SequenceEqual(customField.Values);
