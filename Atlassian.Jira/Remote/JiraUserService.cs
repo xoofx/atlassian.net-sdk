@@ -20,7 +20,7 @@ namespace Atlassian.Jira.Remote
             _jira = jira;
         }
 
-        public async Task<JiraUser> CreatUsereAsync(JiraUserCreationInfo user, CancellationToken token = default(CancellationToken))
+        public async Task<JiraUser> CreatUserAsync(JiraUserCreationInfo user, CancellationToken token = default(CancellationToken))
         {
             var resource = "rest/api/2/user";
             var requestBody = JToken.FromObject(user);
