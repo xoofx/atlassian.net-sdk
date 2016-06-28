@@ -26,6 +26,26 @@ namespace Atlassian.Jira.Remote
             return _jira.RestClient.ExecuteRequestAsync(Method.POST, resource, requestBody, token);
         }
 
+        public Task CreateGroupAsync(string groupName, CancellationToken token = default(CancellationToken))
+        {
+            var resource = "rest/api/2/group";
+            var requestBody = JToken.FromObject(new { name = groupName });
+
+            return _jira.RestClient.ExecuteRequestAsync(Method.POST, resource, requestBody, token);
+        }
+
+        public Task DeleteGroupAsync(string groupName, string swapGroupName = null, CancellationToken token = default(CancellationToken))
+        {
+            var resource = String.Format("rest/api/2/group?groupname={0}", Uri.EscapeDataString(groupName));
+
+            if (!String.IsNullOrEmpty(swapGroupName))
+            {
+                resource += String.Format("&swapGroup={0}", Uri.EscapeDataString(swapGroupName));
+            }
+
+            return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
+        }
+
         public async Task<IPagedQueryResult<JiraUser>> GetUsersAsync(string groupname, bool includeInactiveUsers = false, int maxResults = 50, int startAt = 0, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format(
