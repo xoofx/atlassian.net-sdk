@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Util.DoubleKeyDictionary;
-
-namespace Atlassian.Jira
+﻿namespace Atlassian.Jira
 {
     /// <summary>
     /// Cache for frequently retrieved server items from JIRA.
