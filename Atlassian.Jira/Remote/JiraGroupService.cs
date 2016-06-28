@@ -56,7 +56,7 @@ namespace Atlassian.Jira.Remote
                 maxResults);
 
             var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
-            var serializerSetting = await _jira.RestClient.GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var serializerSetting = _jira.RestClient.Settings.JsonSerializerSettings;
             var users = response["values"]
                 .Cast<JObject>()
                 .Select(valuesJson => JsonConvert.DeserializeObject<JiraUser>(valuesJson.ToString(), serializerSetting));

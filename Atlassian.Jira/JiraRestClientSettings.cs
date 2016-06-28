@@ -1,4 +1,5 @@
 ﻿using Atlassian.Jira.Remote;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,11 +28,21 @@ namespace Atlassian.Jira
         public JiraCache Cache { get; set; }
 
         /// <summary>
+        /// The json global serializer settings to use.
+        /// </summary>
+        public JsonSerializerSettings JsonSerializerSettings { get; private set; }
+
+        /// <summary>
         /// Create a new instance of the settings.
         /// </summary>
         public JiraRestClientSettings()
         {
             this.Cache = new JiraCache();
+
+            JsonSerializerSettings = new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
 
             this.CustomFieldSerializers = new Dictionary<string, ICustomFieldValueSerializer>();
             this.CustomFieldSerializers.Add(GetBuiltInType("labels"), new MultiStringCustomFieldValueSerializer());

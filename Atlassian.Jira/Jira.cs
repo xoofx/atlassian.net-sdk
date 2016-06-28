@@ -62,7 +62,7 @@ namespace Atlassian.Jira
         /// <param name="jiraClient">Rest client to use.</param>
         /// <param name="credentials">Credentials to use.</param>
         /// <param name="cache">Cache to use.</param>
-        public static Jira CreateRestClient(IJiraRestClient jiraClient = null, JiraCredentials credentials = null, JiraCache cache = null)
+        public static Jira CreateRestClient(IJiraRestClient jiraClient, JiraCredentials credentials = null, JiraCache cache = null)
         {
             var services = new ServiceLocator();
             var jira = new Jira(services, credentials, cache);
@@ -555,7 +555,7 @@ namespace Atlassian.Jira
             services.Register<IIssueTypeService>(() => new IssueTypeService(jira));
             services.Register<IIssueFilterService>(() => new IssueFilterService(jira));
             services.Register<IIssueFieldService>(() => new IssueFieldService(jira));
-            services.Register<IIssueService>(() => new IssueService(jira));
+            services.Register<IIssueService>(() => new IssueService(jira, restClient.Settings));
             services.Register<IJiraUserService>(() => new JiraUserService(jira));
             services.Register<IJiraGroupService>(() => new JiraGroupService(jira));
             services.Register<IProjectService>(() => new ProjectService(jira));

@@ -19,8 +19,6 @@ namespace Atlassian.Jira.Remote
         private readonly JiraRestClientSettings _clientSettings;
         private readonly ServiceLocator _services;
 
-        private JsonSerializerSettings _serializerSettings;
-
         internal JiraRestClient(ServiceLocator services, string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
             url = url.EndsWith("/") ? url : url += "/";
@@ -43,28 +41,19 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        public virtual async Task<JsonSerializerSettings> GetSerializerSettingsAsync(CancellationToken token = default(CancellationToken))
-        {
-            if (this._serializerSettings == null)
-            {
-                var remoteFieldsSettings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore };
-                var remoteFieldsJson = await ExecuteRequestAsync(Method.GET, "rest/api/2/field", null, token).ConfigureAwait(false);
-                var remoteFields = JsonConvert.DeserializeObject<RemoteField[]>(remoteFieldsJson.ToString(), remoteFieldsSettings);
-                var serializers = new Dictionary<string, ICustomFieldValueSerializer>(this._clientSettings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
-
-                this._serializerSettings = new JsonSerializerSettings();
-                this._serializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(remoteFields, serializers));
-            }
-
-            return this._serializerSettings;
-        }
-
         public string Url
         {
             get
             {
                 return _restClient.BaseUrl.ToString();
+            }
+        }
+
+        public JiraRestClientSettings Settings
+        {
+            get
+            {
+                return _clientSettings;
             }
         }
 
@@ -95,8 +84,7 @@ namespace Atlassian.Jira.Remote
         public async Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null, CancellationToken token = default(CancellationToken))
         {
             var result = await ExecuteRequestAsync(method, resource, requestBody, token).ConfigureAwait(false);
-            var serializerSettings = await this.GetSerializerSettingsAsync(token).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<T>(result.ToString(), serializerSettings);
+            return JsonConvert.DeserializeObject<T>(result.ToString(), Settings.JsonSerializerSettings);
         }
 
         public async Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null, CancellationToken token = default(CancellationToken))
@@ -117,8 +105,7 @@ namespace Atlassian.Jira.Remote
             }
             else if (requestBody != null)
             {
-                var serializerSettings = await GetSerializerSettingsAsync(token).ConfigureAwait(false);
-                request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(serializerSettings));
+                request.JsonSerializer = new RestSharpJsonSerializer(JsonSerializer.Create(Settings.JsonSerializerSettings));
                 request.AddJsonBody(requestBody);
             }
 

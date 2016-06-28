@@ -37,14 +37,14 @@ namespace Atlassian.Jira.Remote
 
     public class RemoteIssueJsonConverter : JsonConverter
     {
-        private readonly RemoteField[] _remoteFields;
+        private readonly IEnumerable<RemoteField> _remoteFields;
         private readonly IDictionary<string, ICustomFieldValueSerializer> _customFieldSerializers;
         private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings()
         {
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        public RemoteIssueJsonConverter(RemoteField[] remoteFields, IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers)
+        public RemoteIssueJsonConverter(IEnumerable<RemoteField> remoteFields, IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers)
         {
             this._remoteFields = remoteFields;
             this._customFieldSerializers = customFieldSerializers;
@@ -123,7 +123,7 @@ namespace Atlassian.Jira.Remote
                         if (this._customFieldSerializers.ContainsKey(customFieldType))
                         {
                             jToken = this._customFieldSerializers[customFieldType].ToJson(customField.values);
-                        }                       
+                        }
                         else
                         {
                             jToken = JValue.CreateString(customField.values[0]);

@@ -24,10 +24,9 @@ namespace Atlassian.Jira.Remote
         RestClient RestSharpClient { get; }
 
         /// <summary>
-        /// Gets the global serializer settings to use.
+        /// Settings to configure the rest client.
         /// </summary>
-        /// <param name="token">Cancellation token for the operation.</param>
-        Task<JsonSerializerSettings> GetSerializerSettingsAsync(CancellationToken token = default(CancellationToken));
+        JiraRestClientSettings Settings { get; }
 
         /// <summary>
         /// Executes a request.

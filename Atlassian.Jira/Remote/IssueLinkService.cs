@@ -36,7 +36,7 @@ namespace Atlassian.Jira.Remote
 
         public async Task<IEnumerable<IssueLink>> GetLinksForIssueAsync(string issueKey, CancellationToken token)
         {
-            var serializerSettings = await _jira.RestClient.GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var resource = String.Format("rest/api/2/issue/{0}?fields=issuelinks,created", issueKey);
             var issueLinksResult = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
             var issueLinksJson = issueLinksResult["fields"]["issuelinks"];
@@ -73,7 +73,7 @@ namespace Atlassian.Jira.Remote
         public async Task<IEnumerable<IssueLinkType>> GetLinkTypesAsync(CancellationToken token = default(CancellationToken))
         {
             var cache = _jira.Cache;
-            var serializerSettings = await _jira.RestClient.GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
 
             if (!cache.LinkTypes.Any())
             {

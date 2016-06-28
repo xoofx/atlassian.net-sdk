@@ -43,7 +43,7 @@ namespace Atlassian.Jira.Remote
 
         public async Task<IPagedQueryResult<ProjectVersion>> GetPagedVersionsAsync(string projectKey, int startAt = 0, int maxResults = 50, CancellationToken token = default(CancellationToken))
         {
-            var settings = await _jira.RestClient.GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var settings = _jira.RestClient.Settings.JsonSerializerSettings;
             var resource = String.Format("rest/api/2/project/{0}/version?startAt={1}&maxResults={2}",
                 projectKey,
                 startAt,
@@ -64,7 +64,7 @@ namespace Atlassian.Jira.Remote
 
         public async Task<ProjectVersion> CreateVersionAsync(ProjectVersionCreationInfo projectVersion, CancellationToken token = default(CancellationToken))
         {
-            var settings = await _jira.RestClient.GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var settings = _jira.RestClient.Settings.JsonSerializerSettings;
             var serializer = JsonSerializer.Create(settings);
             var resource = "/rest/api/2/version";
             var requestBody = JToken.FromObject(projectVersion, serializer);
@@ -100,7 +100,7 @@ namespace Atlassian.Jira.Remote
         public async Task<ProjectVersion> UpdateVersionAsync(ProjectVersion version, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format("rest/api/2/version/{0}", version.Id);
-            var serializerSettings = await _jira.RestClient.GetSerializerSettingsAsync(token).ConfigureAwait(false);
+            var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var versionJson = JsonConvert.SerializeObject(version.RemoteVersion, serializerSettings);
             var remoteVersion = await _jira.RestClient.ExecuteRequestAsync<RemoteVersion>(Method.PUT, resource, versionJson, token).ConfigureAwait(false);
 
