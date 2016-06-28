@@ -214,15 +214,5 @@ namespace Atlassian.Jira.Test.Integration
             var result1 = await _jira.Filters.GetFavouritesAsync();
             Assert.NotEmpty(result1);
         }
-
-        [Fact]
-        public void GetUser()
-        {
-            var user = _jira.Users.GetUserAsync("admin").Result;
-            Assert.Equal(user.Email, "admin@example.com");
-            Assert.Equal(user.DisplayName, "admin");
-            Assert.Equal(user.Username, "admin");
-            Assert.Equal(user.IsActive, true);
-        }
     }
 }

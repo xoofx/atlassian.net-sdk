@@ -73,6 +73,7 @@
     <Compile Include="Issue.CustomFieldTest.cs" />
     <Compile Include="Issue.CreateTest.cs" />
     <Compile Include="Issue.OperationTest.cs" />
+    <Compile Include="Jira.UserTest.cs" />
     <Compile Include="JiraTypesTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Issue.QueryTest.cs" />
