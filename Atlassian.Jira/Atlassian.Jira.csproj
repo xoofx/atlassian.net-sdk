@@ -91,6 +91,7 @@
     <Compile Include="IssueLink.cs" />
     <Compile Include="IssueLinkType.cs" />
     <Compile Include="JiraUserStatus.cs" />
+    <Compile Include="ProjectCategory.cs" />
     <Compile Include="ProjectComponentsEditableResource.cs" />
     <Compile Include="ProjectVersionsEditableResource.cs" />
     <Compile Include="Remote\IssueFieldService.cs" />

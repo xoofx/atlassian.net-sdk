@@ -52,6 +52,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// The category set on this project.
+        /// </summary>
+        public ProjectCategory Category
+        {
+            get
+            {
+                return _remoteProject.projectCategory;
+            }
+        }
+
+        /// <summary>
         /// Username of the project lead.
         /// </summary>
         public string Lead

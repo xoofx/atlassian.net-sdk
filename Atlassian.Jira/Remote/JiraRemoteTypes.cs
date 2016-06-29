@@ -824,6 +824,8 @@ namespace Atlassian.Jira.Remote
 
         private string urlField;
 
+        public ProjectCategory projectCategory { get; set; }
+
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
         public string description
