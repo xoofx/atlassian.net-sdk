@@ -386,7 +386,7 @@ namespace Atlassian.Jira.Remote
         {
             var resource = String.Format("rest/api/2/issue/{0}?fields=comment", issueKey);
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
-            var issueJson = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token);
+            var issueJson = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
             var commentJson = issueJson["fields"]["comment"]["comments"];
 
             var remoteComments = JsonConvert.DeserializeObject<RemoteComment[]>(commentJson.ToString(), serializerSettings);

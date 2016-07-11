@@ -25,7 +25,7 @@ namespace Atlassian.Jira.Remote
             var resource = "rest/api/2/user";
             var requestBody = JToken.FromObject(user);
 
-            return await _jira.RestClient.ExecuteRequestAsync<JiraUser>(Method.POST, resource, requestBody, token);
+            return await _jira.RestClient.ExecuteRequestAsync<JiraUser>(Method.POST, resource, requestBody, token).ConfigureAwait(false);
         }
 
         public Task DeleteUserAsync(string username, CancellationToken token = default(CancellationToken))

@@ -1132,25 +1132,25 @@ namespace Atlassian.Jira
 
             if (Status != null)
             {
-                await Status.LoadIdAndNameAsync(_jira, token);
+                await Status.LoadIdAndNameAsync(_jira, token).ConfigureAwait(false);
                 remote.status = new RemoteStatus() { id = Status.Id, name = Status.Name };
             }
 
             if (Resolution != null)
             {
-                await Resolution.LoadIdAndNameAsync(_jira, token);
+                await Resolution.LoadIdAndNameAsync(_jira, token).ConfigureAwait(false);
                 remote.resolution = new RemoteResolution() { id = Resolution.Id, name = Resolution.Name };
             }
 
             if (Priority != null)
             {
-                await Priority.LoadIdAndNameAsync(_jira, token);
+                await Priority.LoadIdAndNameAsync(_jira, token).ConfigureAwait(false);
                 remote.priority = new RemotePriority() { id = Priority.Id, name = Priority.Name };
             }
 
             if (Type != null)
             {
-                await Type.LoadIdAndNameAsync(_jira, token);
+                await Type.LoadIdAndNameAsync(_jira, token).ConfigureAwait(false);
                 remote.type = new RemoteIssueType() { id = Type.Id, name = Type.Name };
             }
 

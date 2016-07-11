@@ -184,7 +184,7 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException(String.Format("Unable to locate a version with name '{0}'", versionName));
             }
 
-            await _jira.Versions.DeleteVersionAsync(version.Id, moveFixIssuesTo, moveAffectedIssuesTo, token);
+            await _jira.Versions.DeleteVersionAsync(version.Id, moveFixIssuesTo, moveAffectedIssuesTo, token).ConfigureAwait(false);
         }
     }
 }

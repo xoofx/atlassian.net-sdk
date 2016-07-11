@@ -24,8 +24,7 @@ namespace Atlassian.Jira.Remote
 
         public async Task<IPagedQueryResult<Issue>> GetIssuesFromFavoriteAsync(string filterName, int? maxIssues = default(int?), int startAt = 0, CancellationToken token = default(CancellationToken))
         {
-            var filtersService = _jira.Services.Get<IIssueFilterService>();
-            var filters = await filtersService.GetFavouritesAsync(token);
+            var filters = await this.GetFavouritesAsync(token).ConfigureAwait(false);
             var filter = filters.FirstOrDefault(f => f.Name.Equals(filterName, StringComparison.OrdinalIgnoreCase));
 
             if (filter == null)
@@ -33,7 +32,7 @@ namespace Atlassian.Jira.Remote
                 throw new InvalidOperationException(String.Format("Filter with name '{0}' was not found.", filterName));
             }
 
-            return await _jira.Issues.GetIsssuesFromJqlAsync(filter.Jql, maxIssues, startAt, token);
+            return await _jira.Issues.GetIsssuesFromJqlAsync(filter.Jql, maxIssues, startAt, token).ConfigureAwait(false);
         }
     }
 }

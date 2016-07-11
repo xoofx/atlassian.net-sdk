@@ -123,7 +123,7 @@ namespace Atlassian.Jira.Remote
 
         public async Task<IRestResponse> ExecuteRequestAsync(IRestRequest request, CancellationToken token = default(CancellationToken))
         {
-            var response = await this._restClient.ExecuteTaskAsync(request, token);
+            var response = await this._restClient.ExecuteTaskAsync(request, token).ConfigureAwait(false);
             GetValidJsonFromResponse(response);
             return response;
         }
