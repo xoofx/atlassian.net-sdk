@@ -136,7 +136,7 @@ namespace Atlassian.Jira.Test.Integration
         public void GetProjects()
         {
             var projects = _jira.Projects.GetProjectsAsync().Result;
-            Assert.Equal(1, projects.Count());
+            Assert.True(projects.Count() > 0);
             Assert.Equal("admin", projects.First().Lead);
         }
 
@@ -145,14 +145,6 @@ namespace Atlassian.Jira.Test.Integration
         {
             var linkTypes = _jira.Links.GetLinkTypesAsync().Result;
             Assert.True(linkTypes.Any(l => l.Name.Equals("Duplicate")));
-        }
-
-        [Fact]
-        public async Task GetProjectsAsync()
-        {
-            var projects = await _jira.Projects.GetProjectsAsync();
-
-            Assert.Equal(1, projects.Count());
         }
 
         [Fact]
