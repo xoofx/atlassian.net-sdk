@@ -81,7 +81,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
             // Wait until restore is complete
             WaitForElement(
                 webDriver,
-                TimeSpan.FromMinutes(3),
+                TimeSpan.FromMinutes(10),
                 wd => wd.FindElements(By.TagName("p"))
                     .FirstOrDefault(we => we.Text.Trim().Equals("Your import has been successful.", StringComparison.OrdinalIgnoreCase)));
 
