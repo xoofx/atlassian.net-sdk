@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -255,6 +256,35 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             Assert.Equal("My updated value", issue["Custom Text Field"]);
+        }
+
+        [Fact]
+        public void CanAccessSecurityLevel()
+        {
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "Bug",
+                Summary = "Test Summary " + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+            issue.SaveChanges();
+            Assert.Null(issue.SecurityLevel);
+
+            var resource = String.Format("rest/api/2/issue/{0}", issue.Key.Value);
+            var body = new
+            {
+                fields = new
+                {
+                    security = new
+                    {
+                        id = "10000"
+                    }
+                }
+            };
+            _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, body).Wait();
+
+            issue.Refresh();
+            Assert.Equal("Test Issue Security Level", issue.SecurityLevel.Name);
         }
     }
 }

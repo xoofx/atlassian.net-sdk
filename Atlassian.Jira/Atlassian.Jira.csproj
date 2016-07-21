@@ -64,6 +64,7 @@
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableString.cs" />
     <Compile Include="IJiraGroupService.cs" />
+    <Compile Include="IssueSecurityLevel.cs" />
     <Compile Include="JiraUserCreationInfo.cs" />
     <Compile Include="CustomField.cs" />
     <Compile Include="IGroupResource.cs" />

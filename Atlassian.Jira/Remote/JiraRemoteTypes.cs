@@ -1364,6 +1364,9 @@ namespace Atlassian.Jira.Remote
         [JsonProperty("labels")]
         public string[] labelsReadOnly { get; set; }
 
+        [JsonProperty("security")]
+        public IssueSecurityLevel securityLevelReadOnly { get; set; }
+
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
         [JsonConverter(typeof(NestedValueJsonConverter), "name")]

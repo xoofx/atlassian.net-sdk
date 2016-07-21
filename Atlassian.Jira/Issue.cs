@@ -31,6 +31,7 @@ namespace Atlassian.Jira
         private DateTime? _updateDate;
         private DateTime? _dueDate;
         private DateTime? _resolutionDate;
+        private IssueSecurityLevel _securityLevel;
         private ProjectVersionCollection _affectsVersions = null;
         private ProjectVersionCollection _fixVersions = null;
         private ProjectComponentCollection _components = null;
@@ -76,6 +77,7 @@ namespace Atlassian.Jira
             _resolutionDate = remoteIssue.resolutionDateReadOnly;
             _labels = new IssueLabels(this._jira.Issues, remoteIssue);
             _watchers = new IssueWatchers(this._jira.Issues, remoteIssue.key);
+            _securityLevel = remoteIssue.securityLevelReadOnly;
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -172,6 +174,17 @@ namespace Atlassian.Jira
             get
             {
                 return _jira;
+            }
+        }
+
+        /// <summary>
+        /// Gets the security level set on the issue.
+        /// </summary>
+        public IssueSecurityLevel SecurityLevel
+        {
+            get
+            {
+                return _securityLevel;
             }
         }
 
