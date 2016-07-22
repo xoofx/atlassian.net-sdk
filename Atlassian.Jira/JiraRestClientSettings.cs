@@ -62,11 +62,19 @@ namespace Atlassian.Jira
             this.CustomFieldSerializers.Add(GetBuiltInType("multicheckboxes"), new MultiObjectCustomFieldValueSerializer("value"));
 
             this.CustomFieldSerializers.Add(GetBuiltInType("cascadingselect"), new CascadingSelectCustomFieldValueSerializer());
+
+            this.CustomFieldSerializers.Add(GetGreenhopperType("gh-sprint"), new GreenhopperSprintCustomFieldValueSerialiser("name"));
+
         }
 
         private static string GetBuiltInType(string name)
         {
             return String.Format("com.atlassian.jira.plugin.system.customfieldtypes:{0}", name);
+        }
+
+        private static string GetGreenhopperType(string name)
+        {
+            return String.Format("com.pyxis.greenhopper.jira:{0}", name);
         }
     }
 }
