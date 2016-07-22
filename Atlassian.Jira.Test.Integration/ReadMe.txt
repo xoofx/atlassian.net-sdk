@@ -11,7 +11,7 @@
 3. Login to Jira and skip all the tutorials if needed.
 
 4. Load test data into Jira Server
-	- Run "Atlassian.Jira.Test.Integration.Setup\bin\Debug\JiraSetup.exe setup".
+	- Run "Atlassian.Jira.Test.Integration.Setup\bin\Debug\JiraSetup.exe restore".
 	- Note: If the process fails with an exception, run the command again.
 
-5. Run the unit tests in this project
+5. Run the tests in this project.
