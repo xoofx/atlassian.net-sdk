@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -187,6 +188,66 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(cascadingSelect.ParentOption, "Option2");
             Assert.Equal(cascadingSelect.ChildOption, "Option2.2");
             Assert.Equal(cascadingSelect.Name, "Custom Cascading Select Field");
+        }
+
+        public void CreateAndQuerySprintName()
+        {
+            var issue = new Issue(_jira, "SCRUM")
+            {
+                Type = "Bug",
+                Summary = "Test issue with sprint" + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+            // Set the sprint by id
+            issue["Sprint"] = "1";
+            issue.SaveChanges();
+
+            // Get the sprint by name
+            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal("Sprint 1", newIssue["Sprint"]);
+        }
+
+        public void UpdateAndQuerySprintName()
+        {
+            var issue = new Issue(_jira, "SCRUM")
+            {
+                Type = "Bug",
+                Summary = "Test issue with sprint" + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+            issue.SaveChanges();
+            Assert.Null(issue["Sprint"]);
+
+            // Set the sprint by id
+            issue["Sprint"] = "1";
+            issue.SaveChanges();
+
+            // Get the sprint by name
+            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal("Sprint 1", newIssue["Sprint"]);
+        }
+
+        public void ThrowsErrorWhenSettingSprintByName()
+        {
+            var issue = new Issue(_jira, "SCRUM")
+            {
+                Type = "Bug",
+                Summary = "Test issue with sprint" + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+
+            // Set the sprint by name
+            issue["Sprint"] = "Sprint 1";
+
+            try
+            {
+                issue.SaveChanges();
+                throw new Exception("Method did not throw exception");
+            }
+            catch (AggregateException ex)
+            {
+                Assert.Contains("The 'Sprint' field only supports the sprint id when modifying it", ex.Flatten().InnerException.Message);
+            }
         }
 
         public class IssueFieldMetadataCustomFieldOption

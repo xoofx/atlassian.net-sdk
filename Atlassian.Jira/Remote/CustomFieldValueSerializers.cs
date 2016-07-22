@@ -143,7 +143,20 @@ namespace Atlassian.Jira.Remote
 
         public JToken ToJson(string[] values)
         {
-            return JArray.FromObject(values.Select(v => new JObject(new JProperty(_propertyName, v))).ToArray());
+            string val = values != null ? values.FirstOrDefault() : null;
+            int id = 0;
+
+            if (val != null && !int.TryParse(val, out id))
+            {
+                throw new InvalidOperationException(String.Format("The 'Sprint' field only supports the sprint id when modifying it. Value provided: '{0}'.", val));
+            }
+
+            if (val != null)
+            {
+                return id;
+            }
+
+            return val;
         }
     }
 }
