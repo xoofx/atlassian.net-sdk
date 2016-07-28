@@ -146,12 +146,7 @@ namespace Atlassian.Jira.Remote
             string val = values != null ? values.FirstOrDefault() : null;
             int id = 0;
 
-            if (val != null && !int.TryParse(val, out id))
-            {
-                throw new InvalidOperationException(String.Format("The 'Sprint' field only supports the sprint id when modifying it. Value provided: '{0}'.", val));
-            }
-
-            if (val != null)
+            if (int.TryParse(val, out id))
             {
                 return id;
             }

@@ -227,6 +227,23 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Sprint 1", newIssue["Sprint"]);
         }
 
+        public void CanUpdateIssueWithoutModifyingCustomFields()
+        {
+            var issue = new Issue(_jira, "SCRUM")
+            {
+                Type = "Bug",
+                Summary = "Test issue with sprint" + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+            issue["Sprint"] = "1";
+            issue.SaveChanges();
+            Assert.Equal("Sprint 1", issue["Sprint"]);
+
+            issue.Summary += " (Updated)";
+            issue.SaveChanges();
+            Assert.Equal("Sprint 1", issue["Sprint"]);
+        }
+
         public void ThrowsErrorWhenSettingSprintByName()
         {
             var issue = new Issue(_jira, "SCRUM")
@@ -246,7 +263,7 @@ namespace Atlassian.Jira.Test.Integration
             }
             catch (AggregateException ex)
             {
-                Assert.Contains("The 'Sprint' field only supports the sprint id when modifying it", ex.Flatten().InnerException.Message);
+                Assert.Contains("Number value expected as the Sprint id", ex.Flatten().InnerException.Message);
             }
         }
 
