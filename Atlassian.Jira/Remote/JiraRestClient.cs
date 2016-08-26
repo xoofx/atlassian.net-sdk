@@ -111,20 +111,20 @@ namespace Atlassian.Jira.Remote
 
             LogRequest(request, requestBody);
             var response = await this._restClient.ExecuteTaskAsync(request, token).ConfigureAwait(false);
-            return GetValidJsonFromResponse(response);
+            return GetValidJsonFromResponse(request, response);
         }
 
         public IRestResponse ExecuteRequest(IRestRequest request)
         {
             var response = this._restClient.Execute(request);
-            GetValidJsonFromResponse(response);
+            GetValidJsonFromResponse(request, response);
             return response;
         }
 
         public async Task<IRestResponse> ExecuteRequestAsync(IRestRequest request, CancellationToken token = default(CancellationToken))
         {
             var response = await this._restClient.ExecuteTaskAsync(request, token).ConfigureAwait(false);
-            GetValidJsonFromResponse(response);
+            GetValidJsonFromResponse(request, response);
             return response;
         }
 
@@ -149,9 +149,17 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        private JToken GetValidJsonFromResponse(IRestResponse response)
+        private JToken GetValidJsonFromResponse(IRestRequest request, IRestResponse response)
         {
             var content = response.Content != null ? response.Content.Trim() : string.Empty;
+
+            if (this._clientSettings.EnableRequestTrace)
+            {
+                Trace.WriteLine(String.Format("[{0}] Response for Url: {1}\n{2}",
+                    request.Method,
+                    request.Resource,
+                    content));
+            }
 
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
