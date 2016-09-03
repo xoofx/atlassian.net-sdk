@@ -142,7 +142,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public async Task TransitionIssueAsyncWithComment()
+        public async Task TransitionIssueAsyncWithCommentAndFields()
         {
             var issue = _jira.CreateIssue("TST");
             issue.Summary = "Issue to resolve with async" + _random.Next(int.MaxValue);
@@ -151,13 +151,16 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Null(issue.ResolutionDate);
             var updates = new WorkflowTransitionUpdates() { Comment = "Comment with transition" };
+            issue.FixVersions.Add("2.0");
 
             await issue.WorkflowTransitionAsync(WorkflowActions.Resolve, updates, CancellationToken.None);
 
-            Assert.Equal("Resolved", issue.Status.Name);
-            Assert.Equal("Fixed", issue.Resolution.Name);
+            var updatedIssue = await _jira.Issues.GetIssueAsync(issue.Key.Value);
+            Assert.Equal("Resolved", updatedIssue.Status.Name);
+            Assert.Equal("Fixed", updatedIssue.Resolution.Name);
+            Assert.Equal("2.0", updatedIssue.FixVersions.First().Name);
 
-            var comments = issue.GetCommentsAsync().Result;
+            var comments = updatedIssue.GetCommentsAsync().Result;
             Assert.Equal(1, comments.Count());
             Assert.Equal("Comment with transition", comments.First().Body);
         }
