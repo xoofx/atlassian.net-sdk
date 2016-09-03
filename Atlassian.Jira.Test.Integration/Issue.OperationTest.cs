@@ -234,7 +234,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void UploadAndDownloadOfAttachments()
+        public void AddGetRemoveAttachmentsFromIssue()
         {
             var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
             var issue = new Issue(_jira, "TST")
@@ -262,6 +262,10 @@ namespace Atlassian.Jira.Test.Integration
             var tempFile = Path.GetTempFileName();
             attachments.First(a => a.FileName.Equals("testfile1.txt")).Download(tempFile);
             Assert.Equal("Test File Content 1", File.ReadAllText(tempFile));
+
+            // remove an attachment
+            issue.DeleteAttachmentAsync(attachments.First()).Wait();
+            Assert.Equal(1, issue.GetAttachmentsAsync().Result.Count());
         }
 
         [Fact]

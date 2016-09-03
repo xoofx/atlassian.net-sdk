@@ -187,6 +187,14 @@ namespace Atlassian.Jira
         Task AddAttachmentsAsync(string issueKey, UploadAttachmentInfo[] attachments, CancellationToken token = default(CancellationToken));
 
         /// <summary>
+        /// Removes an attachment from an issue.
+        /// </summary>
+        /// <param name="issueKey">Issue key to remove the attachment from.</param>
+        /// <param name="attachmentId">Identifier of the attachment to remove.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task DeleteAttachmentAsync(string issueKey, string attachmentId, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
         /// Gets the worklog with the given identifier from an issue.
         /// </summary>
         /// <param name="issueKey">The issue key to retrieve the worklog from.</param>

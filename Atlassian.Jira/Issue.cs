@@ -661,6 +661,21 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Removes an attachment from this issue.
+        /// </summary>
+        /// <param name="attachment">Attachment to remove.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task DeleteAttachmentAsync(Attachment attachment, CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to delete attachment from server, issue has not been created.");
+            }
+
+            return _jira.Issues.DeleteAttachmentAsync(_originalIssue.key, attachment.Id, token);
+        }
+
+        /// <summary>
         /// Gets a dictionary with issue field names as keys and their metadata as values.
         /// </summary>
         public Task<IDictionary<String, IssueFieldEditMetadata>> GetIssueFieldsEditMetadataAsync(CancellationToken token = default(CancellationToken))

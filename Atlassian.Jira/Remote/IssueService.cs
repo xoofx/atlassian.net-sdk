@@ -367,6 +367,13 @@ namespace Atlassian.Jira.Remote
             return _jira.RestClient.ExecuteRequestAsync(request, token);
         }
 
+        public Task DeleteAttachmentAsync(string issueKey, string attachmentId, CancellationToken token = default(CancellationToken))
+        {
+            var resource = String.Format("rest/api/2/attachment/{0}", attachmentId);
+
+            return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
+        }
+
         public async Task<IDictionary<string, Issue>> GetIssuesAsync(IEnumerable<string> issueKeys, CancellationToken token = default(CancellationToken))
         {
             if (issueKeys.Any())
