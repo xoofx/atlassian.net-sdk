@@ -92,6 +92,9 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(summaryValue, queriedIssue.Summary);
             Assert.NotNull(queriedIssue.JiraIdentifier);
             Assert.Equal(expectedDueDate, queriedIssue.DueDate.Value);
+            Assert.NotNull(queriedIssue.Priority.IconUrl);
+            Assert.NotNull(queriedIssue.Type.IconUrl);
+            Assert.NotNull(queriedIssue.Status.IconUrl);
         }
 
         [Fact]

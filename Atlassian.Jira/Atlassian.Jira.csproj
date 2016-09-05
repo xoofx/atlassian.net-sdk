@@ -133,7 +133,7 @@
     <Compile Include="Issue.cs" />
     <Compile Include="IWebClient.cs" />
     <Compile Include="Jira.cs" />
-    <Compile Include="JiraConstant.cs" />
+    <Compile Include="JiraNamedConstant.cs" />
     <Compile Include="JiraNamedEntity.cs" />
     <Compile Include="Linq\ExpressionEvaluator.cs" />
     <Compile Include="Linq\ExpressionTreeModifier.cs" />

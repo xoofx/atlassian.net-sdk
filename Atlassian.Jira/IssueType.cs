@@ -11,7 +11,7 @@ namespace Atlassian.Jira
     /// <summary>
     /// The type of the issue as defined in JIRA
     /// </summary>
-    public class IssueType : JiraNamedEntity
+    public class IssueType : JiraNamedConstant
     {
         private bool _isSubTask;
 

@@ -11,12 +11,12 @@ namespace Atlassian.Jira
     /// <summary>
     /// The priority of the issue as defined in JIRA
     /// </summary>
-    public class IssuePriority : JiraNamedEntity
+    public class IssuePriority : JiraNamedConstant
     {
         /// <summary>
         /// Creates an instance of the IssuePriority based on a remote entity.
         /// </summary>
-        public IssuePriority(AbstractNamedRemoteEntity remoteEntity)
+        public IssuePriority(RemotePriority remoteEntity)
             : base(remoteEntity)
         {
         }

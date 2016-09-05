@@ -38,6 +38,7 @@ namespace Atlassian.Jira.Test.Integration
             // In addition, rest API contains "Sub-Task" as an issue type.
             Assert.True(issueTypes.Count() >= 5);
             Assert.True(issueTypes.Any(i => i.Name == "Bug"));
+            Assert.NotNull(issueTypes.First().IconUrl);
         }
 
         [Fact]
@@ -46,6 +47,7 @@ namespace Atlassian.Jira.Test.Integration
             var priorities = _jira.Priorities.GetPrioritiesAsync().Result;
 
             Assert.True(priorities.Any(i => i.Name == "Blocker"));
+            Assert.NotNull(priorities.First().IconUrl);
         }
 
         [Fact]
@@ -62,6 +64,7 @@ namespace Atlassian.Jira.Test.Integration
             var statuses = _jira.Statuses.GetStatusesAsync().Result;
 
             Assert.True(statuses.Any(i => i.Name == "Open"));
+            Assert.NotNull(statuses.First().IconUrl);
         }
 
         [Fact]

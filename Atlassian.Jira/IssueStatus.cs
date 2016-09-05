@@ -11,12 +11,12 @@ namespace Atlassian.Jira
     /// <summary>
     /// The status of the issue as defined in JIRA
     /// </summary>
-    public class IssueStatus : JiraNamedEntity
+    public class IssueStatus : JiraNamedConstant
     {
         /// <summary>
         /// Creates an instance of the IssueStatus based on a remote entity.
         /// </summary>
-        public IssueStatus(AbstractNamedRemoteEntity remoteEntity)
+        public IssueStatus(RemoteStatus remoteEntity)
             : base(remoteEntity)
         {
         }

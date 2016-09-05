@@ -1888,38 +1888,8 @@ namespace Atlassian.Jira.Remote
     [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
     public abstract partial class AbstractRemoteConstant : AbstractNamedRemoteEntity
     {
-
-        private string descriptionField;
-
-        private string iconField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string description
-        {
-            get
-            {
-                return this.descriptionField;
-            }
-            set
-            {
-                this.descriptionField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string icon
-        {
-            get
-            {
-                return this.iconField;
-            }
-            set
-            {
-                this.iconField = value;
-            }
-        }
+        public string description { get; set; }
+        public string iconUrl { get; set; }
     }
 
     /// <remarks/>
