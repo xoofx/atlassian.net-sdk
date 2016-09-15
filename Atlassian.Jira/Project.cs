@@ -74,6 +74,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// The URL set on the project.
+        /// </summary>
+        public string Url
+        {
+            get
+            {
+                return _remoteProject.url;
+            }
+        }
+
+        /// <summary>
         /// Gets an object to interact with the versions of this project.
         /// </summary>
         [Obsolete("Use methods on the Project instead.")]
