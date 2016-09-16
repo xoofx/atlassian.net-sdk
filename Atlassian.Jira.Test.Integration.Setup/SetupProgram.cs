@@ -17,6 +17,9 @@ namespace Atlassian.Jira.Test.Integration.Setup
         {
             var currentDir = Path.GetDirectoryName(typeof(SetupProgram).Assembly.Location);
             var arg = args.Length > 0 ? args[0].ToLowerInvariant() : null;
+            var user = args.Length > 1 ? args[1].ToLowerInvariant() : null;
+            var pass = args.Length > 2 ? args[2].ToLowerInvariant() : null;
+
             Environment.CurrentDirectory = currentDir;
 
             if (arg != null && arg.Equals("start", StringComparison.OrdinalIgnoreCase))
@@ -25,7 +28,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
             }
             else if (arg != null && arg.Equals("restore", StringComparison.OrdinalIgnoreCase))
             {
-                SetupJira(currentDir);
+                SetupJira(currentDir, user, pass);
             }
             else
             {
@@ -40,8 +43,9 @@ namespace Atlassian.Jira.Test.Integration.Setup
             Console.WriteLine("To setup JIRA to run integration tests:");
             Console.WriteLine("  1. 'JiraSetup.exe start'");
             Console.WriteLine("  2. Wait until tomcat container is fully ready.");
-            Console.WriteLine("  3. 'JiraSetup.exe restore'.");
-            Console.WriteLine("  4. Wait until the back up restore is complete.");
+            Console.WriteLine("  3. Manually login to JIRA once and skip all the tutorials if needed.");
+            Console.WriteLine("  4. 'JiraSetup.exe restore <user> <pass>'.");
+            Console.WriteLine("  5. Wait until the back up restore is complete.");
             Console.WriteLine("-------------------------------------------------------");
         }
 
@@ -57,7 +61,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
             process.Start();
         }
 
-        private static void SetupJira(string currentDir)
+        private static void SetupJira(string currentDir, string user, string pass)
         {
             var webDriver = new ChromeDriver();
 
@@ -66,14 +70,14 @@ namespace Atlassian.Jira.Test.Integration.Setup
             Console.WriteLine("-------------------------------------------------------");
 
             // Login
-            LoginToJira(webDriver);
+            LoginToJira(webDriver, user, pass);
 
             // Restore TestData
             RestoreTestData(webDriver, currentDir);
-            
+
             // Login again
-            LoginToJira(webDriver);
-            
+            LoginToJira(webDriver, user, pass);
+
             // Install Jira software if necessary.
             InstallJiraSoftware(webDriver);
 
@@ -110,7 +114,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
                            where name.Equals("Jira Software", StringComparison.OrdinalIgnoreCase)
                            select section;
 
-            return sections.FirstOrDefault();            
+            return sections.FirstOrDefault();
         };
 
         private static void InstallJiraSoftware(ChromeDriver webDriver)
@@ -135,11 +139,11 @@ namespace Atlassian.Jira.Test.Integration.Setup
             }
         }
 
-        private static void LoginToJira(ChromeDriver webDriver)
+        private static void LoginToJira(ChromeDriver webDriver, string user = "admin", string pass = "admin")
         {
             webDriver.Url = "http://localhost:2990/jira/login.jsp";
-            WaitForElement(webDriver, By.Id("login-form-username")).SendKeys("admin");
-            WaitForElement(webDriver, By.Id("login-form-password")).SendKeys("admin");
+            WaitForElement(webDriver, By.Id("login-form-username")).SendKeys(user);
+            WaitForElement(webDriver, By.Id("login-form-password")).SendKeys(pass);
             WaitForElement(webDriver, By.Id("login-form-submit")).Click();
             WaitForElement(webDriver, By.Id("header-details-user-fullname"), TimeSpan.FromSeconds(60));
         }
