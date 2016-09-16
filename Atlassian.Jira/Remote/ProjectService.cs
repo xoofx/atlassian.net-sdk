@@ -22,7 +22,7 @@ namespace Atlassian.Jira.Remote
             var cache = _jira.Cache;
             if (!cache.Projects.Any())
             {
-                var remoteProjects = await _jira.RestClient.ExecuteRequestAsync<RemoteProject[]>(Method.GET, "rest/api/2/project?expand=lead", null, token).ConfigureAwait(false);
+                var remoteProjects = await _jira.RestClient.ExecuteRequestAsync<RemoteProject[]>(Method.GET, "rest/api/2/project?expand=lead,url", null, token).ConfigureAwait(false);
                 cache.Projects.TryAdd(remoteProjects.Select(p => new Project(_jira, p)));
             }
 
