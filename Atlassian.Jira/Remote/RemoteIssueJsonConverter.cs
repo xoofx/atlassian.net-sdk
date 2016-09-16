@@ -106,7 +106,14 @@ namespace Atlassian.Jira.Remote
 
         private string GetCustomFieldType(string customFieldId)
         {
-            return this._remoteFields.First(f => f.id.Equals(customFieldId, StringComparison.InvariantCultureIgnoreCase)).CustomFieldType;
+            var remoteField = this._remoteFields.FirstOrDefault(f => f.id.Equals(customFieldId, StringComparison.InvariantCultureIgnoreCase));
+
+            if (remoteField == null)
+            {
+                throw new InvalidOperationException($"Custom field with id '{customFieldId}' found on issue does not exist on the list of known custom fields returned by Jira.");
+            }
+
+            return remoteField.CustomFieldType;
         }
 
         private void AddCustomFieldValuesToObject(RemoteIssue remoteIssue, JObject jObject)
