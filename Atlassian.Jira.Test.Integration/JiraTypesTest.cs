@@ -144,6 +144,14 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void GetProject()
+        {
+            var project = _jira.Projects.GetProjectAsync("TST").Result;
+            Assert.Equal("admin", project.Lead);
+            Assert.Equal("Test Project", project.Name);
+        }
+
+        [Fact]
         public void GetIssueLinkTypes()
         {
             var linkTypes = _jira.Links.GetLinkTypesAsync().Result;
