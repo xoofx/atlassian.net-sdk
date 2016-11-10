@@ -80,6 +80,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// The start date for this version
+        /// </summary>
+        public DateTime? StartDate
+        {
+            get
+            {
+                return _remoteVersion.startDate;
+            }
+        }
+
+        /// <summary>
         /// The released date for this version (null if not yet released)
         /// </summary>
         public DateTime? ReleasedDate

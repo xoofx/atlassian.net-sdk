@@ -1605,6 +1605,8 @@ namespace Atlassian.Jira.Remote
 
         private bool archivedField;
 
+        private System.Nullable<System.DateTime> startDateField;
+
         private System.Nullable<System.DateTime> releaseDateField;
 
         private bool releasedField;
@@ -1629,6 +1631,20 @@ namespace Atlassian.Jira.Remote
             set
             {
                 this.archivedField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        public System.Nullable<System.DateTime> startDate
+        {
+            get
+            {
+                return this.startDateField;
+            }
+            set
+            {
+                this.startDateField = value;
             }
         }
 
