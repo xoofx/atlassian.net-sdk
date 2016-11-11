@@ -17,8 +17,8 @@ namespace Atlassian.Jira.Test.Integration.Setup
         {
             var currentDir = Path.GetDirectoryName(typeof(SetupProgram).Assembly.Location);
             var arg = args.Length > 0 ? args[0].ToLowerInvariant() : null;
-            var user = args.Length > 1 ? args[1].ToLowerInvariant() : null;
-            var pass = args.Length > 2 ? args[2].ToLowerInvariant() : null;
+            var user = args.Length > 1 ? args[1].ToLowerInvariant() : "admin";
+            var pass = args.Length > 2 ? args[2].ToLowerInvariant() : "admin";
 
             Environment.CurrentDirectory = currentDir;
 
@@ -139,7 +139,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
             }
         }
 
-        private static void LoginToJira(ChromeDriver webDriver, string user = "admin", string pass = "admin")
+        private static void LoginToJira(ChromeDriver webDriver, string user, string pass)
         {
             webDriver.Url = "http://localhost:2990/jira/login.jsp";
             WaitForElement(webDriver, By.Id("login-form-username")).SendKeys(user);
