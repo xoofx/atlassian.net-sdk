@@ -41,6 +41,6 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="user">todo:</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<JiraUser> CreatUserAsync(JiraUserCreationInfo user, CancellationToken token = default(CancellationToken));
+        Task<JiraUser> CreateUserAsync(JiraUserCreationInfo user, CancellationToken token = default(CancellationToken));
     }
 }

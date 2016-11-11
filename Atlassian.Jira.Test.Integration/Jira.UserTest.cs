@@ -27,7 +27,7 @@ namespace Atlassian.Jira.Test.Integration
             var userInfo = BuildUserInfo();
 
             // verify create a user.
-            var user = _jira.Users.CreatUserAsync(userInfo).Result;
+            var user = _jira.Users.CreateUserAsync(userInfo).Result;
             Assert.Equal(user.Email, userInfo.Email);
             Assert.Equal(user.DisplayName, userInfo.DisplayName);
             Assert.Equal(user.Username, userInfo.Username);
