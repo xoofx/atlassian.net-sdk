@@ -1,6 +1,7 @@
 ﻿using Atlassian.Jira.Remote;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,6 +12,8 @@ namespace Atlassian.Jira
     /// <summary>
     /// The resolution of the issue as defined in JIRA
     /// </summary>
+    [SuppressMessage("N/A", "CS0660", Justification = "Operator overloads are used for LINQ to JQL provider.")]
+    [SuppressMessage("N/A", "CS0661", Justification = "Operator overloads are used for LINQ to JQL provider.")]
     public class IssueResolution : JiraNamedEntity
     {
         /// <summary>
