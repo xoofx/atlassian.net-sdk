@@ -88,6 +88,10 @@ namespace Atlassian.Jira
             {
                 return _remoteVersion.startDate;
             }
+            set
+            {
+                _remoteVersion.startDate = value;
+            }
         }
 
         /// <summary>

@@ -52,5 +52,11 @@ namespace Atlassian.Jira
         /// </summary>
         [JsonProperty("releaseDate")]
         public DateTime? ReleaseDate { get; set; }
+
+        /// <summary>
+        /// The start date, null if version has not been started yet.
+        /// </summary>
+        [JsonProperty("startDate")]
+        public DateTime? StartDate { get; set; }
     }
 }
