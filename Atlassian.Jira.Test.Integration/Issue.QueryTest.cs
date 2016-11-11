@@ -26,7 +26,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // Act: Query for paged issues.
             var jql = String.Format("summary ~ \"{0}\"", summaryValue);
-            var result = _jira.Issues.GetIsssuesFromJqlAsync(jql, 5, 1).Result as IPagedQueryResult<Issue>;
+            var result = _jira.Issues.GetIssuesFromJqlAsync(jql, 5, 1).Result as IPagedQueryResult<Issue>;
 
             // Assert
             Assert.Equal(1, result.StartAt);
@@ -101,7 +101,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public async Task GetIssuesFromJqlAsync()
         {
-            var issues = await _jira.Issues.GetIsssuesFromJqlAsync("key = TST-1");
+            var issues = await _jira.Issues.GetIssuesFromJqlAsync("key = TST-1");
             Assert.Equal(issues.Count(), 1);
         }
     }

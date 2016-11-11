@@ -338,7 +338,7 @@ namespace Atlassian.Jira
         [Obsolete("Use Jira.Issues instead.")]
         public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0, CancellationToken token = default(CancellationToken))
         {
-            return this.Issues.GetIsssuesFromJqlAsync(jql, maxIssues, startAt, token);
+            return this.Issues.GetIssuesFromJqlAsync(jql, maxIssues, startAt, token);
         }
 
         /// <summary>

@@ -43,7 +43,7 @@ namespace Atlassian.Jira.Linq
         {
             var jql = _translator.Process(expression);
 
-            var temp = _issues.GetIsssuesFromJqlAsync(jql.Expression, jql.NumberOfResults).Result;
+            var temp = _issues.GetIssuesFromJqlAsync(jql.Expression, jql.NumberOfResults).Result;
             IQueryable<Issue> issues = temp.AsQueryable();
 
             if (isEnumerable)

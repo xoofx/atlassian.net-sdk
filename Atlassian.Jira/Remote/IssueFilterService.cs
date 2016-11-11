@@ -32,7 +32,7 @@ namespace Atlassian.Jira.Remote
                 throw new InvalidOperationException(String.Format("Filter with name '{0}' was not found.", filterName));
             }
 
-            return await _jira.Issues.GetIsssuesFromJqlAsync(filter.Jql, maxIssues, startAt, token).ConfigureAwait(false);
+            return await _jira.Issues.GetIssuesFromJqlAsync(filter.Jql, maxIssues, startAt, token).ConfigureAwait(false);
         }
     }
 }

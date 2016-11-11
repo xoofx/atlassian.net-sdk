@@ -63,7 +63,7 @@ namespace Atlassian.Jira.Remote
             return new Issue(_jira, issue.RemoteIssue);
         }
 
-        public async Task<IPagedQueryResult<Issue>> GetIsssuesFromJqlAsync(string jql, int? maxIssues = default(int?), int startAt = 0, CancellationToken token = default(CancellationToken))
+        public async Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = default(int?), int startAt = 0, CancellationToken token = default(CancellationToken))
         {
             if (_jira.Debug)
             {
@@ -347,7 +347,7 @@ namespace Atlassian.Jira.Remote
         public Task<IPagedQueryResult<Issue>> GetSubTasksAsync(string issueKey, int? maxIssues = default(int?), int startAt = 0, CancellationToken token = default(CancellationToken))
         {
             var jql = String.Format("parent = {0}", issueKey);
-            return GetIsssuesFromJqlAsync(jql, maxIssues, startAt, token);
+            return GetIssuesFromJqlAsync(jql, maxIssues, startAt, token);
         }
 
         public Task AddAttachmentsAsync(string issueKey, UploadAttachmentInfo[] attachments, CancellationToken token = default(CancellationToken))
@@ -380,7 +380,7 @@ namespace Atlassian.Jira.Remote
             {
                 var distinctKeys = issueKeys.Distinct();
                 var jql = String.Format("key in ({0})", String.Join(",", distinctKeys));
-                var result = await this.GetIsssuesFromJqlAsync(jql, distinctKeys.Count(), 0, token).ConfigureAwait(false);
+                var result = await this.GetIssuesFromJqlAsync(jql, distinctKeys.Count(), 0, token).ConfigureAwait(false);
                 return result.ToDictionary<Issue, string>(i => i.Key.Value);
             }
             else

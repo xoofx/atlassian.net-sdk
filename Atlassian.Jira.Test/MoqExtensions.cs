@@ -18,7 +18,7 @@ namespace Atlassian.Jira.Test
             var pagedResult = new Mock<IPagedQueryResult<Issue>>();
             var issues = remoteIssues.Select(i => i.ToLocal(jira));
             pagedResult.Setup(p => p.GetEnumerator()).Returns(issues.GetEnumerator());
-            mock.Setup(s => s.GetIsssuesFromJqlAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            mock.Setup(s => s.GetIssuesFromJqlAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(pagedResult.Object));
         }
 

@@ -218,7 +218,7 @@ namespace Atlassian.Jira.Test.Integration
             };
             issue.SaveChanges();
 
-            var subtasks = _jira.Issues.GetIsssuesFromJqlAsync("project = TST and parent = TST-1").Result;
+            var subtasks = _jira.Issues.GetIssuesFromJqlAsync("project = TST and parent = TST-1").Result;
 
             Assert.True(subtasks.Any(s => s.Summary.Equals(summaryValue)),
                 String.Format("'{0}' was not found as a sub-task of TST-1", summaryValue));
