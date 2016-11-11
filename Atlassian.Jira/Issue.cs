@@ -38,8 +38,6 @@ namespace Atlassian.Jira
         private CustomFieldValueCollection _customFields = null;
         private IssueStatus _status;
         private string _parentIssueKey;
-        private IssueLabels _labels;
-        private IssueWatchers _watchers;
 
         /// <summary>
         /// Creates a new Issue.
@@ -75,8 +73,6 @@ namespace Atlassian.Jira
             _dueDate = remoteIssue.duedate;
             _updateDate = remoteIssue.updated;
             _resolutionDate = remoteIssue.resolutionDateReadOnly;
-            _labels = new IssueLabels(this._jira.Issues, remoteIssue);
-            _watchers = new IssueWatchers(this._jira.Issues, remoteIssue.key);
             _securityLevel = remoteIssue.securityLevelReadOnly;
 
             Assignee = remoteIssue.assignee;
@@ -128,30 +124,6 @@ namespace Atlassian.Jira
             get
             {
                 return this._originalIssue;
-            }
-        }
-
-        /// <summary>
-        /// Get an object to interact with the labels of this issue.
-        /// </summary>
-        [Obsolete("Use Issue.GetLabelsAsync and Issue.SetLabelsAsync instead.")]
-        public IssueLabels Labels
-        {
-            get
-            {
-                return _labels;
-            }
-        }
-
-        /// <summary>
-        /// Get an object to interact with the watchers of this issue.
-        /// </summary>
-        [Obsolete("Use Issue.Add/Get/RemoveWatcher instead.")]
-        public IssueWatchers Watchers
-        {
-            get
-            {
-                return _watchers;
             }
         }
 
@@ -466,25 +438,6 @@ namespace Atlassian.Jira
         /// <param name="inwardIssueKey">Key of the issue to link.</param>
         /// <param name="linkName">Name of the issue link type.</param>
         /// <param name="comment">Comment to add to this issue.</param>
-        [Obsolete("Use Issue.LinkToIssueAsync instead.")]
-        public void LinkToIssue(string inwardIssueKey, string linkName, string comment = null)
-        {
-            try
-            {
-                this.LinkToIssueAsync(inwardIssueKey, linkName, comment, CancellationToken.None).Wait();
-            }
-            catch (AggregateException ex)
-            {
-                throw ex.Flatten().InnerException;
-            }
-        }
-
-        /// <summary>
-        /// Creates a link between this issue and the issue specified.
-        /// </summary>
-        /// <param name="inwardIssueKey">Key of the issue to link.</param>
-        /// <param name="linkName">Name of the issue link type.</param>
-        /// <param name="comment">Comment to add to this issue.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         public Task LinkToIssueAsync(string inwardIssueKey, string linkName, string comment = null, CancellationToken token = default(CancellationToken))
         {
@@ -499,22 +452,6 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets the issue links associated with this issue.
         /// </summary>
-        [Obsolete("Use Issue.GetIssueLinksAsync instead.")]
-        public IEnumerable<IssueLink> GetIssueLinks()
-        {
-            try
-            {
-                return this.GetIssueLinksAsync(CancellationToken.None).Result;
-            }
-            catch (AggregateException ex)
-            {
-                throw ex.Flatten().InnerException;
-            }
-        }
-
-        /// <summary>
-        /// Gets the issue links associated with this issue.
-        /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IEnumerable<IssueLink>> GetIssueLinksAsync(CancellationToken token = default(CancellationToken))
         {
@@ -524,16 +461,6 @@ namespace Atlassian.Jira
             }
 
             return this.Jira.Links.GetLinksForIssueAsync(_originalIssue.key, token);
-        }
-
-        /// <summary>
-        /// Transition an issue through a workflow action.
-        /// </summary>
-        /// <param name="actionName">The workflow action to transition to.</param>
-        [Obsolete("Use Issue.WorkflowTransitionAsync instead.")]
-        public void WorkflowTransition(string actionName)
-        {
-            WorkflowTransitionAsync(actionName).Wait();
         }
 
         /// <summary>
@@ -559,24 +486,6 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="maxIssues">Maximum number of issues to retrieve.</param>
         /// <param name="startAt">Index of the first issue to return (0-based).</param>
-        [Obsolete("Use Issue.GetSubTasksAsync instead.")]
-        public IPagedQueryResult<Issue> GetSubTasks(int? maxIssues = null, int startAt = 0)
-        {
-            try
-            {
-                return this.GetSubTasksAsync(maxIssues, startAt).Result;
-            }
-            catch (AggregateException ex)
-            {
-                throw ex.Flatten().InnerException;
-            }
-        }
-
-        /// <summary>
-        /// Returns the issues that are marked as sub tasks of this issue.
-        /// </summary>
-        /// <param name="maxIssues">Maximum number of issues to retrieve.</param>
-        /// <param name="startAt">Index of the first issue to return (0-based).</param>
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IPagedQueryResult<Issue>> GetSubTasksAsync(int? maxIssues = null, int startAt = 0, CancellationToken token = default(CancellationToken))
         {
@@ -586,15 +495,6 @@ namespace Atlassian.Jira
             }
 
             return _jira.Issues.GetSubTasksAsync(_originalIssue.key, maxIssues, startAt, token);
-        }
-
-        /// <summary>
-        /// Retrieve attachment metadata from server for this issue
-        /// </summary>
-        [Obsolete("Use Issue.GetAttachmentsAsync instead.")]
-        public IEnumerable<Attachment> GetAttachments()
-        {
-            return GetAttachmentsAsync().Result;
         }
 
         /// <summary>
@@ -691,22 +591,6 @@ namespace Atlassian.Jira
         /// <summary>
         /// Retrieve change logs from server for this issue.
         /// </summary>
-        [Obsolete("Use Issue.GetChangeLogsAsync instead.")]
-        public IEnumerable<IssueChangeLog> GetChangeLogs()
-        {
-            try
-            {
-                return GetChangeLogsAsync(CancellationToken.None).Result;
-            }
-            catch (AggregateException ex)
-            {
-                throw ex.Flatten().InnerException;
-            }
-        }
-
-        /// <summary>
-        /// Retrieve change logs from server for this issue.
-        /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IEnumerable<IssueChangeLog>> GetChangeLogsAsync(CancellationToken token = default(CancellationToken))
         {
@@ -716,15 +600,6 @@ namespace Atlassian.Jira
             }
 
             return _jira.Issues.GetChangeLogsAsync(_originalIssue.key, token);
-        }
-
-        /// <summary>
-        /// Retrieve comments from server for this issue
-        /// </summary>
-        [Obsolete("Use Issue.GetCommentsAsync instead.")]
-        public ReadOnlyCollection<Comment> GetComments()
-        {
-            return GetCommentsAsync().Result.ToList().AsReadOnly();
         }
 
         /// <summary>
@@ -755,26 +630,6 @@ namespace Atlassian.Jira
             }
 
             return this.Jira.Issues.GetPagedCommentsAsync(this.Key.Value, maxComments, startAt, token);
-        }
-
-        /// <summary>
-        /// Add a comment to this issue.
-        /// </summary>
-        /// <param name="comment">Comment text to add.</param>
-        [Obsolete("Use Issue.AddCommentAsync instead.")]
-        public void AddComment(string comment)
-        {
-            this.AddCommentAsync(comment).Wait();
-        }
-
-        /// <summary>
-        /// Add a comment to this issue.
-        /// </summary>
-        /// <param name="comment">Comment object to add.</param>
-        [Obsolete("Use Issue.AddCommentAsync instead.")]
-        public void AddComment(Comment comment)
-        {
-            AddCommentAsync(comment).Wait();
         }
 
         /// <summary>
@@ -817,16 +672,6 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Add labels to this issue
-        /// </summary>
-        /// <param name="labels">Label(s) to add</param>
-        [Obsolete("Use the Issue.SetLabelsAsync instead.", true)]
-        public void AddLabels(params string[] labels)
-        {
-            SetLabelsAsync(labels).Wait();
-        }
-
-        /// <summary>
         /// Sets the labels of this issue.
         /// </summary>
         /// <param name="labels">The list of labels to set on the issue</param>
@@ -848,36 +693,6 @@ namespace Atlassian.Jira
             }
 
             return _jira.Issues.SetLabelsAsync(_originalIssue.key, labels, token);
-        }
-
-        /// <summary>
-        ///  Adds a worklog to this issue.
-        /// </summary>
-        /// <param name="timespent">Specifies a time duration in JIRA duration format, representing the time spent working on the worklog</param>
-        /// <param name="worklogStrategy">How to handle the remaining estimate, defaults to AutoAdjustRemainingEstimate</param>
-        /// <param name="newEstimate">New estimate (only used if worklogStrategy set to NewRemainingEstimate)</param>
-        /// <returns>Worklog as constructed by server</returns>
-        [Obsolete("Use Issue.AddWorklogAsync instead.")]
-        public Worklog AddWorklog(string timespent,
-                                  WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate,
-                                  string newEstimate = null)
-        {
-            return AddWorklogAsync(new Worklog(timespent, DateTime.Now), worklogStrategy, newEstimate).Result;
-        }
-
-        /// <summary>
-        ///  Adds a worklog to this issue.
-        /// </summary>
-        /// <param name="worklog">The worklog instance to add</param>
-        /// <param name="worklogStrategy">How to handle the remaining estimate, defaults to AutoAdjustRemainingEstimate</param>
-        /// <param name="newEstimate">New estimate (only used if worklogStrategy set to NewRemainingEstimate)</param>
-        /// <returns>Worklog as constructed by server</returns>
-        [Obsolete("Use Issue.AddWorklogAsync instead.")]
-        public Worklog AddWorklog(Worklog worklog,
-                                  WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate,
-                                  string newEstimate = null)
-        {
-            return AddWorklogAsync(worklog, worklogStrategy, newEstimate).Result;
         }
 
         /// <summary>
@@ -917,15 +732,6 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Deletes the worklog with the given id and updates the remaining estimate field on the isssue
-        /// </summary>
-        [Obsolete("Use Issue.DeleteWorklogAsync instead.")]
-        public void DeleteWorklog(Worklog worklog, WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate, string newEstimate = null)
-        {
-            this.DeleteWorklogAsync(worklog, worklogStrategy, newEstimate).Wait();
-        }
-
-        /// <summary>
         /// Deletes the given worklog from the issue and updates the remaining estimate field.
         /// </summary>
         /// <param name="worklog">The worklog to remove.</param>
@@ -943,15 +749,6 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Retrieve worklogs for current issue
-        /// </summary>
-        [Obsolete("Use Issue.GetWorklogsAsync instead.")]
-        public ReadOnlyCollection<Worklog> GetWorklogs()
-        {
-            return GetWorklogsAsync().Result.ToList().AsReadOnly();
-        }
-
-        /// <summary>
         /// Retrieve worklogs for this issue.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
@@ -963,16 +760,6 @@ namespace Atlassian.Jira
             }
 
             return _jira.Issues.GetWorklogsAsync(_originalIssue.key, token);
-        }
-
-        /// <summary>
-        /// Retrieve the resolution date for this issue.
-        /// </summary>
-        /// <returns>Resultion date for this issue, null if it hasn't been resolved.</returns>
-        [Obsolete("Use Issue.ResolutionDate instead.")]
-        public DateTime? GetResolutionDate()
-        {
-            return this._resolutionDate;
         }
 
         /// <summary>
@@ -1001,16 +788,6 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets the workflow actions that the issue can be transitioned to.
         /// </summary>
-        /// <returns></returns>
-        [Obsolete("Use Issue.GetAvailableActionsAsync instead.")]
-        public IEnumerable<JiraNamedEntity> GetAvailableActions()
-        {
-            return GetAvailableActionsAsync().Result;
-        }
-
-        /// <summary>
-        /// Gets the workflow actions that the issue can be transitioned to.
-        /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IEnumerable<JiraNamedEntity>> GetAvailableActionsAsync(CancellationToken token = default(CancellationToken))
         {
@@ -1020,15 +797,6 @@ namespace Atlassian.Jira
             }
 
             return this._jira.Issues.GetActionsAsync(_originalIssue.key, token);
-        }
-
-        /// <summary>
-        /// Gets time tracking information for this issue.
-        /// </summary>
-        [Obsolete("Use Issue.GetTimeTrackingDataAsync instead.")]
-        public IssueTimeTrackingData GetTimeTrackingData()
-        {
-            return _jira.Issues.GetTimeTrackingDataAsync(_originalIssue.key).Result;
         }
 
         /// <summary>

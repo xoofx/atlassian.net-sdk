@@ -32,24 +32,8 @@ namespace Atlassian.Jira.Remote
         /// Executes a request.
         /// </summary>
         /// <param name="request">Request object.</param>
-        [Obsolete("Use ExecuteRequestAsync instead.")]
-        IRestResponse ExecuteRequest(IRestRequest request);
-
-        /// <summary>
-        /// Executes a request.
-        /// </summary>
-        /// <param name="request">Request object.</param>
         /// <param name="token">Cancellation token for the operation.</param>
         Task<IRestResponse> ExecuteRequestAsync(IRestRequest request, CancellationToken token = default(CancellationToken));
-
-        /// <summary>
-        /// Executes a request and returns the response as JSON.
-        /// </summary>
-        /// <param name="method">Request method.</param>
-        /// <param name="resource">Request resource url.</param>
-        /// <param name="requestBody">Request body to be serialized.</param>
-        [Obsolete("Use ExecuteRequestAsync instead.")]
-        JToken ExecuteRequest(Method method, string resource, object requestBody = null);
 
         /// <summary>
         /// Executes an async request and returns the response as JSON.
@@ -59,16 +43,6 @@ namespace Atlassian.Jira.Remote
         /// <param name="requestBody">Request body to be serialized.</param>
         /// <param name="token">Cancellation token for the operation.</param>
         Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null, CancellationToken toke = default(CancellationToken));
-
-        /// <summary>
-        /// Executes a request and serializes the response to an object.
-        /// </summary>
-        /// <typeparam name="T">Type to serialize the reponse.</typeparam>
-        /// <param name="method">Request method.</param>
-        /// <param name="resource">Request resource url.</param>
-        /// <param name="requestBody">Request body to be serialized.</param>
-        [Obsolete("Use ExecuteRequestAsync instead.")]
-        T ExecuteRequest<T>(Method method, string resource, object requestBody = null);
 
         /// <summary>
         /// Executes an async request and serializes the response to an object.

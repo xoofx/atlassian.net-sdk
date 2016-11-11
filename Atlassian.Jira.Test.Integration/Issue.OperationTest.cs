@@ -387,7 +387,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SetLabelsAsync("label1", "label2").Wait();
 
             issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
-            Assert.Equal(2, issue.Labels.Cached.Length);
+            Assert.Equal(2, 3 /*issue.Labels.Cached.Length*/);
 
             issue.SetLabelsAsync("label1", "label2", "label3").Wait();
             Assert.Equal(3, issue.GetLabelsAsync().Result.Length);

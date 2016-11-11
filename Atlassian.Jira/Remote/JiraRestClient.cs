@@ -57,30 +57,6 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        public JToken ExecuteRequest(Method method, string resource, object requestBody = null)
-        {
-            try
-            {
-                return ExecuteRequestAsync(method, resource, requestBody).Result;
-            }
-            catch (AggregateException ex)
-            {
-                throw ex.Flatten().InnerException;
-            }
-        }
-
-        public T ExecuteRequest<T>(Method method, string resource, object requestBody = null)
-        {
-            try
-            {
-                return ExecuteRequestAsync<T>(method, resource, requestBody).Result;
-            }
-            catch (AggregateException ex)
-            {
-                throw ex.Flatten().InnerException;
-            }
-        }
-
         public async Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null, CancellationToken token = default(CancellationToken))
         {
             var result = await ExecuteRequestAsync(method, resource, requestBody, token).ConfigureAwait(false);
@@ -112,13 +88,6 @@ namespace Atlassian.Jira.Remote
             LogRequest(request, requestBody);
             var response = await this._restClient.ExecuteTaskAsync(request, token).ConfigureAwait(false);
             return GetValidJsonFromResponse(request, response);
-        }
-
-        public IRestResponse ExecuteRequest(IRestRequest request)
-        {
-            var response = this._restClient.Execute(request);
-            GetValidJsonFromResponse(request, response);
-            return response;
         }
 
         public async Task<IRestResponse> ExecuteRequestAsync(IRestRequest request, CancellationToken token = default(CancellationToken))

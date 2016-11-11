@@ -146,27 +146,6 @@ namespace Atlassian.Jira
             return customField.Id;
         }
 
-        /// <summary>
-        /// Changes context of collection to operate against fields for edit.
-        /// </summary>
-        /// <returns>Current collection with changed context/</returns>
-        [Obsolete("CustomFieldValueCollection can now operate on all custom fields by default.")]
-        public CustomFieldValueCollection ForEdit()
-        {
-            return this;
-        }
-
-        /// <summary>
-        /// Changes context of collection to operate against fields for action.
-        /// </summary>
-        /// <param name="actionId">Id of action as defined in JIRA.</param>
-        /// <returns>Current collection with changed context/</returns>
-        [Obsolete("CustomFieldValueCollection can now operate on all custom fields by default.")]
-        public CustomFieldValueCollection ForAction(string actionId)
-        {
-            return this;
-        }
-
         Task<RemoteFieldValue[]> IRemoteIssueFieldProvider.GetRemoteFieldValuesAsync(CancellationToken token)
         {
             var fieldValues = this.Items
