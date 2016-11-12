@@ -272,7 +272,7 @@ namespace Atlassian.Jira.Remote
             var serializerSettings = await this.GetIssueSerializerSettingsAsync(token).ConfigureAwait(false);
             var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource).ConfigureAwait(false);
             var issue = JsonConvert.DeserializeObject<RemoteIssueWrapper>(response.ToString(), serializerSettings);
-            return issue.RemoteIssue.labelsReadOnly ?? new string[0];
+            return issue.RemoteIssue.labels ?? new string[0];
         }
 
         public Task SetLabelsAsync(string issueKey, string[] labels, CancellationToken token = default(CancellationToken))

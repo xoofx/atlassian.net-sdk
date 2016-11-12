@@ -372,28 +372,6 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void AddAndRetriveLabelsFromIssue()
-        {
-            var summaryValue = "Test issue with labels (Updated)" + _random.Next(int.MaxValue);
-
-            var issue = new Issue(_jira, "TST")
-            {
-                Type = "1",
-                Summary = summaryValue,
-                Assignee = "admin"
-            };
-
-            issue.SaveChanges();
-            issue.SetLabelsAsync("label1", "label2").Wait();
-
-            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
-            Assert.Equal(2, 3 /*issue.Labels.Cached.Length*/);
-
-            issue.SetLabelsAsync("label1", "label2", "label3").Wait();
-            Assert.Equal(3, issue.GetLabelsAsync().Result.Length);
-        }
-
-        [Fact]
         public void AddAndGetWorklogs()
         {
             var summaryValue = "Test issue with work logs" + _random.Next(int.MaxValue);

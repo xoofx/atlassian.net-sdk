@@ -111,6 +111,7 @@ namespace Atlassian.Jira.Test.Integration
             serverIssue.DueDate = new DateTime(2011, 10, 10);
             serverIssue.Environment = "Updated Environment";
             serverIssue.Summary = "Updated " + summaryValue;
+            serverIssue.Labels.Add("testLabel");
             serverIssue.SaveChanges();
 
             // assert, get the issue again and verify
@@ -121,6 +122,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Updated " + summaryValue, newServerIssue.Summary);
             Assert.Equal("Updated Description", newServerIssue.Description);
             Assert.Equal("Updated Environment", newServerIssue.Environment);
+            Assert.Contains("testLabel", newServerIssue.Labels);
             Assert.Equal(serverIssue.DueDate, newServerIssue.DueDate);
         }
 
@@ -235,6 +237,34 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(2, issue.Components.Count);
             Assert.True(issue.Components.Any(c => c.Name == "Server"));
             Assert.True(issue.Components.Any(c => c.Name == "Client"));
+        }
+
+        [Fact]
+        public void AddAndRemoveLabelsFromIssue()
+        {
+            var summaryValue = "Test issue with labels (Updated)" + _random.Next(int.MaxValue);
+
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            issue.Labels.Add("label1", "label2");
+            issue.SaveChanges();
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal(2, issue.Labels.Count);
+
+            issue.Labels.RemoveAt(0);
+            issue.SaveChanges();
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal(1, issue.Labels.Count);
+
+            issue.Labels.Clear();
+            issue.SaveChanges();
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal(0, issue.Labels.Count);
         }
 
         [Fact]

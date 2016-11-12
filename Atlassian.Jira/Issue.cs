@@ -36,6 +36,7 @@ namespace Atlassian.Jira
         private ProjectVersionCollection _fixVersions = null;
         private ProjectComponentCollection _components = null;
         private CustomFieldValueCollection _customFields = null;
+        private IssueLabelCollection _labels = null;
         private IssueStatus _status;
         private string _parentIssueKey;
 
@@ -110,6 +111,9 @@ namespace Atlassian.Jira
                 v.ProjectKey = _originalIssue.project;
                 return new ProjectVersion(_jira, v);
             }).ToList());
+
+            var labels = _originalIssue.labels ?? new string[0];
+            _labels = new IssueLabelCollection(labels.ToList());
 
             var components = _originalIssue.components ?? Enumerable.Empty<RemoteComponent>();
             _components = new ProjectComponentCollection("components", _jira, Project, components.Select(c =>
@@ -343,6 +347,17 @@ namespace Atlassian.Jira
             get
             {
                 return _fixVersions;
+            }
+        }
+
+        /// <summary>
+        /// The labels assigned to this issue.
+        /// </summary>
+        public IssueLabelCollection Labels
+        {
+            get
+            {
+                return _labels;
             }
         }
 
@@ -661,6 +676,7 @@ namespace Atlassian.Jira
         /// Retrieve the labels from server for this issue.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
+        [Obsolete("Use Issue.Labels instead.")]
         public Task<string[]> GetLabelsAsync(CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
@@ -675,6 +691,7 @@ namespace Atlassian.Jira
         /// Sets the labels of this issue.
         /// </summary>
         /// <param name="labels">The list of labels to set on the issue</param>
+        [Obsolete("Modify the Issue.Labels collection and call Issue.SaveChanges to update the labels field.")]
         public Task SetLabelsAsync(params string[] labels)
         {
             return SetLabelsAsync(labels, CancellationToken.None);
@@ -685,6 +702,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="labels">The list of labels to set on the issue</param>
         /// <param name="token">Cancellation token for this operation.</param>
+        [Obsolete("Modify the Issue.Labels collection and call Issue.SaveChanges to update the labels field.")]
         public Task SetLabelsAsync(string[] labels, CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
@@ -972,6 +990,11 @@ namespace Atlassian.Jira
                     customfieldId = f.Id,
                     values = f.Values
                 }).ToArray();
+            }
+
+            if (this.Labels.Count > 0)
+            {
+                remote.labels = this.Labels.ToArray();
             }
 
             return remote;

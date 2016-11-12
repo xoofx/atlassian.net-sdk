@@ -82,6 +82,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.Reporter = "admin";
             issue.Summary = summaryValue;
             issue.Type = "1";
+            issue.Labels.Add("testLabel");
 
             issue.SaveChanges();
 
@@ -95,6 +96,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.NotNull(queriedIssue.Priority.IconUrl);
             Assert.NotNull(queriedIssue.Type.IconUrl);
             Assert.NotNull(queriedIssue.Status.IconUrl);
+            Assert.Contains("testLabel", queriedIssue.Labels);
         }
 
         [Fact]

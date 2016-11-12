@@ -8,7 +8,7 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class BaseIntegrationTest
     {
-        public const string HOST = "http://localhost:2990/jira";
+        public const string HOST = "http://feanor:2990/jira";
 
         protected readonly Jira _jira;
         protected readonly Random _random;

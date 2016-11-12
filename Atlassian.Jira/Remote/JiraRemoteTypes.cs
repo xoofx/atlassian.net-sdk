@@ -1362,7 +1362,7 @@ namespace Atlassian.Jira.Remote
 
         [System.Xml.Serialization.SoapIgnore]
         [JsonProperty("labels")]
-        public string[] labelsReadOnly { get; set; }
+        public string[] labels { get; set; }
 
         [JsonProperty("security")]
         public IssueSecurityLevel securityLevelReadOnly { get; set; }

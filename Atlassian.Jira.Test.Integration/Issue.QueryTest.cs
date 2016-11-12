@@ -55,6 +55,26 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void QueryIssueWithLabel()
+        {
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue with labels",
+                Assignee = "admin"
+            };
+
+            issue.Labels.Add("test-label");
+            issue.SaveChanges();
+
+            var serverIssue = (from i in _jira.Issues.Queryable
+                               where i.Labels == "test-label"
+                               select i).First();
+
+            Assert.Contains("test-label", serverIssue.Labels);
+        }
+
+        [Fact]
         public void QueryIssueWithCustomDateField()
         {
             var issue = (from i in _jira.Issues.Queryable
