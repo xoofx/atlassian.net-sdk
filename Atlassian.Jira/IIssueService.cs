@@ -129,6 +129,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="issueKey">The issue key to get labels from.</param>
         /// <param name="token">Cancellation token for this operation.</param>
+        [Obsolete("Use Issue.Labels instead.")]
         Task<string[]> GetLabelsAsync(string issueKey, CancellationToken token = default(CancellationToken));
 
         /// <summary>
@@ -137,6 +138,7 @@ namespace Atlassian.Jira
         /// <param name="issueKey">The issue key to set the labels.</param>
         /// <param name="labels">The list of labels to set on the issue.</param>
         /// <param name="token">Cancellation token for this operation.</param>
+        [Obsolete("Modify the Issue.Labels collection and call Issue.SaveChanges to update the labels field.")]
         Task SetLabelsAsync(string issueKey, string[] labels, CancellationToken token = default(CancellationToken));
 
         /// <summary>
