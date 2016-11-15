@@ -117,7 +117,13 @@ namespace Atlassian.Jira.Remote
             var issueWrapper = new RemoteIssueWrapper(remoteIssue);
             var serializerSettings = await this.GetIssueSerializerSettingsAsync(token).ConfigureAwait(false);
             var issueJson = JsonConvert.SerializeObject(issueWrapper, serializerSettings);
-            var issueFields = JObject.Parse(issueJson)["fields"] as JObject;
+
+            var fieldsJsonSerializerSettings = new JsonSerializerSettings()
+            {
+                DateParseHandling = DateParseHandling.None
+            };
+
+            var issueFields = JsonConvert.DeserializeObject<JObject>(issueJson, fieldsJsonSerializerSettings)["fields"] as JObject;
             var updateFields = new JObject();
 
             foreach (var field in remoteFields)

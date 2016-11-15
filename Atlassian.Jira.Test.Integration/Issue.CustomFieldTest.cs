@@ -51,6 +51,10 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void CreateAndQueryIssueWithComplexCustomFields()
         {
+            var dateTime = new DateTime(2016, 11, 11, 11, 11, 0);
+            var dateTimeStr = dateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffzzz");
+            dateTimeStr = dateTimeStr.Remove(dateTimeStr.LastIndexOf(":"), 1);
+
             var summaryValue = "Test issue with lots of custom fields (Created)" + _random.Next(int.MaxValue);
             var issue = new Issue(_jira, "TST")
             {
@@ -61,6 +65,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue["Custom Text Field"] = "My new value";
             issue["Custom Date Field"] = "2015-10-03";
+            issue["Custom DateTime Field"] = dateTimeStr;
             issue["Custom User Field"] = "admin";
             issue["Custom Select Field"] = "Blue";
             issue["Custom Group Field"] = "jira-users";
@@ -89,6 +94,9 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("1.0", newIssue["Custom Version Field"]);
             Assert.Equal("option1", newIssue["Custom Radio Field"]);
             Assert.Equal("12.34", newIssue["Custom Number Field"]);
+
+            var serverDate = DateTime.Parse(newIssue["Custom DateTime Field"].Value);
+            Assert.Equal(dateTime, serverDate);
 
             Assert.Equal(new string[2] { "label1", "label2" }, newIssue.CustomFields["Custom Labels Field"].Values);
             Assert.Equal(new string[2] { "jira-developers", "jira-users" }, newIssue.CustomFields["Custom Multi Group Field"].Values);
@@ -134,6 +142,10 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void CreateAndUpdateIssueWithComplexCustomFields()
         {
+            var dateTime = new DateTime(2016, 11, 11, 11, 11, 0);
+            var dateTimeStr = dateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffzzz");
+            dateTimeStr = dateTimeStr.Remove(dateTimeStr.LastIndexOf(":"), 1);
+
             var summaryValue = "Test issue with lots of custom fields (Created)" + _random.Next(int.MaxValue);
             var issue = new Issue(_jira, "TST")
             {
@@ -148,6 +160,7 @@ namespace Atlassian.Jira.Test.Integration
 
             newIssue["Custom Text Field"] = "My new value";
             newIssue["Custom Date Field"] = "2015-10-03";
+            newIssue["Custom DateTime Field"] = dateTimeStr;
             newIssue["Custom User Field"] = "admin";
             newIssue["Custom Select Field"] = "Blue";
             newIssue["Custom Group Field"] = "jira-users";
@@ -176,6 +189,9 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("1.0", updatedIssue["Custom Version Field"]);
             Assert.Equal("option1", updatedIssue["Custom Radio Field"]);
             Assert.Equal("1234", updatedIssue["Custom Number Field"]);
+
+            var serverDate = DateTime.Parse(updatedIssue["Custom DateTime Field"].Value);
+            Assert.Equal(dateTime, serverDate);
 
             Assert.Equal(new string[2] { "label1", "label2" }, updatedIssue.CustomFields["Custom Labels Field"].Values);
             Assert.Equal(new string[2] { "jira-developers", "jira-users" }, updatedIssue.CustomFields["Custom Multi Group Field"].Values);
