@@ -328,7 +328,10 @@ namespace Atlassian.Jira.Test.Integration
 
             var comments = issue.GetCommentsAsync().Result;
             Assert.Equal(1, comments.Count());
-            Assert.Equal("new comment", comments.First().Body);
+
+            var comment = comments.First();
+            Assert.Equal("new comment", comment.Body);
+            Assert.Equal(DateTime.Now.Year, comment.CreatedDate.Value.Year);
         }
 
         [Fact]
