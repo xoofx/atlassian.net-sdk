@@ -14,6 +14,7 @@ namespace Atlassian.Jira.Linq
         private StringBuilder _jqlWhere;
         private StringBuilder _jqlOrderBy;
         private int? _numberOfResults;
+        private int? _skipResults;
         private List<Expression> _whereExpressions;
 
         public string Jql
@@ -32,6 +33,14 @@ namespace Atlassian.Jira.Linq
             }
         }
 
+        public int? SkipResults
+        {
+            get
+            {
+                return _skipResults;
+            }
+        }
+
         public JqlData Process(Expression expression)
         {
             expression = ExpressionEvaluator.PartialEval(expression);
@@ -40,7 +49,7 @@ namespace Atlassian.Jira.Linq
             _whereExpressions = new List<Expression>();
 
             this.Visit(expression);
-            return new JqlData { Expression = Jql, NumberOfResults = _numberOfResults };
+            return new JqlData { Expression = Jql, NumberOfResults = _numberOfResults, SkipResults = _skipResults };
         }
 
         private string GetFieldNameFromBinaryExpression(BinaryExpression expression)
@@ -248,6 +257,10 @@ namespace Atlassian.Jira.Linq
             {
                 ProcessWhere(node);
             }
+            else if (node.Method.Name == "Skip")
+            {
+                ProcessSkip(node);
+            }
 
             return base.VisitMethodCall(node);
         }
@@ -261,6 +274,11 @@ namespace Atlassian.Jira.Linq
         private void ProcessTake(MethodCallExpression node)
         {
             _numberOfResults = int.Parse(((ConstantExpression)node.Arguments[1]).Value.ToString());
+        }
+
+        private void ProcessSkip(MethodCallExpression node)
+        {
+            _skipResults = int.Parse(((ConstantExpression)node.Arguments[1]).Value.ToString());
         }
 
         private void ProcessOrderBy(MethodCallExpression node)

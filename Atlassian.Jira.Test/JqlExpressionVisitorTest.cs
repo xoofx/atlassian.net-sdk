@@ -409,6 +409,18 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void SkipWithConstant()
+        {
+            var queryable = CreateQueryable();
+
+            var issues = (from i in queryable
+                          where i.Assignee == "foo"
+                          select i).Skip(25).Take(50).ToArray();
+
+            Assert.Equal(25, _translator.SkipResults);
+        }
+
+        [Fact]
         public void TakeWithLocalVariable()
         {
             var queryable = CreateQueryable();
