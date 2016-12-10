@@ -9,7 +9,7 @@ namespace Atlassian.Jira
     [Flags]
     public enum JiraUserStatus
     {
-        Active = 0,
-        Inactive = 1
+        Active = 1,
+        Inactive = 2
     }
 }
