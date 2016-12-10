@@ -42,7 +42,7 @@ namespace Atlassian.Jira.Remote
         public Task<IEnumerable<JiraUser>> SearchUsersAsync(string query, JiraUserStatus userStatus = JiraUserStatus.Active, int maxResults = 50, int startAt = 0, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format(
-                "rest/api/2/user/search?username={0}&includeActive={1}&includeInActive={2}&startAt={3}&maxResults={4}",
+                "rest/api/2/user/search?username={0}&includeActive={1}&includeInactive={2}&startAt={3}&maxResults={4}",
                 Uri.EscapeDataString(query),
                 userStatus.HasFlag(JiraUserStatus.Active),
                 userStatus.HasFlag(JiraUserStatus.Inactive),
