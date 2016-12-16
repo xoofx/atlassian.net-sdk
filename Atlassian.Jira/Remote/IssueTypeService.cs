@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using Newtonsoft.Json;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,17 @@ namespace Atlassian.Jira.Remote
             }
 
             return cache.IssueTypes.Values;
+        }
+
+        public async Task<IEnumerable<IssueType>> GetIssueTypesForProjectAsync(string projectKey, CancellationToken token = default(CancellationToken))
+        {
+             var resource = String.Format("rest/api/2/project/{0}", projectKey);
+             var projectJson = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
+             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+
+            return projectJson["issueTypes"]
+                .Select(issueTypeJson => JsonConvert.DeserializeObject<RemoteIssueType>(issueTypeJson.ToString(), serializerSettings))
+                .Select(remoteIssueType => new IssueType(remoteIssueType));
         }
     }
 }

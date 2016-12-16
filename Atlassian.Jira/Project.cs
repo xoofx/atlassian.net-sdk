@@ -81,6 +81,15 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets the issue types for the current project.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<IssueType>> GetIssueTypesAsync(CancellationToken token = default(CancellationToken))
+        {
+            return _jira.IssueTypes.GetIssueTypesForProjectAsync(Key, token);
+        }
+
+        /// <summary>
         /// Creates a new project component.
         /// </summary>
         /// <param name="projectComponent">Information of the new component.</param>
