@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Atlassian.Jira.Test
@@ -51,13 +53,13 @@ namespace Atlassian.Jira.Test
                     environment = "environment",
                     fixVersions = new RemoteVersion[] { new RemoteVersion() { id = "remoteFixVersion" } },
                     key = "key",
-                    priority = "priority",
+                    priority = new RemotePriority() { id = "priority" },
                     project = "project",
                     reporter = "reporter",
-                    resolution = "resolution",
-                    status = "status",
+                    resolution = new RemoteResolution() { id = "resolution" },
+                    status = new RemoteStatus() { id = "status" },
                     summary = "summary",
-                    type = "type",
+                    type = new RemoteIssueType() { id = "type" },
                     updated = new DateTime(2011, 2, 2),
                     votes = 1
                 };
@@ -117,9 +119,15 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void IfFieldsSet_ShouldPopulateFields()
             {
-                var issue = CreateIssue("ProjectKey");
-                var version = new RemoteVersion().ToLocal(TestableJira.Create());
+                var jira = TestableJira.Create();
+                var issue = jira.CreateIssue("ProjectKey");
+                var version = new RemoteVersion().ToLocal(issue.Jira);
                 var component = new RemoteComponent().ToLocal();
+
+                jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssueType("4", "issuetype"), 1)));
+                jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("1", "priority"), 1)));
 
                 issue.AffectsVersions.Add(version);
                 issue.Assignee = "assignee";
@@ -147,13 +155,13 @@ namespace Atlassian.Jira.Test
                 Assert.Equal(new DateTime(2011, 1, 1), remoteIssue.duedate);
                 Assert.Equal("environment", remoteIssue.environment);
                 Assert.Null(remoteIssue.key);
-                Assert.Equal("1", remoteIssue.priority);
+                Assert.Equal("1", remoteIssue.priority.id);
                 Assert.Equal("ProjectKey", remoteIssue.project);
                 Assert.Equal("reporter", remoteIssue.reporter);
                 Assert.Null(remoteIssue.resolution);
                 Assert.Null(remoteIssue.status);
                 Assert.Equal("summary", remoteIssue.summary);
-                Assert.Equal("4", remoteIssue.type);
+                Assert.Equal("4", remoteIssue.type.id);
                 Assert.Null(remoteIssue.updated);
                 Assert.Equal(1, remoteIssue.votes);
             }
@@ -163,14 +171,14 @@ namespace Atlassian.Jira.Test
             {
                 var jira = TestableJira.Create();
                 var issue = jira.CreateIssue("ProjectKey");
-                jira.SoapService.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>()))
-                    .Returns(new RemoteIssueType[]{
-                    new RemoteIssueType() { id = "1", name = "Bug"}});
+                var issueType = new IssueType(new RemoteIssueType() { id = "1", name = "Bug" });
+                jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat<IssueType>(issueType, 1)));
 
                 issue.Type = "Bug";
 
                 var remoteIssue = issue.ToRemote();
-                Assert.Equal("1", remoteIssue.type);
+                Assert.Equal("1", remoteIssue.type.id);
             }
         }
 
@@ -180,20 +188,17 @@ namespace Atlassian.Jira.Test
             public void ReturnsCustomFieldsAdded()
             {
                 var jira = TestableJira.Create();
+                var customField = new CustomField(new RemoteField() { id = "CustomField1", name = "My Custom Field" });
                 var remoteIssue = new RemoteIssue()
                 {
                     key = "TST-1",
                     project = "TST",
-                    type = "1"
-                };
-                var remoteField = new RemoteField()
-                {
-                    id = "CustomField1",
-                    name = "My Custom Field"
+                    type = new RemoteIssueType() { id = "1" }
                 };
 
-                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
-                jira.SoapService.Setup(s => s.GetFieldsForEdit(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteField[1] { remoteField });
+                jira.IssueService.SetupIssues(jira, remoteIssue);
+                jira.IssueFieldService.Setup(c => c.GetCustomFieldsAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat<CustomField>(customField, 1)));
 
                 var issue = jira.CreateIssue("TST");
                 issue["My Custom Field"] = "test value";
@@ -207,11 +212,7 @@ namespace Atlassian.Jira.Test
             public void ExcludesCustomFieldsNotModified()
             {
                 var jira = TestableJira.Create();
-                var remoteField = new RemoteField()
-                {
-                    id = "CustomField1",
-                    name = "My Custom Field"
-                };
+                var customField = new CustomField(new RemoteField() { id = "CustomField1", name = "My Custom Field" });
                 var remoteCustomFieldValue = new RemoteCustomFieldValue()
                 {
                     customfieldId = "CustomField1",
@@ -221,14 +222,18 @@ namespace Atlassian.Jira.Test
                 {
                     key = "TST-1",
                     project = "TST",
-                    type = "1",
+                    type = new RemoteIssueType() { id = "1" },
                     customFieldValues = new RemoteCustomFieldValue[1] { remoteCustomFieldValue }
                 };
 
-                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
-                jira.SoapService.Setup(s => s.GetFieldsForEdit(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteField[1] { remoteField });
+                jira.IssueService.Setup(s => s.GetIssueAsync("TST-1", CancellationToken.None))
+                    .Returns(Task.FromResult(new Issue(jira, remoteIssue)));
+                jira.IssueFieldService.Setup(c => c.GetCustomFieldsAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat<CustomField>(customField, 1)));
+                jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssueType("1"), 1)));
 
-                var issue = jira.GetIssuesFromJql("TST-1").First();
+                var issue = jira.Issues.GetIssueAsync("TST-1").Result;
 
                 var result = GetUpdatedFieldsForIssue(issue);
                 Assert.Equal(0, result.Length);
@@ -238,11 +243,7 @@ namespace Atlassian.Jira.Test
             public void ReturnsCustomFieldThatWasModified()
             {
                 var jira = TestableJira.Create();
-                var remoteField = new RemoteField()
-                {
-                    id = "CustomField1",
-                    name = "My Custom Field"
-                };
+                var customField = new CustomField(new RemoteField() { id = "CustomField1", name = "My Custom Field" });
                 var remoteCustomFieldValue = new RemoteCustomFieldValue()
                 {
                     customfieldId = "CustomField1",
@@ -252,14 +253,18 @@ namespace Atlassian.Jira.Test
                 {
                     key = "TST-1",
                     project = "TST",
-                    type = "1",
+                    type = new RemoteIssueType() { id = "1" },
                     customFieldValues = new RemoteCustomFieldValue[1] { remoteCustomFieldValue }
                 };
 
-                jira.SoapService.Setup(s => s.GetIssuesFromJqlSearch(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>())).Returns(new RemoteIssue[1] { remoteIssue });
-                jira.SoapService.Setup(s => s.GetFieldsForEdit(It.IsAny<string>(), It.IsAny<string>())).Returns(new RemoteField[1] { remoteField });
+                jira.IssueService.Setup(s => s.GetIssueAsync("TST-1", CancellationToken.None))
+                    .Returns(Task.FromResult(new Issue(jira, remoteIssue)));
+                jira.IssueFieldService.Setup(c => c.GetCustomFieldsAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat<CustomField>(customField, 1)));
+                jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssueType("1"), 1)));
 
-                var issue = jira.GetIssuesFromJql("TST-1").First();
+                var issue = jira.Issues.GetIssueAsync("TST-1").Result;
                 issue["My Custom Field"] = "My New Value";
 
                 var result = GetUpdatedFieldsForIssue(issue);
@@ -271,8 +276,12 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void IfIssueTypeWithId_ReturnField()
             {
-                var issue = CreateIssue();
-                issue.Type = "5";
+                var jira = TestableJira.Create();
+                var issue = jira.CreateIssue("TST");
+                issue.Priority = "5";
+
+                jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("5"), 1)));
 
                 var result = GetUpdatedFieldsForIssue(issue);
                 Assert.Equal(1, result.Length);
@@ -283,10 +292,9 @@ namespace Atlassian.Jira.Test
             public void IfIssueTypeWithName_ReturnsFieldWithIdInferred()
             {
                 var jira = TestableJira.Create();
-                jira.SoapService.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>()))
-                                .Returns(new RemoteIssueType[]{
-                                    new RemoteIssueType() { id ="2", name="Task" }
-                                });
+                var issueType = new IssueType(new RemoteIssueType() { id = "2", name = "Task" });
+                jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat<IssueType>(issueType, 1)));
                 var issue = jira.CreateIssue("FOO");
                 issue.Type = "Task";
 
@@ -299,13 +307,12 @@ namespace Atlassian.Jira.Test
             public void IfIssueTypeWithNameNotChanged_ReturnsNoFieldsChanged()
             {
                 var jira = TestableJira.Create();
-                jira.SoapService.Setup(s => s.GetIssueTypes(It.IsAny<string>(), It.IsAny<string>()))
-                                .Returns(new RemoteIssueType[]{
-                                    new RemoteIssueType() { id ="5", name="Task" }
-                                });
+                var issueType = new IssueType(new RemoteIssueType() { id = "5", name = "Task" });
+                jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(issueType, 1)));
                 var remoteIssue = new RemoteIssue()
                 {
-                    type = "5",
+                    type = new RemoteIssueType() { id = "5" },
                 };
 
                 var issue = remoteIssue.ToLocal(jira);
@@ -334,7 +341,8 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void IfString_ReturnAllFieldsThatChanged()
             {
-                var issue = CreateIssue();
+                var jira = TestableJira.Create();
+                var issue = jira.CreateIssue("TST");
                 issue.Summary = "foo";
                 issue.Description = "foo";
                 issue.Assignee = "foo";
@@ -343,6 +351,13 @@ namespace Atlassian.Jira.Test
                 issue.Type = "2";
                 issue.Resolution = "3";
                 issue.Priority = "4";
+
+                jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("4"), 1)));
+                jira.IssueResolutionService.Setup(s => s.GetResolutionsAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssueResolution("4"), 1)));
+                jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssueType("2"), 1)));
 
                 Assert.Equal(8, GetUpdatedFieldsForIssue(issue).Length);
             }
@@ -365,14 +380,17 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void IfComparableEqual_ReturnNoFieldsThatChanged()
             {
+                var jira = TestableJira.Create();
                 var remoteIssue = new RemoteIssue()
                 {
-                    priority = "5",
+                    priority = new RemotePriority() { id = "5" },
                 };
 
-                var issue = remoteIssue.ToLocal(TestableJira.Create());
-
+                var issue = remoteIssue.ToLocal(jira);
                 issue.Priority = "5";
+
+                jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("5"), 1)));
 
                 Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
             }
@@ -380,11 +398,14 @@ namespace Atlassian.Jira.Test
             [Fact]
             public void IfComparable_ReturnsFieldsThatChanged()
             {
-                var issue = CreateIssue();
+                var jira = TestableJira.Create();
+                var issue = jira.CreateIssue("TST");
                 issue.Priority = "5";
 
-                Assert.Equal(1, GetUpdatedFieldsForIssue(issue).Length);
+                jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("1"), 1)));
 
+                Assert.Equal(1, GetUpdatedFieldsForIssue(issue).Length);
             }
 
             [Fact]
@@ -457,25 +478,27 @@ namespace Atlassian.Jira.Test
             {
                 var issue = CreateIssue();
 
-                Assert.Throws(typeof(InvalidOperationException), () => issue.GetAttachments());
+                Assert.Throws(typeof(InvalidOperationException), () => issue.GetAttachmentsAsync().Result);
             }
 
             [Fact]
             public void IfIssueIsCreated_ShouldLoadAttachments()
             {
                 //arrange
-                var jira = TestableJira.Create("token");
-                jira.SoapService.Setup(j => j.GetAttachmentsFromIssue("token", "key"))
-                    .Returns(new RemoteAttachment[1] { new RemoteAttachment() { filename = "attach.txt" } });
+                var jira = TestableJira.Create();
+                var webClient = new Mock<IWebClient>();
+                var remoteAttachment = new RemoteAttachment() { filename = "attach.txt" };
+                jira.IssueService.Setup(j => j.GetAttachmentsAsync("issueKey", It.IsAny<CancellationToken>()))
+                    .Returns(Task.FromResult(Enumerable.Repeat<Attachment>(new Attachment(jira, webClient.Object, remoteAttachment), 1)));
 
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+                var issue = (new RemoteIssue() { key = "issueKey" }).ToLocal(jira);
 
                 //act
-                var attachments = issue.GetAttachments();
+                var attachments = issue.GetAttachmentsAsync().Result;
 
                 //assert
-                Assert.Equal(1, attachments.Count);
-                Assert.Equal("attach.txt", attachments[0].FileName);
+                Assert.Equal(1, attachments.Count());
+                Assert.Equal("attach.txt", attachments.First().FileName);
             }
         }
 
@@ -488,68 +511,17 @@ namespace Atlassian.Jira.Test
 
                 Assert.Throws(typeof(InvalidOperationException), () => issue.AddAttachment("foo", new byte[] { 1 }));
             }
-
-            [Fact]
-            public void AddAttachment_IfIssueCreated_ShouldUpload()
-            {
-                //arrange
-                var jira = TestableJira.Create();
-                jira.FileSystem.Setup(f => f.FileReadAllBytes("foo.txt")).Returns(new byte[] { 1, 2, 3 });
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
-
-                //act
-                issue.AddAttachment("foo.txt");
-
-                //assert
-                jira.SoapService.Verify(j => j.AddBase64EncodedAttachmentsToIssue(
-                                                    "token",
-                                                    "key",
-                                                    new string[] { "foo.txt" },
-                                                    new string[] { "AQID" }));
-            }
-        }
-
-        public class AddLabels
-        {
-            [Fact]
-            public void IfIssueNotCreated_ShouldThrowAnException()
-            {
-                var issue = CreateIssue();
-                Assert.Throws(typeof(InvalidOperationException), () => issue.AddLabels());
-            }
         }
 
         public class WorkflowTransition
         {
-            [Fact]
-            public void IfIssueNotCreated_ShouldThrowAnException()
-            {
-                var issue = CreateIssue();
-                Assert.Throws(typeof(InvalidOperationException), () => issue.WorkflowTransition("foo"));
-            }
-
             [Fact]
             public void IfTransitionNotFound_ShouldThrowAnException()
             {
                 var jira = TestableJira.Create();
                 var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
-                Assert.Throws(typeof(InvalidOperationException), () => issue.WorkflowTransition("foo"));
-            }
-
-            [Fact]
-            public void CallsProgressWorkflowAction()
-            {
-                var jira = TestableJira.Create();
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
-                jira.SoapService.Setup(s => s.GetAvailableActions(It.IsAny<string>(), "key"))
-                                .Returns(new RemoteNamedObject[1] { new RemoteNamedObject() { id = "123", name = "action" } });
-                jira.SoapService.Setup(s => s.ProgressWorkflowAction(It.IsAny<string>(), It.IsAny<RemoteIssue>(), "123", It.IsAny<RemoteFieldValue[]>()))
-                                .Returns(new RemoteIssue() { status = "456" });
-
-                issue.WorkflowTransition("action");
-
-                Assert.Equal("456", issue.Status.Id);
+                Assert.Throws(typeof(AggregateException), () => issue.WorkflowTransitionAsync("foo").Wait());
             }
         }
 
@@ -560,192 +532,24 @@ namespace Atlassian.Jira.Test
             {
                 var issue = CreateIssue();
 
-                Assert.Throws(typeof(InvalidOperationException), () => issue.GetComments());
+                Assert.Throws(typeof(InvalidOperationException), () => issue.GetCommentsAsync().Result);
             }
 
             [Fact]
             public void IfIssueIsCreated_ShouldLoadComments()
             {
                 //arrange
-                var jira = TestableJira.Create("token");
-                jira.SoapService.Setup(j => j.GetCommentsFromIssue("token", "key"))
-                    .Returns(new RemoteComment[1] { new RemoteComment() { body = "the comment" } });
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
+                var jira = TestableJira.Create();
+                jira.IssueService.Setup(j => j.GetCommentsAsync("issueKey", It.IsAny<CancellationToken>()))
+                    .Returns(Task.FromResult(Enumerable.Repeat<Comment>(new Comment() { Body = "the comment" }, 1)));
+                var issue = (new RemoteIssue() { key = "issueKey" }).ToLocal(jira);
 
                 //act
-                var comments = issue.GetComments();
+                var comments = issue.GetCommentsAsync().Result;
 
                 //assert
-                Assert.Equal(1, comments.Count);
-                Assert.Equal("the comment", comments[0].Body);
-            }
-        }
-
-        public class AddComment
-        {
-            [Fact]
-            public void IfIssueNotCreated_ShouldThrowAnException()
-            {
-                var issue = CreateIssue();
-
-                Assert.Throws(typeof(InvalidOperationException), () => issue.AddComment("foo"));
-            }
-
-            [Fact]
-            public void IfCredentialsMissingUserName_ShouldThrownException()
-            {
-                // Arrange
-                var jira = TestableJira.Create("token", new JiraCredentials(null));
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
-
-                // Act
-                Assert.Throws<InvalidOperationException>(() => issue.AddComment("the comment"));
-            }
-
-            [Fact]
-            public void IfIssueCreated_ShouldUpload()
-            {
-                //arrange
-                var jira = TestableJira.Create("token", new JiraCredentials("user", "pass"));
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
-
-                //act
-                issue.AddComment("the comment");
-
-                //assert
-                jira.SoapService.Verify(j => j.AddComment(
-                                                    "token",
-                                                    "key",
-                                                    It.Is<RemoteComment>(r => r.body == "the comment" && r.author == "user")));
-            }
-        }
-
-        public class DeleteWorklog
-        {
-            [Fact]
-            public void IfIssueNotCreated_ShouldThrownAnException()
-            {
-                var issue = CreateIssue();
-
-                Assert.Throws(typeof(InvalidOperationException), () => issue.DeleteWorklog(null));
-            }
-        }
-
-        public class AddWorklog
-        {
-            [Fact]
-            public void IfIssueNotCreated_ShouldThrowAnException()
-            {
-                var issue = CreateIssue();
-
-                Assert.Throws(typeof(InvalidOperationException), () => issue.AddWorklog("foo"));
-            }
-
-            [Fact]
-            public void WithWorklogObject_ShouldCallServiceToCreateLog()
-            {
-                var jira = TestableJira.Create();
-                var work = new Worklog("1m", DateTime.Now) { Comment = "comment" };
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
-
-                var result = issue.AddWorklog(work);
-
-                jira.SoapService.Verify(j => j.AddWorklogAndAutoAdjustRemainingEstimate(
-                    It.IsAny<string>(),
-                    "key",
-                    It.Is<RemoteWorklog>(l => l.timeSpent == "1m" && l.comment == "comment")));
-            }
-
-            [Fact]
-            public void ShouldCallServiceToAddWorkLog()
-            {
-                var jira = TestableJira.Create();
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
-
-                //act
-                var result = issue.AddWorklog("1d");
-
-                //assert
-                jira.SoapService.Verify(j => j.AddWorklogAndAutoAdjustRemainingEstimate(
-                    It.IsAny<string>(),
-                    "key",
-                    It.Is<RemoteWorklog>(l => l.timeSpent == "1d")));
-            }
-
-            [Fact]
-            public void IfRetainRemainingEstimate_ShouldAddWorkLog()
-            {
-                var jira = TestableJira.Create();
-                var remoteWorkLog = new RemoteWorklog() { id = "12345" };
-                jira.SoapService.Setup(s => s.AddWorklogAndRetainRemainingEstimate(
-                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RemoteWorklog>())).Returns(remoteWorkLog);
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
-
-                //act
-                var result = issue.AddWorklog("1d", WorklogStrategy.RetainRemainingEstimate);
-
-                //assert
-                Assert.Equal("12345", result.Id);
-                jira.SoapService.Verify(j => j.AddWorklogAndRetainRemainingEstimate(
-                    "token",
-                    "key",
-                    It.Is<RemoteWorklog>(l => l.timeSpent == "1d")));
-            }
-
-            [Fact]
-            public void IfNewRemainingEstimate_ShouldAddWorkLog()
-            {
-                var jira = TestableJira.Create();
-                var remoteWorkLog = new RemoteWorklog() { id = "12345" };
-                jira.SoapService.Setup(s => s.AddWorklogWithNewRemainingEstimate(
-                    It.IsAny<string>(), It.IsAny<string>(), It.IsAny<RemoteWorklog>(), It.IsAny<string>())).Returns(remoteWorkLog);
-                var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
-
-                //act
-                var result = issue.AddWorklog("1d", WorklogStrategy.NewRemainingEstimate, "5d");
-
-                //assert
-                Assert.Equal("12345", result.Id);
-                jira.SoapService.Verify(j => j.AddWorklogWithNewRemainingEstimate(
-                    "token",
-                    "key",
-                    It.Is<RemoteWorklog>(l => l.timeSpent == "1d"),
-                    "5d"));
-            }
-        }
-
-        public class GetWorklogs
-        {
-            [Fact]
-            public void ShouldGetWorklogsFromServer()
-            {
-                var jira = TestableJira.Create();
-                var logs = new RemoteWorklog[] { new RemoteWorklog() { id = "12345" } };
-                jira.SoapService.Setup(s => s.GetWorkLogs(It.IsAny<string>(), "111")).Returns(logs);
-                var issue = (new RemoteIssue() { key = "111" }).ToLocal(jira);
-
-                var result = issue.GetWorklogs();
-
-                Assert.Equal("12345", result.First().Id);
-            }
-
-            [Fact]
-            public void IfIssueNotCreated_ShouldThrowException()
-            {
-                var issue = new Issue(TestableJira.Create(), "project");
-
-                Assert.Throws(typeof(InvalidOperationException), () => issue.GetWorklogs());
-            }
-        }
-
-        public class Refresh
-        {
-            [Fact]
-            public void Refresh_IfIssueNotCreated_ShouldThrowAnException()
-            {
-                var issue = CreateIssue();
-
-                Assert.Throws(typeof(InvalidOperationException), () => issue.Refresh());
+                Assert.Equal(1, comments.Count());
+                Assert.Equal("the comment", comments.First().Body);
             }
         }
 
@@ -756,7 +560,7 @@ namespace Atlassian.Jira.Test
 
         private static RemoteFieldValue[] GetUpdatedFieldsForIssue(Issue issue)
         {
-            return ((IRemoteIssueFieldProvider)issue).GetRemoteFields();
+            return ((IRemoteIssueFieldProvider)issue).GetRemoteFieldValuesAsync(CancellationToken.None).Result;
         }
     }
 }

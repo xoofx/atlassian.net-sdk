@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,10 +10,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Atlassian.Jira</RootNamespace>
     <AssemblyName>Atlassian.Jira</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +26,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>
     </DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,6 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>2</WarningLevel>
     <DocumentationFile>bin\Release\Atlassian.Jira.xml</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -42,8 +45,8 @@
     <AssemblyOriginatorKeyFile>Atlassian.Jira.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="RestSharp, Version=100.0.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
@@ -66,7 +69,24 @@
     <Compile Include="CascadingSelectCustomField.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableString.cs" />
+    <Compile Include="IJiraGroupService.cs" />
+    <Compile Include="IssueLabelCollection.cs" />
+    <Compile Include="IssueSecurityLevel.cs" />
+    <Compile Include="JiraUserCreationInfo.cs" />
     <Compile Include="CustomField.cs" />
+    <Compile Include="IGroupResource.cs" />
+    <Compile Include="IIssueFieldService.cs" />
+    <Compile Include="IIssueService.cs" />
+    <Compile Include="IIssueFilterService.cs" />
+    <Compile Include="IIssueLinkService.cs" />
+    <Compile Include="IIssuePriorityService.cs" />
+    <Compile Include="IIssueResolutionService.cs" />
+    <Compile Include="IIssueStatusService.cs" />
+    <Compile Include="IIssueTypeService.cs" />
+    <Compile Include="IJiraUserService.cs" />
+    <Compile Include="IProjectComponentService.cs" />
+    <Compile Include="IProjectService.cs" />
+    <Compile Include="IProjectVersionService.cs" />
     <Compile Include="IssueFieldEditMetadata.cs" />
     <Compile Include="IssueFieldEditMetadataSchema.cs" />
     <Compile Include="IssueFieldEditMetadataOperation.cs" />
@@ -75,16 +95,22 @@
     <Compile Include="IPagedQueryResult.cs" />
     <Compile Include="IssueChangeLog.cs" />
     <Compile Include="IssueChangeLogItem.cs" />
-    <Compile Include="IssueLabels.cs" />
     <Compile Include="IssueLink.cs" />
     <Compile Include="IssueLinkType.cs" />
-    <Compile Include="IssueWatchers.cs" />
+    <Compile Include="JiraUserStatus.cs" />
+    <Compile Include="ProjectCategory.cs" />
+    <Compile Include="Remote\IssueFieldService.cs" />
+    <Compile Include="Remote\IssueLinkService.cs" />
+    <Compile Include="Remote\IssuePriorityService.cs" />
+    <Compile Include="Remote\IssueResolutionService.cs" />
+    <Compile Include="Remote\IssueService.cs" />
+    <Compile Include="Remote\IssueStatusService.cs" />
+    <Compile Include="IUserResource.cs" />
     <Compile Include="JiraCache.cs" />
     <Compile Include="JiraUser.cs" />
     <Compile Include="PagedQueryResult.cs" />
+    <Compile Include="ProjectComponentCreationInfo.cs" />
     <Compile Include="ProjectVersionCreationInfo.cs" />
-    <Compile Include="ProjectVersionsEditableResource.cs" />
-    <Compile Include="Remote\IJiraClient.cs" />
     <Compile Include="Remote\IJiraRestClient.cs" />
     <Compile Include="IssueStatus.cs" />
     <Compile Include="IssueResolution.cs" />
@@ -110,22 +136,22 @@
     <Compile Include="Issue.cs" />
     <Compile Include="IWebClient.cs" />
     <Compile Include="Jira.cs" />
-    <Compile Include="JiraConstant.cs" />
+    <Compile Include="JiraNamedConstant.cs" />
     <Compile Include="JiraNamedEntity.cs" />
     <Compile Include="Linq\ExpressionEvaluator.cs" />
     <Compile Include="Linq\ExpressionTreeModifier.cs" />
     <Compile Include="Remote\CustomFieldValueSerializers.cs" />
     <Compile Include="Remote\DateFixupJsonConverter.cs" />
     <Compile Include="Remote\ExtensionMethods.cs" />
-    <Compile Include="Remote\IJiraSoapClient.cs" />
     <Compile Include="Linq\IJqlExpressionVisitor.cs" />
     <Compile Include="Linq\JiraQueryable.cs" />
     <Compile Include="Linq\JiraQueryProvider.cs" />
     <Compile Include="JiraEntityDictionary.cs" />
+    <Compile Include="Remote\IssueTypeService.cs" />
+    <Compile Include="Remote\IssueFilterService.cs" />
+    <Compile Include="Remote\JiraGroupService.cs" />
     <Compile Include="Remote\JiraRestClient.cs" />
-    <Compile Include="Remote\JiraSoapService.cs" />
-    <Compile Include="Remote\JiraSoapServiceClientFactory.cs" />
-    <Compile Include="Remote\JiraSoapServiceClientWrapper.cs" />
+    <Compile Include="Remote\JiraRemoteTypes.cs" />
     <Compile Include="Linq\JqlData.cs" />
     <Compile Include="Linq\JqlExpressionVisitor.cs" />
     <Compile Include="Linq\JiraOperators.cs" />
@@ -135,14 +161,16 @@
     <Compile Include="ProjectVersionCollection.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Remote\JiraUserService.cs" />
+    <Compile Include="Remote\ProjectComponentService.cs" />
+    <Compile Include="Remote\ProjectService.cs" />
+    <Compile Include="Remote\ProjectVersionService.cs" />
     <Compile Include="Remote\RemoteIssueJsonConverter.cs" />
     <Compile Include="Remote\RestSharpJsonSerializer.cs" />
     <Compile Include="Remote\NestedValueJsonConverter.cs" />
     <Compile Include="Remote\RemoteFieldNameAttribute.cs" />
-    <Compile Include="Remote\RemoteWorklogPatchBehavior.cs" />
+    <Compile Include="ServiceLocator.cs" />
     <Compile Include="WorkflowTransitionUpdates.cs" />
-    <Compile Include="Utils\DoubleKeyDictionary.cs" />
-    <Compile Include="Utils\DoubleKeyPairValue.cs" />
     <Compile Include="WebClientWrapper.cs" />
     <Compile Include="WorkflowActions.cs" />
     <Compile Include="Worklog.cs" />

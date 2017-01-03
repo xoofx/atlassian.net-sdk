@@ -18,6 +18,12 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Key of the project to associate with this version.
+        /// </summary>
+        [JsonProperty("project")]
+        public string ProjectKey { get; set; }
+
+        /// <summary>
         /// Name of the project version.
         /// </summary>
         [JsonProperty("name")]
@@ -46,5 +52,11 @@ namespace Atlassian.Jira
         /// </summary>
         [JsonProperty("releaseDate")]
         public DateTime? ReleaseDate { get; set; }
+
+        /// <summary>
+        /// The start date, null if version has not been started yet.
+        /// </summary>
+        [JsonProperty("startDate")]
+        public DateTime? StartDate { get; set; }
     }
 }

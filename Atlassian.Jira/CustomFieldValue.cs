@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -30,10 +30,10 @@ namespace Atlassian.Jira
         /// <summary>
         /// The values of the custom field
         /// </summary>
-        public string[] Values 
-        { 
-            get; 
-            set; 
+        public string[] Values
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -49,15 +49,21 @@ namespace Atlassian.Jira
         /// </summary>
         public string Name
         {
-            get 
+            get
             {
-                if (String.IsNullOrEmpty(_name)) 
+                if (String.IsNullOrEmpty(_name))
                 {
-                    _name = _issue.Jira.GetFieldsForEdit(_issue).First(f => f.Id == _id).Name;
+                    var customField = _issue.Jira.Fields.GetCustomFieldsAsync().Result.FirstOrDefault(f => f.Id == _id);
+                    if (customField == null)
+                    {
+                        throw new InvalidOperationException(String.Format("Custom field with id '{0}' was not found.", _id));
+                    }
+
+                    _name = customField.Name;
                 }
 
-                return _name; 
+                return _name;
             }
-        } 
+        }
     }
 }

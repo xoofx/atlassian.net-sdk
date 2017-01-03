@@ -10,17 +10,23 @@ namespace Atlassian.Jira
     /// </summary>
     public class ProjectVersion : JiraNamedEntity
     {
+        private readonly Jira _jira;
         private RemoteVersion _remoteVersion;
 
-        internal ProjectVersion(Jira jira, RemoteVersion remoteVersion)
-            : base(jira, remoteVersion.id)
+        /// <summary>
+        /// Creates a new instance of a ProjectVersion.
+        /// </summary>
+        /// <param name="jira">The jira instance.</param>
+        /// <param name="remoteVersion">The remote version.</param>
+        public ProjectVersion(Jira jira, RemoteVersion remoteVersion)
+            : base(remoteVersion)
         {
             if (jira == null)
             {
                 throw new ArgumentNullException("jira");
             }
 
-            _name = remoteVersion.name;
+            _jira = jira;
             _remoteVersion = remoteVersion;
         }
 
@@ -29,6 +35,17 @@ namespace Atlassian.Jira
             get
             {
                 return _remoteVersion;
+            }
+        }
+
+        /// <summary>
+        /// Gets the project key associated with this version.
+        /// </summary>
+        public string ProjectKey
+        {
+            get
+            {
+                return _remoteVersion.ProjectKey;
             }
         }
 
@@ -59,6 +76,21 @@ namespace Atlassian.Jira
             set
             {
                 _remoteVersion.released = value;
+            }
+        }
+
+        /// <summary>
+        /// The start date for this version
+        /// </summary>
+        public DateTime? StartDate
+        {
+            get
+            {
+                return _remoteVersion.startDate;
+            }
+            set
+            {
+                _remoteVersion.startDate = value;
             }
         }
 
@@ -111,12 +143,10 @@ namespace Atlassian.Jira
         /// Save field changes to the server.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task SaveChangesAsync(CancellationToken token = default(CancellationToken))
+        public async Task SaveChangesAsync(CancellationToken token = default(CancellationToken))
         {
-            return Jira.RestClient.UpdateVersionAsync(_remoteVersion, token).ContinueWith(task =>
-            {
-                _remoteVersion = task.Result;
-            }, token, TaskContinuationOptions.None, TaskScheduler.Default);
+            var version = await _jira.Versions.UpdateVersionAsync(this, token).ConfigureAwait(false);
+            _remoteVersion = version.RemoteVersion;
         }
     }
 }

@@ -12,21 +12,21 @@ namespace Atlassian.Jira
     public class IssueTimeTrackingData
     {
         [JsonProperty("originalEstimate")]
-        public string OriginalEstimate { get; set; }
+        public string OriginalEstimate { get; private set; }
 
         [JsonProperty("originalEstimateSeconds")]
-        public int OriginalEstimateInSeconds { get; set; }
+        public int OriginalEstimateInSeconds { get; private set; }
 
         [JsonProperty("remainingEstimate")]
-        public string RemainingEstimate { get; set; }
+        public string RemainingEstimate { get; private set; }
 
         [JsonProperty("remainingEstimateSeconds")]
-        public int RemainingEstimateInSeconds { get; set; }
+        public int RemainingEstimateInSeconds { get; private set; }
 
         [JsonProperty("timeSpent")]
-        public string TimeSpent { get; set; }
+        public string TimeSpent { get; private set; }
 
         [JsonProperty("timeSpentSeconds")]
-        public int TimeSpentInSeconds { get; set; }
+        public int TimeSpentInSeconds { get; private set; }
     }
 }

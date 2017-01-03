@@ -40,5 +40,21 @@ namespace Atlassian.Jira
         /// </summary>
         [JsonProperty("self")]
         public string Self { get; private set; }
+
+        public override string ToString()
+        {
+            return Username;
+        }
+        
+        public override bool Equals(object other)
+        {
+            var otherAsThisType = other as JiraUser;
+            return otherAsThisType != null && Username.Equals(otherAsThisType.Username);
+        }
+
+        public override int GetHashCode()
+        {
+            return Username.GetHashCode();
+        }
     }
 }

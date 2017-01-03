@@ -1,37 +1,41 @@
 ﻿using Atlassian.Jira.Remote;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
     /// <summary>
     /// The priority of the issue as defined in JIRA
     /// </summary>
-    public class IssuePriority : JiraNamedEntity
+    [SuppressMessage("N/A", "CS0660", Justification = "Operator overloads are used for LINQ to JQL provider.")]
+    [SuppressMessage("N/A", "CS0661", Justification = "Operator overloads are used for LINQ to JQL provider.")]
+    public class IssuePriority : JiraNamedConstant
     {
         /// <summary>
         /// Creates an instance of the IssuePriority based on a remote entity.
         /// </summary>
-        public IssuePriority(AbstractNamedRemoteEntity remoteEntity)
+        public IssuePriority(RemotePriority remoteEntity)
             : base(remoteEntity)
         {
         }
 
-        internal IssuePriority(Jira jira, string id)
-            : base(jira, id)
+        /// <summary>
+        /// Creates an instance of the IssuePriority with the given id and name.
+        /// </summary>
+        public IssuePriority(string id, string name = null)
+            : base(id, name)
         {
         }
 
-        internal IssuePriority(string name)
-            : base(name)
+        protected override async Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {
-        }
-
-        protected override IEnumerable<JiraNamedEntity> GetEntities(Jira jira, string projectKey = null)
-        {
-            return jira.GetIssuePriorities();
+            var priorities = await jira.Priorities.GetPrioritiesAsync(token).ConfigureAwait(false);
+            return priorities as IEnumerable<JiraNamedEntity>;
         }
 
         /// <summary>
@@ -44,11 +48,11 @@ namespace Atlassian.Jira
                 int id;
                 if (int.TryParse(name, out id))
                 {
-                    return new IssuePriority(null, name /*as id*/);
+                    return new IssuePriority(name /*as id*/);
                 }
                 else
                 {
-                    return new IssuePriority(name);
+                    return new IssuePriority(null, name);
                 }
             }
             else
@@ -75,7 +79,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return entity._name == name;
+                return entity.Name == name;
             }
         }
 
@@ -97,7 +101,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return entity._name != name;
+                return entity.Name != name;
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,6 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueUpdateTest : BaseIntegrationTest
     {
-#if !SOAP
         [Fact]
         public async Task UpdateIssueAsync()
         {
@@ -24,12 +24,12 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             //retrieve the issue from server and update
-            issue = await _jira.RestClient.GetIssueAsync(issue.Key.Value, CancellationToken.None);
+            issue = await _jira.Issues.GetIssueAsync(issue.Key.Value, CancellationToken.None);
             issue.Type = "2";
-            issue = await _jira.RestClient.UpdateIssueAsync(issue, CancellationToken.None);
+
+            var newIssue = await issue.SaveChangesAsync();
             Assert.Equal("2", issue.Type.Id);
         }
-#endif
 
         [Fact]
         public void UpdateNamedEntities_ById()
@@ -76,12 +76,12 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             //retrieve the issue from server and update
-            issue = _jira.GetIssue(issue.Key.Value);
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             issue.Type = "2";
             issue.SaveChanges();
 
             //retrieve again and verify
-            issue = _jira.GetIssue(issue.Key.Value);
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("2", issue.Type.Id);
         }
 
@@ -103,7 +103,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             // act, get an issue and update it
-            var serverIssue = (from i in _jira.Issues
+            var serverIssue = (from i in _jira.Issues.Queryable
                                where i.Key == issue.Key
                                select i).ToArray().First();
 
@@ -111,23 +111,19 @@ namespace Atlassian.Jira.Test.Integration
             serverIssue.DueDate = new DateTime(2011, 10, 10);
             serverIssue.Environment = "Updated Environment";
             serverIssue.Summary = "Updated " + summaryValue;
+            serverIssue.Labels.Add("testLabel");
             serverIssue.SaveChanges();
 
             // assert, get the issue again and verify
-            var newServerIssue = (from i in _jira.Issues
+            var newServerIssue = (from i in _jira.Issues.Queryable
                                   where i.Key == issue.Key
                                   select i).ToArray().First();
 
             Assert.Equal("Updated " + summaryValue, newServerIssue.Summary);
             Assert.Equal("Updated Description", newServerIssue.Description);
             Assert.Equal("Updated Environment", newServerIssue.Environment);
-
-#if SOAP
-            // Note: Dates returned from JIRA are UTC
-            //Assert.Equal(new DateTime(2011, 10, 10).ToUniversalTime(), newServerIssue.DueDate);
-#else
+            Assert.Contains("testLabel", newServerIssue.Labels);
             Assert.Equal(serverIssue.DueDate, newServerIssue.DueDate);
-#endif
         }
 
         [Fact]
@@ -244,6 +240,34 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public void AddAndRemoveLabelsFromIssue()
+        {
+            var summaryValue = "Test issue with labels (Updated)" + _random.Next(int.MaxValue);
+
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            issue.Labels.Add("label1", "label2");
+            issue.SaveChanges();
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal(2, issue.Labels.Count);
+
+            issue.Labels.RemoveAt(0);
+            issue.SaveChanges();
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal(1, issue.Labels.Count);
+
+            issue.Labels.Clear();
+            issue.SaveChanges();
+            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal(0, issue.Labels.Count);
+        }
+
+        [Fact]
         public void UpdateIssueWithCustomField()
         {
             var summaryValue = "Test issue with custom field (Updated)" + _random.Next(int.MaxValue);
@@ -262,6 +286,35 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             Assert.Equal("My updated value", issue["Custom Text Field"]);
+        }
+
+        [Fact]
+        public void CanAccessSecurityLevel()
+        {
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "Bug",
+                Summary = "Test Summary " + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+            issue.SaveChanges();
+            Assert.Null(issue.SecurityLevel);
+
+            var resource = String.Format("rest/api/2/issue/{0}", issue.Key.Value);
+            var body = new
+            {
+                fields = new
+                {
+                    security = new
+                    {
+                        id = "10000"
+                    }
+                }
+            };
+            _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, body).Wait();
+
+            issue.Refresh();
+            Assert.Equal("Test Issue Security Level", issue.SecurityLevel.Name);
         }
     }
 }

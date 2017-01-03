@@ -12,6 +12,26 @@ namespace Atlassian.Jira
     public class JiraNamedResource : IJiraEntity
     {
         /// <summary>
+        /// Creates an instance of JiraNamedResource.
+        /// </summary>
+        public JiraNamedResource()
+        {
+        }
+
+        /// <summary>
+        /// Creates an instance of JiraNamedResource.
+        /// </summary>
+        /// <param name="id">Identifier of the resource.</param>
+        /// <param name="name">Name of the resource.</param>
+        /// <param name="self">Url to the resource.</param>
+        public JiraNamedResource(string id, string name, string self = null)
+        {
+            Id = id;
+            Name = name;
+            Self = self;
+        }
+
+        /// <summary>
         /// Identifier of this resource.
         /// </summary>
         [JsonProperty("id")]

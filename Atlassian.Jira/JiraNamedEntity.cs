@@ -3,45 +3,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// Represents a named entity within JIRA. Abstracts the Version and Component used on issues
+    /// Represents a named entity within JIRA.
     /// </summary>
-    /// <remarks>http://docs.atlassian.com/rpc-jira-plugin/latest/com/atlassian/jira/rpc/soap/beans/AbstractNamedRemoteEntity.html</remarks>
     public class JiraNamedEntity : IJiraEntity
     {
-        private Jira _jira;
         private string _id;
-        protected string _name;
+        private string _name;
 
         /// <summary>
         /// Creates an instance of a JiraNamedEntity base on a remote entity.
         /// </summary>
         public JiraNamedEntity(AbstractNamedRemoteEntity remoteEntity)
+            : this(remoteEntity.id, remoteEntity.name)
         {
-            _id = remoteEntity.id;
-            _name = remoteEntity.name;
         }
 
         /// <summary>
-        /// Creates an instance of a JiraNamedEntity base on a remote entity.
+        /// Creates an instance of a JiraNamedEntity.
         /// </summary>
-        public JiraNamedEntity(Jira jira, AbstractNamedRemoteEntity remoteEntity)
-            : this(remoteEntity)
+        /// <param name="id">Identifier of the entity.</param>
+        /// <param name="name">Name of the entity.</param>
+        public JiraNamedEntity(string id, string name = null)
         {
-            _jira = jira;
-        }
-
-        internal JiraNamedEntity(Jira jira, string id)
-        {
-            _jira = jira;
             _id = id;
-        }
-
-        internal JiraNamedEntity(string name)
-        {
             _name = name;
         }
 
@@ -63,33 +53,11 @@ namespace Atlassian.Jira
         {
             get
             {
-                if (String.IsNullOrEmpty(_name))
-                {
-                    _name = GetEntities(_jira).First(e => e.Id.Equals(_id, StringComparison.OrdinalIgnoreCase)).Name;
-                }
-
                 return _name;
             }
         }
 
-        protected Jira Jira
-        {
-            get { return _jira; }
-        }
-
-        internal JiraNamedEntity LoadByName(Jira jira, string projectKey)
-        {
-            var entity = GetEntities(jira, projectKey).FirstOrDefault(e => e.Name.Equals(_name, StringComparison.OrdinalIgnoreCase));
-
-            if (entity != null)
-            {
-                _id = entity._id;
-                _name = entity._name;
-            }
-            return this;
-        }
-
-        protected virtual IEnumerable<JiraNamedEntity> GetEntities(Jira jira, string projectKey = null)
+        protected virtual Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {
             throw new NotImplementedException();
         }
@@ -104,6 +72,31 @@ namespace Atlassian.Jira
             {
                 return _id;
             }
+        }
+
+        internal async Task<JiraNamedEntity> LoadIdAndNameAsync(Jira jira, CancellationToken token)
+        {
+            if (String.IsNullOrEmpty(_id) || String.IsNullOrEmpty(_name))
+            {
+                var entities = await this.GetEntitiesAsync(jira, token).ConfigureAwait(false);
+                var entity = entities.FirstOrDefault(e =>
+                    String.Equals(e.Name, this._name, StringComparison.OrdinalIgnoreCase)
+                    || String.Equals(e.Id, this._id, StringComparison.OrdinalIgnoreCase));
+
+                if (entity == null)
+                {
+                    throw new InvalidOperationException(String.Format("Entity with id '{0}' and name '{1}' was not found for type '{2}'. Available: [{3}]",
+                        this._id,
+                        this._name,
+                        this.GetType(),
+                        String.Join(",", entities.Select(s => s.Id + ":" + s.Name).ToArray())));
+                }
+
+                _id = entity.Id;
+                _name = entity.Name;
+            }
+
+            return this;
         }
     }
 }

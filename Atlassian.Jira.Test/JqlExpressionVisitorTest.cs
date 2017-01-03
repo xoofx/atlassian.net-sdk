@@ -15,26 +15,26 @@ namespace Atlassian.Jira.Test
     {
         private JqlExpressionVisitor _translator;
 
-        private Jira CreateJiraInstance()
+        private JiraQueryable<Issue> CreateQueryable()
         {
+
             _translator = new JqlExpressionVisitor();
-            var soapClient = new Mock<IJiraSoapClient>();
 
-            soapClient.Setup(r => r.GetIssuesFromJqlSearch(
-                                        It.IsAny<string>(),
-                                        It.IsAny<string>(),
-                                        It.IsAny<int>(),
-                                        It.IsAny<int>())).Returns(new RemoteIssue[0]);
+            var jira = Jira.CreateRestClient("http://foo");
+            var issues = new Mock<IIssueService>();
+            var provider = new JiraQueryProvider(_translator, issues.Object);
 
-            return new Jira(_translator, soapClient.Object, null);
+            issues.SetupIssues(jira, new RemoteIssue());
+
+            return new JiraQueryable<Issue>(provider);
         }
 
         [Fact]
         public void EqualsOperatorForNonString()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Votes == 5
                           select i).ToArray();
 
@@ -44,9 +44,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void EqualsOperatorForStringWithFuzzyEquality()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Summary == "Foo"
                           select i).ToArray();
 
@@ -56,9 +56,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void EqualsOperatorForString()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Assignee == "Foo"
                           select i).ToArray();
 
@@ -68,9 +68,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void NotEqualsOperatorForNonString()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Votes != 5
                           select i).ToArray();
 
@@ -80,9 +80,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void NotEqualsOperatorForStringWithFuzzyEquality()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Summary != "Foo"
                           select i).ToArray();
 
@@ -92,9 +92,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void NotEqualsOperatorForString()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Assignee != "Foo"
                           select i).ToArray();
 
@@ -104,9 +104,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GreaterThanOperator()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Votes > 5
                           select i).ToArray();
 
@@ -116,9 +116,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GreaterThanEqualsOperator()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Votes >= 5
                           select i).ToArray();
 
@@ -128,9 +128,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void LessThanOperator()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Votes < 5
                           select i).ToArray();
 
@@ -140,9 +140,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void LessThanOrEqualsOperator()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Votes <= 5
                           select i).ToArray();
 
@@ -152,9 +152,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void AndKeyWord()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Votes > 5 && i.Votes < 10
                           select i).ToArray();
 
@@ -164,9 +164,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void OrKeyWord()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Votes > 5 || i.Votes < 10
                           select i).ToArray();
 
@@ -176,9 +176,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void AssociativeGrouping()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Votes > 5 && (i.Votes < 10 || i.Votes == 20)
                           select i).ToArray();
 
@@ -188,9 +188,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void IsOperatorForEmptyString()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Summary == ""
                           select i).ToArray();
 
@@ -200,9 +200,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void IsNotOperatorForEmptyString()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Summary != ""
                           select i).ToArray();
 
@@ -212,9 +212,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void IsOperatorForNull()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Summary == null
                           select i).ToArray();
 
@@ -224,9 +224,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void GreaterThanOperatorWhenUsingComparableFieldWithString()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Priority > "foo"
                           select i).ToArray();
 
@@ -236,9 +236,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void EqualsOperatorWhenUsingComparableFieldWithString()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Priority == "foo"
                           select i).ToArray();
 
@@ -248,9 +248,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void OrderBy()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Priority == "1"
                           orderby i.Created
                           select i).ToArray();
@@ -261,9 +261,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void OrderByDescending()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Priority == "1"
                           orderby i.Created descending
                           select i).ToArray();
@@ -274,9 +274,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void MultipleOrderBys()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Priority == "1"
                           orderby i.Created, i.DueDate
                           select i).ToArray();
@@ -287,9 +287,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void MultipleOrderByDescending()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Priority == "1"
                           orderby i.Created, i.DueDate descending
                           select i).ToArray();
@@ -300,9 +300,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void NewDateTime()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Created > new DateTime(2011, 1, 1)
                           select i).ToArray();
 
@@ -312,9 +312,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void MultipleDateTimes()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Created > new DateTime(2011, 1, 1) && i.Created < new DateTime(2012, 1, 1)
                           select i).ToArray();
 
@@ -324,10 +324,10 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void LocalStringVariables()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
             var user = "farmas";
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Assignee == user
                           select i).ToArray();
 
@@ -337,10 +337,10 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void LocalDateVariables()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
             var date = new DateTime(2011, 1, 1);
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Created > date
                           select i).ToArray();
 
@@ -350,10 +350,10 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void DateTimeWithLiteralString()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
             var date = new DateTime(2011, 1, 1);
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Created > new LiteralDateTime(date.ToString("yyyy/MM/dd HH:mm"))
                           select i).ToArray();
 
@@ -369,10 +369,10 @@ namespace Atlassian.Jira.Test
             try
             {
                 Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
-                var jira = CreateJiraInstance();
+                var queryable = CreateQueryable();
                 var date = new DateTime(2011, 1, 1);
 
-                var issues = (from i in jira.Issues
+                var issues = (from i in queryable
                               where i.Created > date
                               select i).ToArray();
 
@@ -387,9 +387,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void DateTimeNow()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Created > DateTime.Now
                           select i).ToArray();
 
@@ -399,9 +399,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void TakeWithConstant()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Assignee == "foo"
                           select i).Take(50).ToArray();
 
@@ -409,12 +409,24 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void SkipWithConstant()
+        {
+            var queryable = CreateQueryable();
+
+            var issues = (from i in queryable
+                          where i.Assignee == "foo"
+                          select i).Skip(25).Take(50).ToArray();
+
+            Assert.Equal(25, _translator.SkipResults);
+        }
+
+        [Fact]
         public void TakeWithLocalVariable()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
             var take = 100;
 
-            var issues = (from i in jira.Issues
+            var issues = (from i in queryable
                           where i.Assignee == "foo"
                           select i).Take(take).ToArray();
 
@@ -424,8 +436,8 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void VersionsEqual()
         {
-            var jira = CreateJiraInstance();
-            var issues = (from i in jira.Issues
+            var queryable = CreateQueryable();
+            var issues = (from i in queryable
                           where i.FixVersions == "1.0" && i.AffectsVersions == "2.0"
                           select i).ToArray();
 
@@ -435,8 +447,8 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void ComponentEqual()
         {
-            var jira = CreateJiraInstance();
-            var issues = (from i in jira.Issues
+            var queryable = CreateQueryable();
+            var issues = (from i in queryable
                           where i.Components == "foo"
                           select i).ToArray();
 
@@ -446,8 +458,8 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void VersionsNotEqual()
         {
-            var jira = CreateJiraInstance();
-            var issues = (from i in jira.Issues
+            var queryable = CreateQueryable();
+            var issues = (from i in queryable
                           where i.FixVersions != "1.0" && i.AffectsVersions != "2.0"
                           select i).ToArray();
 
@@ -457,8 +469,8 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void ComponentNotEqual()
         {
-            var jira = CreateJiraInstance();
-            var issues = (from i in jira.Issues
+            var queryable = CreateQueryable();
+            var issues = (from i in queryable
                           where i.Components != "foo"
                           select i).ToArray();
 
@@ -468,8 +480,8 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void CustomFieldEqual()
         {
-            var jira = CreateJiraInstance();
-            var issues = (from i in jira.Issues
+            var queryable = CreateQueryable();
+            var issues = (from i in queryable
                           where i["Foo"] == "foo" && i["Bar"] == new DateTime(2012, 1, 1) && i["Baz"] == new LiteralMatch("baz")
                           select i).ToArray();
 
@@ -479,8 +491,8 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void CustomFieldNotEqual()
         {
-            var jira = CreateJiraInstance();
-            var issues = (from i in jira.Issues
+            var queryable = CreateQueryable();
+            var issues = (from i in queryable
                           where i["Foo"] != "foo" && i["Bar"] != new DateTime(2012, 1, 1) && i["Baz"] != new LiteralMatch("baz")
                           select i).ToArray();
 
@@ -490,8 +502,8 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void CustomFieldGreaterThan()
         {
-            var jira = CreateJiraInstance();
-            var issues = (from i in jira.Issues
+            var queryable = CreateQueryable();
+            var issues = (from i in queryable
                           where i["Foo"] > "foo" && i["Bar"] > new DateTime(2012, 1, 1)
                           select i).ToArray();
 
@@ -501,9 +513,9 @@ namespace Atlassian.Jira.Test
         [Fact]
         public void MultipleSeparateWheres()
         {
-            var jira = CreateJiraInstance();
+            var queryable = CreateQueryable();
 
-            var issues = from i in jira.Issues
+            var issues = from i in queryable
                          where i.Votes == 5
                          select i;
 

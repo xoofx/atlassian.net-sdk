@@ -37,14 +37,14 @@ namespace Atlassian.Jira.Remote
 
     public class RemoteIssueJsonConverter : JsonConverter
     {
-        private readonly RemoteField[] _remoteFields;
+        private readonly IEnumerable<RemoteField> _remoteFields;
         private readonly IDictionary<string, ICustomFieldValueSerializer> _customFieldSerializers;
         private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings()
         {
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        public RemoteIssueJsonConverter(RemoteField[] remoteFields, IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers)
+        public RemoteIssueJsonConverter(IEnumerable<RemoteField> remoteFields, IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers)
         {
             this._remoteFields = remoteFields;
             this._customFieldSerializers = customFieldSerializers;
@@ -106,7 +106,14 @@ namespace Atlassian.Jira.Remote
 
         private string GetCustomFieldType(string customFieldId)
         {
-            return this._remoteFields.First(f => f.id.Equals(customFieldId, StringComparison.InvariantCultureIgnoreCase)).CustomFieldType;
+            var remoteField = this._remoteFields.FirstOrDefault(f => f.id.Equals(customFieldId, StringComparison.InvariantCultureIgnoreCase));
+
+            if (remoteField == null)
+            {
+                throw new InvalidOperationException($"Custom field with id '{customFieldId}' found on issue does not exist on the list of known custom fields returned by Jira.");
+            }
+
+            return remoteField.CustomFieldType;
         }
 
         private void AddCustomFieldValuesToObject(RemoteIssue remoteIssue, JObject jObject)
@@ -123,7 +130,7 @@ namespace Atlassian.Jira.Remote
                         if (this._customFieldSerializers.ContainsKey(customFieldType))
                         {
                             jToken = this._customFieldSerializers[customFieldType].ToJson(customField.values);
-                        }                       
+                        }
                         else
                         {
                             jToken = JValue.CreateString(customField.values[0]);

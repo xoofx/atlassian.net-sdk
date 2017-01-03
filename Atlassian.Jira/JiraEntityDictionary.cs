@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,9 @@ namespace Atlassian.Jira
     /// <summary>
     /// Dictionary of Jira entities, used to store cached values.
     /// </summary>
-    public class JiraEntityDictionary<T> : Dictionary<string, T>, IJiraEntity
+    public class JiraEntityDictionary<T> : ConcurrentDictionary<string, T>
         where T : IJiraEntity
     {
-        private readonly string _id;
-
         /// <summary>
         /// Create an empty dictionary.
         /// </summary>
@@ -27,53 +26,42 @@ namespace Atlassian.Jira
         {
             foreach (var entity in entities)
             {
-                this.Add(entity.Id, entity);
+                this.TryAdd(entity.Id, entity);
             }
         }
 
         /// <summary>
-        /// Create a dictionary with an identifier and the given entities.
+        /// Attempts to remove the entity that has the specified key.
         /// </summary>
-        public JiraEntityDictionary(string id, IEnumerable<T> entities)
-            : this(entities)
+        /// <param name="id">Identifier of the entity.</param>
+        public bool TryRemove(string id)
         {
-            this._id = id;
+            T removedEntity;
+            return TryRemove(id, out removedEntity);
         }
 
         /// <summary>
         /// Adds an entity to the dictionary if it missing, otherwise no-op.
         /// </summary>
         /// <returns>True if entity was added, false otherwise.</returns>
-        public bool AddIfMIssing(T entity)
+        public bool TryAdd(T entity)
         {
-            return this.AddIfMIssing(new T[1] { entity });
+            return this.TryAdd(entity.Id, entity);
         }
 
         /// <summary>
         /// Adds a list of entities to the dictionary if their are missing.
         /// </summary>
         /// <returns>True if at least one entity was added, false otherwise.</returns>
-        public bool AddIfMIssing(IEnumerable<T> entities)
+        public bool TryAdd(IEnumerable<T> entities)
         {
             var result = false;
             foreach (var entity in entities)
             {
-                if (!this.ContainsKey(entity.Id))
-                {
-                    result = true;
-                    this.Add(entity.Id, entity);
-                }
+                result = this.TryAdd(entity.Id, entity) || result;
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Unique identifier for this dictionary.
-        /// </summary>
-        public string Id
-        {
-            get { return this._id; }
         }
     }
 }

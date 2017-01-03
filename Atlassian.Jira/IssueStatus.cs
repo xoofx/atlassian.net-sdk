@@ -1,37 +1,38 @@
 ﻿using Atlassian.Jira.Remote;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
     /// <summary>
     /// The status of the issue as defined in JIRA
     /// </summary>
-    public class IssueStatus : JiraNamedEntity
+    [SuppressMessage("N/A", "CS0660", Justification = "Operator overloads are used for LINQ to JQL provider.")]
+    [SuppressMessage("N/A", "CS0661", Justification = "Operator overloads are used for LINQ to JQL provider.")]
+    public class IssueStatus : JiraNamedConstant
     {
         /// <summary>
         /// Creates an instance of the IssueStatus based on a remote entity.
         /// </summary>
-        public IssueStatus(AbstractNamedRemoteEntity remoteEntity)
+        public IssueStatus(RemoteStatus remoteEntity)
             : base(remoteEntity)
         {
         }
 
-        internal IssueStatus(Jira jira, string id)
-            : base(jira, id)
+        internal IssueStatus(string id, string name = null)
+            : base(id, name)
         {
         }
 
-        internal IssueStatus(string name)
-            : base(name)
+        protected override async Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {
-        }
-
-        protected override IEnumerable<JiraNamedEntity> GetEntities(Jira jira, string projectKey = null)
-        {
-            return jira.GetIssueStatuses();
+            var results = await jira.Statuses.GetStatusesAsync(token).ConfigureAwait(false);
+            return results as IEnumerable<JiraNamedEntity>;
         }
 
         /// <summary>
@@ -44,11 +45,11 @@ namespace Atlassian.Jira
                 int id;
                 if (int.TryParse(name, out id))
                 {
-                    return new IssueStatus(null, name /*as id*/);
+                    return new IssueStatus(name /*as id*/);
                 }
                 else
                 {
-                    return new IssueStatus(name);
+                    return new IssueStatus(null, name);
                 }
             }
             else
@@ -75,7 +76,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return entity._name == name;
+                return entity.Name == name;
             }
         }
 
@@ -97,7 +98,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return entity._name != name;
+                return entity.Name != name;
             }
         }
     }

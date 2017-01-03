@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -8,6 +9,8 @@ namespace Atlassian.Jira
     /// <summary>
     /// Force a CustomField comparison to use the exact match JQL operator.
     /// </summary>
+    [SuppressMessage("N/A", "CS0660", Justification = "Operator overloads are used for LINQ to JQL provider.")]
+    [SuppressMessage("N/A", "CS0661", Justification = "Operator overloads are used for LINQ to JQL provider.")]
     public class LiteralMatch
     {
         private readonly string _value;

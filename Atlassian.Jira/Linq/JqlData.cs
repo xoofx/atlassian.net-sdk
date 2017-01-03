@@ -9,6 +9,6 @@ namespace Atlassian.Jira.Linq
     {
         public string Expression { get; set; }
         public int? NumberOfResults { get; set; }
-
+        public int? SkipResults { get; set; }
     }
 }

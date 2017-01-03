@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -8,6 +9,8 @@ namespace Atlassian.Jira
     /// <summary>
     /// Force a DateTime field to use a string provided as the JQL query value.
     /// </summary>
+    [SuppressMessage("N/A", "CS0660", Justification = "Operator overloads are used for LINQ to JQL provider.")]
+    [SuppressMessage("N/A", "CS0661", Justification = "Operator overloads are used for LINQ to JQL provider.")]
     public class LiteralDateTime
     {
         private readonly string _dateTimeString;

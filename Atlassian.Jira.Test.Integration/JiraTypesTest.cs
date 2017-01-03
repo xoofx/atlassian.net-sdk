@@ -13,7 +13,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void GetFilters()
         {
-            var filters = _jira.GetFilters();
+            var filters = _jira.Filters.GetFavouritesAsync().Result;
 
             Assert.True(filters.Count() >= 1);
             Assert.True(filters.Any(f => f.Name == "One Issue Filter"));
@@ -22,7 +22,7 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void RetrieveNamedEntities()
         {
-            var issue = _jira.GetIssue("TST-1");
+            var issue = _jira.Issues.GetIssueAsync("TST-1").Result;
 
             Assert.Equal("Bug", issue.Type.Name);
             Assert.Equal("Major", issue.Priority.Name);
@@ -33,29 +33,27 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void GetIssueTypes()
         {
-            var issueTypes = _jira.GetIssueTypes("TST");
+            var issueTypes = _jira.IssueTypes.GetIssueTypesAsync().Result;
 
-#if SOAP
-            Assert.Equal(4, issueTypes.Count());
-#else
             // In addition, rest API contains "Sub-Task" as an issue type.
             Assert.True(issueTypes.Count() >= 5);
-#endif
             Assert.True(issueTypes.Any(i => i.Name == "Bug"));
+            Assert.NotNull(issueTypes.First().IconUrl);
         }
 
         [Fact]
         public void GetIssuePriorities()
         {
-            var priorities = _jira.GetIssuePriorities();
+            var priorities = _jira.Priorities.GetPrioritiesAsync().Result;
 
             Assert.True(priorities.Any(i => i.Name == "Blocker"));
+            Assert.NotNull(priorities.First().IconUrl);
         }
 
         [Fact]
         public void GetIssueResolutions()
         {
-            var resolutions = _jira.GetIssueResolutions();
+            var resolutions = _jira.Resolutions.GetResolutionsAsync().Result;
 
             Assert.True(resolutions.Any(i => i.Name == "Fixed"));
         }
@@ -63,81 +61,40 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public void GetIssueStatuses()
         {
-            var statuses = _jira.GetIssueStatuses();
+            var statuses = _jira.Statuses.GetStatusesAsync().Result;
 
             Assert.True(statuses.Any(i => i.Name == "Open"));
+            Assert.NotNull(statuses.First().IconUrl);
         }
 
         [Fact]
         public void GetCustomFields()
         {
-            var fields = _jira.GetCustomFields();
+            var fields = _jira.Fields.GetCustomFieldsAsync().Result;
             Assert.True(fields.Count() >= 19);
-        }
-
-        [Fact]
-        public void AddAndRemoveProjectVersions()
-        {
-            var versionName = "New Version " + _random.Next(int.MaxValue);
-            var projectInfo = new ProjectVersionCreationInfo(versionName);
-            var project = _jira.GetProjects().First();
-
-            // Add a project version.
-            var version = project.Versions.Add(projectInfo);
-            Assert.Equal(versionName, version.Name);
-
-            // Retrive project versions.
-            Assert.True(project.Versions.Get().Any(p => p.Name == versionName));
-
-            // Delete project version
-            project.Versions.Delete(version.Name);
-            Assert.False(project.Versions.Get().Any(p => p.Name == versionName));
-        }
-
-        [Fact]
-        public void GetAndUpdateProjectVersions()
-        {
-            var versions = _jira.GetProjectVersions("TST");
-            Assert.True(versions.Count() >= 3);
-
-            var version1 = versions.First(v => v.Name == "1.0");
-            var newDescription = "1.0 Release " + _random.Next(int.MaxValue);
-            version1.Description = newDescription;
-            version1.SaveChanges();
-
-            Assert.Equal(newDescription, version1.Description);
-            version1 = _jira.GetProjectVersions("TST").First(v => v.Name == "1.0");
-            Assert.Equal(newDescription, version1.Description);
-        }
-
-        [Fact]
-        public void GetProjectComponents()
-        {
-            var components = _jira.GetProjectComponents("TST");
-            Assert.Equal(2, components.Count());
         }
 
         [Fact]
         public void GetProjects()
         {
-            var projects = _jira.GetProjects();
-            Assert.Equal(1, projects.Count());
+            var projects = _jira.Projects.GetProjectsAsync().Result;
+            Assert.True(projects.Count() > 0);
             Assert.Equal("admin", projects.First().Lead);
+        }
+
+        [Fact]
+        public void GetProject()
+        {
+            var project = _jira.Projects.GetProjectAsync("TST").Result;
+            Assert.Equal("admin", project.Lead);
+            Assert.Equal("Test Project", project.Name);
         }
 
         [Fact]
         public void GetIssueLinkTypes()
         {
-            var linkTypes = _jira.GetIssueLinkTypes();
+            var linkTypes = _jira.Links.GetLinkTypesAsync().Result;
             Assert.True(linkTypes.Any(l => l.Name.Equals("Duplicate")));
-        }
-
-        [Fact]
-        public async Task GetProjectsAsync()
-        {
-            var projects = await _jira.GetProjectsAsync(CancellationToken.None);
-
-            Assert.Equal(1, projects.Count());
         }
 
         [Fact]
@@ -145,11 +102,11 @@ namespace Atlassian.Jira.Test.Integration
         {
             // First request.
             var jira = CreateJiraClient();
-            var result1 = await _jira.RestClient.GetIssueStatusesAsync(CancellationToken.None);
+            var result1 = await _jira.Statuses.GetStatusesAsync();
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.RestClient.GetIssueStatusesAsync(CancellationToken.None);
+            var result2 = await _jira.Statuses.GetStatusesAsync();
             Assert.Equal(result1.Count(), result2.Count());
         }
 
@@ -158,11 +115,11 @@ namespace Atlassian.Jira.Test.Integration
         {
             // First request.
             var jira = CreateJiraClient();
-            var result1 = await _jira.RestClient.GetIssueTypesAsync(CancellationToken.None);
+            var result1 = await _jira.IssueTypes.GetIssueTypesAsync(CancellationToken.None);
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.RestClient.GetIssueTypesAsync(CancellationToken.None);
+            var result2 = await _jira.IssueTypes.GetIssueTypesAsync(CancellationToken.None);
             Assert.Equal(result1.Count(), result2.Count());
         }
 
@@ -171,11 +128,11 @@ namespace Atlassian.Jira.Test.Integration
         {
             // First request.
             var jira = CreateJiraClient();
-            var result1 = await _jira.RestClient.GetIssuePrioritiesAsync(CancellationToken.None);
+            var result1 = await _jira.Priorities.GetPrioritiesAsync();
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.RestClient.GetIssuePrioritiesAsync(CancellationToken.None);
+            var result2 = await _jira.Priorities.GetPrioritiesAsync();
             Assert.Equal(result1.Count(), result2.Count());
         }
 
@@ -184,35 +141,20 @@ namespace Atlassian.Jira.Test.Integration
         {
             // First request.
             var jira = CreateJiraClient();
-            var result1 = await _jira.RestClient.GetIssueResolutionsAsync(CancellationToken.None);
+            var result1 = await _jira.Resolutions.GetResolutionsAsync();
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.RestClient.GetIssueResolutionsAsync(CancellationToken.None);
+            var result2 = await _jira.Resolutions.GetResolutionsAsync();
             Assert.Equal(result1.Count(), result2.Count());
         }
 
         [Fact]
         public async Task GetFavouriteFiltersAsync()
         {
-            // First request.
             var jira = CreateJiraClient();
-            var result1 = await _jira.RestClient.GetFavouriteFiltersAsync(CancellationToken.None);
+            var result1 = await _jira.Filters.GetFavouritesAsync();
             Assert.NotEmpty(result1);
-
-            // Cached
-            var result2 = await _jira.RestClient.GetFavouriteFiltersAsync(CancellationToken.None);
-            Assert.Equal(result1.Count(), result2.Count());
-        }
-
-        [Fact]
-        public void GetUser()
-        {
-            var user = _jira.GetUserAsync("admin").Result;
-            Assert.Equal(user.Email, "admin@example.com");
-            Assert.Equal(user.DisplayName, "admin");
-            Assert.Equal(user.Username, "admin");
-            Assert.Equal(user.IsActive, true);
         }
     }
 }

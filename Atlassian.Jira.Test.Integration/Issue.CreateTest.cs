@@ -22,8 +22,7 @@ namespace Atlassian.Jira.Test.Integration
                 Assignee = "admin"
             };
 
-            var newIssue = await _jira.RestClient.CreateIssueAsyc(issue, CancellationToken.None);
-
+            var newIssue = await issue.SaveChangesAsync();
             Assert.Equal(summaryValue, newIssue.Summary);
             Assert.Equal("TST", newIssue.Project);
             Assert.Equal("1", newIssue.Type.Id);
@@ -36,7 +35,7 @@ namespace Atlassian.Jira.Test.Integration
                 Assignee = "admin"
             };
 
-            var newSubTask = await _jira.RestClient.CreateIssueAsyc(subTask, CancellationToken.None);
+            var newSubTask = await subTask.SaveChangesAsync();
 
             Assert.Equal(newIssue.Key.Value, newSubTask.ParentIssueKey);
         }
@@ -54,7 +53,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var issues = (from i in _jira.Issues
+            var issues = (from i in _jira.Issues.Queryable
                           where i.Key == issue.Key
                           select i).ToArray();
 
@@ -70,11 +69,6 @@ namespace Atlassian.Jira.Test.Integration
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
             var expectedDueDate = new DateTime(2011, 12, 12);
-
-#if SOAP
-            expectedDueDate = expectedDueDate.ToUniversalTime();
-#endif
-
             var issue = _jira.CreateIssue("TST");
             issue.AffectsVersions.Add("1.0");
             issue.Assignee = "admin";
@@ -88,16 +82,21 @@ namespace Atlassian.Jira.Test.Integration
             issue.Reporter = "admin";
             issue.Summary = summaryValue;
             issue.Type = "1";
+            issue.Labels.Add("testLabel");
 
             issue.SaveChanges();
 
-            var queriedIssue = (from i in _jira.Issues
+            var queriedIssue = (from i in _jira.Issues.Queryable
                                 where i.Key == issue.Key
                                 select i).ToArray().First();
 
             Assert.Equal(summaryValue, queriedIssue.Summary);
             Assert.NotNull(queriedIssue.JiraIdentifier);
             Assert.Equal(expectedDueDate, queriedIssue.DueDate.Value);
+            Assert.NotNull(queriedIssue.Priority.IconUrl);
+            Assert.NotNull(queriedIssue.Type.IconUrl);
+            Assert.NotNull(queriedIssue.Status.IconUrl);
+            Assert.Contains("testLabel", queriedIssue.Labels);
         }
 
         [Fact]
@@ -118,14 +117,10 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
 
             // query the subtask again to make sure it loads everything from server.
-            subTask = _jira.GetIssue(subTask.Key.Value);
+            subTask = _jira.Issues.GetIssueAsync(subTask.Key.Value).Result;
             Assert.False(parentTask.Type.IsSubTask);
             Assert.True(subTask.Type.IsSubTask);
-
-#if !SOAP
-
             Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
-#endif
         }
 
         [Fact]
@@ -148,7 +143,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = (from i in _jira.Issues
+            var newIssue = (from i in _jira.Issues.Queryable
                             where i.AffectsVersions == "1.0" && i.AffectsVersions == "2.0"
                                     && i.FixVersions == "2.0" && i.FixVersions == "3.0"
                             select i).First();
@@ -179,7 +174,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = (from i in _jira.Issues
+            var newIssue = (from i in _jira.Issues.Queryable
                             where i.Summary == summaryValue && i.Components == "Server" && i.Components == "Client"
                             select i).First();
 
@@ -204,7 +199,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = (from i in _jira.Issues
+            var newIssue = (from i in _jira.Issues.Queryable
                             where i.Summary == summaryValue && i["Custom Text Field"] == "My new value"
                             select i).First();
 
@@ -225,32 +220,10 @@ namespace Atlassian.Jira.Test.Integration
             };
             issue.SaveChanges();
 
-            var subtasks = _jira.GetIssuesFromJql("project = TST and parent = TST-1");
+            var subtasks = _jira.Issues.GetIssuesFromJqlAsync("project = TST and parent = TST-1").Result;
 
             Assert.True(subtasks.Any(s => s.Summary.Equals(summaryValue)),
                 String.Format("'{0}' was not found as a sub-task of TST-1", summaryValue));
         }
-
-#if SOAP
-        /// <summary>
-        /// https://bitbucket.org/farmas/atlassian.net-sdk/issue/3/serialization-error-when-querying-some
-        /// Note that this is disabled for REST because JIRA 7.0 throws the following error: "The entered text is too long. It exceeds the allowed limit of 32,767 characters."
-        /// </summary>
-        [Fact]
-        public void HandleRetrievalOfMessagesWithLargeContentStrings()
-        {
-            var issue = new Issue(_jira, "TST")
-            {
-                Type = "1",
-                Summary = "Serialization nastiness",
-                Assignee = "admin"
-            };
-
-            issue.Description = File.ReadAllText("LongIssueDescription.txt");
-            issue.SaveChanges();
-
-            Assert.Contains("Second stack trace:", issue.Description);
-        }
-#endif
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Atlassian.Jira.Remote
 {
@@ -120,4 +121,37 @@ namespace Atlassian.Jira.Remote
         }
     }
 
+    public class GreenhopperSprintCustomFieldValueSerialiser : ICustomFieldValueSerializer
+    {
+        private readonly string _propertyName;
+
+        public GreenhopperSprintCustomFieldValueSerialiser(string propertyName)
+        {
+            this._propertyName = propertyName;
+        }
+
+        // Sprint field is malformed
+        // See https://ecosystem.atlassian.net/browse/ACJIRA-918 for more information
+        public string[] FromJson(JToken json)
+        {
+            return json.ToString()
+                .Split(new char[] { '{', '}', '[', ']', ',' })
+                .Where(x => x.StartsWith(_propertyName))
+                .Select(x => x.Split(new char[] { '=' })[1])
+                .ToArray();
+        }
+
+        public JToken ToJson(string[] values)
+        {
+            string val = values != null ? values.FirstOrDefault() : null;
+            int id = 0;
+
+            if (int.TryParse(val, out id))
+            {
+                return id;
+            }
+
+            return val;
+        }
+    }
 }

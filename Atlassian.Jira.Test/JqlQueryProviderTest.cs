@@ -12,46 +12,28 @@ namespace Atlassian.Jira.Test
 {
     public class JqlQueryProviderTest
     {
-        private Mock<IJiraSoapClient> _soapClient;
-
-        private Jira CreateJiraInstance()
-        {
-            var translator = new Mock<IJqlExpressionVisitor>();
-            _soapClient = new Mock<IJiraSoapClient>();
-
-            translator.Setup(t => t.Process(It.IsAny<Expression>())).Returns(new JqlData() { Expression = "dummy expression" });
-
-            return new Jira(translator.Object, _soapClient.Object, null);
-        }
-
         [Fact]
         public void Count()
         {
-            var jira = CreateJiraInstance();
-            _soapClient.Setup(r => r.GetIssuesFromJqlSearch(
-                                        It.IsAny<string>(),
-                                        It.IsAny<string>(),
-                                        It.IsAny<int>(),
-                                        It.IsAny<int>())).Returns(new RemoteIssue[1] { new RemoteIssue() });
+            var jira = TestableJira.Create();
+            var provider = new JiraQueryProvider(jira.Translator.Object, jira.IssueService.Object);
+            var queryable = new JiraQueryable<Issue>(provider);
 
-            Assert.Equal(1, jira.Issues.Count());
+            jira.SetupIssues(new RemoteIssue());
+
+            Assert.Equal(1, queryable.Count());
         }
 
         [Fact]
         public void First()
         {
-            var jira = CreateJiraInstance();
-            _soapClient.Setup(r => r.GetIssuesFromJqlSearch(
-                                        It.IsAny<string>(),
-                                        It.IsAny<string>(),
-                                        It.IsAny<int>(),
-                                        It.IsAny<int>())).Returns(new RemoteIssue[]
-                                        {
-                                            new RemoteIssue() { summary = "foo"},
-                                            new RemoteIssue()
-                                        });
+            var jira = TestableJira.Create();
+            var provider = new JiraQueryProvider(jira.Translator.Object, jira.IssueService.Object);
+            var queryable = new JiraQueryable<Issue>(provider);
 
-            Assert.Equal("foo", jira.Issues.First().Summary);
+            jira.SetupIssues(new RemoteIssue() { summary = "foo" }, new RemoteIssue());
+
+            Assert.Equal("foo", queryable.First().Summary);
         }
     }
 }

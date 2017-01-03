@@ -5,6 +5,8 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
@@ -14,7 +16,6 @@ namespace Atlassian.Jira
     public class CustomFieldValueCollection : ReadOnlyCollection<CustomFieldValue>, IRemoteIssueFieldProvider
     {
         private readonly Issue _issue;
-        private Func<string, string> _getFieldIdProvider;
 
         internal CustomFieldValueCollection(Issue issue)
             : this(issue, new List<CustomFieldValue>())
@@ -25,9 +26,6 @@ namespace Atlassian.Jira
             : base(list)
         {
             _issue = issue;
-
-            // By default collection operates for edit custom fields.
-            ForEdit();
         }
 
         /// <summary>
@@ -84,8 +82,19 @@ namespace Atlassian.Jira
         /// <param name="fieldValues">The values of the field</param>
         public CustomFieldValueCollection Add(string fieldName, string[] fieldValues)
         {
-            var fieldId = _getFieldIdProvider(fieldName);
+            var fieldId = GetCustomFieldId(fieldName);
             this.Items.Add(new CustomFieldValue(fieldId, fieldName, _issue) { Values = fieldValues });
+            return this;
+        }
+
+        /// <summary>
+        /// Add a custom field by id with an array of values.
+        /// </summary>
+        /// <param name="fieldName">The id of the custom field as defined in JIRA.</param>
+        /// <param name="fildValues">The values of the field.</param>
+        public CustomFieldValueCollection AddById(string fieldId, params string[] fieldValues)
+        {
+            this.Items.Add(new CustomFieldValue(fieldId, _issue) { Values = fieldValues });
             return this;
         }
 
@@ -119,71 +128,35 @@ namespace Atlassian.Jira
         {
             get
             {
-                var fieldId = _getFieldIdProvider(fieldName);
+                var fieldId = GetCustomFieldId(fieldName);
                 return this.Items.FirstOrDefault(f => f.Id == fieldId);
             }
         }
 
-        /// <summary>
-        /// Changes context of collection to operate against fields for edit.
-        /// </summary>
-        /// <returns>Current collection with changed context/</returns>
-        public CustomFieldValueCollection ForEdit()
+        private string GetCustomFieldId(string fieldName)
         {
-            _getFieldIdProvider = fieldName =>
-            {
-                var customField = _issue.Jira.GetFieldsForEdit(_issue)
+            var customField = _issue.Jira.Fields.GetCustomFieldsAsync().Result
                     .FirstOrDefault(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
 
-                if (customField == null)
-                {
-                    throw new InvalidOperationException(String.Format("Could not find custom field with name '{0}' on the JIRA server. "
-                        + "Make sure this field is available when editing this issue. For more information see JRA-6857", fieldName));
-                }
-
-                return customField.Id;
-            };
-
-            return this;
-        }
-
-        /// <summary>
-        /// Changes context of collection to operate against fields for action.
-        /// </summary>
-        /// <param name="actionId">Id of action as defined in JIRA.</param>
-        /// <returns>Current collection with changed context/</returns>
-        public CustomFieldValueCollection ForAction(string actionId)
-        {
-            _getFieldIdProvider = name =>
+            if (customField == null)
             {
-                var customField = _issue.Jira.GetFieldsForAction(_issue, actionId)
-                    .FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                throw new InvalidOperationException(String.Format("Could not find custom field with name '{0}' on the JIRA server.", fieldName));
+            }
 
-                if (customField == null)
-                {
-                    throw new InvalidOperationException(
-                        String.Format(
-                        CultureInfo.InvariantCulture,
-                        "Could not find custom field with name '{0}' and action with id '{1}' on the JIRA server. ",
-                        name,
-                        actionId));
-                }
-
-                return customField.Id;
-            };
-
-            return this;
+            return customField.Id;
         }
 
-        RemoteFieldValue[] IRemoteIssueFieldProvider.GetRemoteFields()
+        Task<RemoteFieldValue[]> IRemoteIssueFieldProvider.GetRemoteFieldValuesAsync(CancellationToken token)
         {
-            return this.Items
+            var fieldValues = this.Items
                 .Where(field => IsCustomFieldNewOrUpdated(field))
                 .Select(field => new RemoteFieldValue()
                 {
                     id = field.Id,
                     values = field.Values
-                }).ToArray();
+                });
+
+            return Task.FromResult(fieldValues.ToArray());
         }
 
         private bool IsCustomFieldNewOrUpdated(CustomFieldValue customField)
@@ -205,6 +178,12 @@ namespace Atlassian.Jira
             else if (originalField.values == null)
             {
                 // The remote custom field was not initialized, include it on the payload.
+                return true;
+            }
+            else if (customField.Values == null)
+            {
+                // Original field had values, but the new field has been set to null.
+                //  User means to clear the value, include it on the payload.
                 return true;
             }
             else
