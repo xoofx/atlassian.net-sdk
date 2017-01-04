@@ -46,5 +46,13 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException(String.Format("Service '{0}' not found.", typeof(TService)));
             }
         }
+
+        /// <summary>
+        /// Removes all registered services.
+        /// </summary>
+        public void Clear()
+        {
+            _factories.Clear();
+        }
     }
 }
