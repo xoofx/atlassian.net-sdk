@@ -10,9 +10,11 @@ namespace Atlassian.Jira
     internal class WebClientWrapper : IWebClient
     {
         private readonly WebClient _webClient;
+        private readonly Jira _jira;
 
-        public WebClientWrapper()
+        public WebClientWrapper(Jira jira)
         {
+            _jira = jira;
             _webClient = new WebClient();
             _webClient.DownloadFileCompleted += _webClient_DownloadFileCompleted;
         }
@@ -38,24 +40,33 @@ namespace Atlassian.Jira
             }
         }
 
-        public void AddQueryString(string key, string value)
-        {
-            if (!_webClient.QueryString.AllKeys.Contains(key))
-            {
-                _webClient.QueryString.Add(key, value);
-            }
-        }
-
-        public void Download(string url, string fileName)
-        {
-            _webClient.DownloadFile(url, fileName);
-        }
-
         public Task DownloadAsync(string url, string fileName)
         {
             _webClient.CancelAsync();
 
             var completionSource = new TaskCompletionSource<object>();
+            _webClient.Headers.Remove(HttpRequestHeader.Authorization);
+            _webClient.DownloadFileAsync(new Uri(url), fileName, completionSource);
+
+            return completionSource.Task;
+        }
+
+        public Task DownloadWithAuthenticationAsync(string url, string fileName)
+        {
+            var credentials = _jira.GetCredentials();
+
+            if (String.IsNullOrEmpty(credentials.UserName) || String.IsNullOrEmpty(credentials.Password))
+            {
+                throw new InvalidOperationException("Unable to download file, user and/or password are missing. You can specify a provider for credentials when constructing the Jira instance.");
+            }
+
+            _webClient.CancelAsync();
+
+            var completionSource = new TaskCompletionSource<object>();
+            string encodedUserNameAndPassword = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials.UserName + ":" + credentials.Password));
+
+            _webClient.Headers.Remove(HttpRequestHeader.Authorization);
+            _webClient.Headers.Add(HttpRequestHeader.Authorization, "Basic " + encodedUserNameAndPassword);
             _webClient.DownloadFileAsync(new Uri(url), fileName, completionSource);
 
             return completionSource.Task;
