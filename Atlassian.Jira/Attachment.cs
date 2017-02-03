@@ -93,10 +93,9 @@ namespace Atlassian.Jira
         /// <param name="fullFileName">Full file name where attachment will be downloaded.</param>
         public Task DownloadAsync(string fullFileName)
         {
-            AddAuthenticationToRequest(_webClient, _jira);
             var url = GetRequestUrl();
 
-            return _webClient.DownloadAsync(url, fullFileName);
+            return _webClient.DownloadWithAuthenticationAsync(url, fullFileName);
         }
 
         /// <summary>
@@ -105,10 +104,7 @@ namespace Atlassian.Jira
         /// <param name="fullFileName">Full file name where attachment will be downloaded</param>
         public void Download(string fullFileName)
         {
-            AddAuthenticationToRequest(_webClient, _jira);
-            var url = GetRequestUrl();
-
-            _webClient.Download(url, fullFileName);
+            this.DownloadAsync(fullFileName).Wait();
         }
 
         private string GetRequestUrl()
@@ -117,19 +113,6 @@ namespace Atlassian.Jira
                 _jira.Url.EndsWith("/") ? _jira.Url : _jira.Url + "/",
                 this.Id,
                 this.FileName);
-        }
-
-        private static void AddAuthenticationToRequest(IWebClient webClient, Jira jira)
-        {
-            var credentials = jira.GetCredentials();
-
-            if (String.IsNullOrEmpty(credentials.UserName) || String.IsNullOrEmpty(credentials.Password))
-            {
-                throw new InvalidOperationException("Unable to download attachment, user and/or password are missing. You can specify a provider for credentials when constructing the Jira instance.");
-            }
-
-            webClient.AddQueryString("os_username", Uri.EscapeDataString(credentials.UserName));
-            webClient.AddQueryString("os_password", Uri.EscapeDataString(credentials.Password));
         }
     }
 }
