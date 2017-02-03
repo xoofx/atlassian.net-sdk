@@ -16,7 +16,7 @@ namespace Atlassian.Jira.Test.Integration
         void GetChangeLogsForIssue()
         {
             var changelogs = _jira.Issues.GetIssueAsync("TST-1").Result.GetChangeLogsAsync().Result.OrderBy(log => log.CreatedDate);
-            Assert.Equal(4, changelogs.Count());
+            Assert.True(changelogs.Count() >= 4);
 
             var firstChangeLog = changelogs.First();
             Assert.Equal("admin", firstChangeLog.Author.Username);
