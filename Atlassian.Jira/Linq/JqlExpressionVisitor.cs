@@ -82,6 +82,12 @@ namespace Atlassian.Jira.Linq
         private bool TryGetPropertyInfoFromBinaryExpression(BinaryExpression expression, out PropertyInfo propertyInfo)
         {
             var memberExpression = expression.Left as MemberExpression;
+            var unaryExpression = expression.Left as UnaryExpression;
+            if (unaryExpression != null)
+            {
+                memberExpression = unaryExpression.Operand as MemberExpression;
+            }
+
             if (memberExpression != null)
             {
                 propertyInfo = memberExpression.Member as PropertyInfo;
@@ -136,7 +142,7 @@ namespace Atlassian.Jira.Linq
 
         private void ProcessEqualityOperator(BinaryExpression expression, bool equal)
         {
-            if (expression.Left is MemberExpression)
+            if (expression.Left is MemberExpression || expression.Left is UnaryExpression)
             {
                 ProcessMemberEqualityOperator(expression, equal);
             }
@@ -191,9 +197,16 @@ namespace Atlassian.Jira.Linq
             // operator
             var operatorString = String.Empty;
             PropertyInfo propertyInfo = null;
-            if (TryGetPropertyInfoFromBinaryExpression(expression, out propertyInfo)
+
+            if (value is LiteralMatch)
+            {
+                // If the right value is a LiteralMatch, ignore the custom attribute.
+                operatorString = equal ? JiraOperators.EQUALS : JiraOperators.NOTEQUALS;
+            }
+            else if (TryGetPropertyInfoFromBinaryExpression(expression, out propertyInfo)
                 && propertyInfo.GetCustomAttributes(typeof(JqlContainsEqualityAttribute), true).Count() > 0)
             {
+                // Use the equality comparer depending on the presence of custom attribute.
                 operatorString = equal ? JiraOperators.CONTAINS : JiraOperators.NOTCONTAINS;
             }
             else

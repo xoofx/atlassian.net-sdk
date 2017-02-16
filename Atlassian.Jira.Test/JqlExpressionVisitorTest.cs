@@ -478,6 +478,17 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void CanUseLiteralMatchOnMemberProperties()
+        {
+            var queryable = CreateQueryable();
+            var issues = (from i in queryable
+                          where i.Summary == new LiteralMatch("Literal Summary") && i.Description == new LiteralMatch("Literal Description")
+                          select i).ToArray();
+
+            Assert.Equal("(Summary = \"Literal Summary\" and Description = \"Literal Description\")", _translator.Jql);
+        }
+
+        [Fact]
         public void CustomFieldEqual()
         {
             var queryable = CreateQueryable();
