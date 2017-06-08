@@ -192,6 +192,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets an object to interact with the issue remote links of jira.
+        /// </summary>
+        public IIssueRemoteLinkService RemoteLinks
+        {
+            get
+            {
+                return Services.Get<IIssueRemoteLinkService>();
+            }
+        }
+
+        /// <summary>
         /// Gets an object to interact with the issue types of jira.
         /// </summary>
         public IIssueTypeService IssueTypes
@@ -298,6 +309,7 @@ namespace Atlassian.Jira
             services.Register<IIssueResolutionService>(() => new IssueResolutionService(jira));
             services.Register<IIssueStatusService>(() => new IssueStatusService(jira));
             services.Register<IIssueLinkService>(() => new IssueLinkService(jira));
+            services.Register<IIssueRemoteLinkService>(() => new IssueRemoteLinkService(jira));
             services.Register<IIssueTypeService>(() => new IssueTypeService(jira));
             services.Register<IIssueFilterService>(() => new IssueFilterService(jira));
             services.Register<IIssueFieldService>(() => new IssueFieldService(jira));

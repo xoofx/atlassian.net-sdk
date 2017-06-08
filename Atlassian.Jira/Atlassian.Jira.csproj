@@ -63,8 +63,10 @@
     <Compile Include="CascadingSelectCustomField.cs" />
     <Compile Include="Comment.cs" />
     <Compile Include="ComparableString.cs" />
+    <Compile Include="IIssueRemoteLinkService.cs" />
     <Compile Include="IJiraGroupService.cs" />
     <Compile Include="IssueLabelCollection.cs" />
+    <Compile Include="IssueRemoteLink.cs" />
     <Compile Include="IssueSecurityLevel.cs" />
     <Compile Include="JiraUserCreationInfo.cs" />
     <Compile Include="CustomField.cs" />
@@ -94,6 +96,7 @@
     <Compile Include="JiraUserStatus.cs" />
     <Compile Include="ProjectCategory.cs" />
     <Compile Include="Remote\IssueFieldService.cs" />
+    <Compile Include="Remote\IssueRemoteLinkService.cs" />
     <Compile Include="Remote\IssueLinkService.cs" />
     <Compile Include="Remote\IssuePriorityService.cs" />
     <Compile Include="Remote\IssueResolutionService.cs" />

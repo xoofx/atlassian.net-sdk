@@ -126,6 +126,44 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        void RetrieveEmptyRemoteLinks()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue with no links " + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            Assert.Empty(issue.GetRemoteLinksAsync().Result);
+        }
+
+        [Fact]
+        void CreateAndRetrieveRemoteLinks()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue to link from" + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            var url1 = "https://google.com";
+            var title1 = "Google";
+            var summary1 = "Search engine";
+
+            var url2 = "https://bing.com";
+            var title2 = "Bing";
+            string summary2 = null;
+
+            // ling remote links
+            issue.AddRemoteLink(url1, title1, summary1);
+            issue.AddRemoteLink(url2, title2, summary2);
+
+            // Verify remote links of issue.
+            var remoteLinks = issue.GetRemoteLinksAsync().Result;
+            Assert.Equal(2, remoteLinks.Count());
+            Assert.True(remoteLinks.Any(l => l.RemoteUrl == url1 && l.Title == title1 && l.Summary == summary1));
+            Assert.True(remoteLinks.Any(l => l.RemoteUrl == url2 && l.Title == title2 && l.Summary == summary2));
+        }
+
+        [Fact]
         public async Task TransitionIssueAsync()
         {
             var issue = _jira.CreateIssue("TST");
