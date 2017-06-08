@@ -407,6 +407,13 @@ namespace Atlassian.Jira.Remote
             return remoteComments.Select(c => new Comment(c));
         }
 
+        public Task DeleteCommentAsync(string issueKey, string commentId, CancellationToken token = default(CancellationToken))
+        {
+            var resource = String.Format("rest/api/2/issue/{0}/comment/{1}", issueKey, commentId);
+
+            return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
+        }
+        
         public async Task<Worklog> AddWorklogAsync(string issueKey, Worklog worklog, WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate, string newEstimate = null, CancellationToken token = default(CancellationToken))
         {
             var remoteWorklog = worklog.ToRemote();

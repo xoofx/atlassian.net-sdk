@@ -658,6 +658,21 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Removes a comment from this issue.
+        /// </summary>
+        /// <param name="comment">Comment to remove.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task DeleteCommentAsync(Comment comment, CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to delete attachment from server, issue has not been created.");
+            }
+
+            return _jira.Issues.DeleteCommentAsync(_originalIssue.key, comment.Id, token);
+        }
+
+        /// <summary>
         /// Add a comment to this issue.
         /// </summary>
         /// <param name="comment">Comment object to add.</param>

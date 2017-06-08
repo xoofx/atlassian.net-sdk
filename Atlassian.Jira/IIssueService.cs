@@ -102,6 +102,14 @@ namespace Atlassian.Jira
         Task<IEnumerable<Comment>> GetCommentsAsync(string issueKey, CancellationToken token = default(CancellationToken));
 
         /// <summary>
+        /// Removes a comment from an issue.
+        /// </summary>
+        /// <param name="issueKey">Issue key to remove the comment from.</param>
+        /// <param name="commentId">Identifier of the comment to remove.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task DeleteCommentAsync(string issueKey, string commentId, CancellationToken token = default(CancellationToken));
+        
+        /// <summary>
         /// Returns the comments of an issue with paging.
         /// </summary>
         /// <param name="issueKey">Issue key to retrieve comments from.</param>
