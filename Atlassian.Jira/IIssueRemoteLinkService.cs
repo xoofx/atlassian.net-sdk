@@ -1,19 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// Represents the operations on the issue link of jira.
+    /// Represents the operations on the remote links of a jira issue.
     /// </summary>
     public interface IIssueRemoteLinkService
     {
         /// <summary>
-        /// Creates an remote issue link for an issue.
+        /// Creates an remote link for an issue.
         /// </summary>
         /// <param name="issueKey">Key of the issue.</param>
         /// <param name="remoteUrl">Remote url to link to.</param>
