@@ -83,7 +83,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        void CreateAndRetrieveIssueLinks()
+        void AddAndRetrieveIssueLinks()
         {
             var issue1 = _jira.CreateIssue("TST");
             issue1.Summary = "Issue to link from" + _random.Next(int.MaxValue);
@@ -123,6 +123,43 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Duplicate", issueLink.LinkType.Name);
             Assert.Equal(issue1.Key.Value, issueLink.OutwardIssue.Key.Value);
             Assert.Equal(issue3.Key.Value, issueLink.InwardIssue.Key.Value);
+        }
+
+        [Fact]
+        void RetrieveEmptyRemoteLinks()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue with no links " + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            Assert.Empty(issue.GetRemoteLinksAsync().Result);
+        }
+
+        [Fact]
+        public async Task AddAndRetrieveRemoteLinks()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue to link from" + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            var url1 = "https://google.com";
+            var title1 = "Google";
+            var summary1 = "Search engine";
+
+            var url2 = "https://bing.com";
+            var title2 = "Bing";
+
+            // Add remote links
+            await issue.AddRemoteLinkAsync(url1, title1, summary1);
+            await issue.AddRemoteLinkAsync(url2, title2);
+
+            // Verify remote links of issue.
+            var remoteLinks = issue.GetRemoteLinksAsync().Result;
+            Assert.Equal(2, remoteLinks.Count());
+            Assert.True(remoteLinks.Any(l => l.RemoteUrl == url1 && l.Title == title1 && l.Summary == summary1));
+            Assert.True(remoteLinks.Any(l => l.RemoteUrl == url2 && l.Title == title2 && l.Summary == null));
         }
 
         [Fact]

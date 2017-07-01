@@ -479,6 +479,36 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Creates an remote link for an issue.
+        /// </summary>
+        /// <param name="remoteUrl">Remote url to link to.</param>
+        /// <param name="title">Title of the remote link.</param>
+        /// <param name="summary">Summary of the remote link.</param>
+        public Task AddRemoteLinkAsync(string remoteUrl, string title, string summary = null)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to add remote link, issue has not been created.");
+            }
+
+            return this.Jira.RemoteLinks.CreateRemoteLinkAsync(this.Key.Value, remoteUrl, title, summary);
+        }
+
+        /// <summary>
+        /// Gets the remote links associated with this issue.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<IssueRemoteLink>> GetRemoteLinksAsync(CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to get remote links, issue has not been created.");
+            }
+
+            return this.Jira.RemoteLinks.GetRemoteLinksForIssueAsync(_originalIssue.key, token);
+        }
+
+        /// <summary>
         /// Transition an issue through a workflow action.
         /// </summary>
         /// <param name="actionName">The workflow action to transition to.</param>
