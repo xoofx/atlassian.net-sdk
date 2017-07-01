@@ -666,7 +666,7 @@ namespace Atlassian.Jira
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
-                throw new InvalidOperationException("Unable to delete attachment from server, issue has not been created.");
+                throw new InvalidOperationException("Unable to delete comment from server, issue has not been created.");
             }
 
             return _jira.Issues.DeleteCommentAsync(_originalIssue.key, comment.Id, token);

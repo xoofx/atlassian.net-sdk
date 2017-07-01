@@ -335,7 +335,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public async Task AddAndGetCommentsAsync()
+        public async Task AddGetAndDeleteCommentsAsync()
         {
             var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
             var issue = new Issue(_jira, "TST")
@@ -357,6 +357,13 @@ namespace Atlassian.Jira.Test.Integration
             comments = await issue.GetPagedCommentsAsync();
             Assert.Equal(1, comments.Count());
             Assert.Equal("new comment", comments.First().Body);
+
+            // Delete comment.
+            await issue.DeleteCommentAsync(comments.First());
+
+            // Verify no comments
+            comments = await issue.GetPagedCommentsAsync();
+            Assert.Equal(0, comments.Count());
         }
 
         [Fact]
