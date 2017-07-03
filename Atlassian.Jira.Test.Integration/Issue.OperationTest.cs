@@ -126,23 +126,15 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        void RetrieveEmptyRemoteLinks()
-        {
-            var issue = _jira.CreateIssue("TST");
-            issue.Summary = "Issue with no links " + _random.Next(int.MaxValue);
-            issue.Type = "Bug";
-            issue.SaveChanges();
-
-            Assert.Empty(issue.GetRemoteLinksAsync().Result);
-        }
-
-        [Fact]
         public async Task AddAndRetrieveRemoteLinks()
         {
             var issue = _jira.CreateIssue("TST");
             issue.Summary = "Issue to link from" + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
+
+            // Verify issue with no remote links.
+            Assert.Empty(issue.GetRemoteLinksAsync().Result);
 
             var url1 = "https://google.com";
             var title1 = "Google";
