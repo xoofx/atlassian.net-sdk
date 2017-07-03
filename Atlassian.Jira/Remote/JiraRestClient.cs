@@ -65,6 +65,11 @@ namespace Atlassian.Jira.Remote
 
         public async Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null, CancellationToken token = default(CancellationToken))
         {
+            if (method == Method.GET && requestBody != null)
+            {
+                throw new InvalidOperationException($"GET requests are not allowed to have a request body. Resource: {resource}. Body: {requestBody}");
+            }
+
             var request = new RestRequest();
             request.Method = method;
             request.Resource = resource;
