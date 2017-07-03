@@ -396,6 +396,38 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public async Task CanRetrievePagedCommentsAsync()
+        {
+            var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            issue.SaveChanges();
+
+            // Add a comments
+            await issue.AddCommentAsync("new comment1");
+            await issue.AddCommentAsync("new comment2");
+            await issue.AddCommentAsync("new comment3");
+            await issue.AddCommentAsync("new comment4");
+
+            // Verify first page of comments
+            var comments = await issue.GetPagedCommentsAsync(2);
+            Assert.Equal(2, comments.Count());
+            Assert.Equal("new comment1", comments.First().Body);
+            Assert.Equal("new comment2", comments.Skip(1).First().Body);
+
+            // Verify second page of comments
+            comments = await issue.GetPagedCommentsAsync(2, 2);
+            Assert.Equal(2, comments.Count());
+            Assert.Equal("new comment3", comments.First().Body);
+            Assert.Equal("new comment4", comments.Skip(1).First().Body);
+        }
+
+        [Fact]
         public void DeleteIssue()
         {
             // Create issue and verify it is found in server.

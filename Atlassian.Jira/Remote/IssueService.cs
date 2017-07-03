@@ -231,14 +231,14 @@ namespace Atlassian.Jira.Remote
 
         public async Task<IPagedQueryResult<Comment>> GetPagedCommentsAsync(string issueKey, int? maxComments = default(int?), int startAt = 0, CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/issue/{0}/comment", issueKey);
-            var parameters = new
-            {
-                startAt = startAt,
-                maxResults = maxComments ?? _jira.MaxIssuesPerRequest,
-            };
+            var resource = $"rest/api/2/issue/{issueKey}/comment?startAt={startAt}";
 
-            var result = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, parameters).ConfigureAwait(false);
+            if (maxComments.HasValue)
+            {
+                resource += $"&maxResults={maxComments.Value}";
+            }
+
+            var result = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource).ConfigureAwait(false);
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var comments = result["comments"]
                 .Cast<JObject>()
