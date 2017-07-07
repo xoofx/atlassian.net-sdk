@@ -61,7 +61,7 @@ namespace Atlassian.Jira.Test
                     summary = "summary",
                     type = new RemoteIssueType() { id = "type" },
                     updated = new DateTime(2011, 2, 2),
-                    votes = 1
+                    votesData = new RemoteVotes() {  votes = 1, hasVoted = true }
                 };
 
                 var issue = remoteIssue.ToLocal(TestableJira.Create());
@@ -84,6 +84,7 @@ namespace Atlassian.Jira.Test
                 Assert.Equal("type", issue.Type.Id);
                 Assert.Equal(new DateTime(2011, 2, 2), issue.Updated);
                 Assert.Equal(1, issue.Votes);
+                Assert.Equal(true, issue.HasVoted);
             }
         }
 
@@ -113,7 +114,7 @@ namespace Atlassian.Jira.Test
                 Assert.Null(remoteIssue.summary);
                 Assert.Null(remoteIssue.type);
                 Assert.Null(remoteIssue.updated);
-                Assert.Null(remoteIssue.votes);
+                Assert.Null(remoteIssue.votesData);
             }
 
             [Fact]
@@ -143,7 +144,6 @@ namespace Atlassian.Jira.Test
                 issue.Reporter = "reporter";
                 issue.Summary = "summary";
                 issue.Type = "4";
-                issue.Votes = 1;
 
                 var remoteIssue = issue.ToRemote();
 
@@ -163,7 +163,6 @@ namespace Atlassian.Jira.Test
                 Assert.Equal("summary", remoteIssue.summary);
                 Assert.Equal("4", remoteIssue.type.id);
                 Assert.Null(remoteIssue.updated);
-                Assert.Equal(1, remoteIssue.votes);
             }
 
             [Fact]

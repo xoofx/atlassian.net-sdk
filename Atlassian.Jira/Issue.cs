@@ -81,7 +81,8 @@ namespace Atlassian.Jira
             Environment = remoteIssue.environment;
             Reporter = remoteIssue.reporter;
             Summary = remoteIssue.summary;
-            Votes = remoteIssue.votes;
+            Votes = remoteIssue.votesData?.votes;
+            HasVoted = remoteIssue.votesData?.hasVoted;
 
             if (!String.IsNullOrEmpty(remoteIssue.parentKey))
             {
@@ -260,7 +261,12 @@ namespace Atlassian.Jira
         /// <summary>
         /// Number of votes the issue has
         /// </summary>
-        public long? Votes { get; set; }
+        public long? Votes { get; internal set; }
+
+        /// <summary>
+        /// Tell if user has voted the issue
+        /// </summary>
+        public bool? HasVoted { get; internal set; }
 
         /// <summary>
         /// Time and date on which this issue was entered into JIRA
@@ -983,7 +989,7 @@ namespace Atlassian.Jira
                 project = this.Project,
                 reporter = this.Reporter,
                 summary = this.Summary,
-                votes = this.Votes,
+                votesData = this.Votes != null ? new RemoteVotes() { hasVoted = this.HasVoted == true, votes = this.Votes.Value} : null,
                 duedate = this.DueDate
             };
 

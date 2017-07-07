@@ -1334,7 +1334,7 @@ namespace Atlassian.Jira.Remote
 
         private System.Nullable<System.DateTime> updatedField;
 
-        private System.Nullable<long> votesField;
+        private RemoteVotes votesDataField;
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -1580,16 +1580,16 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "votes")]
-        public System.Nullable<long> votes
+        [JsonProperty("votes")]
+        public RemoteVotes votesData
         {
             get
             {
-                return this.votesField;
+                return this.votesDataField;
             }
             set
             {
-                this.votesField = value;
+                this.votesDataField = value;
             }
         }
     }
@@ -2347,6 +2347,50 @@ namespace Atlassian.Jira.Remote
                 this.timeTrackingHoursPerDayField = value;
             }
         }
+    }
+
+       /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
+    public partial class RemoteVotes
+    {
+
+        private long votesField;
+
+        private bool hasVotedField;
+
+
+        /// <remarks/>
+        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        public long votes
+        {
+            get
+            {
+                return this.votesField;
+            }
+            set
+            {
+                this.votesField = value;
+            }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        public bool hasVoted
+        {
+            get
+            {
+                return this.hasVotedField;
+            }
+            set
+            {
+                this.hasVotedField = value;
+            }
+        }
+        
     }
    
 }
