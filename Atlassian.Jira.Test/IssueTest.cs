@@ -84,7 +84,7 @@ namespace Atlassian.Jira.Test
                 Assert.Equal("type", issue.Type.Id);
                 Assert.Equal(new DateTime(2011, 2, 2), issue.Updated);
                 Assert.Equal(1, issue.Votes);
-                Assert.Equal(true, issue.HasVoted);
+                Assert.Equal(true, issue.HasUserVoted);
             }
         }
 

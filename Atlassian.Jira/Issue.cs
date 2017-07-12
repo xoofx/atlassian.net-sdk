@@ -82,7 +82,7 @@ namespace Atlassian.Jira
             Reporter = remoteIssue.reporter;
             Summary = remoteIssue.summary;
             Votes = remoteIssue.votesData?.votes;
-            HasVoted = remoteIssue.votesData?.hasVoted;
+            HasUserVoted = remoteIssue.votesData != null ? remoteIssue.votesData.hasVoted : false;
 
             if (!String.IsNullOrEmpty(remoteIssue.parentKey))
             {
@@ -261,12 +261,12 @@ namespace Atlassian.Jira
         /// <summary>
         /// Number of votes the issue has
         /// </summary>
-        public long? Votes { get; internal set; }
+        public long? Votes { get; private set; }
 
         /// <summary>
-        /// Tell if user has voted the issue
+        /// Whether the user that retrieved this issue has voted on it.
         /// </summary>
-        public bool? HasVoted { get; internal set; }
+        public bool HasUserVoted { get; private set; }
 
         /// <summary>
         /// Time and date on which this issue was entered into JIRA
@@ -989,7 +989,7 @@ namespace Atlassian.Jira
                 project = this.Project,
                 reporter = this.Reporter,
                 summary = this.Summary,
-                votesData = this.Votes != null ? new RemoteVotes() { hasVoted = this.HasVoted == true, votes = this.Votes.Value} : null,
+                votesData = this.Votes != null ? new RemoteVotes() { hasVoted = this.HasUserVoted == true, votes = this.Votes.Value } : null,
                 duedate = this.DueDate
             };
 
