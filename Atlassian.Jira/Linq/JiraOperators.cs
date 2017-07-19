@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Atlassian.Jira.Linq
 {
@@ -27,7 +24,7 @@ namespace Atlassian.Jira.Linq
 
         public const string OR = "or";
         public const string AND = "and";
-        
+
 
     }
 }

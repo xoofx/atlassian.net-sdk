@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Linq;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Atlassian.Jira.Test.Integration

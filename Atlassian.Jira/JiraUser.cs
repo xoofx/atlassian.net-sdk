@@ -1,8 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Atlassian.Jira
 {
@@ -45,7 +42,7 @@ namespace Atlassian.Jira
         {
             return Username;
         }
-        
+
         public override bool Equals(object other)
         {
             var otherAsThisType = other as JiraUser;

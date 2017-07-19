@@ -1,4 +1,6 @@
-﻿namespace Atlassian.Jira
+﻿using System;
+
+namespace Atlassian.Jira
 {
     /// <summary>
     /// Represents a link between an issue and a remote link.

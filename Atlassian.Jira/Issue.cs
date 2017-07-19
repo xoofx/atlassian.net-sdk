@@ -1,19 +1,12 @@
-﻿using Atlassian.Jira.Linq;
-using Atlassian.Jira.Remote;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using RestSharp;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {

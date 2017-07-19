@@ -1,9 +1,7 @@
-﻿using Atlassian.Jira.Remote;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Atlassian.Jira.Remote;
+using Newtonsoft.Json;
 
 namespace Atlassian.Jira
 {

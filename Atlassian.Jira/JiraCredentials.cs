@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Atlassian.Jira
 {
@@ -27,6 +24,6 @@ namespace Atlassian.Jira
         public string Password
         {
             get { return _password; }
-        } 
+        }
     }
 }

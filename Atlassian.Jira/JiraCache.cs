@@ -1,4 +1,6 @@
-﻿namespace Atlassian.Jira
+﻿using System;
+
+namespace Atlassian.Jira
 {
     /// <summary>
     /// Cache for frequently retrieved server items from JIRA.

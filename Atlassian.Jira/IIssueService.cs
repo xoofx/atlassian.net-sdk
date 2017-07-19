@@ -1,10 +1,8 @@
-﻿using Atlassian.Jira.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Linq;
 
 namespace Atlassian.Jira
 {
@@ -108,7 +106,7 @@ namespace Atlassian.Jira
         /// <param name="commentId">Identifier of the comment to remove.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task DeleteCommentAsync(string issueKey, string commentId, CancellationToken token = default(CancellationToken));
-        
+
         /// <summary>
         /// Returns the comments of an issue with paging.
         /// </summary>

@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 
 namespace Atlassian.Jira.Linq
@@ -36,7 +35,7 @@ namespace Atlassian.Jira.Linq
 
         public Type ElementType
         {
-            get 
+            get
             {
                 return typeof(T);
             }
@@ -44,7 +43,7 @@ namespace Atlassian.Jira.Linq
 
         public Expression Expression
         {
-            get 
+            get
             {
                 return _expression;
             }
@@ -52,7 +51,7 @@ namespace Atlassian.Jira.Linq
 
         public IQueryProvider Provider
         {
-            get 
+            get
             {
                 return _provider;
             }

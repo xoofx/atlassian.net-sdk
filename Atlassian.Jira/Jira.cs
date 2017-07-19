@@ -1,11 +1,7 @@
-﻿using Atlassian.Jira.Linq;
-using Atlassian.Jira.Remote;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {

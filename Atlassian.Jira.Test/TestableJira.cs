@@ -1,9 +1,10 @@
-﻿using Atlassian.Jira.Linq;
-using Atlassian.Jira.Remote;
-using Moq;
+﻿using System;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Threading;
+using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
+using Moq;
 
 namespace Atlassian.Jira.Test
 {

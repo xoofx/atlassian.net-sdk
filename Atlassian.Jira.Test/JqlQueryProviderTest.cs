@@ -1,11 +1,7 @@
-﻿using Atlassian.Jira.Linq;
-using Atlassian.Jira.Remote;
-using Moq;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
+using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
 using Xunit;
 
 namespace Atlassian.Jira.Test

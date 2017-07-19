@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,7 +26,7 @@ namespace Atlassian.Jira
         /// Add user to a group
         /// </summary>
         Task AddUserAsync(string groupname, string username, CancellationToken token = default(CancellationToken));
-        
+
         /// <summary>
         /// Remove user from a group
         /// </summary>

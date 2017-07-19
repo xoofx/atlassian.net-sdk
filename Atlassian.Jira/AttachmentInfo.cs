@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Atlassian.Jira
 {
@@ -9,7 +6,7 @@ namespace Atlassian.Jira
     /// Information about an attachment to be uploaded
     /// </summary>
     public class UploadAttachmentInfo
-    {   
+    {
         public string Name { get; set; }
         public byte[] Data { get; set; }
 
