@@ -36,6 +36,8 @@ namespace Atlassian.Jira.Remote
 
         private System.Nullable<System.DateTime> updatedField;
 
+        private System.Collections.Generic.IEnumerable<RemoteCommentProperty> propertiesField;
+
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
         [JsonConverter(typeof(NestedValueJsonConverter), "name")]
@@ -148,6 +150,14 @@ namespace Atlassian.Jira.Remote
             {
                 this.updatedField = value;
             }
+        }
+
+        /// <remarks/>
+        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        public System.Collections.Generic.IEnumerable<RemoteCommentProperty> properties
+        {
+            get { return this.propertiesField; }
+            set { this.propertiesField = value; }
         }
     }
 

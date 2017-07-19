@@ -110,6 +110,16 @@ namespace Atlassian.Jira
             }
         }
 
+        public IEnumerable<KeyValuePair<string, object>> GetProperties()
+        {
+            if (_remoteComment.properties == null)
+            {
+                return new List<KeyValuePair<string, object>>();
+            }
+
+            return _remoteComment.properties.Select(p => p.ToKeyValuePair());
+        }
+
         internal RemoteComment toRemote()
         {
             return _remoteComment;
