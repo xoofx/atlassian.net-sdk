@@ -19,7 +19,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Create a new Comment from a remote intance object.
+        /// Create a new Comment from a remote instance object.
         /// </summary>
         /// <param name="remoteComment">The remote comment.</param>
         public Comment(RemoteComment remoteComment)

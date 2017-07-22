@@ -36,7 +36,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Creates a new Issue.
         /// </summary>
-        /// <param name="jira">Jira instance that ownes this issue.</param>
+        /// <param name="jira">Jira instance that owns this issue.</param>
         /// <param name="projectKey">Project key that owns this issue.</param>
         /// <param name="parentIssueKey">If provided, marks this issue as a subtask of the given parent issue.</param>
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
@@ -680,6 +680,7 @@ namespace Atlassian.Jira
         /// Add a comment to this issue.
         /// </summary>
         /// <param name="comment">Comment text to add.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
         public Task AddCommentAsync(string comment, CancellationToken token = default(CancellationToken))
         {
             var credentials = _jira.GetCredentials();
@@ -769,6 +770,7 @@ namespace Atlassian.Jira
                                  string newEstimate = null,
                                  CancellationToken token = default(CancellationToken))
         {
+            // todo: Use the CancellationToken Parameter
             return AddWorklogAsync(new Worklog(timespent, DateTime.Now), worklogStrategy, newEstimate);
         }
 
@@ -843,6 +845,7 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to refresh, issue has not been saved to server.");
             }
 
+            // todo: Use the CancellationToken Parameter
             var serverIssue = await _jira.Issues.GetIssueAsync(_originalIssue.key).ConfigureAwait(false);
             Initialize(serverIssue.OriginalRemoteIssue);
         }
@@ -922,6 +925,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
         async Task<RemoteFieldValue[]> IRemoteIssueFieldProvider.GetRemoteFieldValuesAsync(CancellationToken token)
         {
             var fields = new List<RemoteFieldValue>();

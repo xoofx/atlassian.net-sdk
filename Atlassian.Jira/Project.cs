@@ -16,7 +16,7 @@ namespace Atlassian.Jira
         private readonly RemoteProject _remoteProject;
 
         /// <summary>
-        /// Createa a new Project instance using a remote project.
+        /// Creates a new Project instance using a remote project.
         /// </summary>
         /// <param name="jira">Instance of the Jira client.</param>
         /// <param name="remoteProject">Remote project.</param>

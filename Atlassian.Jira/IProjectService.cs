@@ -19,7 +19,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Returns a single project in JIRA.
         /// </summary>
-        /// <param name="projectKey">Project key for the singel project to load</param>
+        /// <param name="projectKey">Project key for the single project to load</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<Project> GetProjectAsync(string projectKey, CancellationToken token = default(CancellationToken));
     }
