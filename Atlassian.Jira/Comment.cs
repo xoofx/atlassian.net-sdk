@@ -12,6 +12,7 @@ namespace Atlassian.Jira
     public class Comment
     {
         private readonly RemoteComment _remoteComment;
+        private Dictionary<string, object> _properties;
 
         /// <summary>
         /// Create a new Comment.
@@ -110,14 +111,25 @@ namespace Atlassian.Jira
             }
         }
 
-        public IEnumerable<KeyValuePair<string, object>> GetProperties()
+        public IReadOnlyDictionary<string, object> Properties
         {
-            if (_remoteComment.properties == null)
+            get
             {
-                return new List<KeyValuePair<string, object>>();
+                if (_properties == null)
+                {
+                    if (_remoteComment.properties == null)
+                    {
+                        _properties = new Dictionary<string, object>();
+                    }
+                    else
+                    {
+                        _properties = _remoteComment.properties.ToDictionary(prop => prop.key, prop => prop.value);
+                    }
+                }
+
+                return _properties;
             }
 
-            return _remoteComment.properties.Select(p => p.ToKeyValuePair());
         }
 
         internal RemoteComment toRemote()

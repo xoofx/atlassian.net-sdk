@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 using Newtonsoft.Json;
+
 namespace Atlassian.Jira.Remote
 {
     /// <remarks/>
@@ -35,8 +36,6 @@ namespace Atlassian.Jira.Remote
         private string updateAuthorField;
 
         private System.Nullable<System.DateTime> updatedField;
-
-        private System.Collections.Generic.IEnumerable<RemoteCommentProperty> propertiesField;
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -153,12 +152,7 @@ namespace Atlassian.Jira.Remote
         }
 
         /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public System.Collections.Generic.IEnumerable<RemoteCommentProperty> properties
-        {
-            get { return this.propertiesField; }
-            set { this.propertiesField = value; }
-        }
+        public System.Collections.Generic.IEnumerable<RemoteCommentProperty> properties { get; set; }
     }
 
     /// <remarks/>
@@ -2350,5 +2344,11 @@ namespace Atlassian.Jira.Remote
         public long votes { get; set; }
 
         public bool hasVoted { get; set; }
+    }
+
+    public class RemoteCommentProperty
+    {
+        public string key { get; set; }
+        public object value { get; set; }
     }
 }

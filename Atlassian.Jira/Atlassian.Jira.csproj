@@ -162,7 +162,6 @@
     <Compile Include="Remote\ProjectComponentService.cs" />
     <Compile Include="Remote\ProjectService.cs" />
     <Compile Include="Remote\ProjectVersionService.cs" />
-    <Compile Include="Remote\RemoteCommentProperty.cs" />
     <Compile Include="Remote\RemoteIssueJsonConverter.cs" />
     <Compile Include="Remote\RestSharpJsonSerializer.cs" />
     <Compile Include="Remote\NestedValueJsonConverter.cs" />
