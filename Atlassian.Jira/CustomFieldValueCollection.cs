@@ -40,7 +40,7 @@ namespace Atlassian.Jira
         /// Add a custom field by name with an array of values
         /// </summary>
         /// <param name="fieldName">The name of the custom field as defined in JIRA</param>
-        /// <param name="fildValues">The values of the field</param>
+        /// <param name="fieldValues">The values of the field</param>
         public CustomFieldValueCollection AddArray(string fieldName, params string[] fieldValues)
         {
             return this.Add(fieldName, fieldValues);
@@ -88,8 +88,8 @@ namespace Atlassian.Jira
         /// <summary>
         /// Add a custom field by id with an array of values.
         /// </summary>
-        /// <param name="fieldName">The id of the custom field as defined in JIRA.</param>
-        /// <param name="fildValues">The values of the field.</param>
+        /// <param name="fieldId">The id of the custom field as defined in JIRA.</param>
+        /// <param name="fieldValues">The values of the field.</param>
         public CustomFieldValueCollection AddById(string fieldId, params string[] fieldValues)
         {
             this.Items.Add(new CustomFieldValue(fieldId, _issue) { Values = fieldValues });

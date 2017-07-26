@@ -25,7 +25,7 @@ namespace Atlassian.Jira
         Task DeleteGroupAsync(string groupName, string swapGroupName = null, CancellationToken token = default(CancellationToken));
 
         /// <summary>
-        /// Returns users that are members of the group speficied.
+        /// Returns users that are members of the group specified.
         /// </summary>
         /// <param name="groupName">The name of group to return users for.</param>
         /// <param name="includeInactiveUsers">Whether to include inactive users.</param>

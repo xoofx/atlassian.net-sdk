@@ -38,6 +38,14 @@ namespace Atlassian.Jira
         Task UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken));
 
         /// <summary>
+        /// Updates all fields of an issue.
+        /// </summary>
+        /// <param name="issue">Issue to update.</param>
+        /// <param name="options">Options for the update</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task UpdateIssueAsync(Issue issue, IssueUpdateOptions options, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
         /// Creates an issue and returns a new instance populated from server.
         /// </summary>
         /// <param name="issue">Issue to create.</param>

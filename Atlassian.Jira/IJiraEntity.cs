@@ -3,7 +3,7 @@
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// Representes an Jira entity with a unique identifier.
+    /// Represents a Jira entity with a unique identifier.
     /// </summary>
     public interface IJiraEntity
     {
