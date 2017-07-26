@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 using Newtonsoft.Json;
+
 namespace Atlassian.Jira.Remote
 {
     /// <remarks/>
@@ -149,6 +150,9 @@ namespace Atlassian.Jira.Remote
                 this.updatedField = value;
             }
         }
+
+        /// <remarks/>
+        public System.Collections.Generic.IEnumerable<RemoteCommentProperty> properties { get; set; }
     }
 
     /// <remarks/>
@@ -2340,5 +2344,11 @@ namespace Atlassian.Jira.Remote
         public long votes { get; set; }
 
         public bool hasVoted { get; set; }
+    }
+
+    public class RemoteCommentProperty
+    {
+        public string key { get; set; }
+        public object value { get; set; }
     }
 }
