@@ -104,10 +104,10 @@ namespace Atlassian.Jira.Remote
             await _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, new { fields = fields }, token).ConfigureAwait(false);
         }
 
-        public async Task UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken))
+        public Task UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken))
         {
             var options = new IssueUpdateOptions();
-            await UpdateIssueAsync(issue, options, token);
+            return UpdateIssueAsync(issue, options, token);
         }
 
         public async Task<string> CreateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken))
