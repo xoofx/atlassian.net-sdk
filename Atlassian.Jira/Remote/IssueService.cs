@@ -89,15 +89,25 @@ namespace Atlassian.Jira.Remote
             return PagedQueryResult<Issue>.FromJson((JObject)result, issues);
         }
 
-        public async Task UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken))
+        public async Task UpdateIssueAsync(Issue issue, IssueUpdateOptions options, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format("rest/api/2/issue/{0}", issue.Key.Value);
+            if (options.SuppressEmailNotification)
+            {
+                resource += "?notifyUsers=false";
+            }
             var fieldProvider = issue as IRemoteIssueFieldProvider;
             var remoteFields = await fieldProvider.GetRemoteFieldValuesAsync(token).ConfigureAwait(false);
             var remoteIssue = await issue.ToRemoteAsync(token).ConfigureAwait(false);
             var fields = await this.BuildFieldsObjectFromIssueAsync(remoteIssue, remoteFields, token).ConfigureAwait(false);
 
             await _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, new { fields = fields }, token).ConfigureAwait(false);
+        }
+
+        public async Task UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken))
+        {
+            var options = new IssueUpdateOptions();
+            await UpdateIssueAsync(issue, options, token);
         }
 
         public async Task<string> CreateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken))

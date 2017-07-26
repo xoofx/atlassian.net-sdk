@@ -68,6 +68,7 @@
     <Compile Include="IssueLabelCollection.cs" />
     <Compile Include="IssueRemoteLink.cs" />
     <Compile Include="IssueSecurityLevel.cs" />
+    <Compile Include="IssueUpdateOptions.cs" />
     <Compile Include="JiraUserCreationInfo.cs" />
     <Compile Include="CustomField.cs" />
     <Compile Include="IGroupResource.cs" />
