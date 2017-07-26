@@ -23,7 +23,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Returns all remote links associated with a given issue.
         /// </summary>
-        /// <param name="issue">The issue to retrieve remote links for.</param>
+        /// <param name="issueKey">The issue to retrieve remote links for.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IEnumerable<IssueRemoteLink>> GetRemoteLinksForIssueAsync(string issueKey, CancellationToken token = default(CancellationToken));
     }

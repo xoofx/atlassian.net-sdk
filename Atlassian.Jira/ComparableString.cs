@@ -3,7 +3,7 @@
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// Type that wraps a string and exposes opertor overloads for
+    /// Type that wraps a string and exposes operator overloads for
     /// easier LINQ queries
     /// </summary>
     /// <remarks>
