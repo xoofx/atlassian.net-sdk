@@ -33,6 +33,12 @@ namespace Atlassian.Jira
         public bool IsActive { get; private set; }
 
         /// <summary>
+        /// The locale of the User.
+        /// </summary>
+        [JsonProperty("locale")]
+        public string Locale { get; private set; }
+
+        /// <summary>
         /// Url to access this resource.
         /// </summary>
         [JsonProperty("self")]
