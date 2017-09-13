@@ -22,6 +22,11 @@ namespace Atlassian.Jira
         bool ValidateQuery { get; set; }
 
         /// <summary>
+        /// Maximum number of issues to retrieve per request.
+        /// </summary>
+        int MaxIssuesPerRequest { get; set; }
+
+        /// <summary>
         /// Retrieves an issue by its key.
         /// </summary>
         /// <param name="issueKey">The issue key to retrieve</param>

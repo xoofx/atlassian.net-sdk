@@ -9,6 +9,7 @@ namespace Atlassian.Jira
     public class ServiceLocator
     {
         private readonly ConcurrentDictionary<Type, object> _factories;
+        private readonly ConcurrentDictionary<Type, object> _services;
 
         /// <summary>
         /// Creates a new instance of ServiceLocator.
@@ -16,6 +17,7 @@ namespace Atlassian.Jira
         public ServiceLocator()
         {
             _factories = new ConcurrentDictionary<Type, object>();
+            _services = new ConcurrentDictionary<Type, object>();
         }
 
         /// <summary>
@@ -24,7 +26,11 @@ namespace Atlassian.Jira
         /// <param name="factory">Factory that creates the service instance.</param>
         public void Register<TService>(Func<TService> factory)
         {
-            _factories.AddOrUpdate(typeof(TService), factory, (s, f) => factory);
+            Type serviceType = typeof(TService);
+            object factoryObj = null;
+
+            _factories.AddOrUpdate(serviceType, factory, (s, f) => factory);
+            _services.TryRemove(serviceType, out factoryObj);
         }
 
         /// <summary>
@@ -32,10 +38,20 @@ namespace Atlassian.Jira
         /// </summary>
         public TService Get<TService>()
         {
-            object factoryObj;
-            if (_factories.TryGetValue(typeof(TService), out factoryObj))
+            Type serviceType = typeof(TService);
+            object factoryObj = null;
+            object serviceObj = null;
+
+            if (_services.TryGetValue(serviceType, out serviceObj))
             {
-                return ((Func<TService>)factoryObj).Invoke();
+                return (TService)serviceObj;
+            }
+            else if (_factories.TryGetValue(serviceType, out factoryObj))
+            {
+                serviceObj = ((Func<TService>)factoryObj).Invoke();
+                _services.TryAdd(serviceType, serviceObj);
+
+                return (TService)serviceObj;
             }
             else
             {
@@ -49,6 +65,7 @@ namespace Atlassian.Jira
         public void Clear()
         {
             _factories.Clear();
+            _services.Clear();
         }
     }
 }

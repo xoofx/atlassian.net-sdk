@@ -13,6 +13,8 @@ namespace Atlassian.Jira.Remote
 {
     internal class IssueService : IIssueService
     {
+        private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
+
         private readonly Jira _jira;
         private readonly JiraRestClientSettings _restSettings;
 
@@ -28,7 +30,7 @@ namespace Atlassian.Jira.Remote
 
             public string Jql { get; private set; }
             public CancellationToken Token { get; private set; }
-            public int MaxIssuesPerRequest { get; set; } = 20;
+            public int MaxIssuesPerRequest { get; set; } = DEFAULT_MAX_ISSUES_PER_REQUEST;
             public int StartAt { get; set; } = 0;
             public bool ValidateQuery { get; set; } = true;
         }
@@ -37,7 +39,6 @@ namespace Atlassian.Jira.Remote
         {
             _jira = jira;
             _restSettings = restSettings;
-            ValidateQuery = true;
         }
 
         public JiraQueryable<Issue> Queryable
@@ -50,7 +51,9 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        public bool ValidateQuery { get; set; }
+        public bool ValidateQuery { get; set; } = true;
+
+        public int MaxIssuesPerRequest { get; set; } = DEFAULT_MAX_ISSUES_PER_REQUEST;
 
         private async Task<JsonSerializerSettings> GetIssueSerializerSettingsAsync(CancellationToken token)
         {
@@ -84,7 +87,7 @@ namespace Atlassian.Jira.Remote
         {
             return GetIssuesFromJqlAsync(new JqlOptions(jql, token)
             {
-                MaxIssuesPerRequest = maxIssues ?? _jira.MaxIssuesPerRequest,
+                MaxIssuesPerRequest = maxIssues ?? this.MaxIssuesPerRequest,
                 StartAt = startAt,
                 ValidateQuery = this.ValidateQuery
             });

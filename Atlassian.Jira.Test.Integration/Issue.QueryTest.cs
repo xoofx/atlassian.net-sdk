@@ -115,7 +115,7 @@ namespace Atlassian.Jira.Test.Integration
             (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
 
             //set maximum issues and query
-            _jira.MaxIssuesPerRequest = 1;
+            _jira.Issues.MaxIssuesPerRequest = 1;
             var issues = from i in _jira.Issues.Queryable
                          where i.Summary == randomNumber.ToString()
                          select i;

@@ -13,8 +13,6 @@ namespace Atlassian.Jira
         internal const string DEFAULT_DATE_FORMAT = "yyyy/MM/dd";
         internal static CultureInfo DefaultCultureInfo = CultureInfo.GetCultureInfo("en-us");
 
-        private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
-
         private readonly JiraCredentials _credentials;
         private readonly JiraCache _cache;
         private readonly ServiceLocator _services;
@@ -28,7 +26,6 @@ namespace Atlassian.Jira
             _credentials = credentials;
             _cache = cache ?? new JiraCache();
 
-            this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
         }
 
@@ -261,7 +258,18 @@ namespace Atlassian.Jira
         /// <summary>
         /// Maximum number of issues per request
         /// </summary>
-        public int MaxIssuesPerRequest { get; set; }
+        [Obsolete("Use Jira.Issues.MaxIssuesPerRequest")]
+        public int MaxIssuesPerRequest
+        {
+            get
+            {
+                return this.Issues.MaxIssuesPerRequest;
+            }
+            set
+            {
+                this.Issues.MaxIssuesPerRequest = value;
+            }
+        }
 
         /// <summary>
         /// Url to the JIRA server
