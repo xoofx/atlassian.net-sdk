@@ -8,6 +8,14 @@ namespace Atlassian.Jira.Test.Integration
     public class IssueQueryTest : BaseIntegrationTest
     {
         [Fact]
+        public async Task GetIssuesAsyncWhenIssueDoesNotExist()
+        {
+            var dict = await _jira.Issues.GetIssuesAsync("TST-9999");
+
+            Assert.False(dict.ContainsKey("TST-9999"));
+        }
+
+        [Fact]
         public void GetIssuesWithPagingMetadata()
         {
             // Arrange: Create 3 issues to query.

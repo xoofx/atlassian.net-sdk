@@ -18,6 +18,21 @@ namespace Atlassian.Jira.Remote
 
         private JsonSerializerSettings _serializerSettings;
 
+        private class JqlOptions
+        {
+            public JqlOptions(string jql, CancellationToken token)
+            {
+                this.Jql = jql;
+                this.Token = token;
+            }
+
+            public string Jql { get; private set; }
+            public CancellationToken Token { get; private set; }
+            public int MaxIssuesPerRequest { get; set; } = 20;
+            public int StartAt { get; set; } = 0;
+            public bool ValidateQuery { get; set; } = true;
+        }
+
         public IssueService(Jira jira, JiraRestClientSettings restSettings)
         {
             _jira = jira;
@@ -34,7 +49,7 @@ namespace Atlassian.Jira.Remote
                 return new JiraQueryable<Issue>(provider);
             }
         }
-        
+
         public bool ValidateQuery { get; set; }
 
         private async Task<JsonSerializerSettings> GetIssueSerializerSettingsAsync(CancellationToken token)
@@ -65,23 +80,33 @@ namespace Atlassian.Jira.Remote
             return new Issue(_jira, issue.RemoteIssue);
         }
 
-        public async Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = default(int?), int startAt = 0, CancellationToken token = default(CancellationToken))
+        public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = default(int?), int startAt = 0, CancellationToken token = default(CancellationToken))
+        {
+            return GetIssuesFromJqlAsync(new JqlOptions(jql, token)
+            {
+                MaxIssuesPerRequest = maxIssues ?? _jira.MaxIssuesPerRequest,
+                StartAt = startAt,
+                ValidateQuery = this.ValidateQuery
+            });
+        }
+
+        private async Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(JqlOptions options)
         {
             if (_jira.Debug)
             {
-                Trace.WriteLine("[GetFromJqlAsync] JQL: " + jql);
+                Trace.WriteLine("[GetFromJqlAsync] JQL: " + options.Jql);
             }
 
             var parameters = new
             {
-                jql = jql,
-                startAt = startAt,
-                maxResults = maxIssues ?? _jira.MaxIssuesPerRequest,
-                validateQuery = ValidateQuery,
+                jql = options.Jql,
+                startAt = options.StartAt,
+                maxResults = options.MaxIssuesPerRequest,
+                validateQuery = options.ValidateQuery,
             };
 
-            var result = await _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ConfigureAwait(false);
-            var serializerSettings = await this.GetIssueSerializerSettingsAsync(token).ConfigureAwait(false);
+            var result = await _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, options.Token).ConfigureAwait(false);
+            var serializerSettings = await this.GetIssueSerializerSettingsAsync(options.Token).ConfigureAwait(false);
             var issues = result["issues"]
                 .Cast<JObject>()
                 .Select(issueJson =>
@@ -399,13 +424,22 @@ namespace Atlassian.Jira.Remote
             {
                 var distinctKeys = issueKeys.Distinct();
                 var jql = String.Format("key in ({0})", String.Join(",", distinctKeys));
-                var result = await this.GetIssuesFromJqlAsync(jql, distinctKeys.Count(), 0, token).ConfigureAwait(false);
+                var result = await this.GetIssuesFromJqlAsync(new JqlOptions(jql, token)
+                {
+                    MaxIssuesPerRequest = distinctKeys.Count(),
+                    ValidateQuery = false
+                }).ConfigureAwait(false);
                 return result.ToDictionary<Issue, string>(i => i.Key.Value);
             }
             else
             {
                 return new Dictionary<string, Issue>();
             }
+        }
+
+        public Task<IDictionary<string, Issue>> GetIssuesAsync(params string[] issueKeys)
+        {
+            return this.GetIssuesAsync(issueKeys, default(CancellationToken));
         }
 
         public async Task<IEnumerable<Comment>> GetCommentsAsync(string issueKey, CancellationToken token = default(CancellationToken))

@@ -36,6 +36,12 @@ namespace Atlassian.Jira
         Task<IDictionary<string, Issue>> GetIssuesAsync(IEnumerable<string> issueKeys, CancellationToken token = default(CancellationToken));
 
         /// <summary>
+        /// Retrieves a list of issues by their keys.
+        /// </summary>
+        /// <param name="issueKeys">List of issue keys to retrieve.</param>
+        Task<IDictionary<string, Issue>> GetIssuesAsync(params string[] issueKeys);
+
+        /// <summary>
         /// Updates all fields of an issue.
         /// </summary>
         /// <param name="issue">Issue to update.</param>
