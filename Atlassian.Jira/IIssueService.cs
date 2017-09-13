@@ -17,6 +17,11 @@ namespace Atlassian.Jira
         JiraQueryable<Issue> Queryable { get; }
 
         /// <summary>
+        /// Whether to validate a JQL query
+        /// </summary>
+        bool ValidateQuery { get; set; }
+
+        /// <summary>
         /// Retrieves an issue by its key.
         /// </summary>
         /// <param name="issueKey">The issue key to retrieve</param>

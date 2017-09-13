@@ -22,6 +22,7 @@ namespace Atlassian.Jira.Remote
         {
             _jira = jira;
             _restSettings = restSettings;
+            ValidateQuery = true;
         }
 
         public JiraQueryable<Issue> Queryable
@@ -33,6 +34,8 @@ namespace Atlassian.Jira.Remote
                 return new JiraQueryable<Issue>(provider);
             }
         }
+        
+        public bool ValidateQuery { get; set; }
 
         private async Task<JsonSerializerSettings> GetIssueSerializerSettingsAsync(CancellationToken token)
         {
@@ -74,6 +77,7 @@ namespace Atlassian.Jira.Remote
                 jql = jql,
                 startAt = startAt,
                 maxResults = maxIssues ?? _jira.MaxIssuesPerRequest,
+                validateQuery = ValidateQuery,
             };
 
             var result = await _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ConfigureAwait(false);
