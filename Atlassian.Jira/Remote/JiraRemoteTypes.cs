@@ -648,6 +648,13 @@ namespace Atlassian.Jira.Remote
                 this.nameField = value;
             }
         }
+
+        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        public AvatarUrls avatarUrls
+        {
+            get;
+            set;
+        }
     }
 
     /// <remarks/>
@@ -917,7 +924,29 @@ namespace Atlassian.Jira.Remote
                 this.urlField = value;
             }
         }
+
+        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        public AvatarUrls avatarUrls
+        {
+            get;
+            set;
+        }
+
+
     }
+
+    public class AvatarUrls
+    {
+        [JsonProperty("16x16")]
+        public string xsmall { get; set; }
+        [JsonProperty("24x24")]
+        public string small { get; set; }
+        [JsonProperty("32x32")]
+        public string medium { get; set; }
+        [JsonProperty("48x48")]
+        public string large { get; set; }
+    }
+
 
     /// <remarks/>
     [System.Xml.Serialization.SoapIncludeAttribute(typeof(RemotePermissionScheme))]

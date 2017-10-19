@@ -47,6 +47,16 @@
 
         internal string InternalIdentifier { get; set; }
 
+
+        /// <summary>
+        /// The list of the Avatar URL's for this user
+        /// </summary>
+        [JsonProperty("avatarUrls")]
+        public Remote.AvatarUrls AvatarUrls
+        {
+            get;set;
+        }
+
         public override string ToString()
         {
             return Username;
