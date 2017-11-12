@@ -130,6 +130,10 @@ namespace Atlassian.Jira.Remote
                         {
                             jToken = this._customFieldSerializers[customFieldType].ToJson(customField.values);
                         }
+                        else if (customField.serializer != null)
+                        {
+                            jToken = customField.serializer.ToJson(customField.values);
+                        }
                         else
                         {
                             jToken = JValue.CreateString(customField.values[0]);
@@ -156,6 +160,11 @@ namespace Atlassian.Jira.Remote
                     if (this._customFieldSerializers.ContainsKey(customFieldType))
                     {
                         remoteCustomFieldValue.values = this._customFieldSerializers[customFieldType].FromJson(field.Value);
+                    }
+                    else if (field.Value.Type == JTokenType.Array)
+                    {
+                        var serializer = new MultiStringCustomFieldValueSerializer();
+                        remoteCustomFieldValue.values = serializer.FromJson(field.Value);
                     }
                     else
                     {

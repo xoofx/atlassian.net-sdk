@@ -43,7 +43,7 @@ namespace Atlassian.Jira
         /// <param name="fieldValues">The values of the field</param>
         public CustomFieldValueCollection AddArray(string fieldName, params string[] fieldValues)
         {
-            return this.Add(fieldName, fieldValues);
+            return this.Add(fieldName, fieldValues, new MultiStringCustomFieldValueSerializer());
         }
 
         /// <summary>
@@ -78,10 +78,10 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="fieldName">The name of the custom field as defined in JIRA</param>
         /// <param name="fieldValues">The values of the field</param>
-        public CustomFieldValueCollection Add(string fieldName, string[] fieldValues)
+        public CustomFieldValueCollection Add(string fieldName, string[] fieldValues, ICustomFieldValueSerializer serializer = null)
         {
             var fieldId = GetCustomFieldId(fieldName);
-            this.Items.Add(new CustomFieldValue(fieldId, fieldName, _issue) { Values = fieldValues });
+            this.Items.Add(new CustomFieldValue(fieldId, fieldName, _issue) { Values = fieldValues, Serializer = serializer });
             return this;
         }
 

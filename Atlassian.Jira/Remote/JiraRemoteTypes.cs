@@ -1762,6 +1762,9 @@ namespace Atlassian.Jira.Remote
                 this.valuesField = value;
             }
         }
+
+        [JsonIgnore]
+        public ICustomFieldValueSerializer serializer { get; set; }
     }
 
     /// <remarks/>

@@ -1036,7 +1036,8 @@ namespace Atlassian.Jira
                 remote.customFieldValues = this.CustomFields.Select(f => new RemoteCustomFieldValue()
                 {
                     customfieldId = f.Id,
-                    values = f.Values
+                    values = f.Values,
+                    serializer = f.Serializer
                 }).ToArray();
             }
 
