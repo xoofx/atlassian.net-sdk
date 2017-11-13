@@ -681,7 +681,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="comment">Comment text to add.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task AddCommentAsync(string comment, CancellationToken token = default(CancellationToken))
+        public Task<Comment> AddCommentAsync(string comment, CancellationToken token = default(CancellationToken))
         {
             var credentials = _jira.GetCredentials();
             return this.AddCommentAsync(new Comment() { Author = credentials.UserName, Body = comment }, token);
@@ -707,7 +707,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="comment">Comment object to add.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task AddCommentAsync(Comment comment, CancellationToken token = default(CancellationToken))
+        public Task<Comment> AddCommentAsync(Comment comment, CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {

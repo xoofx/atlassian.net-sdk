@@ -377,17 +377,19 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(0, comments.Count());
 
             // Add a comment
-            await issue.AddCommentAsync("new comment");
+            var commentFromAdd = await issue.AddCommentAsync("new comment");
+            Assert.Equal("new comment", commentFromAdd.Body);
 
             // Verify comment retrieval
             comments = await issue.GetPagedCommentsAsync();
             Assert.Equal(1, comments.Count());
-            var comment = comments.First();
-            Assert.Equal("new comment", comment.Body);
-            Assert.Equal(0, comment.Properties.Count());
+            var commentFromGet = comments.First();
+            Assert.Equal(commentFromAdd.Id, commentFromGet.Id);
+            Assert.Equal("new comment", commentFromGet.Body);
+            Assert.Equal(0, commentFromGet.Properties.Count());
 
             // Delete comment.
-            await issue.DeleteCommentAsync(comments.First());
+            await issue.DeleteCommentAsync(commentFromGet);
 
             // Verify no comments
             comments = await issue.GetPagedCommentsAsync();
