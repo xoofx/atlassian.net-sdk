@@ -27,7 +27,7 @@ namespace Atlassian.Jira.Remote
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var outerObject = JObject.Load(reader);
-            return Convert.ChangeType(outerObject[this._innerProperty], objectType);
+            return outerObject[_innerProperty]?.ToObject(objectType);
         }
     }
 }

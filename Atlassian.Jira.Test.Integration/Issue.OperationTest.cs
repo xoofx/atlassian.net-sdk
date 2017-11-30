@@ -17,7 +17,7 @@ namespace Atlassian.Jira.Test.Integration
 
             var firstChangeLog = changelogs.First();
             Assert.Equal("admin", firstChangeLog.Author.Username);
-            Assert.NotNull(firstChangeLog.CreatedDate);
+            //Assert.NotNull(firstChangeLog.CreatedDate); this can never be null
             Assert.Equal(2, firstChangeLog.Items.Count());
 
             var firstItem = firstChangeLog.Items.First();
@@ -41,7 +41,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(2, issue.GetWatchersAsync().Result.Count());
 
             issue.DeleteWatcherAsync("admin").Wait();
-            Assert.Equal(1, issue.GetWatchersAsync().Result.Count());
+            Assert.Single(issue.GetWatchersAsync().Result);
 
             var user = issue.GetWatchersAsync().Result.First();
             Assert.Equal("test", user.Username);
@@ -64,7 +64,7 @@ namespace Atlassian.Jira.Test.Integration
             subTask.SaveChanges();
 
             var results = parentTask.GetSubTasksAsync().Result;
-            Assert.Equal(results.Count(), 1);
+            Assert.Single(results);
             Assert.Equal(results.First().Summary, subTask.Summary);
         }
 
@@ -106,8 +106,8 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(2, issueLinks.Count());
             Assert.True(issueLinks.All(l => l.OutwardIssue.Key.Value == issue1.Key.Value));
             Assert.True(issueLinks.All(l => l.LinkType.Name == "Duplicate"));
-            Assert.True(issueLinks.Any(l => l.InwardIssue.Key.Value == issue2.Key.Value));
-            Assert.True(issueLinks.Any(l => l.InwardIssue.Key.Value == issue3.Key.Value));
+            Assert.Contains(issueLinks, l => l.InwardIssue.Key.Value == issue2.Key.Value);
+            Assert.Contains(issueLinks, l => l.InwardIssue.Key.Value == issue3.Key.Value);
 
             // Verify link of second issue.
             var issueLink = issue2.GetIssueLinksAsync().Result.Single();
@@ -147,8 +147,8 @@ namespace Atlassian.Jira.Test.Integration
             // Verify remote links of issue.
             var remoteLinks = issue.GetRemoteLinksAsync().Result;
             Assert.Equal(2, remoteLinks.Count());
-            Assert.True(remoteLinks.Any(l => l.RemoteUrl == url1 && l.Title == title1 && l.Summary == summary1));
-            Assert.True(remoteLinks.Any(l => l.RemoteUrl == url2 && l.Title == title2 && l.Summary == null));
+            Assert.Contains(remoteLinks, l => l.RemoteUrl == url1 && l.Title == title1 && l.Summary == summary1);
+            Assert.Contains(remoteLinks, l => l.RemoteUrl == url2 && l.Title == title2 && l.Summary == null);
         }
 
         [Fact]
@@ -187,7 +187,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("2.0", updatedIssue.FixVersions.First().Name);
 
             var comments = updatedIssue.GetCommentsAsync().Result;
-            Assert.Equal(1, comments.Count());
+            Assert.Single(comments);
             Assert.Equal("Comment with transition", comments.First().Body);
         }
 
@@ -275,7 +275,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // create an issue, verify no attachments
             issue.SaveChanges();
-            Assert.Equal(0, issue.GetAttachmentsAsync().Result.Count());
+            Assert.Empty(issue.GetAttachmentsAsync().Result);
 
             // upload multiple attachments
             File.WriteAllText("testfile1.txt", "Test File Content 1");
@@ -294,7 +294,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // remove an attachment
             issue.DeleteAttachmentAsync(attachments.First()).Wait();
-            Assert.Equal(1, issue.GetAttachmentsAsync().Result.Count());
+            Assert.Single(issue.GetAttachmentsAsync().Result);
         }
 
         [Fact]
@@ -325,12 +325,15 @@ namespace Atlassian.Jira.Test.Integration
             var tempFile = Path.GetTempFileName();
             var attachment = attachments.First(a => a.FileName.Equals("testfile1.txt"));
 
+#if NET452
             var task1 = attachment.DownloadAsync(tempFile);
+#endif
             var task2 = attachment.DownloadAsync(tempFile);
 
             await task2;
-
+#if NET452
             Assert.True(task1.IsCanceled);
+#endif
             Assert.Equal("Test File Content 1", File.ReadAllText(tempFile));
         }
 
@@ -347,13 +350,13 @@ namespace Atlassian.Jira.Test.Integration
 
             // create an issue, verify no comments
             issue.SaveChanges();
-            Assert.Equal(0, issue.GetCommentsAsync().Result.Count());
+            Assert.Empty(issue.GetCommentsAsync().Result);
 
             // Add a comment
             issue.AddCommentAsync("new comment").Wait();
 
             var comments = issue.GetCommentsAsync().Result;
-            Assert.Equal(1, comments.Count());
+            Assert.Single(comments);
 
             var comment = comments.First();
             Assert.Equal("new comment", comment.Body);
@@ -374,7 +377,7 @@ namespace Atlassian.Jira.Test.Integration
             // create an issue, verify no comments
             issue.SaveChanges();
             var comments = await issue.GetPagedCommentsAsync();
-            Assert.Equal(0, comments.Count());
+            Assert.Empty(comments);
 
             // Add a comment
             var commentFromAdd = await issue.AddCommentAsync("new comment");
@@ -382,18 +385,20 @@ namespace Atlassian.Jira.Test.Integration
 
             // Verify comment retrieval
             comments = await issue.GetPagedCommentsAsync();
-            Assert.Equal(1, comments.Count());
+
+            Assert.Single(comments);
             var commentFromGet = comments.First();
             Assert.Equal(commentFromAdd.Id, commentFromGet.Id);
             Assert.Equal("new comment", commentFromGet.Body);
-            Assert.Equal(0, commentFromGet.Properties.Count());
+            Assert.Empty(commentFromGet.Properties);
+
 
             // Delete comment.
             await issue.DeleteCommentAsync(commentFromGet);
 
             // Verify no comments
             comments = await issue.GetPagedCommentsAsync();
-            Assert.Equal(0, comments.Count());
+            Assert.Empty(comments);
         }
 
         [Fact]
@@ -481,10 +486,10 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             var worklog = issue.AddWorklogAsync("1h").Result;
-            Assert.Equal(1, issue.GetWorklogsAsync().Result.Count());
+            Assert.Single(issue.GetWorklogsAsync().Result);
 
             issue.DeleteWorklogAsync(worklog).Wait();
-            Assert.Equal(0, issue.GetWorklogsAsync().Result.Count());
+            Assert.Empty(issue.GetWorklogsAsync().Result);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Atlassian.Jira.Remote
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return Convert.ChangeType(JToken.ReadFrom(reader), objectType);
+            return JToken.ReadFrom(reader)?.ToObject(objectType);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

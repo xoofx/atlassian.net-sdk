@@ -28,7 +28,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(user.Email, userInfo.Email);
             Assert.Equal(user.DisplayName, userInfo.DisplayName);
             Assert.Equal(user.Username, userInfo.Username);
-            Assert.Equal(user.IsActive, true);
+            Assert.True(user.IsActive);
             Assert.False(String.IsNullOrEmpty(user.Locale));
             // verify retrieve a user.
             user = _jira.Users.GetUserAsync(userInfo.Username).Result;
@@ -36,7 +36,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // verify search for a user
             var users = _jira.Users.SearchUsersAsync("TestUser").Result;
-            Assert.True(users.Any(u => u.Username == userInfo.Username));
+            Assert.Contains(users, u => u.Username == userInfo.Username);
 
             // verify delete a user
             _jira.Users.DeleteUserAsync(userInfo.Username).Wait();

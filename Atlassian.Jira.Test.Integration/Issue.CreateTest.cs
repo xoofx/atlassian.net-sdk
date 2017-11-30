@@ -36,6 +36,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(newIssue.Key.Value, newSubTask.ParentIssueKey);
         }
 
+        [Fact]
         public void CreateAndQueryIssueWithMinimumFieldsSet()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
@@ -53,7 +54,7 @@ namespace Atlassian.Jira.Test.Integration
                           where i.Key == issue.Key
                           select i).ToArray();
 
-            Assert.Equal(1, issues.Count());
+            Assert.Single(issues);
 
             Assert.Equal(summaryValue, issues[0].Summary);
             Assert.Equal("TST", issues[0].Project);
@@ -145,12 +146,12 @@ namespace Atlassian.Jira.Test.Integration
                             select i).First();
 
             Assert.Equal(2, newIssue.AffectsVersions.Count);
-            Assert.True(newIssue.AffectsVersions.Any(v => v.Name == "1.0"));
-            Assert.True(newIssue.AffectsVersions.Any(v => v.Name == "2.0"));
+            Assert.Contains(newIssue.AffectsVersions, v => v.Name == "1.0");
+            Assert.Contains(newIssue.AffectsVersions, v => v.Name == "2.0");
 
             Assert.Equal(2, newIssue.FixVersions.Count);
-            Assert.True(newIssue.FixVersions.Any(v => v.Name == "2.0"));
-            Assert.True(newIssue.FixVersions.Any(v => v.Name == "3.0"));
+            Assert.Contains(newIssue.FixVersions, v => v.Name == "2.0");
+            Assert.Contains(newIssue.FixVersions, v => v.Name == "3.0");
         }
 
         [Fact]
@@ -175,8 +176,8 @@ namespace Atlassian.Jira.Test.Integration
                             select i).First();
 
             Assert.Equal(2, newIssue.Components.Count);
-            Assert.True(newIssue.Components.Any(c => c.Name == "Server"));
-            Assert.True(newIssue.Components.Any(c => c.Name == "Client"));
+            Assert.Contains(newIssue.Components, c => c.Name == "Server");
+            Assert.Contains(newIssue.Components, c => c.Name == "Client");
         }
 
         [Fact]

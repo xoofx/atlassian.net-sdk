@@ -27,7 +27,7 @@ namespace Atlassian.Jira.Test
                             }
             }.ToLocal(jira);
 
-            Assert.Throws(typeof(InvalidOperationException), () => issue["CustomField"]);
+            Assert.Throws<InvalidOperationException>(() => issue["CustomField"]);
         }
 
         [Fact]

@@ -18,7 +18,7 @@ namespace Atlassian.Jira.Test.Integration
             var issueFields = await iss.GetIssueFieldsEditMetadataAsync();
 
             IssueFieldEditMetadata customRadioField = issueFields["Component/s"];
-            Assert.Equal(false, customRadioField.IsCustom);
+            Assert.False(customRadioField.IsCustom);
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace Atlassian.Jira.Test.Integration
             //assert: IssueFieldEditMetadata of issue
             Assert.True(issueFields.Count() >= 34);
             IssueFieldEditMetadata customRadioField = issueFields["Custom Radio Field"];
-            Assert.Equal(true, customRadioField.IsCustom);
+            Assert.True(customRadioField.IsCustom);
             Assert.Equal("Custom Radio Field", customRadioField.Name);
             Assert.False(customRadioField.IsRequired);
             Assert.Contains(IssueFieldEditMetadataOperation.SET, customRadioField.Operations);
@@ -61,7 +61,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(id, option.Id);
             Assert.Equal(value, option.Value);
             Regex regex = new Regex(selfRegex);
-            Assert.Equal(true, regex.Match(option.Self).Success);
+            Assert.True(regex.Match(option.Self).Success);
         }
     }
 }

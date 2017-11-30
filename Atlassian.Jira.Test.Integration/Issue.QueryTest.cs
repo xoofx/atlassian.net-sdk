@@ -46,7 +46,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var issues = _jira.Filters.GetIssuesFromFavoriteAsync("One Issue Filter").Result;
 
-            Assert.Equal(1, issues.Count());
+            Assert.Single(issues);
             Assert.Equal("TST-1", issues.First().Key.Value);
         }
 
@@ -128,7 +128,7 @@ namespace Atlassian.Jira.Test.Integration
         public async Task GetIssuesFromJqlAsync()
         {
             var issues = await _jira.Issues.GetIssuesFromJqlAsync("key = TST-1");
-            Assert.Equal(issues.Count(), 1);
+            Assert.Single(issues);
         }
     }
 }

@@ -28,11 +28,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(componentName, component.Name);
 
             // Retrive project components.
-            Assert.True(project.GetComponetsAsync().Result.Any(p => p.Name == componentName));
+            Assert.Contains(project.GetComponetsAsync().Result, p => p.Name == componentName);
 
             // Delete project component
             project.DeleteComponentAsync(component.Name).Wait();
-            Assert.False(project.GetComponetsAsync().Result.Any(p => p.Name == componentName));
+            Assert.DoesNotContain(project.GetComponetsAsync().Result, p => p.Name == componentName);
         }
 
         [Fact]
@@ -75,11 +75,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(version.StartDate, projectInfo.StartDate);
 
             // Retrive project versions.
-            Assert.True(project.GetPagedVersionsAsync().Result.Any(p => p.Name == versionName));
+            Assert.Contains(project.GetPagedVersionsAsync().Result, p => p.Name == versionName);
 
             // Delete project version
             project.DeleteVersionAsync(version.Name).Wait();
-            Assert.False(project.GetPagedVersionsAsync().Result.Any(p => p.Name == versionName));
+            Assert.DoesNotContain(project.GetPagedVersionsAsync().Result, p => p.Name == versionName);
         }
     }
 }
