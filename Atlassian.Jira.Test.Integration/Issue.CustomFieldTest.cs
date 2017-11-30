@@ -8,6 +8,19 @@ namespace Atlassian.Jira.Test.Integration
     public class IssueCustomFieldTest : BaseIntegrationTest
     {
         [Fact]
+        public void CanHandleCustomFieldSetToEmptyArrayByDefaultFromServer()
+        {
+            // See: https://bitbucket.org/farmas/atlassian.net-sdk/issues/372
+            var jira = Jira.CreateRestClient(new TraceReplayer("Trace_CustomFieldEmptyArray.txt"));
+            var issue = jira.Issues.GetIssueAsync("GIT-103").Result;
+
+            issue.Summary = "Some change";
+            issue.SaveChanges();
+
+            Assert.NotNull(issue);
+        }
+
+        [Fact]
         public void AddAndReadCustomFieldById()
         {
             var summaryValue = "Test issue with custom text" + _random.Next(int.MaxValue);

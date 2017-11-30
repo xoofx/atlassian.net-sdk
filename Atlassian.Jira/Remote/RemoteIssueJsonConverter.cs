@@ -134,9 +134,13 @@ namespace Atlassian.Jira.Remote
                         {
                             jToken = customField.serializer.ToJson(customField.values);
                         }
-                        else
+                        else if (customField.values.Length > 0)
                         {
                             jToken = JValue.CreateString(customField.values[0]);
+                        }
+                        else
+                        {
+                            jToken = new JArray();
                         }
 
                         jObject.Add(customField.customfieldId, jToken);
