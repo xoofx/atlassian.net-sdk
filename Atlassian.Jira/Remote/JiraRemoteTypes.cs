@@ -1272,6 +1272,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonProperty("size")]
         public System.Nullable<long> filesize
         {
             get

@@ -282,10 +282,18 @@ namespace Atlassian.Jira.Test.Integration
             File.WriteAllText("testfile2.txt", "Test File Content 2");
             issue.AddAttachment("testfile1.txt", "testfile2.txt");
 
+            // verify all attachments can be retrieved.
             var attachments = issue.GetAttachmentsAsync().Result;
             Assert.Equal(2, attachments.Count());
             Assert.True(attachments.Any(a => a.FileName.Equals("testfile1.txt")), "'testfile1.txt' was not downloaded from server");
             Assert.True(attachments.Any(a => a.FileName.Equals("testfile2.txt")), "'testfile2.txt' was not downloaded from server");
+
+            // verify properties of an attachment
+            var attachment = attachments.First();
+            Assert.NotEmpty(attachment.Author);
+            Assert.NotNull(attachment.CreatedDate);
+            Assert.True(attachment.FileSize > 0);
+            Assert.NotEmpty(attachment.MimeType);
 
             // download an attachment
             var tempFile = Path.GetTempFileName();
