@@ -14,7 +14,7 @@ namespace Atlassian.Jira.Test.Integration
             var filters = _jira.Filters.GetFavouritesAsync().Result;
 
             Assert.True(filters.Count() >= 1);
-            Assert.True(filters.Any(f => f.Name == "One Issue Filter"));
+            Assert.Contains(filters, f => f.Name == "One Issue Filter");
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // In addition, rest API contains "Sub-Task" as an issue type.
             Assert.True(issueTypes.Count() >= 5);
-            Assert.True(issueTypes.Any(i => i.Name == "Bug"));
+            Assert.Contains(issueTypes, i => i.Name == "Bug");
             Assert.NotNull(issueTypes.First().IconUrl);
         }
 
@@ -44,7 +44,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var priorities = _jira.Priorities.GetPrioritiesAsync().Result;
 
-            Assert.True(priorities.Any(i => i.Name == "Blocker"));
+            Assert.Contains(priorities, i => i.Name == "Blocker");
             Assert.NotNull(priorities.First().IconUrl);
         }
 
@@ -53,7 +53,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var resolutions = _jira.Resolutions.GetResolutionsAsync().Result;
 
-            Assert.True(resolutions.Any(i => i.Name == "Fixed"));
+            Assert.Contains(resolutions, i => i.Name == "Fixed");
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var statuses = _jira.Statuses.GetStatusesAsync().Result;
 
-            Assert.True(statuses.Any(i => i.Name == "Open"));
+            Assert.Contains(statuses, i => i.Name == "Open");
             Assert.NotNull(statuses.First().IconUrl);
         }
 
@@ -92,7 +92,7 @@ namespace Atlassian.Jira.Test.Integration
         public void GetIssueLinkTypes()
         {
             var linkTypes = _jira.Links.GetLinkTypesAsync().Result;
-            Assert.True(linkTypes.Any(l => l.Name.Equals("Duplicate")));
+            Assert.Contains(linkTypes, l => l.Name.Equals("Duplicate"));
         }
 
         [Fact]

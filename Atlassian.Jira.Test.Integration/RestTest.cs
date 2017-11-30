@@ -13,7 +13,7 @@ namespace Atlassian.Jira.Test.Integration
             var users = _jira.RestClient.ExecuteRequestAsync<JiraNamedResource[]>(Method.GET, "rest/api/2/user/assignable/multiProjectSearch?projectKeys=TST").Result;
 
             Assert.True(users.Length >= 2);
-            Assert.True(users.Any(u => u.Name == "admin"));
+            Assert.Contains(users, u => u.Name == "admin");
         }
 
         [Fact]

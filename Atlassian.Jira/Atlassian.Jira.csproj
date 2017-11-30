@@ -1,190 +1,28 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{438EB0CF-D781-4F1B-9BD3-B33638AA8D1D}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Atlassian.Jira</RootNamespace>
-    <AssemblyName>Atlassian.Jira</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>
-    </DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>2</WarningLevel>
-    <DocumentationFile>bin\Release\Atlassian.Jira.xml</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
+    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <PackageId>Atlassian.SDK</PackageId>
+    <Version>9.8.1</Version>
+    <Authors>Federico Silva Armas</Authors>
+    <Company>Federico Silva Armas</Company>
+    <Product>Atlassian.SDK</Product>
+    <Copyright>https://bitbucket.org/farmas/atlassian.net-sdk</Copyright>
+    <PackageTags>Atlassian JIRA LINQ</PackageTags>
+    <PackageReleaseNotes>For change history, visit: https://bitbucket.org/farmas/atlassian.net-sdk/wiki/History</PackageReleaseNotes>
+    <Description>Utilities to interact with Atlassian products. Contains LinqToJira provider for querying JIRA Issue tracker (http://www.atlassian.com/software/jira).</Description>
+    <PackageIconUrl>http://i1207.photobucket.com/albums/bb473/fsilva_armas/AtlassianIcon.png</PackageIconUrl>
+    <PackageProjectUrl>https://bitbucket.org/farmas/atlassian.net-sdk</PackageProjectUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>9.8.1.0</AssemblyVersion>
+    <FileVersion>9.8.1.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RestSharp.105.2.3\lib\net452\RestSharp.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attachment.cs" />
-    <Compile Include="AttachmentInfo.cs" />
-    <Compile Include="CascadingSelectCustomField.cs" />
-    <Compile Include="Comment.cs" />
-    <Compile Include="ComparableString.cs" />
-    <Compile Include="IIssueRemoteLinkService.cs" />
-    <Compile Include="IJiraGroupService.cs" />
-    <Compile Include="IssueLabelCollection.cs" />
-    <Compile Include="IssueRemoteLink.cs" />
-    <Compile Include="IssueSecurityLevel.cs" />
-    <Compile Include="IssueUpdateOptions.cs" />
-    <Compile Include="JiraUserCreationInfo.cs" />
-    <Compile Include="CustomField.cs" />
-    <Compile Include="IGroupResource.cs" />
-    <Compile Include="IIssueFieldService.cs" />
-    <Compile Include="IIssueService.cs" />
-    <Compile Include="IIssueFilterService.cs" />
-    <Compile Include="IIssueLinkService.cs" />
-    <Compile Include="IIssuePriorityService.cs" />
-    <Compile Include="IIssueResolutionService.cs" />
-    <Compile Include="IIssueStatusService.cs" />
-    <Compile Include="IIssueTypeService.cs" />
-    <Compile Include="IJiraUserService.cs" />
-    <Compile Include="IProjectComponentService.cs" />
-    <Compile Include="IProjectService.cs" />
-    <Compile Include="IProjectVersionService.cs" />
-    <Compile Include="IssueFieldEditMetadata.cs" />
-    <Compile Include="IssueFieldEditMetadataSchema.cs" />
-    <Compile Include="IssueFieldEditMetadataOperation.cs" />
-    <Compile Include="ICustomFieldValueSerializer.cs" />
-    <Compile Include="IJiraEntity.cs" />
-    <Compile Include="IPagedQueryResult.cs" />
-    <Compile Include="IssueChangeLog.cs" />
-    <Compile Include="IssueChangeLogItem.cs" />
-    <Compile Include="IssueLink.cs" />
-    <Compile Include="IssueLinkType.cs" />
-    <Compile Include="JiraUserStatus.cs" />
-    <Compile Include="ProjectCategory.cs" />
-    <Compile Include="Remote\IssueFieldService.cs" />
-    <Compile Include="Remote\IssueRemoteLinkService.cs" />
-    <Compile Include="Remote\IssueLinkService.cs" />
-    <Compile Include="Remote\IssuePriorityService.cs" />
-    <Compile Include="Remote\IssueResolutionService.cs" />
-    <Compile Include="Remote\IssueService.cs" />
-    <Compile Include="Remote\IssueStatusService.cs" />
-    <Compile Include="IUserResource.cs" />
-    <Compile Include="JiraCache.cs" />
-    <Compile Include="JiraUser.cs" />
-    <Compile Include="PagedQueryResult.cs" />
-    <Compile Include="ProjectComponentCreationInfo.cs" />
-    <Compile Include="ProjectVersionCreationInfo.cs" />
-    <Compile Include="Remote\IJiraRestClient.cs" />
-    <Compile Include="IssueStatus.cs" />
-    <Compile Include="IssueResolution.cs" />
-    <Compile Include="IssuePriority.cs" />
-    <Compile Include="CustomFieldValue.cs" />
-    <Compile Include="CustomFieldValueCollection.cs" />
-    <Compile Include="IssueTimeTrackingData.cs" />
-    <Compile Include="IssueType.cs" />
-    <Compile Include="JiraCredentials.cs" />
-    <Compile Include="JiraFilter.cs" />
-    <Compile Include="JiraNamedResource.cs" />
-    <Compile Include="JiraRestClientSettings.cs" />
-    <Compile Include="LiteralDateTime.cs" />
-    <Compile Include="LiteralMatch.cs" />
-    <Compile Include="Project.cs" />
-    <Compile Include="ProjectComponent.cs" />
-    <Compile Include="ProjectComponentCollection.cs" />
-    <Compile Include="JiraNamedEntityCollection.cs" />
-    <Compile Include="Linq\JqlContainsEqualityAttribute.cs" />
-    <Compile Include="FileSystem.cs" />
-    <Compile Include="IFileSystem.cs" />
-    <Compile Include="IRemoteIssueFieldProvider.cs" />
-    <Compile Include="Issue.cs" />
-    <Compile Include="IWebClient.cs" />
-    <Compile Include="Jira.cs" />
-    <Compile Include="JiraNamedConstant.cs" />
-    <Compile Include="JiraNamedEntity.cs" />
-    <Compile Include="Linq\ExpressionEvaluator.cs" />
-    <Compile Include="Linq\ExpressionTreeModifier.cs" />
-    <Compile Include="Remote\CustomFieldValueSerializers.cs" />
-    <Compile Include="Remote\DateFixupJsonConverter.cs" />
-    <Compile Include="Remote\ExtensionMethods.cs" />
-    <Compile Include="Linq\IJqlExpressionVisitor.cs" />
-    <Compile Include="Linq\JiraQueryable.cs" />
-    <Compile Include="Linq\JiraQueryProvider.cs" />
-    <Compile Include="JiraEntityDictionary.cs" />
-    <Compile Include="Remote\IssueTypeService.cs" />
-    <Compile Include="Remote\IssueFilterService.cs" />
-    <Compile Include="Remote\JiraGroupService.cs" />
-    <Compile Include="Remote\JiraRestClient.cs" />
-    <Compile Include="Remote\JiraRemoteTypes.cs" />
-    <Compile Include="Linq\JqlData.cs" />
-    <Compile Include="Linq\JqlExpressionVisitor.cs" />
-    <Compile Include="Linq\JiraOperators.cs" />
-    <Compile Include="Linq\JqlFieldNameAttribute.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProjectVersion.cs" />
-    <Compile Include="ProjectVersionCollection.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Remote\JiraUserService.cs" />
-    <Compile Include="Remote\ProjectComponentService.cs" />
-    <Compile Include="Remote\ProjectService.cs" />
-    <Compile Include="Remote\ProjectVersionService.cs" />
-    <Compile Include="Remote\RemoteIssueJsonConverter.cs" />
-    <Compile Include="Remote\RestSharpJsonSerializer.cs" />
-    <Compile Include="Remote\NestedValueJsonConverter.cs" />
-    <Compile Include="Remote\RemoteFieldNameAttribute.cs" />
-    <Compile Include="ServiceLocator.cs" />
-    <Compile Include="WorkflowTransitionUpdates.cs" />
-    <Compile Include="WebClientWrapper.cs" />
-    <Compile Include="WorkflowActions.cs" />
-    <Compile Include="Worklog.cs" />
-    <Compile Include="WorklogStrategy.cs" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="RestSharp" Version="106.1.0" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
 </Project>
