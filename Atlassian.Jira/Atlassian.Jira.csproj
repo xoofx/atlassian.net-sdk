@@ -6,12 +6,12 @@
     <Authors>Federico Silva Armas</Authors>
     <Company>Federico Silva Armas</Company>
     <Product>Atlassian.SDK</Product>
-    <Copyright>https://bitbucket.org/farmas/atlassian.net-sdk/wiki/Home</Copyright>
+    <Copyright>https://bitbucket.org/farmas/atlassian.net-sdk</Copyright>
     <PackageTags>Atlassian JIRA LINQ</PackageTags>
     <PackageReleaseNotes>For change history, visit: https://bitbucket.org/farmas/atlassian.net-sdk/wiki/History</PackageReleaseNotes>
     <Description>Utilities to interact with Atlassian products. Contains LinqToJira provider for querying JIRA Issue tracker (http://www.atlassian.com/software/jira).</Description>
     <PackageIconUrl>http://i1207.photobucket.com/albums/bb473/fsilva_armas/AtlassianIcon.png</PackageIconUrl>
-    <PackageProjectUrl>https://bitbucket.org/farmas/atlassian.net-sdk/wiki/Home</PackageProjectUrl>
+    <PackageProjectUrl>https://bitbucket.org/farmas/atlassian.net-sdk</PackageProjectUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyVersion>9.8.1.0</AssemblyVersion>
     <FileVersion>9.8.1.0</FileVersion>

@@ -326,6 +326,8 @@ namespace Atlassian.Jira.Test.Integration
             var attachment = attachments.First(a => a.FileName.Equals("testfile1.txt"));
 
 #if NET452
+            // Standard has a different behavior than Framework it throws an exception. It seems you are not allowed to do two concurrent operations with the client
+            //  System.NotSupportedException : WebClient does not support concurrent I/O operations.
             var task1 = attachment.DownloadAsync(tempFile);
 #endif
             var task2 = attachment.DownloadAsync(tempFile);
@@ -391,7 +393,6 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(commentFromAdd.Id, commentFromGet.Id);
             Assert.Equal("new comment", commentFromGet.Body);
             Assert.Empty(commentFromGet.Properties);
-
 
             // Delete comment.
             await issue.DeleteCommentAsync(commentFromGet);
