@@ -237,8 +237,16 @@ namespace Atlassian.Jira.Remote
             var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
 
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
-            var timeTrackingJson = response["fields"]["timetracking"];
-            return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), serializerSettings);
+            var timeTrackingJson = response["fields"]?["timetracking"];
+
+            if (timeTrackingJson != null)
+            {
+                return JsonConvert.DeserializeObject<IssueTimeTrackingData>(timeTrackingJson.ToString(), serializerSettings);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public async Task<IDictionary<string, IssueFieldEditMetadata>> GetFieldsEditMetadataAsync(string issueKey, CancellationToken token = default(CancellationToken))

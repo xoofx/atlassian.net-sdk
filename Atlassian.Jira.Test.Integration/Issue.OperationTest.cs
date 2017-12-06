@@ -224,14 +224,14 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void GetTimeTrackingDataForIssue()
+        public async Task GetTimeTrackingDataForIssue()
         {
             var issue = _jira.CreateIssue("TST");
             issue.Summary = "Issue with timetracking " + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
 
-            var timetracking = issue.GetTimeTrackingDataAsync().Result;
+            var timetracking = await issue.GetTimeTrackingDataAsync();
             Assert.Null(timetracking.TimeSpent);
 
             issue.AddWorklogAsync("2d").Wait();
