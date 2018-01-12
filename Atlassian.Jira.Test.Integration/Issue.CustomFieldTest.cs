@@ -8,6 +8,15 @@ namespace Atlassian.Jira.Test.Integration
     public class IssueCustomFieldTest : BaseIntegrationTest
     {
         [Fact]
+        public void CanHandleCustomFieldWithoutSerializerThatIsArrayOfObjects()
+        {
+            var jira = Jira.CreateRestClient(new TraceReplayer("Trace_CustomFieldArrayOfObjects.txt"));
+            var issue = jira.Issues.GetIssuesFromJqlAsync("foo").Result.Single();
+
+            Assert.True(issue["Watchers"].Value.Length > 0);
+        }
+
+        [Fact]
         public void CanHandleCustomFieldSetToEmptyArrayByDefaultFromServer()
         {
             // See: https://bitbucket.org/farmas/atlassian.net-sdk/issues/372
@@ -56,9 +65,9 @@ namespace Atlassian.Jira.Test.Integration
             var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             var cascadingSelect = newIssue.CustomFields.GetCascadingSelectField("Custom Cascading Select Field");
-            Assert.Equal("Option3",cascadingSelect.ParentOption);
+            Assert.Equal("Option3", cascadingSelect.ParentOption);
             Assert.Null(cascadingSelect.ChildOption);
-            Assert.Equal("Custom Cascading Select Field",cascadingSelect.Name);
+            Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
         }
 
         [Fact]

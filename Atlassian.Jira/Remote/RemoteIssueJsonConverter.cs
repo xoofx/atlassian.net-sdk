@@ -168,7 +168,16 @@ namespace Atlassian.Jira.Remote
                     else if (field.Value.Type == JTokenType.Array)
                     {
                         var serializer = new MultiStringCustomFieldValueSerializer();
-                        remoteCustomFieldValue.values = serializer.FromJson(field.Value);
+                        try
+                        {
+                            remoteCustomFieldValue.values = serializer.FromJson(field.Value);
+                        }
+                        catch (JsonReaderException)
+                        {
+                            // If deserialization failed, then it is not an array of strings, it is not known how to
+                            //    deserialize this field and treat is a black box and dump the json into the property.
+                            remoteCustomFieldValue.values = new string[1] { field.Value.ToString() };
+                        }
                     }
                     else
                     {

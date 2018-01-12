@@ -22,6 +22,9 @@
     <ProjectReference Include="..\Atlassian.Jira\Atlassian.Jira.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Trace_CustomFieldArrayOfObjects.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Trace_CustomFieldEmptyArray.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
