@@ -73,7 +73,7 @@ namespace Atlassian.Jira.Linq
             }
 
             throw new NotSupportedException(String.Format(
-                   "Operator '{0}' can only be applied on properties and property indexers.",
+                   "Operator '{0}' can only be applied on the right side of properties and property indexers.",
                    expression.NodeType));
         }
 
