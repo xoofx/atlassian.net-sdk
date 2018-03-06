@@ -348,6 +348,34 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public async Task DownloadAttachmentDataAsync()
+        {
+            // create an issue
+            var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+            issue.SaveChanges();
+
+            // upload attachment
+            File.WriteAllText("testfile.txt", "Test File Content");
+            issue.AddAttachment("testfile.txt");
+
+            // Get attachment metadata
+            var attachments = await issue.GetAttachmentsAsync(CancellationToken.None);
+            Assert.Equal("testfile.txt", attachments.Single().FileName);
+
+            // download attachment as byte array
+            var tempFile = Path.GetTempFileName();
+            var bytes = await attachments.Single().DownloadDataAsync();
+
+            Assert.Equal(17, bytes.Length);
+        }
+
+        [Fact]
         public void AddAndGetComments()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);

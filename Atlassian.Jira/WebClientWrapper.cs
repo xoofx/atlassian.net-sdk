@@ -49,7 +49,28 @@ namespace Atlassian.Jira
             return completionSource.Task;
         }
 
+        public Task<byte[]> DownloadDataWithAuthenticationAsync(string url)
+        {
+            _webClient.CancelAsync();
+
+            SetAuthenticationHeader();
+
+            return _webClient.DownloadDataTaskAsync(url);
+        }
+
         public Task DownloadWithAuthenticationAsync(string url, string fileName)
+        {
+            _webClient.CancelAsync();
+
+            SetAuthenticationHeader();
+
+            var completionSource = new TaskCompletionSource<object>();
+            _webClient.DownloadFileAsync(new Uri(url), fileName, completionSource);
+
+            return completionSource.Task;
+        }
+
+        private void SetAuthenticationHeader()
         {
             var credentials = _jira.GetCredentials();
 
@@ -58,16 +79,9 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to download file, user and/or password are missing. You can specify a provider for credentials when constructing the Jira instance.");
             }
 
-            _webClient.CancelAsync();
-
-            var completionSource = new TaskCompletionSource<object>();
             string encodedUserNameAndPassword = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials.UserName + ":" + credentials.Password));
-
             _webClient.Headers.Remove(HttpRequestHeader.Authorization);
             _webClient.Headers.Add(HttpRequestHeader.Authorization, "Basic " + encodedUserNameAndPassword);
-            _webClient.DownloadFileAsync(new Uri(url), fileName, completionSource);
-
-            return completionSource.Task;
         }
     }
 }

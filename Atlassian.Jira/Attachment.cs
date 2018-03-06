@@ -96,6 +96,16 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Downloads attachment as a byte array.
+        /// </summary>
+        public Task<byte[]> DownloadDataAsync()
+        {
+            var url = GetRequestUrl();
+
+            return _webClient.DownloadDataWithAuthenticationAsync(url);
+        }
+
+        /// <summary>
         /// Downloads attachment to specified file
         /// </summary>
         /// <param name="fullFileName">Full file name where attachment will be downloaded</param>
