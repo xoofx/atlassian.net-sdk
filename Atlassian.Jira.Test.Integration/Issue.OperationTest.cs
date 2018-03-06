@@ -369,7 +369,6 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("testfile.txt", attachments.Single().FileName);
 
             // download attachment as byte array
-            var tempFile = Path.GetTempFileName();
             var bytes = await attachments.Single().DownloadDataAsync();
 
             Assert.Equal(17, bytes.Length);
