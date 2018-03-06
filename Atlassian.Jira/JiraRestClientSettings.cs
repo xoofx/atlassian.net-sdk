@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using Atlassian.Jira.Remote;
 using Newtonsoft.Json;
 
@@ -29,6 +30,11 @@ namespace Atlassian.Jira
         /// The json global serializer settings to use.
         /// </summary>
         public JsonSerializerSettings JsonSerializerSettings { get; private set; }
+
+        /// <summary>
+        /// Proxy to use when sending requests.
+        /// </summary>
+        public IWebProxy Proxy { get; set; }
 
         /// <summary>
         /// Create a new instance of the settings.

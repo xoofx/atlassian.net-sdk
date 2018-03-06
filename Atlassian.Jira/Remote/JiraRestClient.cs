@@ -24,6 +24,8 @@ namespace Atlassian.Jira.Remote
             _restClient = new RestClient(url);
             _services = services;
 
+            _restClient.Proxy = _clientSettings.Proxy;
+
             if (!String.IsNullOrEmpty(username) && !String.IsNullOrEmpty(password))
             {
                 this._restClient.Authenticator = new HttpBasicAuthenticator(username, password);
