@@ -34,6 +34,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Proxy to use when sending requests.
         /// </summary>
+        /// <example>To enable debugging with Fiddler, set Proxy to new WebProxy("127.0.0.1", 8888)</example>
         public IWebProxy Proxy { get; set; }
 
         /// <summary>
