@@ -34,6 +34,7 @@ namespace Atlassian.Jira
         public IssueType(string id, string name = null, bool isSubTask = false)
             : base(id, name)
         {
+            _isSubTask = isSubTask;
         }
 
         /// <summary>
