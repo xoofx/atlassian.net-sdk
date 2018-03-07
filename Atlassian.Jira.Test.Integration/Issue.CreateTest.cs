@@ -12,17 +12,18 @@ namespace Atlassian.Jira.Test.Integration
         {
             var fields = new CreateIssueFields("TST")
             {
-                TimeTrackingData = new IssueTimeTrackingData() { OriginalEstimate = "1d" }
+                TimeTrackingData = new IssueTimeTrackingData("1d")
             };
 
-            var issue = new Issue(_jira, fields);
-            issue.Type = "1";
-            issue.Summary = "Test Summary " + _random.Next(int.MaxValue);
-            issue.Assignee = "admin";
+            var issue = new Issue(_jira, fields)
+            {
+                Type = "1",
+                Summary = "Test Summary " + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
 
             var newIssue = await issue.SaveChangesAsync();
-            var timeTracking = await newIssue.GetTimeTrackingDataAsync();
-            Assert.Equal("1d", timeTracking.OriginalEstimate);
+            Assert.Equal("1d", newIssue.TimeTrackingData.OriginalEstimate);
         }
 
         [Fact]

@@ -32,7 +32,6 @@ namespace Atlassian.Jira
         private IssueLabelCollection _labels = null;
         private IssueStatus _status;
         private string _parentIssueKey;
-        private IssueTimeTrackingData _timeTrackingData;
 
         /// <summary>
         /// Create a new Issue.
@@ -79,8 +78,8 @@ namespace Atlassian.Jira
             _updateDate = remoteIssue.updated;
             _resolutionDate = remoteIssue.resolutionDateReadOnly;
             _securityLevel = remoteIssue.securityLevelReadOnly;
-            _timeTrackingData = remoteIssue.timeTracking;
 
+            TimeTrackingData = remoteIssue.timeTracking;
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
             Environment = remoteIssue.environment;
@@ -183,15 +182,20 @@ namespace Atlassian.Jira
         public string Description { get; set; }
 
         /// <summary>
-        /// Hardware or software environment to which the issue relates
+        /// Hardware or software environment to which the issue relates.
         /// </summary>
         [JqlContainsEquality]
         public string Environment { get; set; }
 
         /// <summary>
-        /// Person to whom the issue is currently assigned
+        /// Person to whom the issue is currently assigned.
         /// </summary>
         public string Assignee { get; set; }
+
+        /// <summary>
+        /// Time tracking data for this issue.
+        /// </summary>
+        public IssueTimeTrackingData TimeTrackingData { get; private set; }
 
         /// <summary>
         /// Gets the internal identifier assigned by JIRA.
@@ -879,6 +883,10 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets time tracking information for this issue.
         /// </summary>
+        /// <remarks>
+        /// - Returns information as it was at the moment the issue was read from server, to get latest data use the GetTimeTrackingData method.
+        /// - Use the AddWorklog methods to edit the time tracking information.
+        /// </remarks>
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IssueTimeTrackingData> GetTimeTrackingDataAsync(CancellationToken token = default(CancellationToken))
         {
@@ -1000,7 +1008,7 @@ namespace Atlassian.Jira
                 summary = this.Summary,
                 votesData = this.Votes != null ? new RemoteVotes() { hasVoted = this.HasUserVoted == true, votes = this.Votes.Value } : null,
                 duedate = this.DueDate,
-                timeTracking = this._timeTrackingData
+                timeTracking = this.TimeTrackingData
             };
 
             remote.key = this.Key != null ? this.Key.Value : null;
