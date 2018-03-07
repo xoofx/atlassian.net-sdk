@@ -298,11 +298,19 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Returns a new issue that when saved will be created on the remote JIRA server
+        /// Returns a new issue that when saved will be created on the remote JIRA server.
         /// </summary>
         public Issue CreateIssue(string project, string parentIssueKey = null)
         {
             return new Issue(this, project, parentIssueKey);
+        }
+
+        /// <summary>
+        /// Returns a new issue that when saved will be created on the remote JIRA server.
+        /// </summary>
+        public Issue CreateIssue(CreateIssueFields fields)
+        {
+            return new Issue(this, fields);
         }
 
         private static void ConfigureDefaultServices(ServiceLocator services, Jira jira, IJiraRestClient restClient)

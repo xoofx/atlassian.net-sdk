@@ -32,6 +32,17 @@ namespace Atlassian.Jira
         private IssueLabelCollection _labels = null;
         private IssueStatus _status;
         private string _parentIssueKey;
+        private IssueTimeTrackingData _timeTrackingData;
+
+        /// <summary>
+        /// Create a new Issue.
+        /// </summary>
+        /// <param name="jira">Jira instance that owns this issue.</param>
+        /// <param name="fields">Fields to be included in the payload when creating the issue.</param>
+        public Issue(Jira jira, CreateIssueFields fields)
+            : this(jira, new RemoteIssue() { project = fields.ProjectKey, timeTracking = fields.TimeTrackingData }, fields.ParentIssueKey)
+        {
+        }
 
         /// <summary>
         /// Creates a new Issue.
@@ -68,6 +79,7 @@ namespace Atlassian.Jira
             _updateDate = remoteIssue.updated;
             _resolutionDate = remoteIssue.resolutionDateReadOnly;
             _securityLevel = remoteIssue.securityLevelReadOnly;
+            _timeTrackingData = remoteIssue.timeTracking;
 
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
@@ -987,7 +999,8 @@ namespace Atlassian.Jira
                 reporter = this.Reporter,
                 summary = this.Summary,
                 votesData = this.Votes != null ? new RemoteVotes() { hasVoted = this.HasUserVoted == true, votes = this.Votes.Value } : null,
-                duedate = this.DueDate
+                duedate = this.DueDate,
+                timeTracking = this._timeTrackingData
             };
 
             remote.key = this.Key != null ? this.Key.Value : null;

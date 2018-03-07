@@ -1370,6 +1370,9 @@ namespace Atlassian.Jira.Remote
         [JsonProperty("security")]
         public IssueSecurityLevel securityLevelReadOnly { get; set; }
 
+        [JsonProperty("timetracking")]
+        public IssueTimeTrackingData timeTracking { get; set; }
+
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
         [JsonConverter(typeof(NestedValueJsonConverter), "name")]

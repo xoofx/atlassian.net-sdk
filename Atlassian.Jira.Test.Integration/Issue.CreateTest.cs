@@ -8,6 +8,24 @@ namespace Atlassian.Jira.Test.Integration
     public class IssueCreateTest : BaseIntegrationTest
     {
         [Fact]
+        public async Task CreateIssueWithOriginalEstimate()
+        {
+            var fields = new CreateIssueFields("TST")
+            {
+                TimeTrackingData = new IssueTimeTrackingData() { OriginalEstimate = "1d" }
+            };
+
+            var issue = new Issue(_jira, fields);
+            issue.Type = "1";
+            issue.Summary = "Test Summary " + _random.Next(int.MaxValue);
+            issue.Assignee = "admin";
+
+            var newIssue = await issue.SaveChangesAsync();
+            var timeTracking = await newIssue.GetTimeTrackingDataAsync();
+            Assert.Equal("1d", timeTracking.OriginalEstimate);
+        }
+
+        [Fact]
         public async Task CreateIssueAsync()
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
