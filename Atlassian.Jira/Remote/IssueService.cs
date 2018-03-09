@@ -17,6 +17,7 @@ namespace Atlassian.Jira.Remote
 
         private readonly Jira _jira;
         private readonly JiraRestClientSettings _restSettings;
+        private readonly string[] _excludedFields = new string[] { "*all", "-comment", "-attachment", "-issuelinks", "-subtasks", "-watches", "-worklog" };
 
         private JsonSerializerSettings _serializerSettings;
 
@@ -75,7 +76,8 @@ namespace Atlassian.Jira.Remote
 
         public async Task<Issue> GetIssueAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/issue/{0}", issueKey);
+            var excludedFields = String.Join(",", _excludedFields);
+            var resource = $"rest/api/2/issue/{issueKey}?fields={excludedFields}";
             var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
             var serializerSettings = await GetIssueSerializerSettingsAsync(token).ConfigureAwait(false);
             var issue = JsonConvert.DeserializeObject<RemoteIssueWrapper>(response.ToString(), serializerSettings);
@@ -106,6 +108,7 @@ namespace Atlassian.Jira.Remote
                 startAt = options.StartAt,
                 maxResults = options.MaxIssuesPerRequest,
                 validateQuery = options.ValidateQuery,
+                fields = _excludedFields
             };
 
             var result = await _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, options.Token).ConfigureAwait(false);

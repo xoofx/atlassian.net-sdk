@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -6,6 +7,27 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssuePropertiesTest : BaseIntegrationTest
     {
+        [Fact]
+        public async Task TimeTrackingPropertyIncludedInResponses()
+        {
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue with estimates",
+                Assignee = "admin"
+            };
+
+            var newIssue = await issue.SaveChangesAsync();
+
+            Assert.NotNull(newIssue.TimeTrackingData);
+            Assert.Null(newIssue.TimeTrackingData.OriginalEstimate);
+
+            await newIssue.AddWorklogAsync("1d");
+
+            var issuesFromQuery = await _jira.Issues.GetIssuesFromJqlAsync($"id = {newIssue.Key.Value}");
+            Assert.Equal("1d", issuesFromQuery.Single().TimeTrackingData.TimeSpent);
+        }
+
         [Fact]
         public async Task VotesAndHasVotedProperties()
         {
