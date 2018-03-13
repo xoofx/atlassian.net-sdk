@@ -10,21 +10,30 @@ using RestSharp.Authenticators;
 
 namespace Atlassian.Jira.Remote
 {
-    internal class JiraRestClient : IJiraRestClient
+    /// <summary>
+    /// Implements the IJiraRestClient interface using RestSharp.
+    /// </summary>
+    public class JiraRestClient : IJiraRestClient
     {
         private readonly RestClient _restClient;
         private readonly JiraRestClientSettings _clientSettings;
-        private readonly ServiceLocator _services;
 
-        internal JiraRestClient(ServiceLocator services, string url, string username = null, string password = null, JiraRestClientSettings settings = null)
+        /// <summary>
+        /// Creates a new instance of the JiraRestClient class.
+        /// </summary
+        /// <param name="url">Url to the JIRA server.</param>
+        /// <param name="username">Username used to authenticate.</param>
+        /// <param name="password">Password used to authenticate.</param>
+        /// <param name="settings">Settings to configure the rest client.</param>
+        public JiraRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
             url = url.EndsWith("/") ? url : url += "/";
 
             _clientSettings = settings ?? new JiraRestClientSettings();
-            _restClient = new RestClient(url);
-            _services = services;
-
-            _restClient.Proxy = _clientSettings.Proxy;
+            _restClient = new RestClient(url)
+            {
+                Proxy = _clientSettings.Proxy
+            };
 
             if (!String.IsNullOrEmpty(username) && !String.IsNullOrEmpty(password))
             {
@@ -32,6 +41,9 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        /// <summary>
+        /// Rest sharp client used to issue requests.
+        /// </summary>
         public RestClient RestSharpClient
         {
             get
@@ -40,6 +52,9 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        /// <summary>
+        /// Url to the JIRA server.
+        /// </summary>
         public string Url
         {
             get
@@ -48,6 +63,9 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        /// <summary>
+        /// Settings to configure the rest client.
+        /// </summary>
         public JiraRestClientSettings Settings
         {
             get
@@ -56,12 +74,18 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        /// <summary>
+        /// Executes an async request and serializes the response to an object.
+        /// </summary>
         public async Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null, CancellationToken token = default(CancellationToken))
         {
             var result = await ExecuteRequestAsync(method, resource, requestBody, token).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<T>(result.ToString(), Settings.JsonSerializerSettings);
         }
 
+        /// <summary>
+        /// Executes an async request and returns the response as JSON.
+        /// </summary>
         public async Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null, CancellationToken token = default(CancellationToken))
         {
             if (method == Method.GET && requestBody != null)
@@ -90,18 +114,30 @@ namespace Atlassian.Jira.Remote
             }
 
             LogRequest(request, requestBody);
-            var response = await this._restClient.ExecuteTaskAsync(request, token).ConfigureAwait(false);
+            var response = await ExecuteRawResquestAsync(request, token).ConfigureAwait(false);
             return GetValidJsonFromResponse(request, response);
         }
 
+        /// <summary>
+        /// Executes a request with logging and validation.
+        /// </summary>
         public async Task<IRestResponse> ExecuteRequestAsync(IRestRequest request, CancellationToken token = default(CancellationToken))
         {
-            var response = await this._restClient.ExecuteTaskAsync(request, token).ConfigureAwait(false);
+            LogRequest(request);
+            var response = await ExecuteRawResquestAsync(request, token).ConfigureAwait(false);
             GetValidJsonFromResponse(request, response);
             return response;
         }
 
-        private void LogRequest(RestRequest request, object body = null)
+        /// <summary>
+        /// Executes a raw request.
+        /// </summary>
+        protected virtual Task<IRestResponse> ExecuteRawResquestAsync(IRestRequest request, CancellationToken token)
+        {
+            return _restClient.ExecuteTaskAsync(request, token);
+        }
+
+        private void LogRequest(IRestRequest request, object body = null)
         {
             if (this._clientSettings.EnableRequestTrace)
             {

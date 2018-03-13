@@ -42,7 +42,7 @@ namespace Atlassian.Jira
             var services = new ServiceLocator();
             settings = settings ?? new JiraRestClientSettings();
             var jira = new Jira(services, new JiraCredentials(username, password), settings.Cache);
-            var restClient = new JiraRestClient(services, url, username, password, settings);
+            var restClient = new JiraRestClient(url, username, password, settings);
 
             ConfigureDefaultServices(services, jira, restClient);
 
