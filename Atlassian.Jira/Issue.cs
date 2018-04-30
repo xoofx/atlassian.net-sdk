@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Atlassian.Jira.Linq;
-using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -126,6 +126,9 @@ namespace Atlassian.Jira
                 c.ProjectKey = _originalIssue.project;
                 return new ProjectComponent(c);
             }).ToList());
+
+            // additional fields
+            this.AdditionalFields = new IssueFields(_originalIssue, Jira.Url, Jira.Credentials);
         }
 
         internal RemoteIssue OriginalRemoteIssue
@@ -135,6 +138,11 @@ namespace Atlassian.Jira
                 return this._originalIssue;
             }
         }
+
+        /// <summary>
+        /// Fields not represented as properties that were retrieved from the server.
+        /// </summary>
+        public IssueFields AdditionalFields { get; private set; }
 
         /// <summary>
         /// The parent key if this issue is a subtask.
@@ -699,7 +707,13 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<Comment> AddCommentAsync(string comment, CancellationToken token = default(CancellationToken))
         {
-            var credentials = _jira.GetCredentials();
+            var credentials = _jira.Credentials;
+
+            if (credentials == null)
+            {
+                throw new InvalidOperationException("Unable to add comment to issue, user credentials have not been set.");
+            }
+
             return this.AddCommentAsync(new Comment() { Author = credentials.UserName, Body = comment }, token);
         }
 

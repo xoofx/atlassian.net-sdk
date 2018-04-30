@@ -15,7 +15,7 @@ namespace Atlassian.Jira
         private readonly string _mimeType;
         private readonly long? _fileSize;
         private readonly string _id;
-        private readonly Jira _jira;
+        private readonly string _jiraUrl;
         private readonly IWebClient _webClient;
 
         /// <summary>
@@ -24,9 +24,20 @@ namespace Atlassian.Jira
         /// <param name="jira">Object used to interact with JIRA.</param>
         /// <param name="webClient">WebClient to use to download attachment.</param>
         /// <param name="remoteAttachment">Remote attachment entity.</param>
-        public Attachment(Jira jira, IWebClient webClient, RemoteAttachment remoteAttachment)
+        public Attachment(Jira jira, IWebClient webClient, RemoteAttachment remoteAttachment) :
+            this(jira.Url, webClient, remoteAttachment)
         {
-            _jira = jira;
+        }
+
+        /// <summary>
+        /// Creates a new instance of an Attachment from a remote entity.
+        /// </summary>
+        /// <param name="jiraUrl">Address to the JIRA server.</param>
+        /// <param name="webClient">WebClient to use to download attachment.</param>
+        /// <param name="remoteAttachment">Remote attachment entity.</param>
+        public Attachment(string jiraUrl, IWebClient webClient, RemoteAttachment remoteAttachment)
+        {
+            _jiraUrl = jiraUrl;
             _author = remoteAttachment.author;
             _created = remoteAttachment.created;
             _fileName = remoteAttachment.filename;
@@ -116,8 +127,13 @@ namespace Atlassian.Jira
 
         private string GetRequestUrl()
         {
+            if (String.IsNullOrEmpty(_jiraUrl))
+            {
+                throw new InvalidOperationException("Unable to download attachment, JIRA url has not been set.");
+            }
+
             return String.Format("{0}secure/attachment/{1}/{2}",
-                _jira.Url.EndsWith("/") ? _jira.Url : _jira.Url + "/",
+                _jiraUrl.EndsWith("/") ? _jiraUrl : _jiraUrl + "/",
                 this.Id,
                 this.FileName);
         }

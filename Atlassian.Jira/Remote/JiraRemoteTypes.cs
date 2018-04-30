@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace Atlassian.Jira.Remote
 {
@@ -1354,6 +1356,17 @@ namespace Atlassian.Jira.Remote
             }
         }
 
+        [JsonProperty("attachment")]
+        public RemoteAttachment[] remoteAttachments { get; set; }
+
+        [JsonProperty("comment")]
+        [JsonConverter(typeof(NestedValueJsonConverter), "comments")]
+        public RemoteComment[] remoteComments { get; set; }
+
+        [JsonProperty("worklog")]
+        [JsonConverter(typeof(NestedValueJsonConverter), "worklogs")]
+        public RemoteWorklog[] remoteWorklogs { get; set; }
+
         [System.Xml.Serialization.SoapIgnore]
         [JsonProperty("parent")]
         [JsonConverter(typeof(NestedValueJsonConverter), "key")]
@@ -1372,6 +1385,9 @@ namespace Atlassian.Jira.Remote
 
         [JsonProperty("timetracking")]
         public IssueTimeTrackingData timeTracking { get; set; }
+
+        [JsonIgnore]
+        public IDictionary<string, JToken> fieldsReadOnly { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]

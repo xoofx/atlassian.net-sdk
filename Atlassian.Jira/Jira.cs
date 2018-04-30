@@ -279,14 +279,15 @@ namespace Atlassian.Jira
             get { return RestClient.Url; }
         }
 
-        internal JiraCredentials GetCredentials()
+        /// <summary>
+        /// Gets the credentials to use to interact with server resources.
+        /// </summary>
+        public JiraCredentials Credentials
         {
-            if (this._credentials == null)
+            get
             {
-                throw new InvalidOperationException("Unable to get user and password, credentials has not been set.");
+                return _credentials;
             }
-
-            return this._credentials;
         }
 
         internal IFileSystem FileSystem

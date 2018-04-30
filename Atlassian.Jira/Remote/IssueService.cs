@@ -14,27 +14,13 @@ namespace Atlassian.Jira.Remote
     internal class IssueService : IIssueService
     {
         private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
+        private const string ALL_FIELDS_QUERY_STRING = "*all";
 
         private readonly Jira _jira;
         private readonly JiraRestClientSettings _restSettings;
-        private readonly string[] _excludedFields = new string[] { "*all", "-comment", "-attachment", "-issuelinks", "-subtasks", "-watches", "-worklog" };
+        private readonly string[] _excludedFields = new string[] { "comment", "attachment", "issuelinks", "subtasks", "watches", "worklog" };
 
         private JsonSerializerSettings _serializerSettings;
-
-        private class JqlOptions
-        {
-            public JqlOptions(string jql, CancellationToken token)
-            {
-                this.Jql = jql;
-                this.Token = token;
-            }
-
-            public string Jql { get; private set; }
-            public CancellationToken Token { get; private set; }
-            public int MaxIssuesPerRequest { get; set; } = DEFAULT_MAX_ISSUES_PER_REQUEST;
-            public int StartAt { get; set; } = 0;
-            public bool ValidateQuery { get; set; } = true;
-        }
 
         public IssueService(Jira jira, JiraRestClientSettings restSettings)
         {
@@ -76,8 +62,9 @@ namespace Atlassian.Jira.Remote
 
         public async Task<Issue> GetIssueAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {
-            var excludedFields = String.Join(",", _excludedFields);
-            var resource = $"rest/api/2/issue/{issueKey}?fields={excludedFields}";
+            var excludedFields = String.Join(",", _excludedFields.Select(field => $"-{field}"));
+            var fields = $"{ALL_FIELDS_QUERY_STRING},{excludedFields}";
+            var resource = $"rest/api/2/issue/{issueKey}?fields={fields}";
             var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
             var serializerSettings = await GetIssueSerializerSettingsAsync(token).ConfigureAwait(false);
             var issue = JsonConvert.DeserializeObject<RemoteIssueWrapper>(response.ToString(), serializerSettings);
@@ -87,32 +74,51 @@ namespace Atlassian.Jira.Remote
 
         public Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = default(int?), int startAt = 0, CancellationToken token = default(CancellationToken))
         {
-            return GetIssuesFromJqlAsync(new JqlOptions(jql, token)
+            var options = new IssueSearchOptions(jql)
             {
-                MaxIssuesPerRequest = maxIssues ?? this.MaxIssuesPerRequest,
+                MaxIssuesPerRequest = maxIssues,
                 StartAt = startAt,
                 ValidateQuery = this.ValidateQuery
-            });
+            };
+
+            return GetIssuesFromJqlAsync(options, token);
         }
 
-        private async Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(JqlOptions options)
+        public async Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(IssueSearchOptions options, CancellationToken token = default(CancellationToken))
         {
             if (_jira.Debug)
             {
                 Trace.WriteLine("[GetFromJqlAsync] JQL: " + options.Jql);
             }
 
+            var fields = new List<string>();
+            if (options.AdditionalFields == null || !options.AdditionalFields.Any())
+            {
+                fields.Add(ALL_FIELDS_QUERY_STRING);
+                fields.AddRange(_excludedFields.Select(field => $"-{field}"));
+            }
+            else if (options.FetchBasicFields)
+            {
+                var excludedFields = _excludedFields.Where(excludedField => !options.AdditionalFields.Contains(excludedField, StringComparer.OrdinalIgnoreCase)).ToArray();
+                fields.Add(ALL_FIELDS_QUERY_STRING);
+                fields.AddRange(excludedFields.Select(field => $"-{field}"));
+            }
+            else
+            {
+                fields.AddRange(options.AdditionalFields.Select(field => field.Trim().ToLowerInvariant()));
+            }
+
             var parameters = new
             {
                 jql = options.Jql,
                 startAt = options.StartAt,
-                maxResults = options.MaxIssuesPerRequest,
+                maxResults = options.MaxIssuesPerRequest ?? this.MaxIssuesPerRequest,
                 validateQuery = options.ValidateQuery,
-                fields = _excludedFields
+                fields = fields
             };
 
-            var result = await _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, options.Token).ConfigureAwait(false);
-            var serializerSettings = await this.GetIssueSerializerSettingsAsync(options.Token).ConfigureAwait(false);
+            var result = await _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/search", parameters, token).ConfigureAwait(false);
+            var serializerSettings = await this.GetIssueSerializerSettingsAsync(token).ConfigureAwait(false);
             var issues = result["issues"]
                 .Cast<JObject>()
                 .Select(issueJson =>
@@ -321,7 +327,7 @@ namespace Atlassian.Jira.Remote
             var attachmentsJson = result["fields"]["attachment"];
             var attachments = JsonConvert.DeserializeObject<RemoteAttachment[]>(attachmentsJson.ToString(), serializerSettings);
 
-            return attachments.Select(remoteAttachment => new Attachment(_jira, new WebClientWrapper(_jira), remoteAttachment));
+            return attachments.Select(remoteAttachment => new Attachment(_jira.Url, new WebClientWrapper(_jira.Credentials), remoteAttachment));
         }
 
         public async Task<string[]> GetLabelsAsync(string issueKey, CancellationToken token = default(CancellationToken))
@@ -438,11 +444,13 @@ namespace Atlassian.Jira.Remote
             {
                 var distinctKeys = issueKeys.Distinct();
                 var jql = String.Format("key in ({0})", String.Join(",", distinctKeys));
-                var result = await this.GetIssuesFromJqlAsync(new JqlOptions(jql, token)
+                var options = new IssueSearchOptions(jql)
                 {
                     MaxIssuesPerRequest = distinctKeys.Count(),
                     ValidateQuery = false
-                }).ConfigureAwait(false);
+                };
+
+                var result = await this.GetIssuesFromJqlAsync(options, token).ConfigureAwait(false);
                 return result.ToDictionary<Issue, string>(i => i.Key.Value);
             }
             else

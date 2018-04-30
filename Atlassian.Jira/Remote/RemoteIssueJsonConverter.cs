@@ -70,6 +70,9 @@ namespace Atlassian.Jira.Remote
             var customFields = GetCustomFieldValuesFromObject(fields);
             remoteIssue.customFieldValues = customFields.Any() ? customFields.ToArray() : null;
 
+            // save fields dictionary
+            remoteIssue.fieldsReadOnly = fields;
+
             return new RemoteIssueWrapper(remoteIssue);
         }
 

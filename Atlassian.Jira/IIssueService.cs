@@ -80,10 +80,17 @@ namespace Atlassian.Jira
         /// Execute a specific JQL query and return the resulting issues.
         /// </summary>
         /// <param name="jql">JQL search query</param>
-        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="maxIssues">Maximum number of issues to return (defaults to 20). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
+        /// Execute a specific JQL query and return the resulting issues.
+        /// </summary>
+        /// <param name="options">Options to use when executing the search.</param>
+        /// <param name="token">Cancellatin token for this operation.</param>
+        Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(IssueSearchOptions options, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Transition an issue through a workflow action.
