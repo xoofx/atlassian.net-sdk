@@ -82,7 +82,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return field.Value == value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo);
+                return field.Value == value.ToJiraDateTimeString();
             }
         }
 
@@ -94,28 +94,28 @@ namespace Atlassian.Jira
             }
             else
             {
-                return field.Value != value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo);
+                return field.Value != value.ToJiraDateTimeString();
             }
         }
 
         public static bool operator >(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo)) > 0;
+            return field.Value.CompareTo(value.ToJiraDateTimeString()) > 0;
         }
 
         public static bool operator <(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo)) < 0;
+            return field.Value.CompareTo(value.ToJiraDateTimeString()) < 0;
         }
 
         public static bool operator <=(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo)) <= 0;
+            return field.Value.CompareTo(value.ToJiraDateTimeString()) <= 0;
         }
 
         public static bool operator >=(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo)) >= 0;
+            return field.Value.CompareTo(value.ToJiraDateTimeString()) >= 0;
         }
 
         public override string ToString()

@@ -383,6 +383,18 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void DateNow()
+        {
+            var queryable = CreateQueryable();
+
+            var issues = (from i in queryable
+                          where i.Created > DateTime.Now.Date
+                          select i).ToArray();
+
+            Assert.Equal("Created > \"" + DateTime.Now.ToString("yyyy/MM/dd") + "\"", _translator.Jql);
+        }
+
+        [Fact]
         public void DateTimeNow()
         {
             var queryable = CreateQueryable();
@@ -391,7 +403,7 @@ namespace Atlassian.Jira.Test
                           where i.Created > DateTime.Now
                           select i).ToArray();
 
-            Assert.Equal("Created > \"" + DateTime.Now.ToString("yyyy/MM/dd") + "\"", _translator.Jql);
+            Assert.Equal("Created > \"" + DateTime.Now.ToString("yyyy/MM/dd HH:mm") + "\"", _translator.Jql);
         }
 
         [Fact]

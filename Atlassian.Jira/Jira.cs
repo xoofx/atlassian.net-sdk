@@ -11,6 +11,7 @@ namespace Atlassian.Jira
     public class Jira
     {
         internal const string DEFAULT_DATE_FORMAT = "yyyy/MM/dd";
+        internal const string DEFAULT_DATE_TIME_FORMAT = DEFAULT_DATE_FORMAT + " HH:mm";
         internal static CultureInfo DefaultCultureInfo = CultureInfo.GetCultureInfo("en-us");
 
         private readonly JiraCredentials _credentials;
