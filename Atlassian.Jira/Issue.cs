@@ -1,17 +1,10 @@
 ﻿using Atlassian.Jira.Linq;
 using Atlassian.Jira.Remote;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using RestSharp;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -41,9 +34,19 @@ namespace Atlassian.Jira
         private string _parentIssueKey;
 
         /// <summary>
+        /// Create a new Issue.
+        /// </summary>
+        /// <param name="jira">Jira instance that owns this issue.</param>
+        /// <param name="fields">Fields to be included in the payload when creating the issue.</param>
+        public Issue(Jira jira, CreateIssueFields fields)
+            : this(jira, new RemoteIssue() { project = fields.ProjectKey, timeTracking = fields.TimeTrackingData }, fields.ParentIssueKey)
+        {
+        }
+
+        /// <summary>
         /// Creates a new Issue.
         /// </summary>
-        /// <param name="jira">Jira instance that ownes this issue.</param>
+        /// <param name="jira">Jira instance that owns this issue.</param>
         /// <param name="projectKey">Project key that owns this issue.</param>
         /// <param name="parentIssueKey">If provided, marks this issue as a subtask of the given parent issue.</param>
         public Issue(Jira jira, string projectKey, string parentIssueKey = null)
@@ -76,12 +79,14 @@ namespace Atlassian.Jira
             _resolutionDate = remoteIssue.resolutionDateReadOnly;
             _securityLevel = remoteIssue.securityLevelReadOnly;
 
+            TimeTrackingData = remoteIssue.timeTracking;
             Assignee = remoteIssue.assignee;
             Description = remoteIssue.description;
             Environment = remoteIssue.environment;
             Reporter = remoteIssue.reporter;
             Summary = remoteIssue.summary;
-            Votes = remoteIssue.votes;
+            Votes = remoteIssue.votesData?.votes;
+            HasUserVoted = remoteIssue.votesData != null ? remoteIssue.votesData.hasVoted : false;
 
             if (!String.IsNullOrEmpty(remoteIssue.parentKey))
             {
@@ -121,6 +126,9 @@ namespace Atlassian.Jira
                 c.ProjectKey = _originalIssue.project;
                 return new ProjectComponent(c);
             }).ToList());
+
+            // additional fields
+            this.AdditionalFields = new IssueFields(_originalIssue, Jira.Url, Jira.Credentials);
         }
 
         internal RemoteIssue OriginalRemoteIssue
@@ -130,6 +138,11 @@ namespace Atlassian.Jira
                 return this._originalIssue;
             }
         }
+
+        /// <summary>
+        /// Fields not represented as properties that were retrieved from the server.
+        /// </summary>
+        public IssueFields AdditionalFields { get; private set; }
 
         /// <summary>
         /// The parent key if this issue is a subtask.
@@ -177,15 +190,20 @@ namespace Atlassian.Jira
         public string Description { get; set; }
 
         /// <summary>
-        /// Hardware or software environment to which the issue relates
+        /// Hardware or software environment to which the issue relates.
         /// </summary>
         [JqlContainsEquality]
         public string Environment { get; set; }
 
         /// <summary>
-        /// Person to whom the issue is currently assigned
+        /// Person to whom the issue is currently assigned.
         /// </summary>
         public string Assignee { get; set; }
+
+        /// <summary>
+        /// Time tracking data for this issue.
+        /// </summary>
+        public IssueTimeTrackingData TimeTrackingData { get; private set; }
 
         /// <summary>
         /// Gets the internal identifier assigned by JIRA.
@@ -260,7 +278,12 @@ namespace Atlassian.Jira
         /// <summary>
         /// Number of votes the issue has
         /// </summary>
-        public long? Votes { get; set; }
+        public long? Votes { get; private set; }
+
+        /// <summary>
+        /// Whether the user that retrieved this issue has voted on it.
+        /// </summary>
+        public bool HasUserVoted { get; private set; }
 
         /// <summary>
         /// Time and date on which this issue was entered into JIRA
@@ -479,6 +502,36 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Creates an remote link for an issue.
+        /// </summary>
+        /// <param name="remoteUrl">Remote url to link to.</param>
+        /// <param name="title">Title of the remote link.</param>
+        /// <param name="summary">Summary of the remote link.</param>
+        public Task AddRemoteLinkAsync(string remoteUrl, string title, string summary = null)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to add remote link, issue has not been created.");
+            }
+
+            return this.Jira.RemoteLinks.CreateRemoteLinkAsync(this.Key.Value, remoteUrl, title, summary);
+        }
+
+        /// <summary>
+        /// Gets the remote links associated with this issue.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<IssueRemoteLink>> GetRemoteLinksAsync(CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to get remote links, issue has not been created.");
+            }
+
+            return this.Jira.RemoteLinks.GetRemoteLinksForIssueAsync(_originalIssue.key, token);
+        }
+
+        /// <summary>
         /// Transition an issue through a workflow action.
         /// </summary>
         /// <param name="actionName">The workflow action to transition to.</param>
@@ -651,10 +704,32 @@ namespace Atlassian.Jira
         /// Add a comment to this issue.
         /// </summary>
         /// <param name="comment">Comment text to add.</param>
-        public Task AddCommentAsync(string comment, CancellationToken token = default(CancellationToken))
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<Comment> AddCommentAsync(string comment, CancellationToken token = default(CancellationToken))
         {
-            var credentials = _jira.GetCredentials();
+            var credentials = _jira.Credentials;
+
+            if (credentials == null)
+            {
+                throw new InvalidOperationException("Unable to add comment to issue, user credentials have not been set.");
+            }
+
             return this.AddCommentAsync(new Comment() { Author = credentials.UserName, Body = comment }, token);
+        }
+
+        /// <summary>
+        /// Removes a comment from this issue.
+        /// </summary>
+        /// <param name="comment">Comment to remove.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task DeleteCommentAsync(Comment comment, CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to delete comment from server, issue has not been created.");
+            }
+
+            return _jira.Issues.DeleteCommentAsync(_originalIssue.key, comment.Id, token);
         }
 
         /// <summary>
@@ -662,7 +737,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="comment">Comment object to add.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task AddCommentAsync(Comment comment, CancellationToken token = default(CancellationToken))
+        public Task<Comment> AddCommentAsync(Comment comment, CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
@@ -725,6 +800,7 @@ namespace Atlassian.Jira
                                  string newEstimate = null,
                                  CancellationToken token = default(CancellationToken))
         {
+            // todo: Use the CancellationToken Parameter
             return AddWorklogAsync(new Worklog(timespent, DateTime.Now), worklogStrategy, newEstimate);
         }
 
@@ -799,6 +875,7 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to refresh, issue has not been saved to server.");
             }
 
+            // todo: Use the CancellationToken Parameter
             var serverIssue = await _jira.Issues.GetIssueAsync(_originalIssue.key).ConfigureAwait(false);
             Initialize(serverIssue.OriginalRemoteIssue);
         }
@@ -820,6 +897,10 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets time tracking information for this issue.
         /// </summary>
+        /// <remarks>
+        /// - Returns information as it was at the moment the issue was read from server, to get latest data use the GetTimeTrackingData method.
+        /// - Use the AddWorklog methods to edit the time tracking information.
+        /// </remarks>
         /// <param name="token">Cancellation token for this operation.</param>
         public Task<IssueTimeTrackingData> GetTimeTrackingDataAsync(CancellationToken token = default(CancellationToken))
         {
@@ -878,6 +959,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
         async Task<RemoteFieldValue[]> IRemoteIssueFieldProvider.GetRemoteFieldValuesAsync(CancellationToken token)
         {
             var fields = new List<RemoteFieldValue>();
@@ -938,8 +1020,9 @@ namespace Atlassian.Jira
                 project = this.Project,
                 reporter = this.Reporter,
                 summary = this.Summary,
-                votes = this.Votes,
-                duedate = this.DueDate
+                votesData = this.Votes != null ? new RemoteVotes() { hasVoted = this.HasUserVoted == true, votes = this.Votes.Value } : null,
+                duedate = this.DueDate,
+                timeTracking = this.TimeTrackingData
             };
 
             remote.key = this.Key != null ? this.Key.Value : null;
@@ -988,7 +1071,8 @@ namespace Atlassian.Jira
                 remote.customFieldValues = this.CustomFields.Select(f => new RemoteCustomFieldValue()
                 {
                     customfieldId = f.Id,
-                    values = f.Values
+                    values = f.Values,
+                    serializer = f.Serializer
                 }).ToArray();
             }
 

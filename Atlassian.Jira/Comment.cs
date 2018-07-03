@@ -1,8 +1,7 @@
-﻿using Atlassian.Jira.Remote;
-using System;
+﻿using System;
+using Atlassian.Jira.Remote;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Atlassian.Jira
 {
@@ -12,6 +11,7 @@ namespace Atlassian.Jira
     public class Comment
     {
         private readonly RemoteComment _remoteComment;
+        private Dictionary<string, object> _properties;
 
         /// <summary>
         /// Create a new Comment.
@@ -22,7 +22,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Create a new Comment from a remote intance object.
+        /// Create a new Comment from a remote instance object.
         /// </summary>
         /// <param name="remoteComment">The remote comment.</param>
         public Comment(RemoteComment remoteComment)
@@ -108,6 +108,27 @@ namespace Atlassian.Jira
             {
                 return _remoteComment.updated;
             }
+        }
+
+        public IReadOnlyDictionary<string, object> Properties
+        {
+            get
+            {
+                if (_properties == null)
+                {
+                    if (_remoteComment.properties == null)
+                    {
+                        _properties = new Dictionary<string, object>();
+                    }
+                    else
+                    {
+                        _properties = _remoteComment.properties.ToDictionary(prop => prop.key, prop => prop.value);
+                    }
+                }
+
+                return _properties;
+            }
+
         }
 
         internal RemoteComment toRemote()

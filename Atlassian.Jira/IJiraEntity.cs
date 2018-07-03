@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Atlassian.Jira
 {
     /// <summary>
-    /// Representes an Jira entity with a unique identifier.
+    /// Represents a Jira entity with a unique identifier.
     /// </summary>
     public interface IJiraEntity
     {

@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Atlassian.Jira.Test.Integration
 {
     public class BaseIntegrationTest
     {
         public const string HOST = "http://localhost:2990/jira";
+        public const string USERNAME = "admin";
+        public const string PASSWORD = "admin";
 
         protected readonly Jira _jira;
         protected readonly Random _random;
@@ -21,7 +19,7 @@ namespace Atlassian.Jira.Test.Integration
 
         public Jira CreateJiraClient()
         {
-            return Jira.CreateRestClient(HOST, "admin", "admin");
+            return Jira.CreateRestClient(HOST, USERNAME, PASSWORD);
         }
     }
 }

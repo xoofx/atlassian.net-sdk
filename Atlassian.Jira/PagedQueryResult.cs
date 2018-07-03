@@ -1,10 +1,7 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace Atlassian.Jira
 {
@@ -22,7 +19,7 @@ namespace Atlassian.Jira
         /// Create a new instance of PagedQueryResult with all metadata provided.
         /// </summary>
         /// <param name="enumerable">Enumerable to wrap.</param>
-        /// <param name="startAt">Index whithin the total items where this paged paged result starts.</param>
+        /// <param name="startAt">Index within the total items where this page's paged result starts.</param>
         /// <param name="itemsPerPage">Number of items returned per page.</param>
         /// <param name="totalItems">Number of total items available on the server.</param>
         public PagedQueryResult(IEnumerable<T> enumerable, int startAt, int itemsPerPage, int totalItems)
@@ -34,7 +31,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Create an intance of PagedQueryResult taking metadata from a JSON object.
+        /// Create an instance of PagedQueryResult taking metadata from a JSON object.
         /// </summary>
         /// <param name="pagedJson">JSON object with JIRA paged metadata.</param>
         /// <param name="items">Enumerable to wrap.</param>
@@ -48,7 +45,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Index whithin the total items where this paged paged result starts.
+        /// Index within the total items where this page's paged result starts.
         /// </summary>
         public int StartAt
         {

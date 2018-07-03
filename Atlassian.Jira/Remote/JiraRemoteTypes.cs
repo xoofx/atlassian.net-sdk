@@ -9,6 +9,9 @@
 //------------------------------------------------------------------------------
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+
 namespace Atlassian.Jira.Remote
 {
     /// <remarks/>
@@ -149,6 +152,9 @@ namespace Atlassian.Jira.Remote
                 this.updatedField = value;
             }
         }
+
+        /// <remarks/>
+        public System.Collections.Generic.IEnumerable<RemoteCommentProperty> properties { get; set; }
     }
 
     /// <remarks/>
@@ -1268,6 +1274,7 @@ namespace Atlassian.Jira.Remote
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
+        [JsonProperty("size")]
         public System.Nullable<long> filesize
         {
             get
@@ -1334,8 +1341,6 @@ namespace Atlassian.Jira.Remote
 
         private System.Nullable<System.DateTime> updatedField;
 
-        private System.Nullable<long> votesField;
-
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
         [JsonProperty("versions")]
@@ -1350,6 +1355,17 @@ namespace Atlassian.Jira.Remote
                 this.affectsVersionsField = value;
             }
         }
+
+        [JsonProperty("attachment")]
+        public RemoteAttachment[] remoteAttachments { get; set; }
+
+        [JsonProperty("comment")]
+        [JsonConverter(typeof(NestedValueJsonConverter), "comments")]
+        public RemoteComment[] remoteComments { get; set; }
+
+        [JsonProperty("worklog")]
+        [JsonConverter(typeof(NestedValueJsonConverter), "worklogs")]
+        public RemoteWorklog[] remoteWorklogs { get; set; }
 
         [System.Xml.Serialization.SoapIgnore]
         [JsonProperty("parent")]
@@ -1366,6 +1382,12 @@ namespace Atlassian.Jira.Remote
 
         [JsonProperty("security")]
         public IssueSecurityLevel securityLevelReadOnly { get; set; }
+
+        [JsonProperty("timetracking")]
+        public IssueTimeTrackingData timeTracking { get; set; }
+
+        [JsonIgnore]
+        public IDictionary<string, JToken> fieldsReadOnly { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -1578,20 +1600,8 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "votes")]
-        public System.Nullable<long> votes
-        {
-            get
-            {
-                return this.votesField;
-            }
-            set
-            {
-                this.votesField = value;
-            }
-        }
+        [JsonProperty("votes")]
+        public RemoteVotes votesData { get; set; }
     }
 
     /// <remarks/>
@@ -1772,6 +1782,9 @@ namespace Atlassian.Jira.Remote
                 this.valuesField = value;
             }
         }
+
+        [JsonIgnore]
+        public ICustomFieldValueSerializer serializer { get; set; }
     }
 
     /// <remarks/>
@@ -2348,5 +2361,17 @@ namespace Atlassian.Jira.Remote
             }
         }
     }
-   
+
+    public partial class RemoteVotes
+    {
+        public long votes { get; set; }
+
+        public bool hasVoted { get; set; }
+    }
+
+    public class RemoteCommentProperty
+    {
+        public string key { get; set; }
+        public object value { get; set; }
+    }
 }

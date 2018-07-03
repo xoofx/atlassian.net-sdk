@@ -1,9 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Atlassian.Jira.Remote
 {
@@ -16,7 +13,7 @@ namespace Atlassian.Jira.Remote
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return Convert.ChangeType(JToken.ReadFrom(reader), objectType);
+            return JToken.ReadFrom(reader)?.ToObject(objectType);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

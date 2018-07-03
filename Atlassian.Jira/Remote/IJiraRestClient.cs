@@ -1,15 +1,13 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using RestSharp;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using RestSharp;
 
 namespace Atlassian.Jira.Remote
 {
     /// <summary>
-    /// Contract for a client that iteracts with JIRA via rest.
+    /// Contract for a client that interacts with JIRA via rest.
     /// </summary>
     public interface IJiraRestClient
     {
@@ -42,12 +40,12 @@ namespace Atlassian.Jira.Remote
         /// <param name="resource">Request resource url.</param>
         /// <param name="requestBody">Request body to be serialized.</param>
         /// <param name="token">Cancellation token for the operation.</param>
-        Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null, CancellationToken toke = default(CancellationToken));
+        Task<JToken> ExecuteRequestAsync(Method method, string resource, object requestBody = null, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Executes an async request and serializes the response to an object.
         /// </summary>
-        /// <typeparam name="T">Type to serialize the reponse.</typeparam>
+        /// <typeparam name="T">Type to serialize the response.</typeparam>
         /// <param name="method">Request method.</param>
         /// <param name="resource">Request resource url.</param>
         /// <param name="requestBody">Request body to be serialized.</param>

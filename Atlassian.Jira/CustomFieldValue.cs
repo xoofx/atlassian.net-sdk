@@ -1,8 +1,5 @@
-﻿using Atlassian.Jira.Remote;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 
 namespace Atlassian.Jira
 {
@@ -43,6 +40,8 @@ namespace Atlassian.Jira
         {
             get { return _id; }
         }
+
+        internal ICustomFieldValueSerializer Serializer { get; set; }
 
         /// <summary>
         /// Name of the custom field as defined in JIRA

@@ -1,10 +1,8 @@
-﻿using Atlassian.Jira.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Linq;
 
 namespace Atlassian.Jira
 {
@@ -17,6 +15,16 @@ namespace Atlassian.Jira
         /// Query builder for issues in jira.
         /// </summary>
         JiraQueryable<Issue> Queryable { get; }
+
+        /// <summary>
+        /// Whether to validate a JQL query
+        /// </summary>
+        bool ValidateQuery { get; set; }
+
+        /// <summary>
+        /// Maximum number of issues to retrieve per request.
+        /// </summary>
+        int MaxIssuesPerRequest { get; set; }
 
         /// <summary>
         /// Retrieves an issue by its key.
@@ -33,11 +41,25 @@ namespace Atlassian.Jira
         Task<IDictionary<string, Issue>> GetIssuesAsync(IEnumerable<string> issueKeys, CancellationToken token = default(CancellationToken));
 
         /// <summary>
+        /// Retrieves a list of issues by their keys.
+        /// </summary>
+        /// <param name="issueKeys">List of issue keys to retrieve.</param>
+        Task<IDictionary<string, Issue>> GetIssuesAsync(params string[] issueKeys);
+
+        /// <summary>
         /// Updates all fields of an issue.
         /// </summary>
         /// <param name="issue">Issue to update.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task UpdateIssueAsync(Issue issue, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
+        /// Updates all fields of an issue.
+        /// </summary>
+        /// <param name="issue">Issue to update.</param>
+        /// <param name="options">Options for the update</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task UpdateIssueAsync(Issue issue, IssueUpdateOptions options, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Creates an issue and returns a new instance populated from server.
@@ -58,10 +80,17 @@ namespace Atlassian.Jira
         /// Execute a specific JQL query and return the resulting issues.
         /// </summary>
         /// <param name="jql">JQL search query</param>
-        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="maxIssues">Maximum number of issues to return (defaults to 20). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(string jql, int? maxIssues = null, int startAt = 0, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
+        /// Execute a specific JQL query and return the resulting issues.
+        /// </summary>
+        /// <param name="options">Options to use when executing the search.</param>
+        /// <param name="token">Cancellatin token for this operation.</param>
+        Task<IPagedQueryResult<Issue>> GetIssuesFromJqlAsync(IssueSearchOptions options, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Transition an issue through a workflow action.
@@ -100,6 +129,14 @@ namespace Atlassian.Jira
         /// <param name="issueKey">Issue key to retrieve comments from.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IEnumerable<Comment>> GetCommentsAsync(string issueKey, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
+        /// Removes a comment from an issue.
+        /// </summary>
+        /// <param name="issueKey">Issue key to remove the comment from.</param>
+        /// <param name="commentId">Identifier of the comment to remove.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task DeleteCommentAsync(string issueKey, string commentId, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Returns the comments of an issue with paging.

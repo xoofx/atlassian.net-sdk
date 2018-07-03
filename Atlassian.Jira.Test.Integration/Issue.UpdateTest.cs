@@ -1,10 +1,8 @@
-﻿using RestSharp;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using RestSharp;
 using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
@@ -166,8 +164,8 @@ namespace Atlassian.Jira.Test.Integration
             issue.AffectsVersions.Add("1.0");
             issue.FixVersions.Add("2.0");
             issue.SaveChanges();
-            Assert.Equal(1, issue.AffectsVersions.Count);
-            Assert.Equal(1, issue.FixVersions.Count);
+            Assert.Single(issue.AffectsVersions);
+            Assert.Single(issue.FixVersions);
             Assert.Equal("1.0", issue.AffectsVersions.First().Name);
             Assert.Equal("2.0", issue.FixVersions.First().Name);
 
@@ -176,16 +174,16 @@ namespace Atlassian.Jira.Test.Integration
             issue.FixVersions.Remove("2.0");
             issue.FixVersions.Add("3.0");
             issue.SaveChanges();
-            Assert.Equal(1, issue.AffectsVersions.Count);
-            Assert.Equal(1, issue.FixVersions.Count);
+            Assert.Single(issue.AffectsVersions);
+            Assert.Single(issue.FixVersions);
             Assert.Equal("2.0", issue.AffectsVersions.First().Name);
             Assert.Equal("3.0", issue.FixVersions.First().Name);
 
             issue.AffectsVersions.Remove("2.0");
             issue.FixVersions.Remove("3.0");
             issue.SaveChanges();
-            Assert.Equal(0, issue.AffectsVersions.Count);
-            Assert.Equal(0, issue.FixVersions.Count);
+            Assert.Empty(issue.AffectsVersions);
+            Assert.Empty(issue.FixVersions);
 
             issue.AffectsVersions.Add("1.0");
             issue.AffectsVersions.Add("2.0");
@@ -194,12 +192,12 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             Assert.Equal(2, issue.FixVersions.Count);
-            Assert.True(issue.FixVersions.Any(v => v.Name == "2.0"));
-            Assert.True(issue.FixVersions.Any(v => v.Name == "3.0"));
+            Assert.Contains(issue.FixVersions, v => v.Name == "2.0");
+            Assert.Contains(issue.FixVersions, v => v.Name == "3.0");
 
             Assert.Equal(2, issue.AffectsVersions.Count);
-            Assert.True(issue.AffectsVersions.Any(v => v.Name == "1.0"));
-            Assert.True(issue.AffectsVersions.Any(v => v.Name == "2.0"));
+            Assert.Contains(issue.AffectsVersions, v => v.Name == "1.0");
+            Assert.Contains(issue.AffectsVersions, v => v.Name == "2.0");
         }
 
         [Fact]
@@ -218,25 +216,25 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.Components.Add("Client");
             issue.SaveChanges();
-            Assert.Equal(1, issue.Components.Count);
+            Assert.Single(issue.Components);
             Assert.Equal("Client", issue.Components.First().Name);
 
             issue.Components.Remove("Client");
             issue.Components.Add("Server");
             issue.SaveChanges();
-            Assert.Equal(1, issue.Components.Count);
+            Assert.Single(issue.Components);
             Assert.Equal("Server", issue.Components.First().Name);
 
             issue.Components.Remove("Server");
             issue.SaveChanges();
-            Assert.Equal(0, issue.Components.Count);
+            Assert.Empty(issue.Components);
 
             issue.Components.Add("Client");
             issue.Components.Add("Server");
             issue.SaveChanges();
             Assert.Equal(2, issue.Components.Count);
-            Assert.True(issue.Components.Any(c => c.Name == "Server"));
-            Assert.True(issue.Components.Any(c => c.Name == "Client"));
+            Assert.Contains(issue.Components, c => c.Name == "Server");
+            Assert.Contains(issue.Components, c => c.Name == "Client");
         }
 
         [Fact]
@@ -259,12 +257,12 @@ namespace Atlassian.Jira.Test.Integration
             issue.Labels.RemoveAt(0);
             issue.SaveChanges();
             issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
-            Assert.Equal(1, issue.Labels.Count);
+            Assert.Single(issue.Labels);
 
             issue.Labels.Clear();
             issue.SaveChanges();
             issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
-            Assert.Equal(0, issue.Labels.Count);
+            Assert.Empty(issue.Labels);
         }
 
         [Fact]

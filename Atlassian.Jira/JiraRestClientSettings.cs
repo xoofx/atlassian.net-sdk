@@ -1,9 +1,8 @@
-﻿using Atlassian.Jira.Remote;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Net;
+using Atlassian.Jira.Remote;
+using Newtonsoft.Json;
 
 namespace Atlassian.Jira
 {
@@ -31,6 +30,12 @@ namespace Atlassian.Jira
         /// The json global serializer settings to use.
         /// </summary>
         public JsonSerializerSettings JsonSerializerSettings { get; private set; }
+
+        /// <summary>
+        /// Proxy to use when sending requests.
+        /// </summary>
+        /// <example>To enable debugging with Fiddler, set Proxy to new WebProxy("127.0.0.1", 8888)</example>
+        public IWebProxy Proxy { get; set; }
 
         /// <summary>
         /// Create a new instance of the settings.

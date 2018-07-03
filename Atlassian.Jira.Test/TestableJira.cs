@@ -1,13 +1,10 @@
-﻿using Atlassian.Jira.Linq;
+﻿using System;
+using System.Globalization;
+using System.Linq.Expressions;
+using System.Threading;
+using Atlassian.Jira.Linq;
 using Atlassian.Jira.Remote;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Atlassian.Jira.Test
 {
@@ -22,6 +19,8 @@ namespace Atlassian.Jira.Test
         public Mock<IIssueService> IssueService;
         public Mock<IIssuePriorityService> IssuePriorityService;
         public Mock<IIssueResolutionService> IssueResolutionService;
+
+        internal static readonly CultureInfo TestCulture = CultureInfo.InvariantCulture;
 
         private TestableJira(JiraCredentials credentials = null)
             : base(new ServiceLocator(), credentials)
@@ -47,11 +46,14 @@ namespace Atlassian.Jira.Test
             Services.Register<IIssueResolutionService>(() => IssueResolutionService.Object);
 
             Translator.Setup(t => t.Process(It.IsAny<Expression>())).Returns(new JqlData() { Expression = "dummy expression" });
-
         }
 
         public static TestableJira Create(JiraCredentials credentials = null)
         {
+            // switch thread locale to avoid "2016/01/01 does not equal 2016.01.01" errors
+            Thread.CurrentThread.CurrentCulture = TestCulture;
+            Thread.CurrentThread.CurrentUICulture = TestCulture;
+
             return new TestableJira(credentials);
         }
 

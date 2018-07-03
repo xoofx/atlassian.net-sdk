@@ -1,10 +1,9 @@
-﻿using Atlassian.Jira.Remote;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -17,7 +16,7 @@ namespace Atlassian.Jira
         private readonly RemoteProject _remoteProject;
 
         /// <summary>
-        /// Createa a new Project instance using a remote project.
+        /// Creates a new Project instance using a remote project.
         /// </summary>
         /// <param name="jira">Instance of the Jira client.</param>
         /// <param name="remoteProject">Remote project.</param>

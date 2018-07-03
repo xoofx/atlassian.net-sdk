@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,7 +37,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Creates a user.
         /// </summary>
-        /// <param name="user">todo:</param>
+        /// <param name="user">The information about the user to be created.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<JiraUser> CreateUserAsync(JiraUserCreationInfo user, CancellationToken token = default(CancellationToken));
     }

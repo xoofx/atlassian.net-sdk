@@ -1,12 +1,10 @@
-﻿using Atlassian.Jira.Linq;
-using Atlassian.Jira.Remote;
-using Moq;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
+using Moq;
 using Xunit;
 
 namespace Atlassian.Jira.Test
@@ -475,6 +473,17 @@ namespace Atlassian.Jira.Test
                           select i).ToArray();
 
             Assert.Equal("component != \"foo\"", _translator.Jql);
+        }
+
+        [Fact]
+        public void CanUseLiteralMatchOnMemberProperties()
+        {
+            var queryable = CreateQueryable();
+            var issues = (from i in queryable
+                          where i.Summary == new LiteralMatch("Literal Summary") && i.Description == new LiteralMatch("Literal Description")
+                          select i).ToArray();
+
+            Assert.Equal("(Summary = \"Literal Summary\" and Description = \"Literal Description\")", _translator.Jql);
         }
 
         [Fact]

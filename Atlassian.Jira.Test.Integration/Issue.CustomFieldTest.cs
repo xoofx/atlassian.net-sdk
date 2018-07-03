@@ -1,12 +1,34 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Linq;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
     public class IssueCustomFieldTest : BaseIntegrationTest
     {
+        [Fact]
+        public void CanHandleCustomFieldWithoutSerializerThatIsArrayOfObjects()
+        {
+            var jira = Jira.CreateRestClient(new TraceReplayer("Trace_CustomFieldArrayOfObjects.txt"));
+            var issue = jira.Issues.GetIssuesFromJqlAsync("foo").Result.Single();
+
+            Assert.True(issue["Watchers"].Value.Length > 0);
+        }
+
+        [Fact]
+        public void CanHandleCustomFieldSetToEmptyArrayByDefaultFromServer()
+        {
+            // See: https://bitbucket.org/farmas/atlassian.net-sdk/issues/372
+            var jira = Jira.CreateRestClient(new TraceReplayer("Trace_CustomFieldEmptyArray.txt"));
+            var issue = jira.Issues.GetIssueAsync("GIT-103").Result;
+
+            issue.Summary = "Some change";
+            issue.SaveChanges();
+
+            Assert.NotNull(issue);
+        }
+
         [Fact]
         public void AddAndReadCustomFieldById()
         {
@@ -43,9 +65,9 @@ namespace Atlassian.Jira.Test.Integration
             var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             var cascadingSelect = newIssue.CustomFields.GetCascadingSelectField("Custom Cascading Select Field");
-            Assert.Equal(cascadingSelect.ParentOption, "Option3");
+            Assert.Equal("Option3", cascadingSelect.ParentOption);
             Assert.Null(cascadingSelect.ChildOption);
-            Assert.Equal(cascadingSelect.Name, "Custom Cascading Select Field");
+            Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
         }
 
         [Fact]
@@ -201,11 +223,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(new string[2] { "2.0", "3.0" }, updatedIssue.CustomFields["Custom Multi Version Field"].Values);
 
             var cascadingSelect = updatedIssue.CustomFields.GetCascadingSelectField("Custom Cascading Select Field");
-            Assert.Equal(cascadingSelect.ParentOption, "Option2");
-            Assert.Equal(cascadingSelect.ChildOption, "Option2.2");
-            Assert.Equal(cascadingSelect.Name, "Custom Cascading Select Field");
+            Assert.Equal("Option2", cascadingSelect.ParentOption);
+            Assert.Equal("Option2.2", cascadingSelect.ChildOption);
+            Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
         }
-
+        [Fact]
         public void CreateAndQuerySprintName()
         {
             var issue = new Issue(_jira, "SCRUM")
@@ -222,7 +244,7 @@ namespace Atlassian.Jira.Test.Integration
             var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("Sprint 1", newIssue["Sprint"]);
         }
-
+        [Fact]
         public void UpdateAndQuerySprintName()
         {
             var issue = new Issue(_jira, "SCRUM")
@@ -242,7 +264,7 @@ namespace Atlassian.Jira.Test.Integration
             var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("Sprint 1", newIssue["Sprint"]);
         }
-
+        [Fact]
         public void CanUpdateIssueWithoutModifyingCustomFields()
         {
             var issue = new Issue(_jira, "SCRUM")
@@ -259,7 +281,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
             Assert.Equal("Sprint 1", issue["Sprint"]);
         }
-
+        [Fact]
         public void ThrowsErrorWhenSettingSprintByName()
         {
             var issue = new Issue(_jira, "SCRUM")

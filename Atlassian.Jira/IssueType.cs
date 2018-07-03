@@ -1,11 +1,9 @@
-﻿using Atlassian.Jira.Remote;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -36,6 +34,7 @@ namespace Atlassian.Jira
         public IssueType(string id, string name = null, bool isSubTask = false)
             : base(id, name)
         {
+            _isSubTask = isSubTask;
         }
 
         /// <summary>

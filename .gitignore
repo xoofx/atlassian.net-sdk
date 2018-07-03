@@ -27,6 +27,8 @@
 *.sdf
 ipch/
 obj/
+.vs/
+.nuget/
 [Bb]in
 [Dd]ebug*/
 [Rr]elease*/

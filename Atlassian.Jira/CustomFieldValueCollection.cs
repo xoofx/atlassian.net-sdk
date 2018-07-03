@@ -1,12 +1,10 @@
-﻿using Atlassian.Jira.Remote;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -42,10 +40,10 @@ namespace Atlassian.Jira
         /// Add a custom field by name with an array of values
         /// </summary>
         /// <param name="fieldName">The name of the custom field as defined in JIRA</param>
-        /// <param name="fildValues">The values of the field</param>
+        /// <param name="fieldValues">The values of the field</param>
         public CustomFieldValueCollection AddArray(string fieldName, params string[] fieldValues)
         {
-            return this.Add(fieldName, fieldValues);
+            return this.Add(fieldName, fieldValues, new MultiStringCustomFieldValueSerializer());
         }
 
         /// <summary>
@@ -80,18 +78,18 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="fieldName">The name of the custom field as defined in JIRA</param>
         /// <param name="fieldValues">The values of the field</param>
-        public CustomFieldValueCollection Add(string fieldName, string[] fieldValues)
+        public CustomFieldValueCollection Add(string fieldName, string[] fieldValues, ICustomFieldValueSerializer serializer = null)
         {
             var fieldId = GetCustomFieldId(fieldName);
-            this.Items.Add(new CustomFieldValue(fieldId, fieldName, _issue) { Values = fieldValues });
+            this.Items.Add(new CustomFieldValue(fieldId, fieldName, _issue) { Values = fieldValues, Serializer = serializer });
             return this;
         }
 
         /// <summary>
         /// Add a custom field by id with an array of values.
         /// </summary>
-        /// <param name="fieldName">The id of the custom field as defined in JIRA.</param>
-        /// <param name="fildValues">The values of the field.</param>
+        /// <param name="fieldId">The id of the custom field as defined in JIRA.</param>
+        /// <param name="fieldValues">The values of the field.</param>
         public CustomFieldValueCollection AddById(string fieldId, params string[] fieldValues)
         {
             this.Items.Add(new CustomFieldValue(fieldId, _issue) { Values = fieldValues });

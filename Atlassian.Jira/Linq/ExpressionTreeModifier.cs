@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Linq.Expressions;
 
 namespace Atlassian.Jira.Linq
@@ -31,7 +29,7 @@ namespace Atlassian.Jira.Linq
         {
             if (node.Method.Name == "Where"
                 || node.Method.Name == "Take"
-                || node.Method.Name == "OrderBy" 
+                || node.Method.Name == "OrderBy"
                 || node.Method.Name == "OrderByDescending"
                 || node.Method.Name == "ThenBy"
                 || node.Method.Name == "ThenByDescending")

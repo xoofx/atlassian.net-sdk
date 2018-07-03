@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,11 +8,11 @@ namespace Atlassian.Jira
     internal class WebClientWrapper : IWebClient
     {
         private readonly WebClient _webClient;
-        private readonly Jira _jira;
+        private readonly JiraCredentials _credentials;
 
-        public WebClientWrapper(Jira jira)
+        public WebClientWrapper(JiraCredentials credentials)
         {
-            _jira = jira;
+            _credentials = credentials;
             _webClient = new WebClient();
             _webClient.DownloadFileCompleted += _webClient_DownloadFileCompleted;
         }
@@ -51,25 +49,37 @@ namespace Atlassian.Jira
             return completionSource.Task;
         }
 
-        public Task DownloadWithAuthenticationAsync(string url, string fileName)
+        public Task<byte[]> DownloadDataWithAuthenticationAsync(string url)
         {
-            var credentials = _jira.GetCredentials();
-
-            if (String.IsNullOrEmpty(credentials.UserName) || String.IsNullOrEmpty(credentials.Password))
-            {
-                throw new InvalidOperationException("Unable to download file, user and/or password are missing. You can specify a provider for credentials when constructing the Jira instance.");
-            }
-
             _webClient.CancelAsync();
 
-            var completionSource = new TaskCompletionSource<object>();
-            string encodedUserNameAndPassword = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials.UserName + ":" + credentials.Password));
+            SetAuthenticationHeader();
 
-            _webClient.Headers.Remove(HttpRequestHeader.Authorization);
-            _webClient.Headers.Add(HttpRequestHeader.Authorization, "Basic " + encodedUserNameAndPassword);
+            return _webClient.DownloadDataTaskAsync(url);
+        }
+
+        public Task DownloadWithAuthenticationAsync(string url, string fileName)
+        {
+            _webClient.CancelAsync();
+
+            SetAuthenticationHeader();
+
+            var completionSource = new TaskCompletionSource<object>();
             _webClient.DownloadFileAsync(new Uri(url), fileName, completionSource);
 
             return completionSource.Task;
+        }
+
+        private void SetAuthenticationHeader()
+        {
+            if (_credentials == null || String.IsNullOrEmpty(_credentials.UserName) || String.IsNullOrEmpty(_credentials.Password))
+            {
+                throw new InvalidOperationException("Unable to download file, user credentials have not been set.");
+            }
+
+            string encodedUserNameAndPassword = Convert.ToBase64String(Encoding.UTF8.GetBytes(_credentials.UserName + ":" + _credentials.Password));
+            _webClient.Headers.Remove(HttpRequestHeader.Authorization);
+            _webClient.Headers.Add(HttpRequestHeader.Authorization, "Basic " + encodedUserNameAndPassword);
         }
     }
 }

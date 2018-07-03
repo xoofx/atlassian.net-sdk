@@ -1,8 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Atlassian.Jira
 {
@@ -11,22 +8,31 @@ namespace Atlassian.Jira
     /// </summary>
     public class IssueTimeTrackingData
     {
+        /// <summary>
+        /// Creates a new instance of the IssueTimeTrackingData class.
+        /// </summary>
+        public IssueTimeTrackingData(string originalEstimate, string remainingEstimate = null)
+        {
+            this.OriginalEstimate = originalEstimate;
+            this.RemainingEstimate = remainingEstimate;
+        }
+
         [JsonProperty("originalEstimate")]
         public string OriginalEstimate { get; private set; }
 
         [JsonProperty("originalEstimateSeconds")]
-        public int OriginalEstimateInSeconds { get; private set; }
+        public int? OriginalEstimateInSeconds { get; private set; }
 
         [JsonProperty("remainingEstimate")]
         public string RemainingEstimate { get; private set; }
 
         [JsonProperty("remainingEstimateSeconds")]
-        public int RemainingEstimateInSeconds { get; private set; }
+        public int? RemainingEstimateInSeconds { get; private set; }
 
         [JsonProperty("timeSpent")]
         public string TimeSpent { get; private set; }
 
         [JsonProperty("timeSpentSeconds")]
-        public int TimeSpentInSeconds { get; private set; }
+        public int? TimeSpentInSeconds { get; private set; }
     }
 }

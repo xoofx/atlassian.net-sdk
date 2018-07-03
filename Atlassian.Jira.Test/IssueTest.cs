@@ -1,11 +1,9 @@
-﻿using Atlassian.Jira.Remote;
-using Moq;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Remote;
+using Moq;
 using Xunit;
 
 namespace Atlassian.Jira.Test
@@ -18,11 +16,11 @@ namespace Atlassian.Jira.Test
             public void ShouldSetDefaultValues()
             {
                 var issue = CreateIssue("ProjectKey");
-                Assert.Equal(0, issue.AffectsVersions.Count);
+                Assert.Empty(issue.AffectsVersions);
                 Assert.Null(issue.Assignee);
-                Assert.Equal(0, issue.Components.Count);
+                Assert.Empty(issue.Components);
                 Assert.Null(issue.Created);
-                Assert.Equal(0, issue.CustomFields.Count);
+                Assert.Empty(issue.CustomFields);
                 Assert.Null(issue.Description);
                 Assert.Null(issue.DueDate);
                 Assert.Null(issue.Environment);
@@ -61,16 +59,16 @@ namespace Atlassian.Jira.Test
                     summary = "summary",
                     type = new RemoteIssueType() { id = "type" },
                     updated = new DateTime(2011, 2, 2),
-                    votes = 1
+                    votesData = new RemoteVotes() {  votes = 1, hasVoted = true }
                 };
 
                 var issue = remoteIssue.ToLocal(TestableJira.Create());
 
-                Assert.Equal(1, issue.AffectsVersions.Count);
+                Assert.Single(issue.AffectsVersions);
                 Assert.Equal("assignee", issue.Assignee);
-                Assert.Equal(1, issue.Components.Count);
+                Assert.Single(issue.Components);
                 Assert.Equal(new DateTime(2011, 1, 1), issue.Created);
-                Assert.Equal(1, issue.CustomFields.Count);
+                Assert.Single(issue.CustomFields);
                 Assert.Equal("description", issue.Description);
                 Assert.Equal(new DateTime(2011, 3, 3), issue.DueDate);
                 Assert.Equal("environment", issue.Environment);
@@ -84,6 +82,7 @@ namespace Atlassian.Jira.Test
                 Assert.Equal("type", issue.Type.Id);
                 Assert.Equal(new DateTime(2011, 2, 2), issue.Updated);
                 Assert.Equal(1, issue.Votes);
+                Assert.True(issue.HasUserVoted);
             }
         }
 
@@ -113,7 +112,7 @@ namespace Atlassian.Jira.Test
                 Assert.Null(remoteIssue.summary);
                 Assert.Null(remoteIssue.type);
                 Assert.Null(remoteIssue.updated);
-                Assert.Null(remoteIssue.votes);
+                Assert.Null(remoteIssue.votesData);
             }
 
             [Fact]
@@ -143,13 +142,12 @@ namespace Atlassian.Jira.Test
                 issue.Reporter = "reporter";
                 issue.Summary = "summary";
                 issue.Type = "4";
-                issue.Votes = 1;
 
                 var remoteIssue = issue.ToRemote();
 
-                Assert.Equal(1, remoteIssue.affectsVersions.Length);
+                Assert.Single(remoteIssue.affectsVersions);
                 Assert.Equal("assignee", remoteIssue.assignee);
-                Assert.Equal(1, remoteIssue.components.Length);
+                Assert.Single(remoteIssue.components);
                 Assert.Null(remoteIssue.created);
                 Assert.Equal("description", remoteIssue.description);
                 Assert.Equal(new DateTime(2011, 1, 1), remoteIssue.duedate);
@@ -163,7 +161,6 @@ namespace Atlassian.Jira.Test
                 Assert.Equal("summary", remoteIssue.summary);
                 Assert.Equal("4", remoteIssue.type.id);
                 Assert.Null(remoteIssue.updated);
-                Assert.Equal(1, remoteIssue.votes);
             }
 
             [Fact]
@@ -204,7 +201,7 @@ namespace Atlassian.Jira.Test
                 issue["My Custom Field"] = "test value";
 
                 var result = GetUpdatedFieldsForIssue(issue);
-                Assert.Equal(1, result.Length);
+                Assert.Single(result);
                 Assert.Equal("CustomField1", result.First().id);
             }
 
@@ -236,7 +233,7 @@ namespace Atlassian.Jira.Test
                 var issue = jira.Issues.GetIssueAsync("TST-1").Result;
 
                 var result = GetUpdatedFieldsForIssue(issue);
-                Assert.Equal(0, result.Length);
+                Assert.Empty(result);
             }
 
             [Fact]
@@ -268,7 +265,7 @@ namespace Atlassian.Jira.Test
                 issue["My Custom Field"] = "My New Value";
 
                 var result = GetUpdatedFieldsForIssue(issue);
-                Assert.Equal(1, result.Length);
+                Assert.Single(result);
                 Assert.Equal("CustomField1", result.First().id);
                 Assert.Equal("My New Value", result.First().values[0]);
             }
@@ -284,7 +281,7 @@ namespace Atlassian.Jira.Test
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("5"), 1)));
 
                 var result = GetUpdatedFieldsForIssue(issue);
-                Assert.Equal(1, result.Length);
+                Assert.Single(result);
                 Assert.Equal("5", result[0].values[0]);
             }
 
@@ -299,7 +296,7 @@ namespace Atlassian.Jira.Test
                 issue.Type = "Task";
 
                 var result = GetUpdatedFieldsForIssue(issue);
-                Assert.Equal(1, result.Length);
+                Assert.Single(result);
                 Assert.Equal("2", result[0].values[0]);
             }
 
@@ -318,7 +315,7 @@ namespace Atlassian.Jira.Test
                 var issue = remoteIssue.ToLocal(jira);
                 issue.Type = "Task";
 
-                Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
+                Assert.Empty(GetUpdatedFieldsForIssue(issue));
             }
 
             [Fact]
@@ -326,7 +323,7 @@ namespace Atlassian.Jira.Test
             {
                 var issue = CreateIssue();
 
-                Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
+                Assert.Empty(GetUpdatedFieldsForIssue(issue));
             }
 
             [Fact]
@@ -335,7 +332,7 @@ namespace Atlassian.Jira.Test
                 var issue = CreateIssue();
                 issue.Summary = "foo";
 
-                Assert.Equal(1, GetUpdatedFieldsForIssue(issue).Length);
+                Assert.Single(GetUpdatedFieldsForIssue(issue));
             }
 
             [Fact]
@@ -374,7 +371,7 @@ namespace Atlassian.Jira.Test
 
                 issue.Summary = "Summary";
 
-                Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
+                Assert.Empty(GetUpdatedFieldsForIssue(issue));
             }
 
             [Fact]
@@ -391,8 +388,7 @@ namespace Atlassian.Jira.Test
 
                 jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("5"), 1)));
-
-                Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
+                Assert.Empty(GetUpdatedFieldsForIssue(issue));
             }
 
             [Fact]
@@ -405,7 +401,7 @@ namespace Atlassian.Jira.Test
                 jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("1"), 1)));
 
-                Assert.Equal(1, GetUpdatedFieldsForIssue(issue).Length);
+                Assert.Single(GetUpdatedFieldsForIssue(issue));
             }
 
             [Fact]
@@ -415,7 +411,7 @@ namespace Atlassian.Jira.Test
                 issue.DueDate = new DateTime(2011, 10, 10);
 
                 var fields = GetUpdatedFieldsForIssue(issue);
-                Assert.Equal(1, fields.Length);
+                Assert.Single(fields);
                 Assert.Equal("10/Oct/11", fields[0].values[0]);
             }
 
@@ -428,7 +424,7 @@ namespace Atlassian.Jira.Test
                 };
 
                 var issue = remoteIssue.ToLocal(TestableJira.Create());
-                Assert.Equal(0, GetUpdatedFieldsForIssue(issue).Length);
+                Assert.Empty(GetUpdatedFieldsForIssue(issue));
             }
 
             [Fact]
@@ -439,7 +435,7 @@ namespace Atlassian.Jira.Test
                 issue.Components.Add(component.ToLocal());
 
                 var fields = GetUpdatedFieldsForIssue(issue);
-                Assert.Equal(1, fields.Length);
+                Assert.Single(fields);
                 Assert.Equal("components", fields[0].id);
                 Assert.Equal("1", fields[0].values[0]);
             }
@@ -452,7 +448,7 @@ namespace Atlassian.Jira.Test
                 issue.FixVersions.Add(version.ToLocal(TestableJira.Create()));
 
                 var fields = GetUpdatedFieldsForIssue(issue);
-                Assert.Equal(1, fields.Length);
+                Assert.Single(fields);
                 Assert.Equal("fixVersions", fields[0].id);
                 Assert.Equal("1", fields[0].values[0]);
             }
@@ -465,7 +461,7 @@ namespace Atlassian.Jira.Test
                 issue.AffectsVersions.Add(version.ToLocal(TestableJira.Create()));
 
                 var fields = GetUpdatedFieldsForIssue(issue);
-                Assert.Equal(1, fields.Length);
+                Assert.Single(fields);
                 Assert.Equal("versions", fields[0].id);
                 Assert.Equal("1", fields[0].values[0]);
             }
@@ -478,7 +474,7 @@ namespace Atlassian.Jira.Test
             {
                 var issue = CreateIssue();
 
-                Assert.Throws(typeof(InvalidOperationException), () => issue.GetAttachmentsAsync().Result);
+                Assert.Throws<InvalidOperationException>(() => issue.GetAttachmentsAsync().Result);
             }
 
             [Fact]
@@ -497,7 +493,7 @@ namespace Atlassian.Jira.Test
                 var attachments = issue.GetAttachmentsAsync().Result;
 
                 //assert
-                Assert.Equal(1, attachments.Count());
+                Assert.Single(attachments);
                 Assert.Equal("attach.txt", attachments.First().FileName);
             }
         }
@@ -509,7 +505,7 @@ namespace Atlassian.Jira.Test
             {
                 var issue = CreateIssue();
 
-                Assert.Throws(typeof(InvalidOperationException), () => issue.AddAttachment("foo", new byte[] { 1 }));
+                Assert.Throws<InvalidOperationException>(() => issue.AddAttachment("foo", new byte[] { 1 }));
             }
         }
 
@@ -521,7 +517,7 @@ namespace Atlassian.Jira.Test
                 var jira = TestableJira.Create();
                 var issue = (new RemoteIssue() { key = "key" }).ToLocal(jira);
 
-                Assert.Throws(typeof(AggregateException), () => issue.WorkflowTransitionAsync("foo").Wait());
+                Assert.Throws<AggregateException>(() => issue.WorkflowTransitionAsync("foo").Wait());
             }
         }
 
@@ -532,7 +528,7 @@ namespace Atlassian.Jira.Test
             {
                 var issue = CreateIssue();
 
-                Assert.Throws(typeof(InvalidOperationException), () => issue.GetCommentsAsync().Result);
+                Assert.Throws<InvalidOperationException>(() => issue.GetCommentsAsync().Result);
             }
 
             [Fact]
@@ -548,7 +544,7 @@ namespace Atlassian.Jira.Test
                 var comments = issue.GetCommentsAsync().Result;
 
                 //assert
-                Assert.Equal(1, comments.Count());
+                Assert.Single(comments);
                 Assert.Equal("the comment", comments.First().Body);
             }
         }

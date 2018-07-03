@@ -1,11 +1,8 @@
-﻿using Atlassian.Jira.Remote;
-using Moq;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Remote;
 using Xunit;
 
 namespace Atlassian.Jira.Test
@@ -30,7 +27,7 @@ namespace Atlassian.Jira.Test
                             }
             }.ToLocal(jira);
 
-            Assert.Throws(typeof(InvalidOperationException), () => issue["CustomField"]);
+            Assert.Throws<InvalidOperationException>(() => issue["CustomField"]);
         }
 
         [Fact]

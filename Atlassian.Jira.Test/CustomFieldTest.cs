@@ -1,12 +1,12 @@
-﻿using Atlassian.Jira.Remote;
-using Moq;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Remote;
 using Xunit;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Atlassian.Jira.Test
 {
@@ -35,6 +35,71 @@ namespace Atlassian.Jira.Test
 
             //assert
             Assert.Equal("CustomField", issue.CustomFields[0].Name);
+        }
+
+        [Fact]
+        public void WhenAddingArrayOfValues_CanSerializeAsStringArrayWhenNoSerializerIsFound()
+        {
+            // arrange issue
+            var jira = TestableJira.Create();
+            var remoteField = new RemoteField() { id = "remotefield_id", CustomFieldType = "remotefield_type", IsCustomField = true, name = "Custom Field" };
+            var customField = new CustomField(remoteField);
+            var issue = new RemoteIssue() { project = "projectKey", key = "issueKey" }.ToLocal(jira);
+
+            jira.IssueFieldService.Setup(c => c.GetCustomFieldsAsync(CancellationToken.None))
+                .Returns(Task.FromResult(Enumerable.Repeat(customField, 1)));
+
+            issue.CustomFields.AddArray("Custom Field", "val1", "val2");
+
+            // arrange serialization
+            var remoteIssue = issue.ToRemote();
+            var converter = new RemoteIssueJsonConverter(new List<RemoteField> { remoteField }, new Dictionary<string, ICustomFieldValueSerializer>());
+            var serializerSettings = new JsonSerializerSettings();
+            serializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            serializerSettings.Converters.Add(converter);
+            var issueWrapper = new RemoteIssueWrapper(remoteIssue);
+
+            // act
+            var issueJson = JsonConvert.SerializeObject(issueWrapper, serializerSettings);
+
+            // assert
+            var jObject = JObject.Parse(issueJson);
+            var remoteFieldValue = jObject["fields"]["remotefield_id"];
+            var valueArray = remoteFieldValue.ToObject<string[]>();
+            Assert.Equal(2, valueArray.Length);
+            Assert.Contains("val1", valueArray);
+            Assert.Contains("val2", valueArray);
+        }
+
+        [Fact]
+        public void CanDeserializeArrayOfStrings_WhenCustomFieldValueIsArrayAndNoSerializerIsRegistered()
+        {
+            // arrange issue
+            var remoteField = new RemoteField() { id = "customfield_id", CustomFieldType = "customfield_type", IsCustomField = true, name = "Custom Field" };
+            var jObject = JObject.FromObject(new
+            {
+                fields = new
+                {
+                    //project = "projectKey",
+                    key = "issueKey",
+                    customfield_id = new string[] { "val1", "val2" }
+                }
+            });
+
+            // arrange serialization
+            var converter = new RemoteIssueJsonConverter(new List<RemoteField> { remoteField }, new Dictionary<string, ICustomFieldValueSerializer>());
+            var serializerSettings = new JsonSerializerSettings();
+            serializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            serializerSettings.Converters.Add(converter);
+
+            // act
+            var remoteIssue = JsonConvert.DeserializeObject<RemoteIssueWrapper>(jObject.ToString(), serializerSettings).RemoteIssue;
+
+            // assert
+            var customFieldValues = remoteIssue.customFieldValues.First().values;
+            Assert.Equal(2, customFieldValues.Length);
+            Assert.Contains("val1", customFieldValues);
+            Assert.Contains("val2", customFieldValues);
         }
     }
 }

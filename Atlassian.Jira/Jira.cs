@@ -1,11 +1,7 @@
-﻿using Atlassian.Jira.Linq;
-using Atlassian.Jira.Remote;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using Atlassian.Jira.Linq;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -16,8 +12,6 @@ namespace Atlassian.Jira
     {
         internal const string DEFAULT_DATE_FORMAT = "yyyy/MM/dd";
         internal static CultureInfo DefaultCultureInfo = CultureInfo.GetCultureInfo("en-us");
-
-        private const int DEFAULT_MAX_ISSUES_PER_REQUEST = 20;
 
         private readonly JiraCredentials _credentials;
         private readonly JiraCache _cache;
@@ -32,7 +26,6 @@ namespace Atlassian.Jira
             _credentials = credentials;
             _cache = cache ?? new JiraCache();
 
-            this.MaxIssuesPerRequest = DEFAULT_MAX_ISSUES_PER_REQUEST;
             this.Debug = false;
         }
 
@@ -49,7 +42,7 @@ namespace Atlassian.Jira
             var services = new ServiceLocator();
             settings = settings ?? new JiraRestClientSettings();
             var jira = new Jira(services, new JiraCredentials(username, password), settings.Cache);
-            var restClient = new JiraRestClient(services, url, username, password, settings);
+            var restClient = new JiraRestClient(url, username, password, settings);
 
             ConfigureDefaultServices(services, jira, restClient);
 
@@ -192,6 +185,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets an object to interact with the issue remote links of jira.
+        /// </summary>
+        public IIssueRemoteLinkService RemoteLinks
+        {
+            get
+            {
+                return Services.Get<IIssueRemoteLinkService>();
+            }
+        }
+
+        /// <summary>
         /// Gets an object to interact with the issue types of jira.
         /// </summary>
         public IIssueTypeService IssueTypes
@@ -254,7 +258,18 @@ namespace Atlassian.Jira
         /// <summary>
         /// Maximum number of issues per request
         /// </summary>
-        public int MaxIssuesPerRequest { get; set; }
+        [Obsolete("Use Jira.Issues.MaxIssuesPerRequest")]
+        public int MaxIssuesPerRequest
+        {
+            get
+            {
+                return this.Issues.MaxIssuesPerRequest;
+            }
+            set
+            {
+                this.Issues.MaxIssuesPerRequest = value;
+            }
+        }
 
         /// <summary>
         /// Url to the JIRA server
@@ -264,14 +279,15 @@ namespace Atlassian.Jira
             get { return RestClient.Url; }
         }
 
-        internal JiraCredentials GetCredentials()
+        /// <summary>
+        /// Gets the credentials to use to interact with server resources.
+        /// </summary>
+        public JiraCredentials Credentials
         {
-            if (this._credentials == null)
+            get
             {
-                throw new InvalidOperationException("Unable to get user and password, credentials has not been set.");
+                return _credentials;
             }
-
-            return this._credentials;
         }
 
         internal IFileSystem FileSystem
@@ -283,11 +299,19 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Returns a new issue that when saved will be created on the remote JIRA server
+        /// Returns a new issue that when saved will be created on the remote JIRA server.
         /// </summary>
         public Issue CreateIssue(string project, string parentIssueKey = null)
         {
             return new Issue(this, project, parentIssueKey);
+        }
+
+        /// <summary>
+        /// Returns a new issue that when saved will be created on the remote JIRA server.
+        /// </summary>
+        public Issue CreateIssue(CreateIssueFields fields)
+        {
+            return new Issue(this, fields);
         }
 
         private static void ConfigureDefaultServices(ServiceLocator services, Jira jira, IJiraRestClient restClient)
@@ -298,6 +322,7 @@ namespace Atlassian.Jira
             services.Register<IIssueResolutionService>(() => new IssueResolutionService(jira));
             services.Register<IIssueStatusService>(() => new IssueStatusService(jira));
             services.Register<IIssueLinkService>(() => new IssueLinkService(jira));
+            services.Register<IIssueRemoteLinkService>(() => new IssueRemoteLinkService(jira));
             services.Register<IIssueTypeService>(() => new IssueTypeService(jira));
             services.Register<IIssueFilterService>(() => new IssueFilterService(jira));
             services.Register<IIssueFieldService>(() => new IssueFieldService(jira));

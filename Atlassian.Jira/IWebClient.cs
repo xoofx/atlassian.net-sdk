@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Atlassian.Jira
@@ -20,5 +17,10 @@ namespace Atlassian.Jira
         /// Downloads a file from the server including authentication header.
         /// </summary>
         Task DownloadWithAuthenticationAsync(string url, string fileName);
+
+        /// <summary>
+        /// Downloads the resource as a System.Byte array from the URI specified as an asynchronous operation.
+        /// </summary>
+        Task<byte[]> DownloadDataWithAuthenticationAsync(string url);
     }
 }

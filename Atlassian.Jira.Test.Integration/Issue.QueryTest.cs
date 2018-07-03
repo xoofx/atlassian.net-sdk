@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,6 +8,76 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueQueryTest : BaseIntegrationTest
     {
+        [Fact]
+        public async Task GetIssueThatIncludesOnlyOneBasicField()
+        {
+            var options = new IssueSearchOptions("key = TST-1")
+            {
+                FetchBasicFields = false,
+                AdditionalFields = new List<string>() { "summary" }
+            };
+
+            var issues = await _jira.Issues.GetIssuesFromJqlAsync(options);
+            Assert.NotNull(issues.First().Summary);
+            Assert.Null(issues.First().Assignee);
+        }
+
+        [Fact]
+        public async Task GetIssueThatIncludesOnlyOneNonBasicField()
+        {
+            var options = new IssueSearchOptions("key = TST-1")
+            {
+                FetchBasicFields = false,
+                AdditionalFields = new List<string>() { "attachment" }
+            };
+
+            var issues = await _jira.Issues.GetIssuesFromJqlAsync(options);
+            var issue = issues.First();
+            Assert.Null(issue.Summary);
+            Assert.NotEmpty(issue.AdditionalFields.Attachments);
+        }
+
+        [Fact]
+        public async Task GetIssueThatIncludesOnlyAllNonBasicFields()
+        {
+            // Arrange
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue",
+                Assignee = "admin"
+            };
+
+            issue.SaveChanges();
+
+            await issue.AddCommentAsync("My comment");
+            await issue.AddWorklogAsync("1d");
+
+            // Act
+            var options = new IssueSearchOptions($"key = {issue.Key.Value}")
+            {
+                FetchBasicFields = false,
+                AdditionalFields = new List<string>() { "comment", "watches", "worklog" }
+            };
+
+            var issues = await _jira.Issues.GetIssuesFromJqlAsync(options);
+            var serverIssue = issues.First();
+
+            // Assert
+            Assert.Null(serverIssue.Summary);
+            Assert.Equal("My comment", serverIssue.AdditionalFields.Comments.First().Body);
+            Assert.Equal("1d", serverIssue.AdditionalFields.Worklogs.First().TimeSpent);
+            Assert.True(serverIssue.AdditionalFields.ContainsKey("watches"));
+        }
+
+        [Fact]
+        public async Task GetIssuesAsyncWhenIssueDoesNotExist()
+        {
+            var dict = await _jira.Issues.GetIssuesAsync("TST-9999");
+
+            Assert.False(dict.ContainsKey("TST-9999"));
+        }
+
         [Fact]
         public void GetIssuesWithPagingMetadata()
         {
@@ -40,7 +109,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var issues = _jira.Filters.GetIssuesFromFavoriteAsync("One Issue Filter").Result;
 
-            Assert.Equal(1, issues.Count());
+            Assert.Single(issues);
             Assert.Equal("TST-1", issues.First().Key.Value);
         }
 
@@ -109,7 +178,7 @@ namespace Atlassian.Jira.Test.Integration
             (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
 
             //set maximum issues and query
-            _jira.MaxIssuesPerRequest = 1;
+            _jira.Issues.MaxIssuesPerRequest = 1;
             var issues = from i in _jira.Issues.Queryable
                          where i.Summary == randomNumber.ToString()
                          select i;
@@ -122,7 +191,7 @@ namespace Atlassian.Jira.Test.Integration
         public async Task GetIssuesFromJqlAsync()
         {
             var issues = await _jira.Issues.GetIssuesFromJqlAsync("key = TST-1");
-            Assert.Equal(issues.Count(), 1);
+            Assert.Single(issues);
         }
     }
 }

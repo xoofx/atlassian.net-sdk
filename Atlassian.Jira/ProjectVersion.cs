@@ -1,7 +1,7 @@
-﻿using Atlassian.Jira.Remote;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {

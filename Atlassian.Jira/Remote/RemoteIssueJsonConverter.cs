@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Atlassian.Jira.Remote
 {
@@ -71,6 +70,9 @@ namespace Atlassian.Jira.Remote
             var customFields = GetCustomFieldValuesFromObject(fields);
             remoteIssue.customFieldValues = customFields.Any() ? customFields.ToArray() : null;
 
+            // save fields dictionary
+            remoteIssue.fieldsReadOnly = fields;
+
             return new RemoteIssueWrapper(remoteIssue);
         }
 
@@ -131,9 +133,17 @@ namespace Atlassian.Jira.Remote
                         {
                             jToken = this._customFieldSerializers[customFieldType].ToJson(customField.values);
                         }
-                        else
+                        else if (customField.serializer != null)
+                        {
+                            jToken = customField.serializer.ToJson(customField.values);
+                        }
+                        else if (customField.values.Length > 0)
                         {
                             jToken = JValue.CreateString(customField.values[0]);
+                        }
+                        else
+                        {
+                            jToken = new JArray();
                         }
 
                         jObject.Add(customField.customfieldId, jToken);
@@ -157,6 +167,20 @@ namespace Atlassian.Jira.Remote
                     if (this._customFieldSerializers.ContainsKey(customFieldType))
                     {
                         remoteCustomFieldValue.values = this._customFieldSerializers[customFieldType].FromJson(field.Value);
+                    }
+                    else if (field.Value.Type == JTokenType.Array)
+                    {
+                        var serializer = new MultiStringCustomFieldValueSerializer();
+                        try
+                        {
+                            remoteCustomFieldValue.values = serializer.FromJson(field.Value);
+                        }
+                        catch (JsonReaderException)
+                        {
+                            // If deserialization failed, then it is not an array of strings, it is not known how to
+                            //    deserialize this field and treat is a black box and dump the json into the property.
+                            remoteCustomFieldValue.values = new string[1] { field.Value.ToString() };
+                        }
                     }
                     else
                     {

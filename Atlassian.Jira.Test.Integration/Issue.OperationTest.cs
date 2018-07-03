@@ -1,9 +1,6 @@
-﻿using RestSharp;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -20,7 +17,7 @@ namespace Atlassian.Jira.Test.Integration
 
             var firstChangeLog = changelogs.First();
             Assert.Equal("admin", firstChangeLog.Author.Username);
-            Assert.NotNull(firstChangeLog.CreatedDate);
+            //Assert.NotNull(firstChangeLog.CreatedDate); this can never be null
             Assert.Equal(2, firstChangeLog.Items.Count());
 
             var firstItem = firstChangeLog.Items.First();
@@ -44,7 +41,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(2, issue.GetWatchersAsync().Result.Count());
 
             issue.DeleteWatcherAsync("admin").Wait();
-            Assert.Equal(1, issue.GetWatchersAsync().Result.Count());
+            Assert.Single(issue.GetWatchersAsync().Result);
 
             var user = issue.GetWatchersAsync().Result.First();
             Assert.Equal("test", user.Username);
@@ -67,7 +64,7 @@ namespace Atlassian.Jira.Test.Integration
             subTask.SaveChanges();
 
             var results = parentTask.GetSubTasksAsync().Result;
-            Assert.Equal(results.Count(), 1);
+            Assert.Single(results);
             Assert.Equal(results.First().Summary, subTask.Summary);
         }
 
@@ -83,7 +80,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        void CreateAndRetrieveIssueLinks()
+        void AddAndRetrieveIssueLinks()
         {
             var issue1 = _jira.CreateIssue("TST");
             issue1.Summary = "Issue to link from" + _random.Next(int.MaxValue);
@@ -109,8 +106,8 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(2, issueLinks.Count());
             Assert.True(issueLinks.All(l => l.OutwardIssue.Key.Value == issue1.Key.Value));
             Assert.True(issueLinks.All(l => l.LinkType.Name == "Duplicate"));
-            Assert.True(issueLinks.Any(l => l.InwardIssue.Key.Value == issue2.Key.Value));
-            Assert.True(issueLinks.Any(l => l.InwardIssue.Key.Value == issue3.Key.Value));
+            Assert.Contains(issueLinks, l => l.InwardIssue.Key.Value == issue2.Key.Value);
+            Assert.Contains(issueLinks, l => l.InwardIssue.Key.Value == issue3.Key.Value);
 
             // Verify link of second issue.
             var issueLink = issue2.GetIssueLinksAsync().Result.Single();
@@ -123,6 +120,35 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Duplicate", issueLink.LinkType.Name);
             Assert.Equal(issue1.Key.Value, issueLink.OutwardIssue.Key.Value);
             Assert.Equal(issue3.Key.Value, issueLink.InwardIssue.Key.Value);
+        }
+
+        [Fact]
+        public async Task AddAndRetrieveRemoteLinks()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue to link from" + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            // Verify issue with no remote links.
+            Assert.Empty(issue.GetRemoteLinksAsync().Result);
+
+            var url1 = "https://google.com";
+            var title1 = "Google";
+            var summary1 = "Search engine";
+
+            var url2 = "https://bing.com";
+            var title2 = "Bing";
+
+            // Add remote links
+            await issue.AddRemoteLinkAsync(url1, title1, summary1);
+            await issue.AddRemoteLinkAsync(url2, title2);
+
+            // Verify remote links of issue.
+            var remoteLinks = issue.GetRemoteLinksAsync().Result;
+            Assert.Equal(2, remoteLinks.Count());
+            Assert.Contains(remoteLinks, l => l.RemoteUrl == url1 && l.Title == title1 && l.Summary == summary1);
+            Assert.Contains(remoteLinks, l => l.RemoteUrl == url2 && l.Title == title2 && l.Summary == null);
         }
 
         [Fact]
@@ -161,7 +187,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("2.0", updatedIssue.FixVersions.First().Name);
 
             var comments = updatedIssue.GetCommentsAsync().Result;
-            Assert.Equal(1, comments.Count());
+            Assert.Single(comments);
             Assert.Equal("Comment with transition", comments.First().Body);
         }
 
@@ -198,14 +224,14 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public void GetTimeTrackingDataForIssue()
+        public async Task GetTimeTrackingDataForIssue()
         {
             var issue = _jira.CreateIssue("TST");
             issue.Summary = "Issue with timetracking " + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
 
-            var timetracking = issue.GetTimeTrackingDataAsync().Result;
+            var timetracking = await issue.GetTimeTrackingDataAsync();
             Assert.Null(timetracking.TimeSpent);
 
             issue.AddWorklogAsync("2d").Wait();
@@ -249,17 +275,25 @@ namespace Atlassian.Jira.Test.Integration
 
             // create an issue, verify no attachments
             issue.SaveChanges();
-            Assert.Equal(0, issue.GetAttachmentsAsync().Result.Count());
+            Assert.Empty(issue.GetAttachmentsAsync().Result);
 
             // upload multiple attachments
             File.WriteAllText("testfile1.txt", "Test File Content 1");
             File.WriteAllText("testfile2.txt", "Test File Content 2");
             issue.AddAttachment("testfile1.txt", "testfile2.txt");
 
+            // verify all attachments can be retrieved.
             var attachments = issue.GetAttachmentsAsync().Result;
             Assert.Equal(2, attachments.Count());
             Assert.True(attachments.Any(a => a.FileName.Equals("testfile1.txt")), "'testfile1.txt' was not downloaded from server");
             Assert.True(attachments.Any(a => a.FileName.Equals("testfile2.txt")), "'testfile2.txt' was not downloaded from server");
+
+            // verify properties of an attachment
+            var attachment = attachments.First();
+            Assert.NotEmpty(attachment.Author);
+            Assert.NotNull(attachment.CreatedDate);
+            Assert.True(attachment.FileSize > 0);
+            Assert.NotEmpty(attachment.MimeType);
 
             // download an attachment
             var tempFile = Path.GetTempFileName();
@@ -268,7 +302,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // remove an attachment
             issue.DeleteAttachmentAsync(attachments.First()).Wait();
-            Assert.Equal(1, issue.GetAttachmentsAsync().Result.Count());
+            Assert.Single(issue.GetAttachmentsAsync().Result);
         }
 
         [Fact]
@@ -299,13 +333,45 @@ namespace Atlassian.Jira.Test.Integration
             var tempFile = Path.GetTempFileName();
             var attachment = attachments.First(a => a.FileName.Equals("testfile1.txt"));
 
+#if NET452
+            // Standard has a different behavior than Framework it throws an exception. It seems you are not allowed to do two concurrent operations with the client
+            //  System.NotSupportedException : WebClient does not support concurrent I/O operations.
             var task1 = attachment.DownloadAsync(tempFile);
+#endif
             var task2 = attachment.DownloadAsync(tempFile);
 
             await task2;
-
+#if NET452
             Assert.True(task1.IsCanceled);
+#endif
             Assert.Equal("Test File Content 1", File.ReadAllText(tempFile));
+        }
+
+        [Fact]
+        public async Task DownloadAttachmentDataAsync()
+        {
+            // create an issue
+            var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+            issue.SaveChanges();
+
+            // upload attachment
+            File.WriteAllText("testfile.txt", "Test File Content");
+            issue.AddAttachment("testfile.txt");
+
+            // Get attachment metadata
+            var attachments = await issue.GetAttachmentsAsync(CancellationToken.None);
+            Assert.Equal("testfile.txt", attachments.Single().FileName);
+
+            // download attachment as byte array
+            var bytes = await attachments.Single().DownloadDataAsync();
+
+            Assert.Equal(17, bytes.Length);
         }
 
         [Fact]
@@ -321,13 +387,13 @@ namespace Atlassian.Jira.Test.Integration
 
             // create an issue, verify no comments
             issue.SaveChanges();
-            Assert.Equal(0, issue.GetCommentsAsync().Result.Count());
+            Assert.Empty(issue.GetCommentsAsync().Result);
 
             // Add a comment
             issue.AddCommentAsync("new comment").Wait();
 
             var comments = issue.GetCommentsAsync().Result;
-            Assert.Equal(1, comments.Count());
+            Assert.Single(comments);
 
             var comment = comments.First();
             Assert.Equal("new comment", comment.Body);
@@ -335,7 +401,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public async Task AddAndGetCommentsAsync()
+        public async Task AddGetAndDeleteCommentsAsync()
         {
             var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
             var issue = new Issue(_jira, "TST")
@@ -348,15 +414,59 @@ namespace Atlassian.Jira.Test.Integration
             // create an issue, verify no comments
             issue.SaveChanges();
             var comments = await issue.GetPagedCommentsAsync();
-            Assert.Equal(0, comments.Count());
+            Assert.Empty(comments);
 
             // Add a comment
-            await issue.AddCommentAsync("new comment");
+            var commentFromAdd = await issue.AddCommentAsync("new comment");
+            Assert.Equal("new comment", commentFromAdd.Body);
 
             // Verify comment retrieval
             comments = await issue.GetPagedCommentsAsync();
-            Assert.Equal(1, comments.Count());
-            Assert.Equal("new comment", comments.First().Body);
+
+            Assert.Single(comments);
+            var commentFromGet = comments.First();
+            Assert.Equal(commentFromAdd.Id, commentFromGet.Id);
+            Assert.Equal("new comment", commentFromGet.Body);
+            Assert.Empty(commentFromGet.Properties);
+
+            // Delete comment.
+            await issue.DeleteCommentAsync(commentFromGet);
+
+            // Verify no comments
+            comments = await issue.GetPagedCommentsAsync();
+            Assert.Empty(comments);
+        }
+
+        [Fact]
+        public async Task CanRetrievePagedCommentsAsync()
+        {
+            var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            issue.SaveChanges();
+
+            // Add a comments
+            await issue.AddCommentAsync("new comment1");
+            await issue.AddCommentAsync("new comment2");
+            await issue.AddCommentAsync("new comment3");
+            await issue.AddCommentAsync("new comment4");
+
+            // Verify first page of comments
+            var comments = await issue.GetPagedCommentsAsync(2);
+            Assert.Equal(2, comments.Count());
+            Assert.Equal("new comment1", comments.First().Body);
+            Assert.Equal("new comment2", comments.Skip(1).First().Body);
+
+            // Verify second page of comments
+            comments = await issue.GetPagedCommentsAsync(2, 2);
+            Assert.Equal(2, comments.Count());
+            Assert.Equal("new comment3", comments.First().Body);
+            Assert.Equal("new comment4", comments.Skip(1).First().Body);
         }
 
         [Fact]
@@ -412,10 +522,10 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             var worklog = issue.AddWorklogAsync("1h").Result;
-            Assert.Equal(1, issue.GetWorklogsAsync().Result.Count());
+            Assert.Single(issue.GetWorklogsAsync().Result);
 
             issue.DeleteWorklogAsync(worklog).Wait();
-            Assert.Equal(0, issue.GetWorklogsAsync().Result.Count());
+            Assert.Empty(issue.GetWorklogsAsync().Result);
         }
     }
 }

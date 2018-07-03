@@ -1,8 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace Atlassian.Jira
 {
@@ -36,6 +33,12 @@ namespace Atlassian.Jira
         public bool IsActive { get; private set; }
 
         /// <summary>
+        /// The locale of the User.
+        /// </summary>
+        [JsonProperty("locale")]
+        public string Locale { get; private set; }
+
+        /// <summary>
         /// Url to access this resource.
         /// </summary>
         [JsonProperty("self")]
@@ -45,7 +48,7 @@ namespace Atlassian.Jira
         {
             return Username;
         }
-        
+
         public override bool Equals(object other)
         {
             var otherAsThisType = other as JiraUser;
