@@ -146,6 +146,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue["Custom Text Field"] = "My new value";
             issue["Custom Date Field"] = "2015-10-03";
+            issue["Custom Select Field"] = "Blue";
             issue.SaveChanges();
 
             var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
@@ -153,12 +154,14 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("2015-10-03", newIssue["Custom Date Field"]);
             newIssue["Custom Text Field"] = null;
             newIssue["Custom Date Field"] = null;
+            newIssue["Custom Select Field"] = null;
             newIssue.SaveChanges();
 
             var updatedIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             Assert.Null(updatedIssue["Custom Text Field"]);
             Assert.Null(updatedIssue["Custom Date Field"]);
+            Assert.Null(updatedIssue["Custom Select Field"]);
         }
 
         [Fact]
