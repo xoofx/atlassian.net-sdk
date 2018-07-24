@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>net452</TargetFrameworks>
     <PackageId>Atlassian.SDK.Signed</PackageId>
-    <Version>10.3.1</Version>
+    <Version>10.3.2</Version>
     <Authors>Federico Silva Armas</Authors>
     <Company>Federico Silva Armas</Company>
     <Product>Atlassian.SDK</Product>
@@ -13,8 +13,8 @@
     <PackageIconUrl>http://i1207.photobucket.com/albums/bb473/fsilva_armas/AtlassianIcon.png</PackageIconUrl>
     <PackageProjectUrl>https://bitbucket.org/farmas/atlassian.net-sdk</PackageProjectUrl>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>10.3.1.0</AssemblyVersion>
-    <FileVersion>10.3.1.0</FileVersion>
+    <AssemblyVersion>10.3.2.0</AssemblyVersion>
+    <FileVersion>10.3.2.0</FileVersion>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
