@@ -12,6 +12,6 @@ namespace Atlassian.Jira
         /// Description of this security level.
         /// </summary>
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; private set; }
     }
 }
