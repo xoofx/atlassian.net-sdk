@@ -172,17 +172,15 @@ namespace Atlassian.Jira.Remote
 
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
-                throw new InvalidOperationException(response.ErrorMessage);
+                throw new InvalidOperationException($"Error Message: {response.ErrorMessage}");
             }
-            else if (response.StatusCode == HttpStatusCode.InternalServerError
-                || response.StatusCode == HttpStatusCode.BadRequest)
-            {
-                throw new InvalidOperationException(String.Format("Response Content: {0}", content));
-            }
-            else if (response.StatusCode == HttpStatusCode.Forbidden
-                || response.StatusCode == HttpStatusCode.Unauthorized)
+            else if (response.StatusCode == HttpStatusCode.Forbidden || response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 throw new System.Security.Authentication.AuthenticationException(string.Format("Response Content: {0}", content));
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new InvalidOperationException($"Response Status Code: {(int)response.StatusCode}. Response Content: {content}");
             }
             else if (string.IsNullOrWhiteSpace(content))
             {

@@ -77,5 +77,14 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.Equal(issue.Key.Value, json["issues"][0]["key"].ToString());
         }
+
+        [Fact]
+        public async Task WillThrowErrorIfSiteIsUnreachable()
+        {
+            var jira = Jira.CreateRestClient("http://farmasXXX.atlassian.net");
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => jira.Issues.GetIssueAsync("TST-1"));
+            Assert.Contains("404", exception.Message);
+        }
     }
 }
