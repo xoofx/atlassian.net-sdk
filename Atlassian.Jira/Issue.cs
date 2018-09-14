@@ -748,6 +748,21 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Update a comment in this issue.
+        /// </summary>
+        /// <param name="comment">Comment object to update.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<Comment> UpdateCommentAsync(Comment comment, CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to update comment to issue, issue has not been created.");
+            }
+
+            return this.Jira.Issues.UpdateCommentAsync(this.Key.Value, comment, token);
+        }
+
+        /// <summary>
         /// Retrieve the labels from server for this issue.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>

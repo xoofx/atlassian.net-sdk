@@ -287,6 +287,13 @@ namespace Atlassian.Jira.Remote
             return new Comment(remoteComment);
         }
 
+        public async Task<Comment> UpdateCommentAsync(string issueKey, Comment comment, CancellationToken token = default(CancellationToken))
+        {
+            var resource = String.Format("rest/api/2/issue/{0}/comment/{1}", issueKey, comment.Id);
+            var remoteComment = await _jira.RestClient.ExecuteRequestAsync<RemoteComment>(Method.PUT, resource, comment.toRemote(), token).ConfigureAwait(false);
+            return new Comment(remoteComment);
+        }
+
         public async Task<IPagedQueryResult<Comment>> GetPagedCommentsAsync(string issueKey, int? maxComments = default(int?), int startAt = 0, CancellationToken token = default(CancellationToken))
         {
             var resource = $"rest/api/2/issue/{issueKey}/comment?startAt={startAt}";

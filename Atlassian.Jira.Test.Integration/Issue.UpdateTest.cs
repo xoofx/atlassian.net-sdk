@@ -148,6 +148,47 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public async Task UpdateComment()
+        {
+            var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            // create an issue, verify no comments
+            issue.SaveChanges();
+            var comments = await issue.GetPagedCommentsAsync();
+            Assert.Empty(comments);
+
+            // Add a comment
+            var commentFromAdd = await issue.AddCommentAsync("new comment");
+            Assert.Equal("new comment", commentFromAdd.Body);
+
+            // Verify comment retrieval
+            comments = await issue.GetPagedCommentsAsync();
+
+            Assert.Single(comments);
+            var commentFromGet = comments.First();
+            Assert.Equal(commentFromAdd.Id, commentFromGet.Id);
+            Assert.Equal("new comment", commentFromGet.Body);
+            Assert.Empty(commentFromGet.Properties);
+
+            //Update Comment
+            commentFromGet.Body = "new body";
+            var commentFromUpdate = await issue.UpdateCommentAsync(commentFromGet);
+
+            //Verify comment updated
+            comments = await issue.GetPagedCommentsAsync();
+            commentFromGet = comments.First();
+
+            Assert.Equal(commentFromGet.Id, commentFromUpdate.Id);
+            Assert.Equal("new body", commentFromGet.Body);
+        }
+
+        [Fact]
         public void AddAndRemoveVersions()
         {
             var summaryValue = "Test issue with versions (Updated)" + _random.Next(int.MaxValue);
