@@ -152,7 +152,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="issueKey">The issue key</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<IEnumerable<JiraNamedEntity>> GetActionsAsync(string issueKey, CancellationToken token = default(CancellationToken));
+        Task<IEnumerable<IssueTransition>> GetActionsAsync(string issueKey, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Retrieve attachment metadata from server for this issue
