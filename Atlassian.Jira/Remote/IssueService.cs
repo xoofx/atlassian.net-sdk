@@ -289,6 +289,11 @@ namespace Atlassian.Jira.Remote
 
         public async Task<Comment> UpdateCommentAsync(string issueKey, Comment comment, CancellationToken token = default(CancellationToken))
         {
+            if (String.IsNullOrEmpty(comment.Id))
+            {
+                throw new InvalidOperationException("Unable to update comment due to missing id field.");
+            }
+
             var resource = String.Format("rest/api/2/issue/{0}/comment/{1}", issueKey, comment.Id);
             var remoteComment = await _jira.RestClient.ExecuteRequestAsync<RemoteComment>(Method.PUT, resource, comment.toRemote(), token).ConfigureAwait(false);
             return new Comment(remoteComment);

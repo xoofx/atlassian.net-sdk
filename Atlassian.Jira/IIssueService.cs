@@ -144,7 +144,7 @@ namespace Atlassian.Jira
         /// <param name="issueKey">Issue key to update the comment to.</param>
         /// <param name="comment">Comment object to update.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<Comment> UpdateCommentAsync(string value, Comment comment, CancellationToken token);
+        Task<Comment> UpdateCommentAsync(string issueKey, Comment comment, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Returns the comments of an issue with paging.
