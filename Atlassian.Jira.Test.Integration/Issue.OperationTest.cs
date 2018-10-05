@@ -10,6 +10,23 @@ namespace Atlassian.Jira.Test.Integration
     public class IssueOperationsTest : BaseIntegrationTest
     {
         [Fact]
+        async Task AssignIssue()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Type = "1";
+            issue.Summary = "Test issue to assign" + _random.Next(int.MaxValue);
+
+            issue.SaveChanges();
+            Assert.Equal("admin", issue.Assignee);
+
+            await issue.AssignAsync("test");
+            Assert.Equal("test", issue.Assignee);
+
+            issue = await _jira.Issues.GetIssueAsync(issue.Key.Value);
+            Assert.Equal("test", issue.Assignee);
+        }
+
+        [Fact]
         void GetChangeLogsForIssue()
         {
             var changelogs = _jira.Issues.GetIssueAsync("TST-1").Result.GetChangeLogsAsync().Result.OrderBy(log => log.CreatedDate);

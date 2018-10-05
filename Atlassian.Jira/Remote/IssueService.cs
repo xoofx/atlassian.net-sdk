@@ -554,5 +554,12 @@ namespace Atlassian.Jira.Remote
             var resource = String.Format("rest/api/2/issue/{0}", issueKey);
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
         }
+
+        public Task AssignIssueAsync(string issueKey, string assignee, CancellationToken token = default(CancellationToken))
+        {
+            var resource = $"/rest/api/2/issue/{issueKey}/assignee";
+
+            return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, new { name = assignee }, token);
+        }
     }
 }

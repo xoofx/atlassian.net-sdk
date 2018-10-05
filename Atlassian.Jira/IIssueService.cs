@@ -276,5 +276,13 @@ namespace Atlassian.Jira
         /// <param name="newEstimate">New estimate (only used if worklogStrategy set to NewRemainingEstimate)</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task DeleteWorklogAsync(string issueKey, string worklogId, WorklogStrategy worklogStrategy = WorklogStrategy.AutoAdjustRemainingEstimate, string newEstimate = null, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
+        /// Assigns an issue to the specified user.
+        /// </summary>
+        /// <param name="issueKey">Identifier of the issue to assign.</param>
+        /// <param name="assignee">The username of the user to assign the issue to.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task AssignIssueAsync(string issueKey, string assignee, CancellationToken token = default(CancellationToken));
     }
 }

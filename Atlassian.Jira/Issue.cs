@@ -972,6 +972,23 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Assigns this issue to the specified user.
+        /// </summary>
+        /// <param name="assignee">The username of the user to assign this issue to.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public async Task AssignAsync(string assignee, CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to assign issue, issue has not been saved to server.");
+            }
+
+            await _jira.Issues.AssignIssueAsync(Key.Value, assignee, token);
+            var issue = await _jira.Issues.GetIssueAsync(_originalIssue.key, token).ConfigureAwait(false);
+            Initialize(issue.OriginalRemoteIssue);
+        }
+
+        /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
