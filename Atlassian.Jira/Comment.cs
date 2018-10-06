@@ -10,8 +10,8 @@ namespace Atlassian.Jira
     /// </summary>
     public class Comment
     {
-        private readonly RemoteComment _remoteComment;
-        private Dictionary<string, object> _properties;
+        private readonly IEnumerable<RemoteCommentProperty> _properties;
+        private Dictionary<string, object> _propertiesMap;
 
         /// <summary>
         /// Create a new Comment.
@@ -27,113 +27,63 @@ namespace Atlassian.Jira
         /// <param name="remoteComment">The remote comment.</param>
         public Comment(RemoteComment remoteComment)
         {
-            _remoteComment = remoteComment;
+            Id = remoteComment.id;
+            Author = remoteComment.author;
+            Body = remoteComment.body;
+            CreatedDate = remoteComment.created;
+            GroupLevel = remoteComment.groupLevel;
+            RoleLevel = remoteComment.roleLevel;
+            UpdateAuthor = remoteComment.updateAuthor;
+            UpdatedDate = remoteComment.updated;
+            _properties = remoteComment.properties;
         }
 
-        public string Author
-        {
-            get
-            {
-                return _remoteComment.author;
-            }
-            set
-            {
-                _remoteComment.author = value;
-            }
-        }
+        public string Id { get; private set; }
 
-        public string Body
-        {
-            get
-            {
-                return _remoteComment.body;
-            }
-            set
-            {
-                _remoteComment.body = value;
-            }
-        }
+        public string Author { get; set; }
 
-        public DateTime? CreatedDate
-        {
-            get
-            {
-                return _remoteComment.created;
-            }
-        }
+        public string Body { get; set; }
 
-        public string Id
-        {
-            get
-            {
-                return _remoteComment.id;
-            }
-        }
+        public string GroupLevel { get; set; }
 
-        public string GroupLevel
-        {
-            get
-            {
-                return _remoteComment.groupLevel;
-            }
-            set
-            {
-                _remoteComment.groupLevel = value;
-            }
-        }
+        public string RoleLevel { get; set; }
 
-        public string RoleLevel
-        {
-            get
-            {
-                return _remoteComment.roleLevel;
-            }
-            set
-            {
-                _remoteComment.roleLevel = value;
-            }
-        }
+        public DateTime? CreatedDate { get; private set; }
 
-        public string UpdateAuthor
-        {
-            get
-            {
-                return _remoteComment.updateAuthor;
-            }
-        }
+        public string UpdateAuthor { get; private set; }
 
-        public DateTime? UpdatedDate
-        {
-            get
-            {
-                return _remoteComment.updated;
-            }
-        }
+        public DateTime? UpdatedDate { get; private set; }
 
         public IReadOnlyDictionary<string, object> Properties
         {
             get
             {
-                if (_properties == null)
+                if (_propertiesMap == null)
                 {
-                    if (_remoteComment.properties == null)
+                    if (_properties == null)
                     {
-                        _properties = new Dictionary<string, object>();
+                        _propertiesMap = new Dictionary<string, object>();
                     }
                     else
                     {
-                        _properties = _remoteComment.properties.ToDictionary(prop => prop.key, prop => prop.value);
+                        _propertiesMap = _properties.ToDictionary(prop => prop.key, prop => prop.value);
                     }
                 }
 
-                return _properties;
+                return _propertiesMap;
             }
 
         }
 
-        internal RemoteComment toRemote()
+        internal RemoteComment ToRemote()
         {
-            return _remoteComment;
+            return new RemoteComment
+            {
+                author = this.Author,
+                body = this.Body,
+                groupLevel = this.GroupLevel,
+                roleLevel = this.RoleLevel
+            };
         }
     }
 }

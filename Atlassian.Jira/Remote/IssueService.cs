@@ -283,7 +283,7 @@ namespace Atlassian.Jira.Remote
             }
 
             var resource = String.Format("rest/api/2/issue/{0}/comment", issueKey);
-            var remoteComment = await _jira.RestClient.ExecuteRequestAsync<RemoteComment>(Method.POST, resource, comment.toRemote(), token).ConfigureAwait(false);
+            var remoteComment = await _jira.RestClient.ExecuteRequestAsync<RemoteComment>(Method.POST, resource, comment.ToRemote(), token).ConfigureAwait(false);
             return new Comment(remoteComment);
         }
 
@@ -295,7 +295,7 @@ namespace Atlassian.Jira.Remote
             }
 
             var resource = String.Format("rest/api/2/issue/{0}/comment/{1}", issueKey, comment.Id);
-            var remoteComment = await _jira.RestClient.ExecuteRequestAsync<RemoteComment>(Method.PUT, resource, comment.toRemote(), token).ConfigureAwait(false);
+            var remoteComment = await _jira.RestClient.ExecuteRequestAsync<RemoteComment>(Method.PUT, resource, comment.ToRemote(), token).ConfigureAwait(false);
             return new Comment(remoteComment);
         }
 
