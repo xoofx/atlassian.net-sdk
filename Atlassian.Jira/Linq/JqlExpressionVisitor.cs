@@ -229,12 +229,7 @@ namespace Atlassian.Jira.Linq
             }
             else if (valueType == typeof(DateTime))
             {
-                /* Using "en-us" culture to conform to formats of JIRA.
-                 * See https://bitbucket.org/farmas/atlassian.net-sdk/issue/31
-                 */
-                var dateString = ((DateTime)value).ToString(Jira.DEFAULT_DATE_FORMAT, Jira.DefaultCultureInfo);
-                _jqlWhere.Append(String.Format("\"{0}\"", dateString));
-
+                _jqlWhere.Append(String.Format("\"{0}\"", Jira.FormatDateTimeString((DateTime)value)));
             }
             else
             {
