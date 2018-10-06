@@ -229,7 +229,7 @@ namespace Atlassian.Jira.Linq
             }
             else if (valueType == typeof(DateTime))
             {
-                _jqlWhere.Append(String.Format("\"{0}\"", ((DateTime)value).ToJiraDateTimeString()));
+                _jqlWhere.Append(String.Format("\"{0}\"", Jira.FormatDateTimeString((DateTime)value)));
             }
             else
             {

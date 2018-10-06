@@ -314,6 +314,16 @@ namespace Atlassian.Jira
             return new Issue(this, fields);
         }
 
+        internal static string FormatDateTimeString(DateTime value)
+        {
+            /* Using "en-us" culture to conform to formats of JIRA.
+             * See https://bitbucket.org/farmas/atlassian.net-sdk/issue/31
+             */
+            return value.ToString(
+                value.TimeOfDay == TimeSpan.Zero ? DEFAULT_DATE_FORMAT : DEFAULT_DATE_TIME_FORMAT,
+                Jira.DefaultCultureInfo);
+        }
+
         private static void ConfigureDefaultServices(ServiceLocator services, Jira jira, IJiraRestClient restClient)
         {
             services.Register<IProjectVersionService>(() => new ProjectVersionService(jira));

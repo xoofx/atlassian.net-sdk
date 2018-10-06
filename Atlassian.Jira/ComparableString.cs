@@ -32,7 +32,7 @@ namespace Atlassian.Jira
 
         public static bool operator ==(ComparableString field, string value)
         {
-            if ((object) field == null)
+            if ((object)field == null)
             {
                 return value == null;
             }
@@ -44,7 +44,7 @@ namespace Atlassian.Jira
 
         public static bool operator !=(ComparableString field, string value)
         {
-            if ((object) field == null)
+            if ((object)field == null)
             {
                 return value != null;
             }
@@ -82,7 +82,7 @@ namespace Atlassian.Jira
             }
             else
             {
-                return field.Value == value.ToJiraDateTimeString();
+                return field.Value == Jira.FormatDateTimeString(value);
             }
         }
 
@@ -94,28 +94,28 @@ namespace Atlassian.Jira
             }
             else
             {
-                return field.Value != value.ToJiraDateTimeString();
+                return field.Value != Jira.FormatDateTimeString(value);
             }
         }
 
         public static bool operator >(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToJiraDateTimeString()) > 0;
+            return field.Value.CompareTo(Jira.FormatDateTimeString(value)) > 0;
         }
 
         public static bool operator <(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToJiraDateTimeString()) < 0;
+            return field.Value.CompareTo(Jira.FormatDateTimeString(value)) < 0;
         }
 
         public static bool operator <=(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToJiraDateTimeString()) <= 0;
+            return field.Value.CompareTo(Jira.FormatDateTimeString(value)) <= 0;
         }
 
         public static bool operator >=(ComparableString field, DateTime value)
         {
-            return field.Value.CompareTo(value.ToJiraDateTimeString()) >= 0;
+            return field.Value.CompareTo(Jira.FormatDateTimeString(value)) >= 0;
         }
 
         public override string ToString()
