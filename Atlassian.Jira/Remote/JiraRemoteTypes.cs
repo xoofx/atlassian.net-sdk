@@ -1941,12 +1941,6 @@ namespace Atlassian.Jira.Remote
     {
     }
 
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
     public partial class RemoteTransition : AbstractRemoteConstant
     {
         public RemoteStatus to { get; set; }

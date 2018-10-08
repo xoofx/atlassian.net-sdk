@@ -152,6 +152,25 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
+        public async Task GetTransitionsAsync()
+        {
+            var issue = _jira.CreateIssue("TST");
+            issue.Summary = "Issue with transitions " + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            var transitions = await issue.GetAvailableActionsAsync();
+            Assert.True(transitions.Count() > 1);
+
+            var transition = transitions.Single(t => t.Name.Equals("Resolve Issue", StringComparison.OrdinalIgnoreCase));
+            Assert.False(transition.HasScreen);
+            Assert.False(transition.IsInitial);
+            Assert.False(transition.IsInitial);
+            Assert.False(transition.IsGlobal);
+            Assert.Equal("Resolved", transition.To.Name);
+        }
+
+        [Fact]
         public async Task TransitionIssueAsync()
         {
             var issue = _jira.CreateIssue("TST");
