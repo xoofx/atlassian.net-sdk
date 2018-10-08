@@ -321,14 +321,14 @@ namespace Atlassian.Jira.Remote
             return PagedQueryResult<Comment>.FromJson((JObject)result, comments);
         }
 
-        public async Task<IEnumerable<JiraNamedEntity>> GetActionsAsync(string issueKey, CancellationToken token = default(CancellationToken))
+        public async Task<IEnumerable<IssueTransition>> GetActionsAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format("rest/api/2/issue/{0}/transitions", issueKey);
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var result = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
-            var remoteTransitions = JsonConvert.DeserializeObject<RemoteNamedObject[]>(result["transitions"].ToString(), serializerSettings);
+            var remoteTransitions = JsonConvert.DeserializeObject<RemoteTransition[]>(result["transitions"].ToString(), serializerSettings);
 
-            return remoteTransitions.Select(transition => new JiraNamedEntity(transition));
+            return remoteTransitions.Select(transition => new IssueTransition(transition));
         }
 
         public async Task<IEnumerable<Attachment>> GetAttachmentsAsync(string issueKey, CancellationToken token = default(CancellationToken))

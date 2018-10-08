@@ -1941,6 +1941,15 @@ namespace Atlassian.Jira.Remote
     {
     }
 
+    public partial class RemoteTransition : AbstractRemoteConstant
+    {
+        public RemoteStatus to { get; set; }
+        public bool hasScreen { get; set; }
+        public bool isGlobal { get; set; }
+        public bool isInitial { get; set; }
+        public bool isConditional { get; set; }
+    }
+
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
     [System.SerializableAttribute()]

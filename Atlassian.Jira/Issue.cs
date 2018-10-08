@@ -899,7 +899,7 @@ namespace Atlassian.Jira
         /// Gets the workflow actions that the issue can be transitioned to.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task<IEnumerable<JiraNamedEntity>> GetAvailableActionsAsync(CancellationToken token = default(CancellationToken))
+        public Task<IEnumerable<IssueTransition>> GetAvailableActionsAsync(CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
