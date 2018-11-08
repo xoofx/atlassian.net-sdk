@@ -12,9 +12,6 @@ namespace Atlassian.Jira
     /// </summary>
     public class JiraNamedEntity : IJiraEntity
     {
-        private string _id;
-        private string _name;
-
         /// <summary>
         /// Creates an instance of a JiraNamedEntity base on a remote entity.
         /// </summary>
@@ -30,31 +27,24 @@ namespace Atlassian.Jira
         /// <param name="name">Name of the entity.</param>
         public JiraNamedEntity(string id, string name = null)
         {
-            _id = id;
-            _name = name;
+            if (String.IsNullOrEmpty(id) && String.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException($"Named entity should have and id or a name. Id: '{id}'. Name: '{name}'.");
+            }
+
+            Id = id;
+            Name = name;
         }
 
         /// <summary>
-        /// Id of the entity
+        /// Id of the entity.
         /// </summary>
-        public string Id
-        {
-            get
-            {
-                return _id;
-            }
-        }
+        public string Id { get; private set; }
 
         /// <summary>
-        /// Name of the entity
+        /// Name of the entity.
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
+        public string Name { get; private set; }
 
         protected virtual Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {
@@ -63,36 +53,36 @@ namespace Atlassian.Jira
 
         public override string ToString()
         {
-            if (!String.IsNullOrEmpty(_name))
+            if (!String.IsNullOrEmpty(Name))
             {
-                return _name;
+                return Name;
             }
             else
             {
-                return _id;
+                return Id;
             }
         }
 
         internal async Task<JiraNamedEntity> LoadIdAndNameAsync(Jira jira, CancellationToken token)
         {
-            if (String.IsNullOrEmpty(_id) || String.IsNullOrEmpty(_name))
+            if (String.IsNullOrEmpty(Id) || String.IsNullOrEmpty(Name))
             {
                 var entities = await this.GetEntitiesAsync(jira, token).ConfigureAwait(false);
                 var entity = entities.FirstOrDefault(e =>
-                    String.Equals(e.Name, this._name, StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(e.Id, this._id, StringComparison.OrdinalIgnoreCase));
+                    (!String.IsNullOrEmpty(Name) && String.Equals(e.Name, this.Name, StringComparison.OrdinalIgnoreCase)) ||
+                    (!String.IsNullOrEmpty(Id) && String.Equals(e.Id, this.Id, StringComparison.OrdinalIgnoreCase)));
 
                 if (entity == null)
                 {
                     throw new InvalidOperationException(String.Format("Entity with id '{0}' and name '{1}' was not found for type '{2}'. Available: [{3}]",
-                        this._id,
-                        this._name,
+                        this.Id,
+                        this.Name,
                         this.GetType(),
                         String.Join(",", entities.Select(s => s.Id + ":" + s.Name).ToArray())));
                 }
 
-                _id = entity.Id;
-                _name = entity.Name;
+                Id = entity.Id;
+                Name = entity.Name;
             }
 
             return this;

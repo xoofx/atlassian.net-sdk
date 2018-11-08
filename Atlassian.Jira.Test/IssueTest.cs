@@ -59,7 +59,7 @@ namespace Atlassian.Jira.Test
                     summary = "summary",
                     type = new RemoteIssueType() { id = "type" },
                     updated = new DateTime(2011, 2, 2),
-                    votesData = new RemoteVotes() {  votes = 1, hasVoted = true }
+                    votesData = new RemoteVotes() { votes = 1, hasVoted = true }
                 };
 
                 var issue = remoteIssue.ToLocal(TestableJira.Create());
@@ -120,8 +120,8 @@ namespace Atlassian.Jira.Test
             {
                 var jira = TestableJira.Create();
                 var issue = jira.CreateIssue("ProjectKey");
-                var version = new RemoteVersion().ToLocal(issue.Jira);
-                var component = new RemoteComponent().ToLocal();
+                var version = new RemoteVersion() { id = "1" }.ToLocal(issue.Jira);
+                var component = new RemoteComponent() { id = "1" }.ToLocal();
 
                 jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssueType("4", "issuetype"), 1)));
@@ -352,7 +352,7 @@ namespace Atlassian.Jira.Test
                 jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("4"), 1)));
                 jira.IssueResolutionService.Setup(s => s.GetResolutionsAsync(CancellationToken.None))
-                    .Returns(Task.FromResult(Enumerable.Repeat(new IssueResolution("4"), 1)));
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssueResolution("3"), 1)));
                 jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssueType("2"), 1)));
 
@@ -399,7 +399,7 @@ namespace Atlassian.Jira.Test
                 issue.Priority = "5";
 
                 jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
-                    .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("1"), 1)));
+                    .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("5"), 1)));
 
                 Assert.Single(GetUpdatedFieldsForIssue(issue));
             }
