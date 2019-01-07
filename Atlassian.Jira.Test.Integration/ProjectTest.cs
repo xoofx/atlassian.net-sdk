@@ -28,11 +28,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(componentName, component.Name);
 
             // Retrive project components.
-            Assert.Contains(project.GetComponetsAsync().Result, p => p.Name == componentName);
+            Assert.Contains(project.GetComponentsAsync().Result, p => p.Name == componentName);
 
             // Delete project component
             project.DeleteComponentAsync(component.Name).Wait();
-            Assert.DoesNotContain(project.GetComponetsAsync().Result, p => p.Name == componentName);
+            Assert.DoesNotContain(project.GetComponentsAsync().Result, p => p.Name == componentName);
         }
 
         [Fact]

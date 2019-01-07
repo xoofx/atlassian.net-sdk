@@ -60,7 +60,7 @@ namespace Atlassian.Jira.Test
             jira.Services.Register<IProjectComponentService>(() => componentResource.Object);
 
             // Act
-            var components = jira.Projects.GetProjectsAsync().Result.First().GetComponetsAsync().Result;
+            var components = jira.Projects.GetProjectsAsync().Result.First().GetComponentsAsync().Result;
 
             // Assert
             Assert.Equal("my component", components.First().Name);

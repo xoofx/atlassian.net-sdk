@@ -103,7 +103,7 @@ namespace Atlassian.Jira
         /// Gets the components for the current project.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task<IEnumerable<ProjectComponent>> GetComponetsAsync(CancellationToken token = default(CancellationToken))
+        public Task<IEnumerable<ProjectComponent>> GetComponentsAsync(CancellationToken token = default(CancellationToken))
         {
             return _jira.Components.GetComponentsAsync(Key, token);
         }
@@ -116,7 +116,7 @@ namespace Atlassian.Jira
         /// <param name="token">Cancellation token for this operation.</param>
         public async Task DeleteComponentAsync(string componentName, string moveIssuesTo = null, CancellationToken token = default(CancellationToken))
         {
-            var components = await this.GetComponetsAsync(token).ConfigureAwait(false);
+            var components = await this.GetComponentsAsync(token).ConfigureAwait(false);
             var component = components.First(c => String.Equals(c.Name, componentName));
 
             if (component == null)
