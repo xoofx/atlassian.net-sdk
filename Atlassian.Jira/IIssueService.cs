@@ -131,6 +131,14 @@ namespace Atlassian.Jira
         Task<IEnumerable<Comment>> GetCommentsAsync(string issueKey, CancellationToken token = default(CancellationToken));
 
         /// <summary>
+        /// Returns all comments of an issue.
+        /// </summary>
+        /// <param name="issueKey">Issue key to retrieve comments from.</param>
+        /// <param name="options">Options to configure the values of the query.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<Comment>> GetCommentsAsync(string issueKey, CommentQueryOptions options, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
         /// Removes a comment from an issue.
         /// </summary>
         /// <param name="issueKey">Issue key to remove the comment from.</param>

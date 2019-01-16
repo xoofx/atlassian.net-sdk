@@ -476,13 +476,27 @@ namespace Atlassian.Jira.Remote
             return this.GetIssuesAsync(issueKeys, default(CancellationToken));
         }
 
-        public async Task<IEnumerable<Comment>> GetCommentsAsync(string issueKey, CancellationToken token = default(CancellationToken))
+        public Task<IEnumerable<Comment>> GetCommentsAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/issue/{0}/comment?expand=properties", issueKey);
-            var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+            var options = new CommentQueryOptions();
+            options.Expand.Add("properties");
+
+            return GetCommentsAsync(issueKey, options, token);
+        }
+
+        public async Task<IEnumerable<Comment>> GetCommentsAsync(string issueKey, CommentQueryOptions options, CancellationToken token = default(CancellationToken))
+        {
+            var resource = String.Format("rest/api/2/issue/{0}/comment", issueKey);
+
+            if (options.Expand.Any())
+            {
+                resource += $"?expand={String.Join(",", options.Expand)}";
+            }
+
             var issueJson = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
             var commentJson = issueJson["comments"];
 
+            var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var remoteComments = JsonConvert.DeserializeObject<RemoteComment[]>(commentJson.ToString(), serializerSettings);
 
             return remoteComments.Select(c => new Comment(c));
