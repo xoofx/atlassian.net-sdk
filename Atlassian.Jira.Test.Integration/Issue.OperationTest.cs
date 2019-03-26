@@ -428,13 +428,16 @@ namespace Atlassian.Jira.Test.Integration
             // Add a comment
             issue.AddCommentAsync("new comment").Wait();
 
-            var comments = issue.GetCommentsAsync().Result;
+            var options = new CommentQueryOptions();
+            options.Expand.Add("renderedBody");
+            var comments = issue.GetCommentsAsync(options).Result;
             Assert.Single(comments);
 
             var comment = comments.First();
             Assert.Equal("new comment", comment.Body);
             Assert.Equal(DateTime.Now.Year, comment.CreatedDate.Value.Year);
             Assert.Null(comment.Visibility);
+            Assert.Equal("new comment", comment.RenderedBody);
         }
 
         [Fact]

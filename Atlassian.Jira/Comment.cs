@@ -37,6 +37,7 @@ namespace Atlassian.Jira
             UpdatedDate = remoteComment.updated;
             Visibility = remoteComment.visibility;
             _properties = remoteComment.properties;
+            RenderedBody = remoteComment.renderedBody;
         }
 
         public string Id { get; private set; }
@@ -56,6 +57,8 @@ namespace Atlassian.Jira
         public DateTime? UpdatedDate { get; private set; }
 
         public CommentVisibility Visibility { get; set; }
+
+        public string RenderedBody { get; set; }
 
         public IReadOnlyDictionary<string, object> Properties
         {

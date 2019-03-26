@@ -703,6 +703,21 @@ namespace Atlassian.Jira
         /// <summary>
         /// Get the comments for this issue.
         /// </summary>
+        /// <param name="options">Options to use when querying the comments.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<Comment>> GetCommentsAsync(CommentQueryOptions options, CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve comments from server, issue has not been created.");
+            }
+
+            return _jira.Issues.GetCommentsAsync(_originalIssue.key, options, token);
+        }
+
+        /// <summary>
+        /// Get the comments for this issue.
+        /// </summary>
         /// <param name="maxComments">Maximum number of comments to retrieve.</param>
         /// <param name="startAt">Index of the first comment to return (0-based).</param>
         /// <param name="token">Cancellation token for this operation.</param>

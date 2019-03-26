@@ -10,6 +10,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// The fields of the comment object to expand with information on the server.
         /// </summary>
+        /// <remarks>To return the body as html you can use the "renderedBody" flag.</remarks>
         public IList<string> Expand { get; } = new List<string>();
     }
 }
