@@ -115,7 +115,7 @@ namespace Atlassian.Jira.Remote
                 throw new InvalidOperationException($"Custom field with id '{customFieldId}' found on issue does not exist on the list of known custom fields returned by Jira.");
             }
 
-            return remoteField.CustomFieldType;
+            return remoteField.Schema.Custom;
         }
 
         private void AddCustomFieldValuesToObject(RemoteIssue remoteIssue, JObject jObject)

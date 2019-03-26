@@ -8,6 +8,48 @@ namespace Atlassian.Jira.Test.Integration
     public class IssueCustomFieldTest : BaseIntegrationTest
     {
         [Fact]
+        public async void CustomFieldsForProject_IfProjectDoesNotExist_ShouldThrowException()
+        {
+            Exception ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await _jira.Fields.GetCustomFieldsForProjectAsync("FOO"));
+
+            Assert.Contains("Project with key 'FOO' was not found on the Jira server.", ex.Message);
+        }
+
+        [Fact]
+        public async void CustomFieldsForProject_ShouldReturnAllCustomFieldsOfAllIssueTypes()
+        {
+            var results = await _jira.Fields.GetCustomFieldsForProjectAsync("TST");
+            Assert.Equal(19, results.Count());
+        }
+
+        /// <summary>
+        /// This case test the path when there are multiple custom fields defined in JIRA with the same name.
+        /// Most likly because the user has a combination of Classic and NextGen projects. Since the test
+        /// integration server is unable to create these type of custom fields, a property was added to the
+        /// CustomFieldValueCollection that can force the new code path to execute.
+        /// </summary>
+        [Fact]
+        public async void CanSetCustomFieldUsingSearchByProjectOnly()
+        {
+            var summaryValue = "Test issue with custom field by project" + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            issue.CustomFields.SearchByProjectOnly = true;
+            issue["Custom Text Field"] = "My new value";
+            issue["Custom Date Field"] = "2015-10-03";
+
+            var newIssue = await issue.SaveChangesAsync();
+
+            Assert.Equal("My new value", newIssue["Custom Text Field"]);
+            Assert.Equal("2015-10-03", newIssue["Custom Date Field"]);
+        }
+
+        [Fact]
         public void CanHandleCustomFieldWithoutSerializerThatIsArrayOfObjects()
         {
             var jira = Jira.CreateRestClient(new TraceReplayer("Trace_CustomFieldArrayOfObjects.txt"));

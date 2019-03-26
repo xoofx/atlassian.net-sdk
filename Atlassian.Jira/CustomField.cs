@@ -14,6 +14,11 @@ namespace Atlassian.Jira
             : base(remoteField)
         {
             _remoteField = remoteField;
+
+            if (String.IsNullOrEmpty(this.Id) && !String.IsNullOrEmpty(CustomIdentifier))
+            {
+                this.Id = $"customfield_{CustomIdentifier}";
+            }
         }
 
         internal RemoteField RemoteField
@@ -28,7 +33,15 @@ namespace Atlassian.Jira
         {
             get
             {
-                return _remoteField.CustomFieldType;
+                return _remoteField.Schema?.Custom;
+            }
+        }
+
+        public string CustomIdentifier
+        {
+            get
+            {
+                return _remoteField.Schema?.CustomId;
             }
         }
     }

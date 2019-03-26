@@ -27,6 +27,11 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// When Id's are unknown, searches for custom fields by the issue project only.
+        /// </summary>
+        public bool SearchByProjectOnly { get; set; }
+
+        /// <summary>
         /// Add a custom field by name
         /// </summary>
         /// <param name="fieldName">The name of the custom field as defined in JIRA</param>
@@ -133,15 +138,31 @@ namespace Atlassian.Jira
 
         private string GetCustomFieldId(string fieldName)
         {
-            var customField = _issue.Jira.Fields.GetCustomFieldsAsync().Result
-                    .FirstOrDefault(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
+            var customFields = _issue.Jira.Fields.GetCustomFieldsAsync().Result.Where(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
+            var searchByProject = (customFields.Count() > 1) || SearchByProjectOnly;
 
-            if (customField == null)
+            if (searchByProject)
             {
-                throw new InvalidOperationException(String.Format("Could not find custom field with name '{0}' on the JIRA server.", fieldName));
+                // There are multiple custom fields with the same name, need to find it by the project.
+                customFields = _issue.Jira.Fields.GetCustomFieldsForProjectAsync(_issue.Project).Result.Where(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
             }
 
-            return customField.Id;
+            if (customFields.Count() == 0)
+            {
+                var errorMessage = $"Could not find custom field with name '{fieldName}' on the JIRA server.";
+
+                if (searchByProject)
+                {
+                    errorMessage += $" The field was only searched for in the project with key '{_issue.Project}'." +
+                        $" Make sure the custom field is available in the issue create screen for that project.";
+                }
+
+                throw new InvalidOperationException(errorMessage);
+            }
+            else
+            {
+                return customFields.Single().Id;
+            }
         }
 
         Task<RemoteFieldValue[]> IRemoteIssueFieldProvider.GetRemoteFieldValuesAsync(CancellationToken token)

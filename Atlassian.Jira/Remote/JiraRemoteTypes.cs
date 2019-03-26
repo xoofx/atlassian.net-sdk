@@ -1895,14 +1895,23 @@ namespace Atlassian.Jira.Remote
     [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
     public partial class RemoteField : AbstractNamedRemoteEntity
     {
-        [System.Xml.Serialization.SoapIgnore]
         [JsonProperty("custom")]
         public bool IsCustomField { get; set; }
 
-        [System.Xml.Serialization.SoapIgnore]
         [JsonProperty("schema")]
-        [JsonConverter(typeof(NestedValueJsonConverter), "custom")]
-        public string CustomFieldType { get; set; }
+        public RemoteFieldSchema Schema { get; set; }
+    }
+
+    public class RemoteFieldSchema
+    {
+        [JsonProperty("custom")]
+        public string Custom { get; set; }
+
+        [JsonProperty("customId")]
+        public string CustomId { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
     }
 
     /// <remarks/>

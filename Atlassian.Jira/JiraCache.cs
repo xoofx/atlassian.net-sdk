@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 
 namespace Atlassian.Jira
 {
@@ -7,24 +8,15 @@ namespace Atlassian.Jira
     /// </summary>
     public class JiraCache
     {
-        private JiraEntityDictionary<IssueType> _cachedIssueTypes = new JiraEntityDictionary<IssueType>();
-        private JiraEntityDictionary<ProjectComponent> _cachedComponents = new JiraEntityDictionary<ProjectComponent>();
-        private JiraEntityDictionary<ProjectVersion> _cachedVersions = new JiraEntityDictionary<ProjectVersion>();
-        private JiraEntityDictionary<CustomField> _cachedCustomFields = new JiraEntityDictionary<CustomField>();
-        private JiraEntityDictionary<IssuePriority> _cachedPriorities = new JiraEntityDictionary<IssuePriority>();
-        private JiraEntityDictionary<IssueStatus> _cachedStatuses = new JiraEntityDictionary<IssueStatus>();
-        private JiraEntityDictionary<IssueResolution> _cachedResolutions = new JiraEntityDictionary<IssueResolution>();
-        private JiraEntityDictionary<Project> _cachedProjects = new JiraEntityDictionary<Project>();
-        private JiraEntityDictionary<IssueLinkType> _cachedLinkTypes = new JiraEntityDictionary<IssueLinkType>();
-
-        public JiraEntityDictionary<IssueType> IssueTypes { get { return this._cachedIssueTypes; } }
-        public JiraEntityDictionary<ProjectComponent> Components { get { return this._cachedComponents; } }
-        public JiraEntityDictionary<ProjectVersion> Versions { get { return this._cachedVersions; } }
-        public JiraEntityDictionary<IssuePriority> Priorities { get { return this._cachedPriorities; } }
-        public JiraEntityDictionary<IssueStatus> Statuses { get { return this._cachedStatuses; } }
-        public JiraEntityDictionary<IssueResolution> Resolutions { get { return this._cachedResolutions; } }
-        public JiraEntityDictionary<Project> Projects { get { return this._cachedProjects; } }
-        public JiraEntityDictionary<CustomField> CustomFields { get { return this._cachedCustomFields; } }
-        public JiraEntityDictionary<IssueLinkType> LinkTypes { get { return this._cachedLinkTypes; } }
+        public JiraEntityDictionary<IssueType> IssueTypes { get; } = new JiraEntityDictionary<IssueType>();
+        public JiraEntityDictionary<ProjectComponent> Components { get; } = new JiraEntityDictionary<ProjectComponent>();
+        public JiraEntityDictionary<ProjectVersion> Versions { get; } = new JiraEntityDictionary<ProjectVersion>();
+        public JiraEntityDictionary<IssuePriority> Priorities { get; } = new JiraEntityDictionary<IssuePriority>();
+        public JiraEntityDictionary<IssueStatus> Statuses { get; } = new JiraEntityDictionary<IssueStatus>();
+        public JiraEntityDictionary<IssueResolution> Resolutions { get; } = new JiraEntityDictionary<IssueResolution>();
+        public JiraEntityDictionary<Project> Projects { get; } = new JiraEntityDictionary<Project>();
+        public JiraEntityDictionary<CustomField> CustomFields { get; } = new JiraEntityDictionary<CustomField>();
+        public JiraEntityDictionary<IssueLinkType> LinkTypes { get; } = new JiraEntityDictionary<IssueLinkType>();
+        public ConcurrentDictionary<string, JiraEntityDictionary<CustomField>> ProjectCustomFields { get; } = new ConcurrentDictionary<string, JiraEntityDictionary<CustomField>>();
     }
 }

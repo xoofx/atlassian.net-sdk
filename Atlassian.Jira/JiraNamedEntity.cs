@@ -39,12 +39,12 @@ namespace Atlassian.Jira
         /// <summary>
         /// Id of the entity.
         /// </summary>
-        public string Id { get; private set; }
+        public string Id { get; protected set; }
 
         /// <summary>
         /// Name of the entity.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; protected set; }
 
         protected virtual Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {

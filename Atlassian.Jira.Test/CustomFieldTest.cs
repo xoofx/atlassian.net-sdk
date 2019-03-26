@@ -42,7 +42,7 @@ namespace Atlassian.Jira.Test
         {
             // arrange issue
             var jira = TestableJira.Create();
-            var remoteField = new RemoteField() { id = "remotefield_id", CustomFieldType = "remotefield_type", IsCustomField = true, name = "Custom Field" };
+            var remoteField = new RemoteField() { id = "remotefield_id", Schema = new RemoteFieldSchema() { Custom = "remotefield_type" }, IsCustomField = true, name = "Custom Field" };
             var customField = new CustomField(remoteField);
             var issue = new RemoteIssue() { project = "projectKey", key = "issueKey" }.ToLocal(jira);
 
@@ -75,7 +75,7 @@ namespace Atlassian.Jira.Test
         public void CanDeserializeArrayOfStrings_WhenCustomFieldValueIsArrayAndNoSerializerIsRegistered()
         {
             // arrange issue
-            var remoteField = new RemoteField() { id = "customfield_id", CustomFieldType = "customfield_type", IsCustomField = true, name = "Custom Field" };
+            var remoteField = new RemoteField() { id = "customfield_id", Schema = new RemoteFieldSchema() { Custom = "customfield_type" }, IsCustomField = true, name = "Custom Field" };
             var jObject = JObject.FromObject(new
             {
                 fields = new
