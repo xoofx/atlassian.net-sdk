@@ -33,13 +33,22 @@ namespace Atlassian.Jira.Remote
 
         public async Task<IEnumerable<IssueType>> GetIssueTypesForProjectAsync(string projectKey, CancellationToken token = default(CancellationToken))
         {
-             var resource = String.Format("rest/api/2/project/{0}", projectKey);
-             var projectJson = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
-             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+            var cache = _jira.Cache;
 
-            return projectJson["issueTypes"]
-                .Select(issueTypeJson => JsonConvert.DeserializeObject<RemoteIssueType>(issueTypeJson.ToString(), serializerSettings))
-                .Select(remoteIssueType => new IssueType(remoteIssueType));
+            if (!cache.ProjectIssueTypes.TryGetValue(projectKey, out JiraEntityDictionary<IssueType> _))
+            {
+                var resource = String.Format("rest/api/2/project/{0}", projectKey);
+                var projectJson = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
+                var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+
+                var issueTypes = projectJson["issueTypes"]
+                    .Select(issueTypeJson => JsonConvert.DeserializeObject<RemoteIssueType>(issueTypeJson.ToString(), serializerSettings))
+                    .Select(remoteIssueType => new IssueType(remoteIssueType));
+
+                cache.ProjectIssueTypes.TryAdd(projectKey, new JiraEntityDictionary<IssueType>(issueTypes));
+            }
+
+            return cache.ProjectIssueTypes[projectKey].Values;
         }
     }
 }

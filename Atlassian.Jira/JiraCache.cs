@@ -17,6 +17,8 @@ namespace Atlassian.Jira
         public JiraEntityDictionary<Project> Projects { get; } = new JiraEntityDictionary<Project>();
         public JiraEntityDictionary<CustomField> CustomFields { get; } = new JiraEntityDictionary<CustomField>();
         public JiraEntityDictionary<IssueLinkType> LinkTypes { get; } = new JiraEntityDictionary<IssueLinkType>();
+
         public ConcurrentDictionary<string, JiraEntityDictionary<CustomField>> ProjectCustomFields { get; } = new ConcurrentDictionary<string, JiraEntityDictionary<CustomField>>();
+        public ConcurrentDictionary<string, JiraEntityDictionary<IssueType>> ProjectIssueTypes { get; } = new ConcurrentDictionary<string, JiraEntityDictionary<IssueType>>();
     }
 }
