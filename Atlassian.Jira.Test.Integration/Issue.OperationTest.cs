@@ -434,6 +434,42 @@ namespace Atlassian.Jira.Test.Integration
             var comment = comments.First();
             Assert.Equal("new comment", comment.Body);
             Assert.Equal(DateTime.Now.Year, comment.CreatedDate.Value.Year);
+            Assert.Null(comment.Visibility);
+        }
+
+        [Fact]
+        public async Task AddAndUpdateComments()
+        {
+            var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "1",
+                Summary = summaryValue,
+                Assignee = "admin"
+            };
+
+            issue.SaveChanges();
+
+            // Add a comment
+            var comment = new Comment()
+            {
+                Author = _jira.Credentials.UserName,
+                Body = "New comment",
+                Visibility = new CommentVisibility("Developers")
+            };
+            var newComment = await issue.AddCommentAsync(comment);
+
+            // Verify visibility.
+            Assert.Equal("role", newComment.Visibility.Type);
+            Assert.Equal("Developers", newComment.Visibility.Value);
+
+            // Update the comment
+            newComment.Visibility.Value = "Users";
+            var updatedComment = await issue.UpdateCommentAsync(newComment);
+
+            // verify changes.
+            Assert.Equal("role", newComment.Visibility.Type);
+            Assert.Equal("Users", newComment.Visibility.Value);
         }
 
         [Fact]

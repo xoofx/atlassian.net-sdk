@@ -35,6 +35,7 @@ namespace Atlassian.Jira
             RoleLevel = remoteComment.roleLevel;
             UpdateAuthor = remoteComment.updateAuthor;
             UpdatedDate = remoteComment.updated;
+            Visibility = remoteComment.visibility;
             _properties = remoteComment.properties;
         }
 
@@ -53,6 +54,8 @@ namespace Atlassian.Jira
         public string UpdateAuthor { get; private set; }
 
         public DateTime? UpdatedDate { get; private set; }
+
+        public CommentVisibility Visibility { get; set; }
 
         public IReadOnlyDictionary<string, object> Properties
         {
@@ -82,7 +85,8 @@ namespace Atlassian.Jira
                 author = this.Author,
                 body = this.Body,
                 groupLevel = this.GroupLevel,
-                roleLevel = this.RoleLevel
+                roleLevel = this.RoleLevel,
+                visibility = this.Visibility
             };
         }
     }

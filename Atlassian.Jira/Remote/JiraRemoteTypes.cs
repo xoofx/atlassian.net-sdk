@@ -153,8 +153,9 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        /// <remarks/>
         public System.Collections.Generic.IEnumerable<RemoteCommentProperty> properties { get; set; }
+
+        public CommentVisibility visibility { get; set; }
     }
 
     /// <remarks/>
