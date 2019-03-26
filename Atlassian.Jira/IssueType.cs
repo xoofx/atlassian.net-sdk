@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Atlassian.Jira.Remote;
@@ -48,9 +49,21 @@ namespace Atlassian.Jira
             }
         }
 
+        public bool SearchByProjectOnly { get; set; }
+
+        internal string ProjectKey { get; set; }
+
         protected override async Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {
             var results = await jira.IssueTypes.GetIssueTypesAsync(token).ConfigureAwait(false);
+
+            if (!String.IsNullOrEmpty(ProjectKey) && (results.Count() > 1 || SearchByProjectOnly))
+            {
+                // There are multiple issue types with the same name. Possibly because there are a combination
+                //  of classic and NextGen projects in Jira. Get the issue types from the project if it is defined.
+                results = await jira.IssueTypes.GetIssueTypesForProjectAsync(ProjectKey).ConfigureAwait(false);
+            }
+
             return results as IEnumerable<JiraNamedEntity>;
         }
 

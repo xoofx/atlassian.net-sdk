@@ -32,6 +32,7 @@ namespace Atlassian.Jira
         private IssueLabelCollection _labels = null;
         private IssueStatus _status;
         private string _parentIssueKey;
+        private IssueType _issueType;
 
         /// <summary>
         /// Create a new Issue.
@@ -273,7 +274,22 @@ namespace Atlassian.Jira
         /// The type of the issue
         /// </summary>
         [RemoteFieldName("issuetype")]
-        public IssueType Type { get; set; }
+        public IssueType Type
+        {
+            get
+            {
+                return _issueType;
+            }
+            set
+            {
+                _issueType = value;
+
+                if (_issueType != null)
+                {
+                    _issueType.ProjectKey = _project;
+                }
+            }
+        }
 
         /// <summary>
         /// Number of votes the issue has

@@ -8,6 +8,22 @@ namespace Atlassian.Jira.Test.Integration
     public class IssueCreateTest : BaseIntegrationTest
     {
         [Fact]
+        public async Task CreateIssueWithIssueTypesPerProject()
+        {
+            var issue = new Issue(_jira, "TST")
+            {
+                Type = "Bug",
+                Summary = "Test Summary " + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+
+            issue.Type.SearchByProjectOnly = true;
+            var newIssue = await issue.SaveChangesAsync();
+
+            Assert.Equal("Bug", newIssue.Type.Name);
+        }
+
+        [Fact]
         public async Task CreateIssueWithOriginalEstimate()
         {
             var fields = new CreateIssueFields("TST")
