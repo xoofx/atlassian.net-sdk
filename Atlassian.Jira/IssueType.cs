@@ -15,15 +15,13 @@ namespace Atlassian.Jira
     [SuppressMessage("N/A", "CS0661", Justification = "Operator overloads are used for LINQ to JQL provider.")]
     public class IssueType : JiraNamedConstant
     {
-        private bool _isSubTask;
-
         /// <summary>
         /// Creates an instance of the IssuePriority based on a remote entity.
         /// </summary>
         public IssueType(RemoteIssueType remoteIssueType)
             : base(remoteIssueType)
         {
-            _isSubTask = remoteIssueType.subTask;
+            IsSubTask = remoteIssueType.subTask;
         }
 
         /// <summary>
@@ -35,19 +33,13 @@ namespace Atlassian.Jira
         public IssueType(string id, string name = null, bool isSubTask = false)
             : base(id, name)
         {
-            _isSubTask = isSubTask;
+            IsSubTask = isSubTask;
         }
 
         /// <summary>
         /// Whether this issue type represents a sub-task.
         /// </summary>
-        public bool IsSubTask
-        {
-            get
-            {
-                return _isSubTask;
-            }
-        }
+        public bool IsSubTask { get; private set; }
 
         public bool SearchByProjectOnly { get; set; }
 
@@ -57,7 +49,8 @@ namespace Atlassian.Jira
         {
             var results = await jira.IssueTypes.GetIssueTypesAsync(token).ConfigureAwait(false);
 
-            if (!String.IsNullOrEmpty(ProjectKey) && (results.Count() > 1 || SearchByProjectOnly))
+            if (!String.IsNullOrEmpty(ProjectKey) &&
+                (SearchByProjectOnly || results.Distinct(new JiraEntityNameEqualityComparer()).Count() != results.Count()))
             {
                 // There are multiple issue types with the same name. Possibly because there are a combination
                 //  of classic and NextGen projects in Jira. Get the issue types from the project if it is defined.

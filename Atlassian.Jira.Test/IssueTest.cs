@@ -182,7 +182,7 @@ namespace Atlassian.Jira.Test
         public class GetUpdatedFields
         {
             [Fact]
-            public void ReturnsCustomFieldsAdded()
+            public async Task ReturnsCustomFieldsAdded()
             {
                 var jira = TestableJira.Create();
                 var customField = new CustomField(new RemoteField() { id = "CustomField1", name = "My Custom Field" });
@@ -200,13 +200,13 @@ namespace Atlassian.Jira.Test
                 var issue = jira.CreateIssue("TST");
                 issue["My Custom Field"] = "test value";
 
-                var result = GetUpdatedFieldsForIssue(issue);
+                var result = await GetUpdatedFieldsForIssueAsync(issue);
                 Assert.Single(result);
                 Assert.Equal("CustomField1", result.First().id);
             }
 
             [Fact]
-            public void ExcludesCustomFieldsNotModified()
+            public async Task ExcludesCustomFieldsNotModified()
             {
                 var jira = TestableJira.Create();
                 var customField = new CustomField(new RemoteField() { id = "CustomField1", name = "My Custom Field" });
@@ -232,12 +232,12 @@ namespace Atlassian.Jira.Test
 
                 var issue = jira.Issues.GetIssueAsync("TST-1").Result;
 
-                var result = GetUpdatedFieldsForIssue(issue);
+                var result = await GetUpdatedFieldsForIssueAsync(issue);
                 Assert.Empty(result);
             }
 
             [Fact]
-            public void ReturnsCustomFieldThatWasModified()
+            public async Task ReturnsCustomFieldThatWasModified()
             {
                 var jira = TestableJira.Create();
                 var customField = new CustomField(new RemoteField() { id = "CustomField1", name = "My Custom Field" });
@@ -264,14 +264,14 @@ namespace Atlassian.Jira.Test
                 var issue = jira.Issues.GetIssueAsync("TST-1").Result;
                 issue["My Custom Field"] = "My New Value";
 
-                var result = GetUpdatedFieldsForIssue(issue);
+                var result = await GetUpdatedFieldsForIssueAsync(issue);
                 Assert.Single(result);
                 Assert.Equal("CustomField1", result.First().id);
                 Assert.Equal("My New Value", result.First().values[0]);
             }
 
             [Fact]
-            public void IfIssueTypeWithId_ReturnField()
+            public async Task IfIssueTypeWithId_ReturnField()
             {
                 var jira = TestableJira.Create();
                 var issue = jira.CreateIssue("TST");
@@ -280,13 +280,13 @@ namespace Atlassian.Jira.Test
                 jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("5"), 1)));
 
-                var result = GetUpdatedFieldsForIssue(issue);
+                var result = await GetUpdatedFieldsForIssueAsync(issue);
                 Assert.Single(result);
                 Assert.Equal("5", result[0].values[0]);
             }
 
             [Fact]
-            public void IfIssueTypeWithName_ReturnsFieldWithIdInferred()
+            public async Task IfIssueTypeWithName_ReturnsFieldWithIdInferred()
             {
                 var jira = TestableJira.Create();
                 var issueType = new IssueType(new RemoteIssueType() { id = "2", name = "Task" });
@@ -295,13 +295,13 @@ namespace Atlassian.Jira.Test
                 var issue = jira.CreateIssue("FOO");
                 issue.Type = "Task";
 
-                var result = GetUpdatedFieldsForIssue(issue);
+                var result = await GetUpdatedFieldsForIssueAsync(issue);
                 Assert.Single(result);
                 Assert.Equal("2", result[0].values[0]);
             }
 
             [Fact]
-            public void IfIssueTypeWithNameNotChanged_ReturnsNoFieldsChanged()
+            public async Task IfIssueTypeWithNameNotChanged_ReturnsNoFieldsChanged()
             {
                 var jira = TestableJira.Create();
                 var issueType = new IssueType(new RemoteIssueType() { id = "5", name = "Task" });
@@ -315,28 +315,29 @@ namespace Atlassian.Jira.Test
                 var issue = remoteIssue.ToLocal(jira);
                 issue.Type = "Task";
 
-                Assert.Empty(GetUpdatedFieldsForIssue(issue));
+                var fields = await GetUpdatedFieldsForIssueAsync(issue);
+                Assert.Empty(fields);
             }
 
             [Fact]
-            public void ReturnEmptyIfNothingChanged()
+            public async Task ReturnEmptyIfNothingChanged()
             {
                 var issue = CreateIssue();
 
-                Assert.Empty(GetUpdatedFieldsForIssue(issue));
+                Assert.Empty((await GetUpdatedFieldsForIssueAsync(issue)));
             }
 
             [Fact]
-            public void IfString_ReturnOneFieldThatChanged()
+            public async Task IfString_ReturnOneFieldThatChanged()
             {
                 var issue = CreateIssue();
                 issue.Summary = "foo";
 
-                Assert.Single(GetUpdatedFieldsForIssue(issue));
+                Assert.Single((await GetUpdatedFieldsForIssueAsync(issue)));
             }
 
             [Fact]
-            public void IfString_ReturnAllFieldsThatChanged()
+            public async Task IfString_ReturnAllFieldsThatChanged()
             {
                 var jira = TestableJira.Create();
                 var issue = jira.CreateIssue("TST");
@@ -356,11 +357,11 @@ namespace Atlassian.Jira.Test
                 jira.IssueTypeService.Setup(s => s.GetIssueTypesAsync(CancellationToken.None))
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssueType("2"), 1)));
 
-                Assert.Equal(8, GetUpdatedFieldsForIssue(issue).Length);
+                Assert.Equal(8, (await GetUpdatedFieldsForIssueAsync(issue)).Length);
             }
 
             [Fact]
-            public void IfStringEqual_ReturnNoFieldsThatChanged()
+            public async Task IfStringEqual_ReturnNoFieldsThatChanged()
             {
                 var remoteIssue = new RemoteIssue()
                 {
@@ -371,11 +372,11 @@ namespace Atlassian.Jira.Test
 
                 issue.Summary = "Summary";
 
-                Assert.Empty(GetUpdatedFieldsForIssue(issue));
+                Assert.Empty(await GetUpdatedFieldsForIssueAsync(issue));
             }
 
             [Fact]
-            public void IfComparableEqual_ReturnNoFieldsThatChanged()
+            public async Task IfComparableEqual_ReturnNoFieldsThatChanged()
             {
                 var jira = TestableJira.Create();
                 var remoteIssue = new RemoteIssue()
@@ -388,11 +389,11 @@ namespace Atlassian.Jira.Test
 
                 jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("5"), 1)));
-                Assert.Empty(GetUpdatedFieldsForIssue(issue));
+                Assert.Empty(await GetUpdatedFieldsForIssueAsync(issue));
             }
 
             [Fact]
-            public void IfComparable_ReturnsFieldsThatChanged()
+            public async Task IfComparable_ReturnsFieldsThatChanged()
             {
                 var jira = TestableJira.Create();
                 var issue = jira.CreateIssue("TST");
@@ -401,22 +402,22 @@ namespace Atlassian.Jira.Test
                 jira.IssuePriorityService.Setup(s => s.GetPrioritiesAsync(CancellationToken.None))
                     .Returns(Task.FromResult(Enumerable.Repeat(new IssuePriority("5"), 1)));
 
-                Assert.Single(GetUpdatedFieldsForIssue(issue));
+                Assert.Single(await GetUpdatedFieldsForIssueAsync(issue));
             }
 
             [Fact]
-            public void IfDateTimeChanged_ReturnsFieldsThatChanged()
+            public async Task IfDateTimeChanged_ReturnsFieldsThatChanged()
             {
                 var issue = CreateIssue();
                 issue.DueDate = new DateTime(2011, 10, 10);
 
-                var fields = GetUpdatedFieldsForIssue(issue);
+                var fields = await GetUpdatedFieldsForIssueAsync(issue);
                 Assert.Single(fields);
                 Assert.Equal("10/Oct/11", fields[0].values[0]);
             }
 
             [Fact]
-            public void IfDateTimeUnChangd_ShouldNotIncludeItInFieldsThatChanged()
+            public async Task IfDateTimeUnChangd_ShouldNotIncludeItInFieldsThatChanged()
             {
                 var remoteIssue = new RemoteIssue()
                 {
@@ -424,43 +425,43 @@ namespace Atlassian.Jira.Test
                 };
 
                 var issue = remoteIssue.ToLocal(TestableJira.Create());
-                Assert.Empty(GetUpdatedFieldsForIssue(issue));
+                Assert.Empty(await GetUpdatedFieldsForIssueAsync(issue));
             }
 
             [Fact]
-            public void IfComponentsAdded_ReturnsFields()
+            public async Task IfComponentsAdded_ReturnsFields()
             {
                 var issue = new RemoteIssue() { key = "foo" }.ToLocal(TestableJira.Create());
                 var component = new RemoteComponent() { id = "1", name = "1.0" };
                 issue.Components.Add(component.ToLocal());
 
-                var fields = GetUpdatedFieldsForIssue(issue);
+                var fields = await GetUpdatedFieldsForIssueAsync(issue);
                 Assert.Single(fields);
                 Assert.Equal("components", fields[0].id);
                 Assert.Equal("1", fields[0].values[0]);
             }
 
             [Fact]
-            public void IfAddFixVersion_ReturnAllFieldsThatChanged()
+            public async Task IfAddFixVersion_ReturnAllFieldsThatChanged()
             {
                 var issue = new RemoteIssue() { key = "foo" }.ToLocal(TestableJira.Create());
                 var version = new RemoteVersion() { id = "1", name = "1.0" };
                 issue.FixVersions.Add(version.ToLocal(TestableJira.Create()));
 
-                var fields = GetUpdatedFieldsForIssue(issue);
+                var fields = await GetUpdatedFieldsForIssueAsync(issue);
                 Assert.Single(fields);
                 Assert.Equal("fixVersions", fields[0].id);
                 Assert.Equal("1", fields[0].values[0]);
             }
 
             [Fact]
-            public void IfAddAffectsVersion_ReturnAllFieldsThatChanged()
+            public async Task IfAddAffectsVersion_ReturnAllFieldsThatChanged()
             {
                 var issue = new RemoteIssue() { key = "foo" }.ToLocal(TestableJira.Create());
                 var version = new RemoteVersion() { id = "1", name = "1.0" };
                 issue.AffectsVersions.Add(version.ToLocal(TestableJira.Create()));
 
-                var fields = GetUpdatedFieldsForIssue(issue);
+                var fields = await GetUpdatedFieldsForIssueAsync(issue);
                 Assert.Single(fields);
                 Assert.Equal("versions", fields[0].id);
                 Assert.Equal("1", fields[0].values[0]);
@@ -554,9 +555,9 @@ namespace Atlassian.Jira.Test
             return TestableJira.Create().CreateIssue(project);
         }
 
-        private static RemoteFieldValue[] GetUpdatedFieldsForIssue(Issue issue)
+        private static Task<RemoteFieldValue[]> GetUpdatedFieldsForIssueAsync(Issue issue)
         {
-            return ((IRemoteIssueFieldProvider)issue).GetRemoteFieldValuesAsync(CancellationToken.None).Result;
+            return ((IRemoteIssueFieldProvider)issue).GetRemoteFieldValuesAsync(CancellationToken.None);
         }
     }
 }
