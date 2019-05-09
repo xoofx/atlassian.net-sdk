@@ -1,4 +1,4 @@
-﻿using Atlassian.Jira.Linq;
+using Atlassian.Jira.Linq;
 using Atlassian.Jira.Remote;
 using System;
 using System.Collections.Generic;
@@ -896,7 +896,7 @@ namespace Atlassian.Jira
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
-                throw new InvalidOperationException("Unable to retrieve worklog, issue has not been saved to server.");
+                throw new InvalidOperationException("Unable to retrieve worklogs, issue has not been saved to server.");
             }
 
             return _jira.Issues.GetWorklogsAsync(_originalIssue.key, token);
