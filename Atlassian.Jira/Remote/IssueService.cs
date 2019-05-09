@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -308,7 +308,7 @@ namespace Atlassian.Jira.Remote
                 resource += $"&maxResults={maxComments.Value}";
             }
 
-            var result = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource).ConfigureAwait(false);
+            var result = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var comments = result["comments"]
                 .Cast<JObject>()
