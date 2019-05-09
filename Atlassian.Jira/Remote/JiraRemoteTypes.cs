@@ -1363,8 +1363,7 @@ namespace Atlassian.Jira.Remote
         public RemoteAttachment[] remoteAttachments { get; set; }
 
         [JsonProperty("comment")]
-        [JsonConverter(typeof(NestedValueJsonConverter), "comments")]
-        public RemoteComment[] remoteComments { get; set; }
+        public RemotePagedComments remotePagedComments { get; set; }
 
         [JsonProperty("worklog")]
         public RemotePagedWorklogs remotePagedWorklogs { get; set; }
@@ -1617,6 +1616,12 @@ namespace Atlassian.Jira.Remote
     {
         [JsonProperty("worklogs")]
         public RemoteWorklog[] remoteWorklogs { get; set; }
+    }
+
+    public class RemotePagedComments: RemotePagedResult
+    {
+        [JsonProperty("comments")]
+        public RemoteComment[] remoteComments { get; set; }
     }
 
     /// <remarks/>

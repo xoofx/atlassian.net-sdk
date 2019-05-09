@@ -22,9 +22,11 @@ namespace Atlassian.Jira
         {
             _map = remoteIssue.fieldsReadOnly ?? new Dictionary<string, JToken>();
 
-            if (remoteIssue.remoteComments != null)
+            if (remoteIssue.remotePagedComments != null)
             {
-                this.Comments = remoteIssue.remoteComments.Select(remoteComment => new Comment(remoteComment));
+                var pagedResults = remoteIssue.remotePagedComments;
+                var comments = pagedResults.remoteComments.Select(remoteComment => new Comment(remoteComment));
+                this.Comments = new PagedQueryResult<Comment>(comments, pagedResults.startAt, pagedResults.maxResults, pagedResults.total);
             }
 
             if (remoteIssue.remotePagedWorklogs != null)
@@ -48,7 +50,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Comments of the issue.
         /// </summary>
-        public IEnumerable<Comment> Comments { get; private set; }
+        public IPagedQueryResult<Comment> Comments { get; private set; }
 
         /// <summary>
         /// Worklogs of the issue.
