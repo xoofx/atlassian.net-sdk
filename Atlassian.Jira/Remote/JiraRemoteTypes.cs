@@ -1367,8 +1367,7 @@ namespace Atlassian.Jira.Remote
         public RemoteComment[] remoteComments { get; set; }
 
         [JsonProperty("worklog")]
-        [JsonConverter(typeof(NestedValueJsonConverter), "worklogs")]
-        public RemoteWorklog[] remoteWorklogs { get; set; }
+        public RemotePagedWorklogs remotePagedWorklogs { get; set; }
 
         [System.Xml.Serialization.SoapIgnore]
         [JsonProperty("parent")]
@@ -1605,6 +1604,19 @@ namespace Atlassian.Jira.Remote
 
         [JsonProperty("votes")]
         public RemoteVotes votesData { get; set; }
+    }
+
+    public class RemotePagedResult
+    {
+        public int maxResults { get; set; }
+        public int startAt { get; set; }
+        public int total { get; set; }
+    }
+
+    public class RemotePagedWorklogs : RemotePagedResult
+    {
+        [JsonProperty("worklogs")]
+        public RemoteWorklog[] remoteWorklogs { get; set; }
     }
 
     /// <remarks/>

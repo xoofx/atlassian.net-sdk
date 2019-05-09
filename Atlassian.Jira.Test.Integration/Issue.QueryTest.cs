@@ -66,8 +66,13 @@ namespace Atlassian.Jira.Test.Integration
             // Assert
             Assert.Null(serverIssue.Summary);
             Assert.Equal("My comment", serverIssue.AdditionalFields.Comments.First().Body);
-            Assert.Equal("1d", serverIssue.AdditionalFields.Worklogs.First().TimeSpent);
             Assert.True(serverIssue.AdditionalFields.ContainsKey("watches"));
+
+            var worklogs = serverIssue.AdditionalFields.Worklogs;
+            Assert.Equal(20, worklogs.ItemsPerPage);
+            Assert.Equal(0, worklogs.StartAt);
+            Assert.Equal(1, worklogs.TotalItems);
+            Assert.Equal("1d", worklogs.First().TimeSpent);
         }
 
         [Fact]

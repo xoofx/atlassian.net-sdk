@@ -27,9 +27,11 @@ namespace Atlassian.Jira
                 this.Comments = remoteIssue.remoteComments.Select(remoteComment => new Comment(remoteComment));
             }
 
-            if (remoteIssue.remoteWorklogs != null)
+            if (remoteIssue.remotePagedWorklogs != null)
             {
-                this.Worklogs = remoteIssue.remoteWorklogs.Select(remoteWorklog => new Worklog(remoteWorklog));
+                var pagedResults = remoteIssue.remotePagedWorklogs;
+                var worklogs = pagedResults.remoteWorklogs.Select(remoteWorklog => new Worklog(remoteWorklog));
+                this.Worklogs = new PagedQueryResult<Worklog>(worklogs, pagedResults.startAt, pagedResults.maxResults, pagedResults.total);
             }
 
             if (remoteIssue.remoteAttachments != null)
@@ -51,7 +53,7 @@ namespace Atlassian.Jira
         /// <summary>
         /// Worklogs of the issue.
         /// </summary>
-        public IEnumerable<Worklog> Worklogs { get; private set; }
+        public IPagedQueryResult<Worklog> Worklogs { get; private set; }
 
         /// <summary>
         ///  Gets the field with the specified key.
