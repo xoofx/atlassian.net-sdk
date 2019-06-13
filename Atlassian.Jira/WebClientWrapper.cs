@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -77,9 +78,10 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to download file, user credentials have not been set.");
             }
 
-            string encodedUserNameAndPassword = Convert.ToBase64String(Encoding.UTF8.GetBytes(_credentials.UserName + ":" + _credentials.Password));
+            var authHeader = JiraHttpBasicAuthenticator.GetAuthorizationHeader(_credentials.UserName, _credentials.Password);
+
             _webClient.Headers.Remove(HttpRequestHeader.Authorization);
-            _webClient.Headers.Add(HttpRequestHeader.Authorization, "Basic " + encodedUserNameAndPassword);
+            _webClient.Headers.Add(HttpRequestHeader.Authorization, authHeader);
         }
     }
 }
