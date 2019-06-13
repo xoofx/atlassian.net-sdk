@@ -37,7 +37,7 @@ namespace Atlassian.Jira.Remote
 
             if (!String.IsNullOrEmpty(username) && !String.IsNullOrEmpty(password))
             {
-                this._restClient.Authenticator = new JiraHttpBasicAuthenticator(username, password);
+                this._restClient.Authenticator = new HttpBasicAuthenticator(username, password);
             }
         }
 
