@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -468,11 +468,13 @@ namespace Atlassian.Jira.Test.Integration
 
             // Update the comment
             newComment.Visibility.Value = "Users";
+            newComment.Body = "changed body";
             var updatedComment = await issue.UpdateCommentAsync(newComment);
 
             // verify changes.
-            Assert.Equal("role", newComment.Visibility.Type);
-            Assert.Equal("Users", newComment.Visibility.Value);
+            Assert.Equal("role", updatedComment.Visibility.Type);
+            Assert.Equal("Users", updatedComment.Visibility.Value);
+            Assert.Equal("changed body", updatedComment.Body);
         }
 
         [Fact]
