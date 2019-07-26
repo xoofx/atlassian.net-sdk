@@ -9,6 +9,12 @@ namespace Atlassian.Jira
     public class JiraUser
     {
         /// <summary>
+        /// The identifier for the user as defined by JIRA.
+        /// </summary>
+        [JsonProperty("key")]
+        public string Key { get; private set; }
+
+        /// <summary>
         /// The 'username' for the user.
         /// </summary>
         [JsonProperty("name")]

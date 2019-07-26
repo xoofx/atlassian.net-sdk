@@ -28,8 +28,10 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(user.Email, userInfo.Email);
             Assert.Equal(user.DisplayName, userInfo.DisplayName);
             Assert.Equal(user.Username, userInfo.Username);
+            Assert.Equal(user.Key, userInfo.Username);
             Assert.True(user.IsActive);
             Assert.False(String.IsNullOrEmpty(user.Locale));
+
             // verify retrieve a user.
             user = _jira.Users.GetUserAsync(userInfo.Username).Result;
             Assert.Equal(user.DisplayName, userInfo.DisplayName);
