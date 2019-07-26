@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -11,7 +11,7 @@ namespace Atlassian.Jira.Test.Integration
             var rand = _random.Next(int.MaxValue);
             return new JiraUserCreationInfo()
             {
-                Username = "TestUser" + rand,
+                Username = "test" + rand,
                 DisplayName = "Test User " + rand,
                 Email = String.Format("test{0}@user.com", rand),
                 Password = "MyPass" + rand
@@ -35,7 +35,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(user.DisplayName, userInfo.DisplayName);
 
             // verify search for a user
-            var users = _jira.Users.SearchUsersAsync("TestUser").Result;
+            var users = _jira.Users.SearchUsersAsync("test").Result;
             Assert.Contains(users, u => u.Username == userInfo.Username);
 
             // verify delete a user
