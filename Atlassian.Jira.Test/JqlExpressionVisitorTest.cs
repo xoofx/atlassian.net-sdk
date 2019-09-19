@@ -352,7 +352,7 @@ namespace Atlassian.Jira.Test
             var date = new DateTime(2011, 1, 1);
 
             var issues = (from i in queryable
-                          where i.Created > new LiteralDateTime(date.ToString("yyyy/MM/dd HH:mm"))
+                          where i.Created > new LiteralDateTime(date.ToString("yyyy/MM/dd HH:mm", CultureInfo.InvariantCulture))
                           select i).ToArray();
 
             Assert.Equal("Created > \"2011/01/01 00:00\"", _translator.Jql);
@@ -391,7 +391,7 @@ namespace Atlassian.Jira.Test
                           where i.Created > DateTime.Now.Date
                           select i).ToArray();
 
-            Assert.Equal("Created > \"" + DateTime.Now.ToString("yyyy/MM/dd") + "\"", _translator.Jql);
+            Assert.Equal("Created > \"" + DateTime.Now.ToString("yyyy/MM/dd", CultureInfo.InvariantCulture) + "\"", _translator.Jql);
         }
 
         [Fact]
@@ -403,7 +403,7 @@ namespace Atlassian.Jira.Test
                           where i.Created > DateTime.Now
                           select i).ToArray();
 
-            Assert.Equal("Created > \"" + DateTime.Now.ToString("yyyy/MM/dd HH:mm") + "\"", _translator.Jql);
+            Assert.Equal("Created > \"" + DateTime.Now.ToString("yyyy/MM/dd HH:mm", CultureInfo.InvariantCulture) + "\"", _translator.Jql);
         }
 
         [Fact]
