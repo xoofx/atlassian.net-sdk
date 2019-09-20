@@ -81,6 +81,13 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public async Task WillThrowErrorIfSiteIsUnreachable()
         {
+#if NET452
+            // Standard has a different behavior than Framework, it throws the same exception but with a different message:
+            // System.InvalidOperationException: 'Error Message: The request was aborted: Could not create SSL/TLS secure channel.'
+            // This workaround fixes the test: https://stackoverflow.com/questions/2859790/the-request-was-aborted-could-not-create-ssl-tls-secure-channel.
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+#endif
+
             var jira = Jira.CreateRestClient("http://farmasXXX.atlassian.net");
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => jira.Issues.GetIssueAsync("TST-1"));

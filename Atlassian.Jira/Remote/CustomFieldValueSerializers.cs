@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -49,12 +50,12 @@ namespace Atlassian.Jira.Remote
     {
         public string[] FromJson(JToken json)
         {
-            return new string[1] { json.ToString() };
+            return new string[1] { json.ToObject<string>() };
         }
 
         public JToken ToJson(string[] values)
         {
-            return float.Parse(values[0]);
+            return float.Parse(values[0], CultureInfo.InvariantCulture);
         }
     }
 
