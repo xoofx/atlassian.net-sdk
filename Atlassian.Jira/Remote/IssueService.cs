@@ -1,13 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Atlassian.Jira.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira.Remote
 {
@@ -574,6 +576,93 @@ namespace Atlassian.Jira.Remote
             var resource = $"/rest/api/2/issue/{issueKey}/assignee";
 
             return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, new { name = assignee }, token);
+        }
+
+        public async Task<List<string>> GetPropertyKeysAsync(string issueKey, CancellationToken token = default)
+        {
+            if (string.IsNullOrEmpty(issueKey))
+            {
+                throw new InvalidOperationException("Unable to interact with the issue properties, make sure the issue has been created.");
+            }
+
+            var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+            var serializer = JsonSerializer.Create(serializerSettings);
+
+            var resource = $"rest/api/2/issue/{issueKey}/properties";
+            var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
+            var propertyRefsJson = response["keys"];
+            var propertyRefs = propertyRefsJson.ToObject<IList<RemoteEntityPropertyReference>>(serializer);
+            return propertyRefs.Select(x => x.key).ToList();
+        }
+
+        public async Task<ReadOnlyDictionary<string, JToken>> GetPropertiesAsync(string issueKey, IEnumerable<string> propertyKeys, CancellationToken token = default)
+        {
+            if (string.IsNullOrEmpty(issueKey))
+            {
+                throw new InvalidOperationException("Unable to interact with the issue properties, make sure the issue has been created.");
+            }
+
+            var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+            var serializer = JsonSerializer.Create(serializerSettings);
+
+            var requestTasks = propertyKeys.Select(async (propertyKey) =>
+            {
+                // NOTE; There are no character limits on property keys
+                var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
+                var resource = $"rest/api/2/issue/{issueKey}/properties/{urlEncodedKey}";
+
+                try
+                {
+                    // NOTE; Response includes the key and value
+                    var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
+                    return response.ToObject<RemoteEntityProperty>(serializer);
+                }
+                catch (ResourceNotFoundException)
+                {
+                    // WARN; Null result needs to be filtered out during processing!
+                    return null;
+                }
+            });
+
+            var responses = await Task.WhenAll(requestTasks).ConfigureAwait(false);
+            var transformedResponses = responses
+                .Where(x => x != null)
+                .ToDictionary(x => x.key, x => x.value);
+
+            return new ReadOnlyDictionary<string, JToken>(transformedResponses);
+        }
+
+        public Task SetPropertyAsync(string issueKey, string propertyKey, JToken obj, CancellationToken token = default)
+        {
+            if (string.IsNullOrEmpty(issueKey))
+            {
+                throw new InvalidOperationException("Unable to interact with the issue properties, make sure the issue has been created.");
+            }
+
+            if (propertyKey.Length <= 0 || propertyKey.Length >= 256)
+            {
+                throw new ArgumentOutOfRangeException(nameof(propertyKey), "PropertyKey length must be between 0 and 256 (both exclusive)");
+            }
+
+            var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
+            var resource = $"rest/api/2/issue/{issueKey}/properties/{urlEncodedKey}";
+            return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, obj, token);
+        }
+
+        public async Task DeletePropertyAsync(string issueKey, string propertyKey, CancellationToken token = default)
+        {
+            if (string.IsNullOrEmpty(issueKey))
+            {
+                throw new InvalidOperationException("Unable to interact with the issue properties, make sure the issue has been created.");
+            }
+
+            var existingKeys = await GetPropertyKeysAsync(issueKey, token);
+            if (existingKeys.Contains(propertyKey))
+            {
+                var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
+                var resource = $"rest/api/2/issue/{issueKey}/properties/{urlEncodedKey}";
+                await _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
+            }
         }
     }
 }

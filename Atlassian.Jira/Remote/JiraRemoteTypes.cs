@@ -2412,4 +2412,16 @@ namespace Atlassian.Jira.Remote
         public string key { get; set; }
         public object value { get; set; }
     }
+
+    public class RemoteEntityProperty
+    {
+        public string key { get; set; }
+        public JToken value { get; set; }
+    }
+
+    public class RemoteEntityPropertyReference
+    {
+        public string self { get; set; }
+        public string key { get; set; }
+    }
 }

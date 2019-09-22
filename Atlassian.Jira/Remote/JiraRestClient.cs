@@ -174,6 +174,10 @@ namespace Atlassian.Jira.Remote
             {
                 throw new InvalidOperationException($"Error Message: {response.ErrorMessage}");
             }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new ResourceNotFoundException($"Response Content: {content}");
+            }
             else if (response.StatusCode == HttpStatusCode.Forbidden || response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 throw new System.Security.Authentication.AuthenticationException(string.Format("Response Content: {0}", content));
