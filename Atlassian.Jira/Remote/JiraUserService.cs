@@ -48,5 +48,11 @@ namespace Atlassian.Jira.Remote
 
             return _jira.RestClient.ExecuteRequestAsync<IEnumerable<JiraUser>>(Method.GET, resource, null, token);
         }
+        
+        public Task<JiraUser> GetMyselfAsync(CancellationToken token = default(CancellationToken))
+        {
+            var resource = "rest/api/2/myself";
+            return _jira.RestClient.ExecuteRequestAsync<JiraUser>(Method.GET, resource, null, token);
+        }
     }
 }

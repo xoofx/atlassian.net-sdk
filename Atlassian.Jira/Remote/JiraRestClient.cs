@@ -21,25 +21,32 @@ namespace Atlassian.Jira.Remote
 
         /// <summary>
         /// Creates a new instance of the JiraRestClient class.
-        /// </summary
+        /// </summary>
         /// <param name="url">Url to the JIRA server.</param>
         /// <param name="username">Username used to authenticate.</param>
         /// <param name="password">Password used to authenticate.</param>
         /// <param name="settings">Settings to configure the rest client.</param>
         public JiraRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
+            : this(url, new HttpBasicAuthenticator(username, password), settings)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the JiraRestClient class.
+        /// </summary>
+        /// <param name="url">The url to the JIRA server.</param>
+        /// <param name="authenticator">The authenticator used by RestSharp.</param>
+        /// <param name="settings">The settings to configure the rest client.</param>
+        protected JiraRestClient(string url, IAuthenticator authenticator, JiraRestClientSettings settings = null)
         {
             url = url.EndsWith("/") ? url : url += "/";
-
             _clientSettings = settings ?? new JiraRestClientSettings();
             _restClient = new RestClient(url)
             {
                 Proxy = _clientSettings.Proxy
             };
 
-            if (!String.IsNullOrEmpty(username) && !String.IsNullOrEmpty(password))
-            {
-                this._restClient.Authenticator = new HttpBasicAuthenticator(username, password);
-            }
+            this._restClient.Authenticator = authenticator;
         }
 
         /// <summary>

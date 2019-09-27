@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using Atlassian.Jira.Linq;
+using Atlassian.Jira.OAuth;
 using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
@@ -14,7 +16,7 @@ namespace Atlassian.Jira
         internal const string DEFAULT_DATE_TIME_FORMAT = DEFAULT_DATE_FORMAT + " HH:mm";
         internal static CultureInfo DefaultCultureInfo = CultureInfo.GetCultureInfo("en-us");
 
-        private readonly JiraCredentials _credentials;
+        private JiraCredentials _credentials;
         private readonly JiraCache _cache;
         private readonly ServiceLocator _services;
 
@@ -63,6 +65,46 @@ namespace Atlassian.Jira
             ConfigureDefaultServices(services, jira, jiraClient);
             return jira;
         }
+        
+        /// <summary>
+        /// Creates a JIRA rest client using OAuth authentication protocol.
+        /// </summary>
+        /// <param name="url">Url to the JIRA server.</param>
+        /// <param name="consumerKey">The consumer key provided by the Jira application link.</param>
+        /// <param name="consumerSecret">The consumer public key in XML format.</param>
+        /// <param name="oAuthAccessToken">The access token provided by Jira after the request token has been authorize.</param>
+        /// <param name="oAuthTokenSecret">The token secret provided by Jira when asking for a request token.</param>
+        /// <param name="oAuthSignatureMethod">The signature method used to generate the request token.</param>
+        /// <returns>Jira object configured to use REST API.</returns>
+        public static async Task<Jira> CreateOAuthRestClientAsync(
+            string url,
+            string consumerKey,
+            string consumerSecret,
+            string oAuthAccessToken,
+            string oAuthTokenSecret,
+            JiraOAuthSignatureMethod oAuthSignatureMethod = JiraOAuthSignatureMethod.RsaSha1)
+        {
+            var services = new ServiceLocator();
+            var settings = new JiraRestClientSettings();
+            var jira = new Jira(services, new JiraCredentials(null), settings.Cache);
+            var restClient = new JiraOAuthRestClient(
+                url,
+                consumerKey,
+                consumerSecret,
+                oAuthAccessToken,
+                oAuthTokenSecret,
+                oAuthSignatureMethod,
+                settings);
+
+            ConfigureDefaultServices(services, jira, restClient);
+
+            var currentUser = await jira.Users.GetMyselfAsync();
+
+            jira._credentials = new JiraCredentials(currentUser.Username);
+
+            return jira;
+        }
+
 
         /// <summary>
         /// Gets the service locator for this jira instance.
