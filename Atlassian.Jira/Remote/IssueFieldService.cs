@@ -32,21 +32,41 @@ namespace Atlassian.Jira.Remote
             return cache.CustomFields.Values;
         }
 
-        private static IEnumerable<CustomField> GetCustomFieldsFromIssueType(JToken issueType, JsonSerializerSettings serializerSettings)
-        {
-            return ((JObject)issueType["fields"]).Properties()
-                .Where(f => f.Name.StartsWith("customfield_", StringComparison.OrdinalIgnoreCase))
-                .Select(f => JsonConvert.DeserializeObject<RemoteField>(f.Value.ToString(), serializerSettings))
-                .Select(remoteField => new CustomField(remoteField));
-        }
-
-        public async Task<IEnumerable<CustomField>> GetCustomFieldsForProjectAsync(string projectKey, CancellationToken token = default(CancellationToken))
+        public async Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CustomFieldFetchOptions options, CancellationToken token = default)
         {
             var cache = _jira.Cache;
+            var projectKey = options.ProjectKeys.FirstOrDefault();
+            var issueTypeId = options.IssueTypeIds.FirstOrDefault();
+            var issueTypeName = options.IssueTypeNames.FirstOrDefault();
+
+            if (!String.IsNullOrEmpty(issueTypeId) || !String.IsNullOrEmpty(issueTypeName))
+            {
+                projectKey = $"{projectKey}::{issueTypeId}::{issueTypeName}";
+            }
+            else if (String.IsNullOrEmpty(projectKey))
+            {
+                return await GetCustomFieldsAsync(token);
+            }
 
             if (!cache.ProjectCustomFields.TryGetValue(projectKey, out JiraEntityDictionary<CustomField> fields))
             {
-                var resource = $"rest/api/2/issue/createmeta?projectKeys={projectKey}&expand=projects.issuetypes.fields";
+                var resource = $"rest/api/2/issue/createmeta?expand=projects.issuetypes.fields";
+
+                if (options.ProjectKeys.Any())
+                {
+                    resource += $"&projectKeys={String.Join(",", options.ProjectKeys)}";
+                }
+
+                if (options.IssueTypeIds.Any())
+                {
+                    resource += $"&issuetypeIds={String.Join(",", options.IssueTypeIds)}";
+                }
+
+                if (options.IssueTypeNames.Any())
+                {
+                    resource += $"&issuetypeNames={String.Join(",", options.IssueTypeNames)}";
+                }
+
                 var jObject = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
                 var jProject = jObject["projects"].FirstOrDefault();
 
@@ -63,6 +83,22 @@ namespace Atlassian.Jira.Remote
             }
 
             return cache.ProjectCustomFields[projectKey].Values;
+        }
+
+        public Task<IEnumerable<CustomField>> GetCustomFieldsForProjectAsync(string projectKey, CancellationToken token = default(CancellationToken))
+        {
+            var options = new CustomFieldFetchOptions();
+            options.ProjectKeys.Add(projectKey);
+
+            return GetCustomFieldsAsync(options, token);
+        }
+
+        private static IEnumerable<CustomField> GetCustomFieldsFromIssueType(JToken issueType, JsonSerializerSettings serializerSettings)
+        {
+            return ((JObject)issueType["fields"]).Properties()
+                .Where(f => f.Name.StartsWith("customfield_", StringComparison.OrdinalIgnoreCase))
+                .Select(f => JsonConvert.DeserializeObject<RemoteField>(f.Value.ToString(), serializerSettings))
+                .Select(remoteField => new CustomField(remoteField));
         }
     }
 }

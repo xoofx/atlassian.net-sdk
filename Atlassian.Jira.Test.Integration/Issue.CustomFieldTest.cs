@@ -10,7 +10,9 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public async void CustomFieldsForProject_IfProjectDoesNotExist_ShouldThrowException()
         {
-            Exception ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await _jira.Fields.GetCustomFieldsForProjectAsync("FOO"));
+            var options = new CustomFieldFetchOptions();
+            options.ProjectKeys.Add("FOO");
+            Exception ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await _jira.Fields.GetCustomFieldsAsync(options));
 
             Assert.Contains("Project with key 'FOO' was not found on the Jira server.", ex.Message);
         }
@@ -18,7 +20,23 @@ namespace Atlassian.Jira.Test.Integration
         [Fact]
         public async void CustomFieldsForProject_ShouldReturnAllCustomFieldsOfAllIssueTypes()
         {
-            var results = await _jira.Fields.GetCustomFieldsForProjectAsync("TST");
+            var options = new CustomFieldFetchOptions();
+            options.ProjectKeys.Add("TST");
+            var results = await _jira.Fields.GetCustomFieldsAsync(options);
+            Assert.Equal(19, results.Count());
+        }
+
+        /// <summary>
+        /// Note that in the current data set all the custom fields are reused between the issue types.
+        /// </summary>
+        [Fact]
+        public async void CustomFieldsForProjectAndIssueType_ShouldReturnAllCustomFieldsTheIssueType()
+        {
+            var options = new CustomFieldFetchOptions();
+            options.ProjectKeys.Add("TST");
+            options.IssueTypeNames.Add("Bug");
+
+            var results = await _jira.Fields.GetCustomFieldsAsync(options);
             Assert.Equal(19, results.Count());
         }
 
