@@ -90,7 +90,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
         {
             File.Copy(
                 Path.Combine(currentDir, "TestData.zip"),
-                Path.Combine(currentDir, @"amps-standalone-jira-7.1.7\target\jira\home\import\TestData.zip"),
+                Path.Combine(currentDir, @"amps-standalone-jira-7.13.8\target\jira\home\import\TestData.zip"),
                 true);
 
             webDriver.Url = $"http://localhost:{port}/jira/secure/admin/XmlRestore!default.jspa";
