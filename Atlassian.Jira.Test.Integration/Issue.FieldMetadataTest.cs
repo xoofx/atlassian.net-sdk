@@ -8,11 +8,12 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueFieldMetadataTest : BaseIntegrationTest
     {
-        [Fact]
-        public async Task TestNonCustomFieldOption()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task TestNonCustomFieldOption(Jira jira)
         {
             // prepare
-            Issue iss = _jira.Issues.GetIssueAsync("TST-1").Result;
+            Issue iss = jira.Issues.GetIssueAsync("TST-1").Result;
 
             // exercise
             var issueFields = await iss.GetIssueFieldsEditMetadataAsync();
@@ -21,11 +22,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.False(customRadioField.IsCustom);
         }
 
-        [Fact]
-        public async Task TestCustomFieldOptions()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task TestCustomFieldOptions(Jira jira)
         {
             // prepare
-            Issue iss = _jira.Issues.GetIssueAsync("TST-1").Result;
+            Issue iss = jira.Issues.GetIssueAsync("TST-1").Result;
 
             // exercise
             var issueFields = await iss.GetIssueFieldsEditMetadataAsync();

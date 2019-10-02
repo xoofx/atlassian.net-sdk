@@ -7,10 +7,11 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueCreateTest : BaseIntegrationTest
     {
-        [Fact]
-        public async Task CreateIssueWithIssueTypesPerProject()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task CreateIssueWithIssueTypesPerProject(Jira jira)
         {
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "Bug",
                 Summary = "Test Summary " + _random.Next(int.MaxValue),
@@ -23,15 +24,16 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Bug", newIssue.Type.Name);
         }
 
-        [Fact]
-        public async Task CreateIssueWithOriginalEstimate()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task CreateIssueWithOriginalEstimate(Jira jira)
         {
             var fields = new CreateIssueFields("TST")
             {
                 TimeTrackingData = new IssueTimeTrackingData("1d")
             };
 
-            var issue = new Issue(_jira, fields)
+            var issue = new Issue(jira, fields)
             {
                 Type = "1",
                 Summary = "Test Summary " + _random.Next(int.MaxValue),
@@ -42,11 +44,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("1d", newIssue.TimeTrackingData.OriginalEstimate);
         }
 
-        [Fact]
-        public async Task CreateIssueAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task CreateIssueAsync(Jira jira)
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -59,7 +62,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("1", newIssue.Type.Id);
 
             // Create a subtask async.
-            var subTask = new Issue(_jira, "TST", newIssue.Key.Value)
+            var subTask = new Issue(jira, "TST", newIssue.Key.Value)
             {
                 Type = "5",
                 Summary = "My Subtask",
@@ -71,12 +74,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(newIssue.Key.Value, newSubTask.ParentIssueKey);
         }
 
-        [Fact]
-        public void CreateAndQueryIssueWithMinimumFieldsSet()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateAndQueryIssueWithMinimumFieldsSet(Jira jira)
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -85,7 +89,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var issues = (from i in _jira.Issues.Queryable
+            var issues = (from i in jira.Issues.Queryable
                           where i.Key == issue.Key
                           select i).ToArray();
 
@@ -96,12 +100,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("1", issues[0].Type.Id);
         }
 
-        [Fact]
-        public void CreateAndQueryIssueWithAllFieldsSet()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateAndQueryIssueWithAllFieldsSet(Jira jira)
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
             var expectedDueDate = new DateTime(2011, 12, 12);
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.AffectsVersions.Add("1.0");
             issue.Assignee = "admin";
             issue.Components.Add("Server");
@@ -118,7 +123,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var queriedIssue = (from i in _jira.Issues.Queryable
+            var queriedIssue = (from i in jira.Issues.Queryable
                                 where i.Key == issue.Key
                                 select i).ToArray().First();
 
@@ -131,15 +136,16 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Contains("testLabel", queriedIssue.Labels);
         }
 
-        [Fact]
-        public void CreateAndQueryIssueWithSubTask()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateAndQueryIssueWithSubTask(Jira jira)
         {
-            var parentTask = _jira.CreateIssue("TST");
+            var parentTask = jira.CreateIssue("TST");
             parentTask.Type = "1";
             parentTask.Summary = "Test issue with SubTask" + _random.Next(int.MaxValue);
             parentTask.SaveChanges();
 
-            var subTask = _jira.CreateIssue("TST", parentTask.Key.Value);
+            var subTask = jira.CreateIssue("TST", parentTask.Key.Value);
             subTask.Type = "5"; // SubTask issue type.
             subTask.Summary = "Test SubTask" + _random.Next(int.MaxValue);
             subTask.SaveChanges();
@@ -149,18 +155,19 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
 
             // query the subtask again to make sure it loads everything from server.
-            subTask = _jira.Issues.GetIssueAsync(subTask.Key.Value).Result;
+            subTask = jira.Issues.GetIssueAsync(subTask.Key.Value).Result;
             Assert.False(parentTask.Type.IsSubTask);
             Assert.True(subTask.Type.IsSubTask);
             Assert.Equal(parentTask.Key.Value, subTask.ParentIssueKey);
         }
 
-        [Fact]
-        public void CreateAndQueryIssueWithVersions()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateAndQueryIssueWithVersions(Jira jira)
         {
             var summaryValue = "Test issue with versions (Created)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -175,7 +182,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = (from i in _jira.Issues.Queryable
+            var newIssue = (from i in jira.Issues.Queryable
                             where i.AffectsVersions == "1.0" && i.AffectsVersions == "2.0"
                                     && i.FixVersions == "2.0" && i.FixVersions == "3.0"
                             select i).First();
@@ -189,12 +196,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Contains(newIssue.FixVersions, v => v.Name == "3.0");
         }
 
-        [Fact]
-        public void CreateAndQueryIssueWithComponents()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateAndQueryIssueWithComponents(Jira jira)
         {
             var summaryValue = "Test issue with components (Created)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -206,7 +214,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = (from i in _jira.Issues.Queryable
+            var newIssue = (from i in jira.Issues.Queryable
                             where i.Summary == summaryValue && i.Components == "Server" && i.Components == "Client"
                             select i).First();
 
@@ -215,12 +223,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Contains(newIssue.Components, c => c.Name == "Client");
         }
 
-        [Fact]
-        public void CreateAndQueryIssueWithCustomField()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateAndQueryIssueWithCustomField(Jira jira)
         {
             var summaryValue = "Test issue with custom field (Created)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -231,7 +240,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = (from i in _jira.Issues.Queryable
+            var newIssue = (from i in jira.Issues.Queryable
                             where i.Summary == summaryValue && i["Custom Text Field"] == "My new value"
                             select i).First();
 
@@ -239,12 +248,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("admin", newIssue["Custom User Field"]);
         }
 
-        [Fact]
-        public void CreateIssueAsSubtask()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateIssueAsSubtask(Jira jira)
         {
             var summaryValue = "Test issue as subtask " + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST", "TST-1")
+            var issue = new Issue(jira, "TST", "TST-1")
             {
                 Type = "5", //subtask
                 Summary = summaryValue,
@@ -252,7 +262,7 @@ namespace Atlassian.Jira.Test.Integration
             };
             issue.SaveChanges();
 
-            var subtasks = _jira.Issues.GetIssuesFromJqlAsync("project = TST and parent = TST-1").Result;
+            var subtasks = jira.Issues.GetIssuesFromJqlAsync("project = TST and parent = TST-1").Result;
 
             Assert.True(subtasks.Any(s => s.Summary.Equals(summaryValue)),
                 String.Format("'{0}' was not found as a sub-task of TST-1", summaryValue));

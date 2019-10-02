@@ -8,8 +8,9 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueQueryTest : BaseIntegrationTest
     {
-        [Fact]
-        public async Task GetIssueThatIncludesOnlyOneBasicField()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssueThatIncludesOnlyOneBasicField(Jira jira)
         {
             var options = new IssueSearchOptions("key = TST-1")
             {
@@ -17,13 +18,14 @@ namespace Atlassian.Jira.Test.Integration
                 AdditionalFields = new List<string>() { "summary" }
             };
 
-            var issues = await _jira.Issues.GetIssuesFromJqlAsync(options);
+            var issues = await jira.Issues.GetIssuesFromJqlAsync(options);
             Assert.NotNull(issues.First().Summary);
             Assert.Null(issues.First().Assignee);
         }
 
-        [Fact]
-        public async Task GetIssueThatIncludesOnlyOneNonBasicField()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssueThatIncludesOnlyOneNonBasicField(Jira jira)
         {
             var options = new IssueSearchOptions("key = TST-1")
             {
@@ -31,17 +33,18 @@ namespace Atlassian.Jira.Test.Integration
                 AdditionalFields = new List<string>() { "attachment" }
             };
 
-            var issues = await _jira.Issues.GetIssuesFromJqlAsync(options);
+            var issues = await jira.Issues.GetIssuesFromJqlAsync(options);
             var issue = issues.First();
             Assert.Null(issue.Summary);
             Assert.NotEmpty(issue.AdditionalFields.Attachments);
         }
 
-        [Fact]
-        public async Task GetIssueThatIncludesOnlyAllNonBasicFields()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssueThatIncludesOnlyAllNonBasicFields(Jira jira)
         {
             // Arrange
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = "Test issue",
@@ -60,7 +63,7 @@ namespace Atlassian.Jira.Test.Integration
                 AdditionalFields = new List<string>() { "comment", "watches", "worklog" }
             };
 
-            var issues = await _jira.Issues.GetIssuesFromJqlAsync(options);
+            var issues = await jira.Issues.GetIssuesFromJqlAsync(options);
             var serverIssue = issues.First();
 
             // Assert
@@ -80,22 +83,24 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("My comment", comments.First().Body);
         }
 
-        [Fact]
-        public async Task GetIssuesAsyncWhenIssueDoesNotExist()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssuesAsyncWhenIssueDoesNotExist(Jira jira)
         {
-            var dict = await _jira.Issues.GetIssuesAsync("TST-9999");
+            var dict = await jira.Issues.GetIssuesAsync("TST-9999");
 
             Assert.False(dict.ContainsKey("TST-9999"));
         }
 
-        [Fact]
-        public void GetIssuesWithPagingMetadata()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssuesWithPagingMetadata(Jira jira)
         {
             // Arrange: Create 3 issues to query.
             var summaryValue = "Test-Summary-" + Guid.NewGuid().ToString();
             for (int i = 0; i < 3; i++)
             {
-                new Issue(_jira, "TST")
+                new Issue(jira, "TST")
                 {
                     Type = "1",
                     Summary = summaryValue,
@@ -105,7 +110,7 @@ namespace Atlassian.Jira.Test.Integration
 
             // Act: Query for paged issues.
             var jql = String.Format("summary ~ \"{0}\"", summaryValue);
-            var result = _jira.Issues.GetIssuesFromJqlAsync(jql, 5, 1).Result as IPagedQueryResult<Issue>;
+            var result = jira.Issues.GetIssuesFromJqlAsync(jql, 5, 1).Result as IPagedQueryResult<Issue>;
 
             // Assert
             Assert.Equal(1, result.StartAt);
@@ -114,29 +119,32 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(5, result.ItemsPerPage);
         }
 
-        [Fact]
-        public void GetIssuesFromFilter()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssuesFromFilter(Jira jira)
         {
-            var issues = _jira.Filters.GetIssuesFromFavoriteAsync("One Issue Filter").Result;
+            var issues = jira.Filters.GetIssuesFromFavoriteAsync("One Issue Filter").Result;
 
             Assert.Single(issues);
             Assert.Equal("TST-1", issues.First().Key.Value);
         }
 
-        [Fact]
-        public void QueryWithZeroResults()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void QueryWithZeroResults(Jira jira)
         {
-            var issues = from i in _jira.Issues.Queryable
+            var issues = from i in jira.Issues.Queryable
                          where i.Created == new DateTime(2010, 1, 1)
                          select i;
 
             Assert.Equal(0, issues.Count());
         }
 
-        [Fact]
-        public void QueryIssueWithLabel()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void QueryIssueWithLabel(Jira jira)
         {
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = "Test issue with labels",
@@ -146,50 +154,53 @@ namespace Atlassian.Jira.Test.Integration
             issue.Labels.Add("test-label");
             issue.SaveChanges();
 
-            var serverIssue = (from i in _jira.Issues.Queryable
+            var serverIssue = (from i in jira.Issues.Queryable
                                where i.Labels == "test-label"
                                select i).First();
 
             Assert.Contains("test-label", serverIssue.Labels);
         }
 
-        [Fact]
-        public void QueryIssueWithCustomDateField()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void QueryIssueWithCustomDateField(Jira jira)
         {
-            var issue = (from i in _jira.Issues.Queryable
+            var issue = (from i in jira.Issues.Queryable
                          where i["Custom Date Field"] <= new DateTime(2012, 4, 1)
                          select i).First();
 
             Assert.Equal("Sample bug in Test Project", issue.Summary);
         }
 
-        [Fact]
-        public void QueryIssuesWithTakeExpression()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void QueryIssuesWithTakeExpression(Jira jira)
         {
             // create 2 issues with same summary
             var randomNumber = _random.Next(int.MaxValue);
-            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
-            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
+            (new Issue(jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
+            (new Issue(jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
 
             // query with take method to only return 1
-            var issues = (from i in _jira.Issues.Queryable
+            var issues = (from i in jira.Issues.Queryable
                           where i.Summary == randomNumber.ToString()
                           select i).Take(1);
 
             Assert.Equal(1, issues.Count());
         }
 
-        [Fact]
-        public void MaximumNumberOfIssuesPerRequest()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void MaximumNumberOfIssuesPerRequest(Jira jira)
         {
             // create 2 issues with same summary
             var randomNumber = _random.Next(int.MaxValue);
-            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
-            (new Issue(_jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
+            (new Issue(jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
+            (new Issue(jira, "TST") { Type = "1", Summary = "Test Summary " + randomNumber, Assignee = "admin" }).SaveChanges();
 
             //set maximum issues and query
-            _jira.Issues.MaxIssuesPerRequest = 1;
-            var issues = from i in _jira.Issues.Queryable
+            jira.Issues.MaxIssuesPerRequest = 1;
+            var issues = from i in jira.Issues.Queryable
                          where i.Summary == randomNumber.ToString()
                          select i;
 
@@ -197,10 +208,11 @@ namespace Atlassian.Jira.Test.Integration
 
         }
 
-        [Fact]
-        public async Task GetIssuesFromJqlAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssuesFromJqlAsync(Jira jira)
         {
-            var issues = await _jira.Issues.GetIssuesFromJqlAsync("key = TST-1");
+            var issues = await jira.Issues.GetIssuesFromJqlAsync("key = TST-1");
             Assert.Single(issues);
         }
     }

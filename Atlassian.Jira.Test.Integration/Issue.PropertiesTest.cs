@@ -7,10 +7,11 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssuePropertiesTest : BaseIntegrationTest
     {
-        [Fact]
-        public async Task TimeTrackingPropertyIncludedInResponses()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task TimeTrackingPropertyIncludedInResponses(Jira jira)
         {
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = "Test issue with estimates",
@@ -24,14 +25,15 @@ namespace Atlassian.Jira.Test.Integration
 
             await newIssue.AddWorklogAsync("1d");
 
-            var issuesFromQuery = await _jira.Issues.GetIssuesFromJqlAsync($"id = {newIssue.Key.Value}");
+            var issuesFromQuery = await jira.Issues.GetIssuesFromJqlAsync($"id = {newIssue.Key.Value}");
             Assert.Equal("1d", issuesFromQuery.Single().TimeTrackingData.TimeSpent);
         }
 
-        [Fact]
-        public async Task VotesAndHasVotedProperties()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task VotesAndHasVotedProperties(Jira jira)
         {
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = "Test issue with votes",
@@ -45,7 +47,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.False(issue.HasUserVoted);
 
             // cast a vote with a second user.
-            var jiraTester = Jira.CreateRestClient(BaseIntegrationTest.HOST, "test", "test");
+            var jiraTester = Jira.CreateRestClient(JiraProvider.HOST, "test", "test");
             await jiraTester.RestClient.ExecuteRequestAsync(RestSharp.Method.POST, $"rest/api/2/issue/{issue.Key.Value}/votes");
 
             // verify votes for first user

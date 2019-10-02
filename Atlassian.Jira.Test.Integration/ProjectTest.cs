@@ -7,21 +7,23 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class ProjectTest : BaseIntegrationTest
     {
-        [Fact]
-        public async Task GetIssueTypes()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssueTypes(Jira jira)
         {
-            var project = await _jira.Projects.GetProjectAsync("TST");
+            var project = await jira.Projects.GetProjectAsync("TST");
             var issueTypes = await project.GetIssueTypesAsync();
 
             Assert.True(issueTypes.Any());
         }
 
-        [Fact]
-        public void AddAndRemoveProjectComponent()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddAndRemoveProjectComponent(Jira jira)
         {
             var componentName = "New Component " + _random.Next(int.MaxValue);
             var projectInfo = new ProjectComponentCreationInfo(componentName);
-            var project = _jira.Projects.GetProjectsAsync().Result.First();
+            var project = jira.Projects.GetProjectsAsync().Result.First();
 
             // Add a project component.
             var component = project.AddComponentAsync(projectInfo).Result;
@@ -35,18 +37,20 @@ namespace Atlassian.Jira.Test.Integration
             Assert.DoesNotContain(project.GetComponentsAsync().Result, p => p.Name == componentName);
         }
 
-        [Fact]
-        public void GetProjectComponents()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetProjectComponents(Jira jira)
         {
-            var components = _jira.Components.GetComponentsAsync("TST").Result;
+            var components = jira.Components.GetComponentsAsync("TST").Result;
             Assert.Equal(2, components.Count());
         }
 
-        [Fact]
-        public void GetAndUpdateProjectVersions()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetAndUpdateProjectVersions(Jira jira)
         {
             var startDate = new DateTime(2000, 11, 1);
-            var versions = _jira.Versions.GetVersionsAsync("TST").Result;
+            var versions = jira.Versions.GetVersionsAsync("TST").Result;
             Assert.True(versions.Count() >= 3);
 
             var version = versions.First(v => v.Name == "1.0");
@@ -56,16 +60,17 @@ namespace Atlassian.Jira.Test.Integration
             version.SaveChanges();
 
             Assert.Equal(newDescription, version.Description);
-            version = _jira.Versions.GetVersionsAsync("TST").Result.First(v => v.Name == "1.0");
+            version = jira.Versions.GetVersionsAsync("TST").Result.First(v => v.Name == "1.0");
             Assert.Equal(newDescription, version.Description);
             Assert.Equal(version.StartDate, startDate);
         }
 
-        [Fact]
-        public void AddAndRemoveProjectVersions()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddAndRemoveProjectVersions(Jira jira)
         {
             var versionName = "New Version " + _random.Next(int.MaxValue);
-            var project = _jira.Projects.GetProjectsAsync().Result.First();
+            var project = jira.Projects.GetProjectsAsync().Result.First();
             var projectInfo = new ProjectVersionCreationInfo(versionName);
             projectInfo.StartDate = new DateTime(2000, 11, 1);
 

@@ -18,13 +18,14 @@ namespace Atlassian.Jira.Test.Integration
             };
         }
 
-        [Fact]
-        public void CreateGetAndDeleteUsers()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateGetAndDeleteUsers(Jira jira)
         {
             var userInfo = BuildUserInfo();
 
             // verify create a user.
-            var user = _jira.Users.CreateUserAsync(userInfo).Result;
+            var user = jira.Users.CreateUserAsync(userInfo).Result;
             Assert.Equal(user.Email, userInfo.Email);
             Assert.Equal(user.DisplayName, userInfo.DisplayName);
             Assert.Equal(user.Username, userInfo.Username);
@@ -33,40 +34,41 @@ namespace Atlassian.Jira.Test.Integration
             Assert.False(String.IsNullOrEmpty(user.Locale));
 
             // verify retrieve a user.
-            user = _jira.Users.GetUserAsync(userInfo.Username).Result;
+            user = jira.Users.GetUserAsync(userInfo.Username).Result;
             Assert.Equal(user.DisplayName, userInfo.DisplayName);
 
             // verify search for a user
-            var users = _jira.Users.SearchUsersAsync("test").Result;
+            var users = jira.Users.SearchUsersAsync("test").Result;
             Assert.Contains(users, u => u.Username == userInfo.Username);
 
             // verify delete a user
-            _jira.Users.DeleteUserAsync(userInfo.Username).Wait();
-            users = _jira.Users.SearchUsersAsync(userInfo.Username).Result;
+            jira.Users.DeleteUserAsync(userInfo.Username).Wait();
+            users = jira.Users.SearchUsersAsync(userInfo.Username).Result;
             Assert.Empty(users);
         }
 
-        [Fact]
-        public void AddAndRemoveUserFromGroup()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddAndRemoveUserFromGroup(Jira jira)
         {
             // Create the group.
             var groupName = "test-group-" + _random.Next(int.MaxValue);
-            _jira.Groups.CreateGroupAsync(groupName).Wait();
+            jira.Groups.CreateGroupAsync(groupName).Wait();
 
             // add user to group
-            _jira.Groups.AddUserAsync(groupName, "admin").Wait();
+            jira.Groups.AddUserAsync(groupName, "admin").Wait();
 
             // get users from group.
-            var users = _jira.Groups.GetUsersAsync(groupName).Result;
+            var users = jira.Groups.GetUsersAsync(groupName).Result;
             Assert.Equal("admin", users.First().Username);
 
             // delete user from group.
-            _jira.Groups.RemoveUserAsync(groupName, "admin").Wait();
-            users = _jira.Groups.GetUsersAsync(groupName).Result;
+            jira.Groups.RemoveUserAsync(groupName, "admin").Wait();
+            users = jira.Groups.GetUsersAsync(groupName).Result;
             Assert.Empty(users);
 
             // delete group
-            _jira.Groups.DeleteGroupAsync(groupName).Wait();
+            jira.Groups.DeleteGroupAsync(groupName).Wait();
         }
     }
 }

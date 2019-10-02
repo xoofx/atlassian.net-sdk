@@ -9,10 +9,11 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueOperationsTest : BaseIntegrationTest
     {
-        [Fact]
-        async Task AssignIssue()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        async Task AssignIssue(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Type = "1";
             issue.Summary = "Test issue to assign" + _random.Next(int.MaxValue);
 
@@ -22,14 +23,15 @@ namespace Atlassian.Jira.Test.Integration
             await issue.AssignAsync("test");
             Assert.Equal("test", issue.Assignee);
 
-            issue = await _jira.Issues.GetIssueAsync(issue.Key.Value);
+            issue = await jira.Issues.GetIssueAsync(issue.Key.Value);
             Assert.Equal("test", issue.Assignee);
         }
 
-        [Fact]
-        void GetChangeLogsForIssue()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        void GetChangeLogsForIssue(Jira jira)
         {
-            var changelogs = _jira.Issues.GetIssueAsync("TST-1").Result.GetChangeLogsAsync().Result.OrderBy(log => log.CreatedDate);
+            var changelogs = jira.Issues.GetIssueAsync("TST-1").Result.GetChangeLogsAsync().Result.OrderBy(log => log.CreatedDate);
             Assert.True(changelogs.Count() >= 4);
 
             var firstChangeLog = changelogs.First();
@@ -46,10 +48,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("SampleImage.png", firstItem.ToValue);
         }
 
-        [Fact]
-        void AddAndRemoveWatchersToIssue()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        void AddAndRemoveWatchersToIssue(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Type = "1";
             issue.Summary = "Test issue with watchers" + _random.Next(int.MaxValue);
             issue.SaveChanges();
@@ -67,15 +70,16 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("test@qa.com", user.Email);
         }
 
-        [Fact]
-        void GetSubTasks()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        void GetSubTasks(Jira jira)
         {
-            var parentTask = _jira.CreateIssue("TST");
+            var parentTask = jira.CreateIssue("TST");
             parentTask.Type = "1";
             parentTask.Summary = "Test issue with SubTask" + _random.Next(int.MaxValue);
             parentTask.SaveChanges();
 
-            var subTask = _jira.CreateIssue("TST", parentTask.Key.Value);
+            var subTask = jira.CreateIssue("TST", parentTask.Key.Value);
             subTask.Type = "5"; // SubTask issue type.
             subTask.Summary = "Test SubTask" + _random.Next(int.MaxValue);
             subTask.SaveChanges();
@@ -85,10 +89,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(results.First().Summary, subTask.Summary);
         }
 
-        [Fact]
-        void RetrieveEmptyIssueLinks()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        void RetrieveEmptyIssueLinks(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "Issue with no links " + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
@@ -96,20 +101,21 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Empty(issue.GetIssueLinksAsync().Result);
         }
 
-        [Fact]
-        void AddAndRetrieveIssueLinks()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        void AddAndRetrieveIssueLinks(Jira jira)
         {
-            var issue1 = _jira.CreateIssue("TST");
+            var issue1 = jira.CreateIssue("TST");
             issue1.Summary = "Issue to link from" + _random.Next(int.MaxValue);
             issue1.Type = "Bug";
             issue1.SaveChanges();
 
-            var issue2 = _jira.CreateIssue("TST");
+            var issue2 = jira.CreateIssue("TST");
             issue2.Summary = "Issue to link to " + _random.Next(int.MaxValue);
             issue2.Type = "Bug";
             issue2.SaveChanges();
 
-            var issue3 = _jira.CreateIssue("TST");
+            var issue3 = jira.CreateIssue("TST");
             issue3.Summary = "Issue to link to " + _random.Next(int.MaxValue);
             issue3.Type = "Bug";
             issue3.SaveChanges();
@@ -139,10 +145,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(issue3.Key.Value, issueLink.InwardIssue.Key.Value);
         }
 
-        [Fact]
-        public async Task AddAndRetrieveRemoteLinks()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task AddAndRetrieveRemoteLinks(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "Issue to link from" + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
@@ -168,10 +175,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Contains(remoteLinks, l => l.RemoteUrl == url2 && l.Title == title2 && l.Summary == null);
         }
 
-        [Fact]
-        public async Task GetTransitionsAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetTransitionsAsync(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "Issue with transitions " + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
@@ -187,10 +195,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Resolved", transition.To.Name);
         }
 
-        [Fact]
-        public async Task TransitionIssueAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task TransitionIssueAsync(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "Issue to resolve with async" + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
@@ -203,10 +212,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Fixed", issue.Resolution.Name);
         }
 
-        [Fact]
-        public async Task TransitionIssueAsyncWithCommentAndFields()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task TransitionIssueAsyncWithCommentAndFields(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "Issue to resolve with async" + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
@@ -217,7 +227,7 @@ namespace Atlassian.Jira.Test.Integration
 
             await issue.WorkflowTransitionAsync(WorkflowActions.Resolve, updates, CancellationToken.None);
 
-            var updatedIssue = await _jira.Issues.GetIssueAsync(issue.Key.Value);
+            var updatedIssue = await jira.Issues.GetIssueAsync(issue.Key.Value);
             Assert.Equal("Resolved", updatedIssue.Status.Name);
             Assert.Equal("Fixed", updatedIssue.Resolution.Name);
             Assert.Equal("2.0", updatedIssue.FixVersions.First().Name);
@@ -227,10 +237,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Comment with transition", comments.First().Body);
         }
 
-        [Fact]
-        void Transition_ResolveIssue()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        void Transition_ResolveIssue(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "Issue to resolve " + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
@@ -244,10 +255,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.NotNull(issue.ResolutionDate);
         }
 
-        [Fact]
-        void Transition_ResolveIssue_AsWontFix()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        void Transition_ResolveIssue_AsWontFix(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "Issue to resolve " + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
@@ -259,10 +271,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Won't Fix", issue.Resolution.Name);
         }
 
-        [Fact]
-        public async Task GetTimeTrackingDataForIssue()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetTimeTrackingDataForIssue(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "Issue with timetracking " + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.SaveChanges();
@@ -276,11 +289,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("2d", timetracking.TimeSpent);
         }
 
-        [Fact]
-        public void GetResolutionDate()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetResolutionDate(Jira jira)
         {
             // Arrange
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             var currentDate = DateTime.Now;
             issue.Summary = "Issue to resolve " + Guid.NewGuid().ToString();
             issue.Type = "Bug";
@@ -298,11 +312,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(issue.ResolutionDate.Value.Year, currentDate.Year);
         }
 
-        [Fact]
-        public void AddGetRemoveAttachmentsFromIssue()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddGetRemoveAttachmentsFromIssue(Jira jira)
         {
             var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -341,12 +356,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Single(issue.GetAttachmentsAsync().Result);
         }
 
-        [Fact]
-        public async Task DownloadAttachments()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task DownloadAttachments(Jira jira)
         {
             // create an issue
             var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -373,12 +389,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Test File Content 1", File.ReadAllText(tempFile));
         }
 
-        [Fact]
-        public async Task DownloadAttachmentData()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task DownloadAttachmentData(Jira jira)
         {
             // create an issue
             var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -400,11 +417,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(17, bytes.Length);
         }
 
-        [Fact]
-        public void AddAndGetComments()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddAndGetComments(Jira jira)
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -430,11 +448,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("new comment", comment.RenderedBody);
         }
 
-        [Fact]
-        public async Task AddAndUpdateComments()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task AddAndUpdateComments(Jira jira)
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -446,7 +465,7 @@ namespace Atlassian.Jira.Test.Integration
             // Add a comment
             var comment = new Comment()
             {
-                Author = _jira.Credentials.UserName,
+                Author = jira.Credentials.UserName,
                 Body = "New comment",
                 Visibility = new CommentVisibility("Developers")
             };
@@ -467,11 +486,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("changed body", updatedComment.Body);
         }
 
-        [Fact]
-        public async Task AddGetAndDeleteCommentsAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task AddGetAndDeleteCommentsAsync(Jira jira)
         {
             var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -504,11 +524,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Empty(comments);
         }
 
-        [Fact]
-        public async Task CanRetrievePagedCommentsAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task CanRetrievePagedCommentsAsync(Jira jira)
         {
             var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -536,27 +557,29 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("new comment4", comments.Skip(1).First().Body);
         }
 
-        [Fact]
-        public void DeleteIssue()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void DeleteIssue(Jira jira)
         {
             // Create issue and verify it is found in server.
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Type = "1";
             issue.Summary = String.Format("Issue to delete ({0})", _random.Next(int.MaxValue));
             issue.SaveChanges();
-            Assert.True(_jira.Issues.Queryable.Where(i => i.Key == issue.Key).Any(), "Expected issue in server");
+            Assert.True(jira.Issues.Queryable.Where(i => i.Key == issue.Key).Any(), "Expected issue in server");
 
             // Delete issue and verify it is no longer found.
-            _jira.Issues.DeleteIssueAsync(issue.Key.Value).Wait();
-            Assert.Throws<AggregateException>(() => _jira.Issues.GetIssueAsync(issue.Key.Value).Result);
+            jira.Issues.DeleteIssueAsync(issue.Key.Value).Wait();
+            Assert.Throws<AggregateException>(() => jira.Issues.GetIssueAsync(issue.Key.Value).Result);
         }
 
-        [Fact]
-        public void AddAndGetWorklogs()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddAndGetWorklogs(Jira jira)
         {
             var summaryValue = "Test issue with work logs" + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -576,11 +599,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(new DateTime(2012, 1, 1), logs.ElementAt(3).StartDate);
         }
 
-        [Fact]
-        public void DeleteWorklog()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void DeleteWorklog(Jira jira)
         {
             var summary = "Test issue with worklogs" + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summary,

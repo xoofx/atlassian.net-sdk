@@ -7,36 +7,39 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueCustomFieldTest : BaseIntegrationTest
     {
-        [Fact]
-        public async void CustomFieldsForProject_IfProjectDoesNotExist_ShouldThrowException()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async void CustomFieldsForProject_IfProjectDoesNotExist_ShouldThrowException(Jira jira)
         {
             var options = new CustomFieldFetchOptions();
             options.ProjectKeys.Add("FOO");
-            Exception ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await _jira.Fields.GetCustomFieldsAsync(options));
+            Exception ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await jira.Fields.GetCustomFieldsAsync(options));
 
             Assert.Contains("Project with key 'FOO' was not found on the Jira server.", ex.Message);
         }
 
-        [Fact]
-        public async void CustomFieldsForProject_ShouldReturnAllCustomFieldsOfAllIssueTypes()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async void CustomFieldsForProject_ShouldReturnAllCustomFieldsOfAllIssueTypes(Jira jira)
         {
             var options = new CustomFieldFetchOptions();
             options.ProjectKeys.Add("TST");
-            var results = await _jira.Fields.GetCustomFieldsAsync(options);
+            var results = await jira.Fields.GetCustomFieldsAsync(options);
             Assert.Equal(19, results.Count());
         }
 
         /// <summary>
         /// Note that in the current data set all the custom fields are reused between the issue types.
         /// </summary>
-        [Fact]
-        public async void CustomFieldsForProjectAndIssueType_ShouldReturnAllCustomFieldsTheIssueType()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async void CustomFieldsForProjectAndIssueType_ShouldReturnAllCustomFieldsTheIssueType(Jira jira)
         {
             var options = new CustomFieldFetchOptions();
             options.ProjectKeys.Add("TST");
             options.IssueTypeNames.Add("Bug");
 
-            var results = await _jira.Fields.GetCustomFieldsAsync(options);
+            var results = await jira.Fields.GetCustomFieldsAsync(options);
             Assert.Equal(19, results.Count());
         }
 
@@ -46,11 +49,12 @@ namespace Atlassian.Jira.Test.Integration
         /// integration server is unable to create these type of custom fields, a property was added to the
         /// CustomFieldValueCollection that can force the new code path to execute.
         /// </summary>
-        [Fact]
-        public async void CanSetCustomFieldUsingSearchByProjectOnly()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async void CanSetCustomFieldUsingSearchByProjectOnly(Jira jira)
         {
             var summaryValue = "Test issue with custom field by project" + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -89,11 +93,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.NotNull(issue);
         }
 
-        [Fact]
-        public void AddAndReadCustomFieldById()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddAndReadCustomFieldById(Jira jira)
         {
             var summaryValue = "Test issue with custom text" + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -103,15 +108,16 @@ namespace Atlassian.Jira.Test.Integration
             issue.CustomFields.AddById("customfield_10000", "My Sample Text");
             issue.SaveChanges();
 
-            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("My Sample Text", newIssue.CustomFields.First(f => f.Id.Equals("customfield_10000")).Values.First());
         }
 
-        [Fact]
-        public void CreateIssueWithCascadingSelectFieldWithOnlyParentOptionSet()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateIssueWithCascadingSelectFieldWithOnlyParentOptionSet(Jira jira)
         {
             var summaryValue = "Test issue with cascading select" + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -122,7 +128,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.CustomFields.AddCascadingSelectField("Custom Cascading Select Field", "Option3");
             issue.SaveChanges();
 
-            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             var cascadingSelect = newIssue.CustomFields.GetCascadingSelectField("Custom Cascading Select Field");
             Assert.Equal("Option3", cascadingSelect.ParentOption);
@@ -130,15 +136,16 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
         }
 
-        [Fact]
-        public void CreateAndQueryIssueWithComplexCustomFields()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateAndQueryIssueWithComplexCustomFields(Jira jira)
         {
             var dateTime = new DateTime(2016, 11, 11, 11, 11, 0);
             var dateTimeStr = dateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffzzz");
             dateTimeStr = dateTimeStr.Remove(dateTimeStr.LastIndexOf(":"), 1);
 
             var summaryValue = "Test issue with lots of custom fields (Created)" + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -165,7 +172,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             Assert.Equal("My new value", newIssue["Custom Text Field"]);
             Assert.Equal("2015-10-03", newIssue["Custom Date Field"]);
@@ -193,11 +200,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
         }
 
-        [Fact]
-        public void CanClearValueOfCustomField()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CanClearValueOfCustomField(Jira jira)
         {
             var summaryValue = "Test issue " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -209,7 +217,7 @@ namespace Atlassian.Jira.Test.Integration
             issue["Custom Select Field"] = "Blue";
             issue.SaveChanges();
 
-            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("My new value", newIssue["Custom Text Field"]);
             Assert.Equal("2015-10-03", newIssue["Custom Date Field"]);
             newIssue["Custom Text Field"] = null;
@@ -217,22 +225,23 @@ namespace Atlassian.Jira.Test.Integration
             newIssue["Custom Select Field"] = null;
             newIssue.SaveChanges();
 
-            var updatedIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            var updatedIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             Assert.Null(updatedIssue["Custom Text Field"]);
             Assert.Null(updatedIssue["Custom Date Field"]);
             Assert.Null(updatedIssue["Custom Select Field"]);
         }
 
-        [Fact]
-        public void CreateAndUpdateIssueWithComplexCustomFields()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateAndUpdateIssueWithComplexCustomFields(Jira jira)
         {
             var dateTime = new DateTime(2016, 11, 11, 11, 11, 0);
             var dateTimeStr = dateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffzzz");
             dateTimeStr = dateTimeStr.Remove(dateTimeStr.LastIndexOf(":"), 1);
 
             var summaryValue = "Test issue with lots of custom fields (Created)" + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -241,7 +250,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
-            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             newIssue["Custom Text Field"] = "My new value";
             newIssue["Custom Date Field"] = "2015-10-03";
@@ -263,7 +272,7 @@ namespace Atlassian.Jira.Test.Integration
 
             newIssue.SaveChanges();
 
-            var updatedIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            var updatedIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             Assert.Equal("My new value", updatedIssue["Custom Text Field"]);
             Assert.Equal("2015-10-03", updatedIssue["Custom Date Field"]);
@@ -290,10 +299,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Option2.2", cascadingSelect.ChildOption);
             Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
         }
-        [Fact]
-        public void CreateAndQuerySprintName()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CreateAndQuerySprintName(Jira jira)
         {
-            var issue = new Issue(_jira, "SCRUM")
+            var issue = new Issue(jira, "SCRUM")
             {
                 Type = "Bug",
                 Summary = "Test issue with sprint" + _random.Next(int.MaxValue),
@@ -304,13 +314,14 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             // Get the sprint by name
-            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("Sprint 1", newIssue["Sprint"]);
         }
-        [Fact]
-        public void UpdateAndQuerySprintName()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void UpdateAndQuerySprintName(Jira jira)
         {
-            var issue = new Issue(_jira, "SCRUM")
+            var issue = new Issue(jira, "SCRUM")
             {
                 Type = "Bug",
                 Summary = "Test issue with sprint" + _random.Next(int.MaxValue),
@@ -324,13 +335,14 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             // Get the sprint by name
-            var newIssue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("Sprint 1", newIssue["Sprint"]);
         }
-        [Fact]
-        public void CanUpdateIssueWithoutModifyingCustomFields()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CanUpdateIssueWithoutModifyingCustomFields(Jira jira)
         {
-            var issue = new Issue(_jira, "SCRUM")
+            var issue = new Issue(jira, "SCRUM")
             {
                 Type = "Bug",
                 Summary = "Test issue with sprint" + _random.Next(int.MaxValue),
@@ -344,10 +356,11 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
             Assert.Equal("Sprint 1", issue["Sprint"]);
         }
-        [Fact]
-        public void ThrowsErrorWhenSettingSprintByName()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void ThrowsErrorWhenSettingSprintByName(Jira jira)
         {
-            var issue = new Issue(_jira, "SCRUM")
+            var issue = new Issue(jira, "SCRUM")
             {
                 Type = "Bug",
                 Summary = "Test issue with sprint" + _random.Next(int.MaxValue),

@@ -9,11 +9,12 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class IssueUpdateTest : BaseIntegrationTest
     {
-        [Fact]
-        public async Task UpdateIssueAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task UpdateIssueAsync(Jira jira)
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -22,17 +23,18 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             //retrieve the issue from server and update
-            issue = await _jira.Issues.GetIssueAsync(issue.Key.Value, CancellationToken.None);
+            issue = await jira.Issues.GetIssueAsync(issue.Key.Value, CancellationToken.None);
             issue.Type = "2";
 
             var newIssue = await issue.SaveChangesAsync();
             Assert.Equal("2", issue.Type.Id);
         }
 
-        [Fact]
-        public void UpdateNamedEntities_ById()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void UpdateNamedEntities_ById(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "AutoLoadNamedEntities_ById " + _random.Next(int.MaxValue);
             issue.Type = "1";
             issue.Priority = "5";
@@ -45,10 +47,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Trivial", issue.Priority.Name);
         }
 
-        [Fact]
-        public void UpdateNamedEntities_ByName()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void UpdateNamedEntities_ByName(Jira jira)
         {
-            var issue = _jira.CreateIssue("TST");
+            var issue = jira.CreateIssue("TST");
             issue.Summary = "AutoLoadNamedEntities_Name " + _random.Next(int.MaxValue);
             issue.Type = "Bug";
             issue.Priority = "Trivial";
@@ -61,11 +64,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Trivial", issue.Priority.Name);
         }
 
-        [Fact]
-        public void UpdateIssueType()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void UpdateIssueType(Jira jira)
         {
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -74,21 +78,22 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             //retrieve the issue from server and update
-            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            issue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             issue.Type = "2";
             issue.SaveChanges();
 
             //retrieve again and verify
-            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            issue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("2", issue.Type.Id);
         }
 
-        [Fact]
-        public void UpdateWithAllFieldsSet()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void UpdateWithAllFieldsSet(Jira jira)
         {
             // arrange, create an issue to test.
             var summaryValue = "Test Summary " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Assignee = "admin",
                 Description = "Test Description",
@@ -101,7 +106,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
 
             // act, get an issue and update it
-            var serverIssue = (from i in _jira.Issues.Queryable
+            var serverIssue = (from i in jira.Issues.Queryable
                                where i.Key == issue.Key
                                select i).ToArray().First();
 
@@ -113,7 +118,7 @@ namespace Atlassian.Jira.Test.Integration
             serverIssue.SaveChanges();
 
             // assert, get the issue again and verify
-            var newServerIssue = (from i in _jira.Issues.Queryable
+            var newServerIssue = (from i in jira.Issues.Queryable
                                   where i.Key == issue.Key
                                   select i).ToArray().First();
 
@@ -124,12 +129,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(serverIssue.DueDate, newServerIssue.DueDate);
         }
 
-        [Fact]
-        public void UpdateAssignee()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void UpdateAssignee(Jira jira)
         {
             var summaryValue = "Test issue with assignee (Updated)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -147,11 +153,12 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("admin", issue.Assignee);
         }
 
-        [Fact]
-        public async Task UpdateComment()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task UpdateComment(Jira jira)
         {
             var summaryValue = "Test Summary with comments " + _random.Next(int.MaxValue);
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -188,12 +195,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("new body", commentFromGet.Body);
         }
 
-        [Fact]
-        public void AddAndRemoveVersions()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddAndRemoveVersions(Jira jira)
         {
             var summaryValue = "Test issue with versions (Updated)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -241,12 +249,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Contains(issue.AffectsVersions, v => v.Name == "2.0");
         }
 
-        [Fact]
-        public void AddAndRemoveComponents()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddAndRemoveComponents(Jira jira)
         {
             var summaryValue = "Test issue with components (Updated)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -278,12 +287,13 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Contains(issue.Components, c => c.Name == "Client");
         }
 
-        [Fact]
-        public void AddAndRemoveLabelsFromIssue()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void AddAndRemoveLabelsFromIssue(Jira jira)
         {
             var summaryValue = "Test issue with labels (Updated)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -292,26 +302,27 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.Labels.Add("label1", "label2");
             issue.SaveChanges();
-            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            issue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal(2, issue.Labels.Count);
 
             issue.Labels.RemoveAt(0);
             issue.SaveChanges();
-            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            issue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Single(issue.Labels);
 
             issue.Labels.Clear();
             issue.SaveChanges();
-            issue = _jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            issue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Empty(issue.Labels);
         }
 
-        [Fact]
-        public void UpdateIssueWithCustomField()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void UpdateIssueWithCustomField(Jira jira)
         {
             var summaryValue = "Test issue with custom field (Updated)" + _random.Next(int.MaxValue);
 
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "1",
                 Summary = summaryValue,
@@ -327,10 +338,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("My updated value", issue["Custom Text Field"]);
         }
 
-        [Fact]
-        public void CanAccessSecurityLevel()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void CanAccessSecurityLevel(Jira jira)
         {
-            var issue = new Issue(_jira, "TST")
+            var issue = new Issue(jira, "TST")
             {
                 Type = "Bug",
                 Summary = "Test Summary " + _random.Next(int.MaxValue),
@@ -350,7 +362,7 @@ namespace Atlassian.Jira.Test.Integration
                     }
                 }
             };
-            _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, body).Wait();
+            jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, body).Wait();
 
             issue.Refresh();
             Assert.Equal("Test Issue Security Level", issue.SecurityLevel.Name);

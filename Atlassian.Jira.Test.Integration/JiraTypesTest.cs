@@ -8,19 +8,21 @@ namespace Atlassian.Jira.Test.Integration
 {
     public class JiraTypesTest : BaseIntegrationTest
     {
-        [Fact]
-        public void GetFilters()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetFilters(Jira jira)
         {
-            var filters = _jira.Filters.GetFavouritesAsync().Result;
+            var filters = jira.Filters.GetFavouritesAsync().Result;
 
             Assert.True(filters.Count() >= 1);
             Assert.Contains(filters, f => f.Name == "One Issue Filter");
         }
 
-        [Fact]
-        public void RetrieveNamedEntities()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void RetrieveNamedEntities(Jira jira)
         {
-            var issue = _jira.Issues.GetIssueAsync("TST-1").Result;
+            var issue = jira.Issues.GetIssueAsync("TST-1").Result;
 
             Assert.Equal("Bug", issue.Type.Name);
             Assert.Equal("Major", issue.Priority.Name);
@@ -28,10 +30,11 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Null(issue.Resolution);
         }
 
-        [Fact]
-        public void GetIssueTypes()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssueTypes(Jira jira)
         {
-            var issueTypes = _jira.IssueTypes.GetIssueTypesAsync().Result;
+            var issueTypes = jira.IssueTypes.GetIssueTypesAsync().Result;
 
             // In addition, rest API contains "Sub-Task" as an issue type.
             Assert.True(issueTypes.Count() >= 5);
@@ -39,119 +42,131 @@ namespace Atlassian.Jira.Test.Integration
             Assert.NotNull(issueTypes.First().IconUrl);
         }
 
-        [Fact]
-        public void GetIssuePriorities()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssuePriorities(Jira jira)
         {
-            var priorities = _jira.Priorities.GetPrioritiesAsync().Result;
+            var priorities = jira.Priorities.GetPrioritiesAsync().Result;
 
             Assert.Contains(priorities, i => i.Name == "Blocker");
             Assert.NotNull(priorities.First().IconUrl);
         }
 
-        [Fact]
-        public void GetIssueResolutions()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssueResolutions(Jira jira)
         {
-            var resolutions = _jira.Resolutions.GetResolutionsAsync().Result;
+            var resolutions = jira.Resolutions.GetResolutionsAsync().Result;
 
             Assert.Contains(resolutions, i => i.Name == "Fixed");
         }
 
-        [Fact]
-        public void GetIssueStatuses()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssueStatuses(Jira jira)
         {
-            var statuses = _jira.Statuses.GetStatusesAsync().Result;
+            var statuses = jira.Statuses.GetStatusesAsync().Result;
 
             Assert.Contains(statuses, i => i.Name == "Open");
             Assert.NotNull(statuses.First().IconUrl);
         }
 
-        [Fact]
-        public void GetCustomFields()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetCustomFields(Jira jira)
         {
-            var fields = _jira.Fields.GetCustomFieldsAsync().Result;
+            var fields = jira.Fields.GetCustomFieldsAsync().Result;
             Assert.True(fields.Count() >= 19);
         }
 
-        [Fact]
-        public void GetProjects()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetProjects(Jira jira)
         {
-            var projects = _jira.Projects.GetProjectsAsync().Result;
+            var projects = jira.Projects.GetProjectsAsync().Result;
             Assert.True(projects.Count() > 0);
             Assert.Equal("admin", projects.First().Lead);
         }
 
-        [Fact]
-        public void GetProject()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetProject(Jira jira)
         {
-            var project = _jira.Projects.GetProjectAsync("TST").Result;
+            var project = jira.Projects.GetProjectAsync("TST").Result;
             Assert.Equal("admin", project.Lead);
             Assert.Equal("Test Project", project.Name);
         }
 
-        [Fact]
-        public void GetIssueLinkTypes()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssueLinkTypes(Jira jira)
         {
-            var linkTypes = _jira.Links.GetLinkTypesAsync().Result;
+            var linkTypes = jira.Links.GetLinkTypesAsync().Result;
             Assert.Contains(linkTypes, l => l.Name.Equals("Duplicate"));
         }
 
-        [Fact]
-        public async Task GetIssueStatusesAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssueStatusesAsync(Jira jira)
         {
             // First request.
-            var jira = CreateJiraClient();
-            var result1 = await _jira.Statuses.GetStatusesAsync();
+            //var jira = CreateJiraClient();
+            var result1 = await jira.Statuses.GetStatusesAsync();
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.Statuses.GetStatusesAsync();
+            var result2 = await jira.Statuses.GetStatusesAsync();
             Assert.Equal(result1.Count(), result2.Count());
         }
 
-        [Fact]
-        public async Task GetIssueTypesAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssueTypesAsync(Jira jira)
         {
             // First request.
-            var jira = CreateJiraClient();
-            var result1 = await _jira.IssueTypes.GetIssueTypesAsync(CancellationToken.None);
+            //var jira = CreateJiraClient();
+            var result1 = await jira.IssueTypes.GetIssueTypesAsync(CancellationToken.None);
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.IssueTypes.GetIssueTypesAsync(CancellationToken.None);
+            var result2 = await jira.IssueTypes.GetIssueTypesAsync(CancellationToken.None);
             Assert.Equal(result1.Count(), result2.Count());
         }
 
-        [Fact]
-        public async Task GetIssuePrioritiesAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssuePrioritiesAsync(Jira jira)
         {
             // First request.
-            var jira = CreateJiraClient();
-            var result1 = await _jira.Priorities.GetPrioritiesAsync();
+            //var jira = CreateJiraClient();
+            var result1 = await jira.Priorities.GetPrioritiesAsync();
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.Priorities.GetPrioritiesAsync();
+            var result2 = await jira.Priorities.GetPrioritiesAsync();
             Assert.Equal(result1.Count(), result2.Count());
         }
 
-        [Fact]
-        public async Task GetIssueResolutionsAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssueResolutionsAsync(Jira jira)
         {
             // First request.
-            var jira = CreateJiraClient();
-            var result1 = await _jira.Resolutions.GetResolutionsAsync();
+            //var jira = CreateJiraClient();
+            var result1 = await jira.Resolutions.GetResolutionsAsync();
             Assert.NotEmpty(result1);
 
             // Cached
-            var result2 = await _jira.Resolutions.GetResolutionsAsync();
+            var result2 = await jira.Resolutions.GetResolutionsAsync();
             Assert.Equal(result1.Count(), result2.Count());
         }
 
-        [Fact]
-        public async Task GetFavouriteFiltersAsync()
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetFavouriteFiltersAsync(Jira jira)
         {
-            var jira = CreateJiraClient();
-            var result1 = await _jira.Filters.GetFavouritesAsync();
+            //var jira = CreateJiraClient();
+            var result1 = await jira.Filters.GetFavouritesAsync();
             Assert.NotEmpty(result1);
         }
     }
