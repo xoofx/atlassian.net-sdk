@@ -32,7 +32,7 @@ namespace Atlassian.Jira.Remote
             return cache.CustomFields.Values;
         }
 
-        public async Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CustomFieldFetchOptions options, CancellationToken token = default)
+        public async Task<IEnumerable<CustomField>> GetCustomFieldsAsync(CustomFieldFetchOptions options, CancellationToken token = default(CancellationToken))
         {
             var cache = _jira.Cache;
             var projectKey = options.ProjectKeys.FirstOrDefault();
