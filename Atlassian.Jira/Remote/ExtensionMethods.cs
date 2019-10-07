@@ -33,9 +33,9 @@ namespace Atlassian.Jira.Remote
         /// <summary>
         /// Create a new Attachment from a RemoteAttachment
         /// </summary>
-        public static Attachment ToLocal(this RemoteAttachment remoteAttachment, Jira jira, IWebClient webClient)
+        public static Attachment ToLocal(this RemoteAttachment remoteAttachment, Jira jira)
         {
-            return new Attachment(jira, webClient, remoteAttachment);
+            return new Attachment(jira, remoteAttachment);
         }
 
         /// <summary>

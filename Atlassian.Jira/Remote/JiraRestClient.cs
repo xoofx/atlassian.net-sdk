@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
+using RestSharp.Extensions;
 
 namespace Atlassian.Jira.Remote
 {
@@ -135,6 +136,25 @@ namespace Atlassian.Jira.Remote
         protected virtual Task<IRestResponse> ExecuteRawResquestAsync(IRestRequest request, CancellationToken token)
         {
             return _restClient.ExecuteTaskAsync(request, token);
+        }
+
+        /// <summary>
+        /// Downloads file as a byte array.
+        /// </summary>
+        /// <param name="url">Url to the file location.</param>
+        public byte[] DownloadData(string url)
+        {
+            return _restClient.DownloadData(new RestRequest(url, Method.GET));
+        }
+
+        /// <summary>
+        /// Downloads file to the specified location.
+        /// </summary>
+        /// <param name="url">Url to the file location.</param>
+        /// <param name="fullFileName">Full file name where the file will be downloaded.</param>
+        public void Download(string url, string fullFileName)
+        {
+            _restClient.DownloadData(new RestRequest(url, Method.GET)).SaveAs(fullFileName);
         }
 
         private void LogRequest(IRestRequest request, object body = null)

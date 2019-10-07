@@ -16,9 +16,8 @@ namespace Atlassian.Jira
         /// Creates a new instance of IssueFields.
         /// </summary>
         /// <param name="remoteIssue">The remote issue that contains the fields.</param>
-        /// <param name="jiraUrl">The JIRA server url.</param>
-        /// <param name="credentials">The credentials used to access server resources.</param>
-        public IssueFields(RemoteIssue remoteIssue, string jiraUrl = null, JiraCredentials credentials = null)
+        /// <param name="jira">The Jira instance that owns the issue.</param>
+        public IssueFields(RemoteIssue remoteIssue, Jira jira)
         {
             _map = remoteIssue.fieldsReadOnly ?? new Dictionary<string, JToken>();
 
@@ -38,7 +37,7 @@ namespace Atlassian.Jira
 
             if (remoteIssue.remoteAttachments != null)
             {
-                this.Attachments = remoteIssue.remoteAttachments.Select(remoteAttachment => new Attachment(jiraUrl, new WebClientWrapper(credentials), remoteAttachment));
+                this.Attachments = remoteIssue.remoteAttachments.Select(remoteAttachment => new Attachment(jira, remoteAttachment));
             }
         }
 

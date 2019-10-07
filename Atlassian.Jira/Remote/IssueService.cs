@@ -339,7 +339,7 @@ namespace Atlassian.Jira.Remote
             var attachmentsJson = result["fields"]["attachment"];
             var attachments = JsonConvert.DeserializeObject<RemoteAttachment[]>(attachmentsJson.ToString(), serializerSettings);
 
-            return attachments.Select(remoteAttachment => new Attachment(_jira.Url, new WebClientWrapper(_jira.Credentials), remoteAttachment));
+            return attachments.Select(remoteAttachment => new Attachment(_jira, remoteAttachment));
         }
 
         public async Task<string[]> GetLabelsAsync(string issueKey, CancellationToken token = default(CancellationToken))

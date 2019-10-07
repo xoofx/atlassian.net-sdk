@@ -129,7 +129,7 @@ namespace Atlassian.Jira
             }).ToList());
 
             // additional fields
-            this.AdditionalFields = new IssueFields(_originalIssue, Jira.Url, Jira.Credentials);
+            this.AdditionalFields = new IssueFields(_originalIssue, Jira);
         }
 
         internal RemoteIssue OriginalRemoteIssue

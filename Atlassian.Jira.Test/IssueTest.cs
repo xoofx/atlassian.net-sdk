@@ -483,10 +483,9 @@ namespace Atlassian.Jira.Test
             {
                 //arrange
                 var jira = TestableJira.Create();
-                var webClient = new Mock<IWebClient>();
                 var remoteAttachment = new RemoteAttachment() { filename = "attach.txt" };
                 jira.IssueService.Setup(j => j.GetAttachmentsAsync("issueKey", It.IsAny<CancellationToken>()))
-                    .Returns(Task.FromResult(Enumerable.Repeat<Attachment>(new Attachment(jira, webClient.Object, remoteAttachment), 1)));
+                    .Returns(Task.FromResult(Enumerable.Repeat<Attachment>(new Attachment(jira, remoteAttachment), 1)));
 
                 var issue = (new RemoteIssue() { key = "issueKey" }).ToLocal(jira);
 

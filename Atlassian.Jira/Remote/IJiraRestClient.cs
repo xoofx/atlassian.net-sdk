@@ -51,5 +51,18 @@ namespace Atlassian.Jira.Remote
         /// <param name="requestBody">Request body to be serialized.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<T> ExecuteRequestAsync<T>(Method method, string resource, object requestBody = null, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
+        /// Downloads file as a byte array.
+        /// </summary>
+        /// <param name="url">Url to the file location.</param>
+        byte[] DownloadData(string url);
+
+        /// <summary>
+        /// Downloads file to the specified location.
+        /// </summary>
+        /// <param name="url">Url to the file location.</param>
+        /// <param name="fullFileName">Full file name where the file will be downloaded.</param>
+        void Download(string url, string fullFileName);
     }
 }

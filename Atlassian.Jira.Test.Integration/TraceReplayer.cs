@@ -65,5 +65,15 @@ namespace Atlassian.Jira.Test.Integration
             return Task.FromResult(result);
 
         }
+
+        public byte[] DownloadData(string url)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Download(string url, string fullFileName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Atlassian.Jira.Remote;
+using RestSharp;
+using RestSharp.Extensions;
 
 namespace Atlassian.Jira
 {
@@ -9,42 +11,29 @@ namespace Atlassian.Jira
     /// </summary>
     public class Attachment
     {
+        private readonly Jira _jira;
+
         private readonly string _author;
         private readonly DateTime? _created;
         private readonly string _fileName;
         private readonly string _mimeType;
         private readonly long? _fileSize;
         private readonly string _id;
-        private readonly string _jiraUrl;
-        private readonly IWebClient _webClient;
 
         /// <summary>
         /// Creates a new instance of an Attachment from a remote entity.
         /// </summary>
         /// <param name="jira">Object used to interact with JIRA.</param>
-        /// <param name="webClient">WebClient to use to download attachment.</param>
         /// <param name="remoteAttachment">Remote attachment entity.</param>
-        public Attachment(Jira jira, IWebClient webClient, RemoteAttachment remoteAttachment) :
-            this(jira.Url, webClient, remoteAttachment)
+        public Attachment(Jira jira, RemoteAttachment remoteAttachment)
         {
-        }
-
-        /// <summary>
-        /// Creates a new instance of an Attachment from a remote entity.
-        /// </summary>
-        /// <param name="jiraUrl">Address to the JIRA server.</param>
-        /// <param name="webClient">WebClient to use to download attachment.</param>
-        /// <param name="remoteAttachment">Remote attachment entity.</param>
-        public Attachment(string jiraUrl, IWebClient webClient, RemoteAttachment remoteAttachment)
-        {
-            _jiraUrl = jiraUrl;
+            _jira = jira;
             _author = remoteAttachment.author;
             _created = remoteAttachment.created;
             _fileName = remoteAttachment.filename;
             _mimeType = remoteAttachment.mimetype;
             _fileSize = remoteAttachment.filesize;
             _id = remoteAttachment.id;
-            _webClient = webClient;
         }
 
         /// <summary>
@@ -96,24 +85,13 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Downloads attachment to specified file.
-        /// </summary>
-        /// <param name="fullFileName">Full file name where attachment will be downloaded.</param>
-        public Task DownloadAsync(string fullFileName)
-        {
-            var url = GetRequestUrl();
-
-            return _webClient.DownloadWithAuthenticationAsync(url, fullFileName);
-        }
-
-        /// <summary>
         /// Downloads attachment as a byte array.
         /// </summary>
-        public Task<byte[]> DownloadDataAsync()
+        public byte[] DownloadData()
         {
             var url = GetRequestUrl();
 
-            return _webClient.DownloadDataWithAuthenticationAsync(url);
+            return _jira.RestClient.DownloadData(url);
         }
 
         /// <summary>
@@ -122,18 +100,20 @@ namespace Atlassian.Jira
         /// <param name="fullFileName">Full file name where attachment will be downloaded</param>
         public void Download(string fullFileName)
         {
-            this.DownloadAsync(fullFileName).Wait();
+            var url = GetRequestUrl();
+
+            _jira.RestClient.Download(url, fullFileName);
         }
 
         private string GetRequestUrl()
         {
-            if (String.IsNullOrEmpty(_jiraUrl))
+            if (String.IsNullOrEmpty(_jira.Url))
             {
                 throw new InvalidOperationException("Unable to download attachment, JIRA url has not been set.");
             }
 
             return String.Format("{0}secure/attachment/{1}/{2}",
-                _jiraUrl.EndsWith("/") ? _jiraUrl : _jiraUrl + "/",
+                _jira.Url.EndsWith("/") ? _jira.Url : _jira.Url + "/",
                 this.Id,
                 this.FileName);
         }

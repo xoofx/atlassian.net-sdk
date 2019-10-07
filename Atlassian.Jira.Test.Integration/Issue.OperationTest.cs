@@ -342,7 +342,7 @@ namespace Atlassian.Jira.Test.Integration
         }
 
         [Fact]
-        public async Task DownloadAttachmentsAsync()
+        public async Task DownloadAttachments()
         {
             // create an issue
             var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
@@ -368,23 +368,13 @@ namespace Atlassian.Jira.Test.Integration
             // download an attachment multiple times
             var tempFile = Path.GetTempFileName();
             var attachment = attachments.First(a => a.FileName.Equals("testfile1.txt"));
-
-#if NET452
-            // Standard has a different behavior than Framework it throws an exception. It seems you are not allowed to do two concurrent operations with the client
-            //  System.NotSupportedException : WebClient does not support concurrent I/O operations.
-            var task1 = attachment.DownloadAsync(tempFile);
-#endif
-            var task2 = attachment.DownloadAsync(tempFile);
-
-            await task2;
-#if NET452
-            Assert.True(task1.IsCanceled);
-#endif
+            
+            attachment.Download(tempFile);
             Assert.Equal("Test File Content 1", File.ReadAllText(tempFile));
         }
 
         [Fact]
-        public async Task DownloadAttachmentDataAsync()
+        public async Task DownloadAttachmentData()
         {
             // create an issue
             var summaryValue = "Test Summary with attachment " + _random.Next(int.MaxValue);
@@ -405,7 +395,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("testfile.txt", attachments.Single().FileName);
 
             // download attachment as byte array
-            var bytes = await attachments.Single().DownloadDataAsync();
+            var bytes = attachments.Single().DownloadData();
 
             Assert.Equal(17, bytes.Length);
         }
