@@ -365,10 +365,10 @@ namespace Atlassian.Jira.Test.Integration
             Assert.True(attachments.Any(a => a.FileName.Equals("testfile1.txt")), "'testfile1.txt' was not downloaded from server");
             Assert.True(attachments.Any(a => a.FileName.Equals("testfile2.txt")), "'testfile2.txt' was not downloaded from server");
 
-            // download an attachment multiple times
+            // download an attachment.
             var tempFile = Path.GetTempFileName();
             var attachment = attachments.First(a => a.FileName.Equals("testfile1.txt"));
-            
+
             attachment.Download(tempFile);
             Assert.Equal("Test File Content 1", File.ReadAllText(tempFile));
         }

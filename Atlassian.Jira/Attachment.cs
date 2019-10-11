@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Atlassian.Jira.Remote;
-using RestSharp;
-using RestSharp.Extensions;
 
 namespace Atlassian.Jira
 {
@@ -12,7 +10,6 @@ namespace Atlassian.Jira
     public class Attachment
     {
         private readonly Jira _jira;
-
         private readonly string _author;
         private readonly DateTime? _created;
         private readonly string _fileName;
