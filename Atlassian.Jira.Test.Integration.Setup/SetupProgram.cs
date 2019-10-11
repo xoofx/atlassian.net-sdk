@@ -2,171 +2,90 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 
 namespace Atlassian.Jira.Test.Integration.Setup
 {
-    class SetupProgram
+    public class SetupProgram
     {
+        public const string URL = "http://localhost:8080";
+
         static void Main(string[] args)
         {
-            var currentDir = Path.GetDirectoryName(typeof(SetupProgram).Assembly.Location);
-            var arg = args.Length > 0 ? args[0].ToLowerInvariant() : null;
-            var user = args.Length > 1 ? args[1].ToLowerInvariant() : "admin";
-            var pass = args.Length > 2 ? args[2].ToLowerInvariant() : "admin";
-            var port = args.Length > 3 ? args[3] : "2990";
+            WaitForJira().Wait();
 
-            Environment.CurrentDirectory = currentDir;
+            using (var webDriver = new ChromeDriver())
+            {
+                webDriver.Url = URL;
 
-            if (arg != null && arg.Equals("start", StringComparison.OrdinalIgnoreCase))
-            {
-                StartJira(currentDir);
-            }
-            else if (arg != null && arg.Equals("restore", StringComparison.OrdinalIgnoreCase))
-            {
-                SetupJira(currentDir, user, pass, port);
-            }
-            else
-            {
-                PrintInstructions();
-            }
+                SetupJira(webDriver);
 
+                webDriver.Quit();
+            };
         }
 
-        private static void PrintInstructions()
+        private static async Task WaitForJira()
         {
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("To setup JIRA to run integration tests:");
-            Console.WriteLine("  1. 'JiraSetup.exe start'");
-            Console.WriteLine("  2. Wait until tomcat container is fully ready.");
-            Console.WriteLine("  3. Manually login to JIRA once and skip all the tutorials if needed.");
-            Console.WriteLine("  4. 'JiraSetup.exe restore <user> <pass> <port>'.");
-            Console.WriteLine("  5. Wait until the back up restore is complete.");
-            Console.WriteLine("-------------------------------------------------------");
-        }
-
-        private static void StartJira(string currentDir)
-        {
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("Starting JIRA.");
-            Console.WriteLine("Wait until the tomcat container is ready to accept requests.");
-            Console.WriteLine("-------------------------------------------------------");
-
-            var process = new Process();
-            process.StartInfo.FileName = Path.Combine(currentDir, "StartJira.bat");
-            process.Start();
-        }
-
-        private static void SetupJira(string currentDir, string user, string pass, string port)
-        {
-            var webDriver = new ChromeDriver();
-
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("Restoring test data.");
-            Console.WriteLine("-------------------------------------------------------");
-
-            // Login
-            LoginToJira(webDriver, user, pass, port);
-
-            // Restore TestData
-            RestoreTestData(webDriver, currentDir, port);
-
-            // Login again
-            LoginToJira(webDriver, user, pass, port);
-
-            // Install Jira software if necessary.
-            InstallJiraSoftware(webDriver, port);
-
-            Console.WriteLine("-------------------------------------------------------");
-            Console.WriteLine("JIRA Restore Complete. You can now run the integration tests.");
-            Console.WriteLine("-------------------------------------------------------");
-
-            webDriver.Quit();
-        }
-
-        private static void RestoreTestData(ChromeDriver webDriver, string currentDir, string port)
-        {
-            File.Copy(
-                Path.Combine(currentDir, "TestData.zip"),
-                Path.Combine(currentDir, @"amps-standalone-jira-7.13.8\target\jira\home\import\TestData.zip"),
-                true);
-
-            webDriver.Url = $"http://localhost:{port}/jira/secure/admin/XmlRestore!default.jspa";
-            WaitForElement(webDriver, By.Name("filename")).SendKeys("TestData.zip");
-            WaitForElement(webDriver, By.Id("restore-xml-data-backup-submit")).Click();
-
-            // Wait until restore is complete
-            WaitForElement(
-                webDriver,
-                TimeSpan.FromMinutes(10),
-                wd => wd.FindElements(By.TagName("p"))
-                    .FirstOrDefault(we => we.Text.Trim().Equals("Your import has been successful.", StringComparison.OrdinalIgnoreCase)));
-        }
-
-        private static Func<IWebDriver, IWebElement> FindJiraSectionFunc = (wd) =>
-        {
-            var sections = from section in wd.FindElements(By.ClassName("application-item"))
-                           let name = section.FindElement(By.ClassName("application-name")).Text.Trim()
-                           where name.Equals("Jira Software", StringComparison.OrdinalIgnoreCase)
-                           select section;
-
-            return sections.FirstOrDefault();
-        };
-
-        private static void InstallJiraSoftware(ChromeDriver webDriver, string port)
-        {
-            webDriver.Url = $"http://localhost:{port}/jira/plugins/servlet/applications/versions-licenses";
-            var jiraSection = WaitForElement(webDriver, FindJiraSectionFunc);
-            var installButton = jiraSection.FindElements(By.ClassName("install-notification-action")).FirstOrDefault();
-
-            if (installButton != null)
+            using (var client = new HttpClient())
             {
-                Console.WriteLine("Installing JIRA Software.");
-                installButton.Click();
+                HttpResponseMessage response = null;
+                var retryCount = 0;
 
-                var wait = new WebDriverWait(webDriver, TimeSpan.FromMinutes(10));
-                wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException));
-                wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-                wait.Until(wd => !FindJiraSectionFunc(wd).FindElements(By.ClassName("install-notification-action")).Any());
-            }
-            else
-            {
-                Console.WriteLine("JIRA Software is already installed.");
+                do
+                {
+                    try
+                    {
+                        Console.Write($"Pinging server {URL}.");
+
+                        retryCount++;
+                        await Task.Delay(2000);
+                        response = await client.GetAsync(URL);
+                        response.EnsureSuccessStatusCode();
+                    }
+                    catch (HttpRequestException)
+                    {
+                        Console.WriteLine($" Failed, retry count: {retryCount}");
+                    }
+                } while (retryCount < 30 && (response == null || response.StatusCode != HttpStatusCode.OK));
+
+                Console.WriteLine($" Success!");
             }
         }
 
-        private static void LoginToJira(ChromeDriver webDriver, string user, string pass, string port)
+        private static void SetupJira(ChromeDriver webDriver)
         {
-            webDriver.Url = $"http://localhost:{port}/jira/login.jsp";
-            WaitForElement(webDriver, By.Id("login-form-username")).SendKeys(user);
-            WaitForElement(webDriver, By.Id("login-form-password")).SendKeys(pass);
-            WaitForElement(webDriver, By.Id("login-form-submit")).Click();
-            WaitForElement(webDriver, By.Id("header-details-user-fullname"), TimeSpan.FromSeconds(60));
-        }
+            Console.WriteLine("--- Starting to setup Jira ---");
 
-        private static IWebElement WaitForElement(IWebDriver webDriver, By locator)
-        {
-            return WaitForElement(webDriver, locator, TimeSpan.FromSeconds(10));
-        }
+            Console.WriteLine("Choose to manually setup jira.");
+            webDriver.WaitForElement(By.XPath("//div[@data-choice-value='classic']"), TimeSpan.FromMinutes(5)).Click();
 
-        private static IWebElement WaitForElement(IWebDriver webDriver, By locator, TimeSpan timeout)
-        {
-            return WaitForElement(webDriver, timeout, wd => wd.FindElements(locator).FirstOrDefault());
-        }
+            Console.WriteLine("Click the next button.");
+            webDriver.WaitForElement(By.Id("jira-setup-mode-submit")).Click();
 
-        private static IWebElement WaitForElement(IWebDriver webDriver, Func<IWebDriver, IWebElement> func)
-        {
-            return WaitForElement(webDriver, TimeSpan.FromSeconds(10), func);
-        }
+            Console.WriteLine("Wait for database page, and click on the next button.");
+            webDriver.WaitForElement(By.Id("jira-setup-database-submit")).Click();
 
-        private static IWebElement WaitForElement(IWebDriver webDriver, TimeSpan timeout, Func<IWebDriver, IWebElement> func)
-        {
-            var wait = new WebDriverWait(webDriver, timeout);
-            wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException));
-            wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
-            return wait.Until(func);
+            Console.WriteLine("Wait for the built-in database to be setup.");
+            webDriver.WaitForElement(By.Id("jira-setupwizard-submit"), TimeSpan.FromMinutes(10));
+
+            Console.WriteLine("Click on the import link.");
+            webDriver.WaitForElement(By.TagName("a")).Click();
+
+            Console.WriteLine("Wait for the import data page and import the test data.");
+            webDriver.WaitForElement(By.Name("filename")).SendKeys("TestData.zip");
+            webDriver.WaitForElement(By.Id("jira-setupwizard-outgoing-mailfalse")).Click();
+            webDriver.WaitForElement(By.Id("jira-setupwizard-submit")).Click();
+
+            Console.WriteLine("Wait until restore is complete.");
+            webDriver.WaitForElement(By.Id("login-form-username"), TimeSpan.FromMinutes(10));
+
+            Console.WriteLine("--- Finished setting up Jira ---");
         }
     }
 }

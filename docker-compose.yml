@@ -1,0 +1,9 @@
+﻿version: "3"
+services:
+  jira:
+    image: atlassian/jira-software:7.13
+    container_name: jira
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Atlassian.Jira.Test.Integration.Setup/import/:/var/atlassian/application-data/jira/import/

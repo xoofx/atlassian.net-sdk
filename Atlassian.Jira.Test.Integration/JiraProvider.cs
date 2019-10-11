@@ -5,7 +5,7 @@ namespace Atlassian.Jira.Test.Integration
 {
     internal class JiraProvider : IEnumerable<object[]>
     {
-        public const string HOST = "http://localhost:2990/jira";
+        public const string HOST = "http://localhost:8080";
 
         public const string USERNAME = "admin";
         public const string PASSWORD = "admin";

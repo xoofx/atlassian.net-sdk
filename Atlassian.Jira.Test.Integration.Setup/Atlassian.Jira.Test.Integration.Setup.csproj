@@ -4,22 +4,20 @@
     <TargetFramework>net452</TargetFramework>
     <AssemblyName>JiraSetup</AssemblyName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Properties\**" />
     <EmbeddedResource Remove="Properties\**" />
     <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="StartJira.bat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="TestData.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Selenium.Chrome.WebDriver" Version="2.38.0" />
     <PackageReference Include="Selenium.Support" Version="3.11.2" />
     <PackageReference Include="Selenium.WebDriver" Version="3.11.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 </Project>
