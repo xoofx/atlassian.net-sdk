@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
-    public class IssuePropertiesTest : BaseIntegrationTest
+    public class IssuePropertiesTest
     {
         [Theory]
         [ClassData(typeof(JiraProvider))]

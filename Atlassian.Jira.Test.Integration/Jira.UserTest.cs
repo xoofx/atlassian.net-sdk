@@ -4,8 +4,10 @@ using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
-    public class JiraUserTest : BaseIntegrationTest
+    public class JiraUserTest
     {
+        private readonly Random _random = new Random();
+
         private JiraUserCreationInfo BuildUserInfo()
         {
             var rand = _random.Next(int.MaxValue);

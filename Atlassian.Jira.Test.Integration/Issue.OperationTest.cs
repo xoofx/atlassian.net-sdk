@@ -7,8 +7,10 @@ using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
-    public class IssueOperationsTest : BaseIntegrationTest
+    public class IssueOperationsTest
     {
+        private readonly Random _random = new Random();
+
         [Theory]
         [ClassData(typeof(JiraProvider))]
         async Task AssignIssue(Jira jira)

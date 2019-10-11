@@ -5,8 +5,10 @@ using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
-    public class IssueCustomFieldTest : BaseIntegrationTest
+    public class IssueCustomFieldTest
     {
+        private readonly Random _random = new Random();
+
         [Theory]
         [ClassData(typeof(JiraProvider))]
         public async void CustomFieldsForProject_IfProjectDoesNotExist_ShouldThrowException(Jira jira)
@@ -299,6 +301,7 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Option2.2", cascadingSelect.ChildOption);
             Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
         }
+
         [Theory]
         [ClassData(typeof(JiraProvider))]
         public void CreateAndQuerySprintName(Jira jira)
@@ -317,6 +320,7 @@ namespace Atlassian.Jira.Test.Integration
             var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("Sprint 1", newIssue["Sprint"]);
         }
+
         [Theory]
         [ClassData(typeof(JiraProvider))]
         public void UpdateAndQuerySprintName(Jira jira)
@@ -338,6 +342,7 @@ namespace Atlassian.Jira.Test.Integration
             var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
             Assert.Equal("Sprint 1", newIssue["Sprint"]);
         }
+
         [Theory]
         [ClassData(typeof(JiraProvider))]
         public void CanUpdateIssueWithoutModifyingCustomFields(Jira jira)
@@ -356,6 +361,7 @@ namespace Atlassian.Jira.Test.Integration
             issue.SaveChanges();
             Assert.Equal("Sprint 1", issue["Sprint"]);
         }
+
         [Theory]
         [ClassData(typeof(JiraProvider))]
         public void ThrowsErrorWhenSettingSprintByName(Jira jira)

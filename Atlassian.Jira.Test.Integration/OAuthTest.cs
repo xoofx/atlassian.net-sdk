@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
-    public class OAuthTest : BaseIntegrationTest
+    public class OAuthTest
     {
         [Fact]
         public async Task CanGenerateRequestToken()

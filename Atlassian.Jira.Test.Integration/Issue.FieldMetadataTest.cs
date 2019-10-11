@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
-    public class IssueFieldMetadataTest : BaseIntegrationTest
+    public class IssueFieldMetadataTest
     {
         [Theory]
         [ClassData(typeof(JiraProvider))]

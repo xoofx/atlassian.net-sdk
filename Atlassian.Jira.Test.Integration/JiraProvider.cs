@@ -15,21 +15,28 @@ namespace Atlassian.Jira.Test.Integration
         public const string OAUTHACCESSTOKEN = "ZGUlzyOnuzS929YgIXv6Yt0TiZ8KbUAG";
         public const string OAUTHTOKENSECRET = "EDeTxUt7QqDkoawenPY3QCaGeVGXa1BJ";
 
+        private static Jira _jiraWithCredentials;
+        private static Jira _jiraWithOAuth;
+
         private readonly List<object[]> _data;
+
+        static JiraProvider()
+        {
+            _jiraWithCredentials = Jira.CreateRestClient(HOST, USERNAME, PASSWORD);
+            _jiraWithOAuth = Jira.CreateOAuthRestClientAsync(
+                HOST,
+                OAUTHCONSUMERKEY,
+                OAUTHCONSUMERSECRET,
+                OAUTHACCESSTOKEN,
+                OAUTHTOKENSECRET).Result;
+        }
 
         public JiraProvider()
         {
             _data = new List<object[]>
             {
-                new object[] { Jira.CreateRestClient(HOST, USERNAME, PASSWORD) },
-                new object[] {
-                    Jira.CreateOAuthRestClientAsync(
-                        HOST,
-                        OAUTHCONSUMERKEY,
-                        OAUTHCONSUMERSECRET,
-                        OAUTHACCESSTOKEN,
-                        OAUTHTOKENSECRET).Result
-                },
+                new object[] { _jiraWithCredentials },
+                new object[] { _jiraWithOAuth }
             };
         }
 

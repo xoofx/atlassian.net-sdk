@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
-    public class JiraTypesTest : BaseIntegrationTest
+    public class JiraTypesTest
     {
         [Theory]
         [ClassData(typeof(JiraProvider))]
@@ -110,7 +110,6 @@ namespace Atlassian.Jira.Test.Integration
         public async Task GetIssueStatusesAsync(Jira jira)
         {
             // First request.
-            //var jira = CreateJiraClient();
             var result1 = await jira.Statuses.GetStatusesAsync();
             Assert.NotEmpty(result1);
 
@@ -124,7 +123,6 @@ namespace Atlassian.Jira.Test.Integration
         public async Task GetIssueTypesAsync(Jira jira)
         {
             // First request.
-            //var jira = CreateJiraClient();
             var result1 = await jira.IssueTypes.GetIssueTypesAsync(CancellationToken.None);
             Assert.NotEmpty(result1);
 
@@ -138,7 +136,6 @@ namespace Atlassian.Jira.Test.Integration
         public async Task GetIssuePrioritiesAsync(Jira jira)
         {
             // First request.
-            //var jira = CreateJiraClient();
             var result1 = await jira.Priorities.GetPrioritiesAsync();
             Assert.NotEmpty(result1);
 
@@ -152,7 +149,6 @@ namespace Atlassian.Jira.Test.Integration
         public async Task GetIssueResolutionsAsync(Jira jira)
         {
             // First request.
-            //var jira = CreateJiraClient();
             var result1 = await jira.Resolutions.GetResolutionsAsync();
             Assert.NotEmpty(result1);
 
@@ -165,7 +161,6 @@ namespace Atlassian.Jira.Test.Integration
         [ClassData(typeof(JiraProvider))]
         public async Task GetFavouriteFiltersAsync(Jira jira)
         {
-            //var jira = CreateJiraClient();
             var result1 = await jira.Filters.GetFavouritesAsync();
             Assert.NotEmpty(result1);
         }

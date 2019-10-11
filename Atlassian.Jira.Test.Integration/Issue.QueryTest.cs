@@ -6,8 +6,10 @@ using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
 {
-    public class IssueQueryTest : BaseIntegrationTest
+    public class IssueQueryTest
     {
+        private readonly Random _random = new Random();
+
         [Theory]
         [ClassData(typeof(JiraProvider))]
         public async Task GetIssueThatIncludesOnlyOneBasicField(Jira jira)

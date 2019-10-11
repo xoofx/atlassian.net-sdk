@@ -36,8 +36,10 @@ namespace Atlassian.Jira.Test.Integration
         }
     }
 
-    public class RestTest : BaseIntegrationTest
+    public class RestTest
     {
+        private readonly Random _random = new Random();
+
         [Fact]
         public async Task CanUseCustomRestClient()
         {
