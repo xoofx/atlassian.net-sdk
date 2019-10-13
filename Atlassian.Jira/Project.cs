@@ -168,7 +168,7 @@ namespace Atlassian.Jira
         public async Task DeleteVersionAsync(string versionName, string moveFixIssuesTo = null, string moveAffectedIssuesTo = null, CancellationToken token = default(CancellationToken))
         {
             var versions = await this.GetVersionsAsync(token).ConfigureAwait(false);
-            var version = versions.FirstOrDefault(v => String.Equals(v.ProjectKey, Key));
+            var version = versions.FirstOrDefault(v => String.Equals(v.Name, versionName, StringComparison.OrdinalIgnoreCase));
 
             if (version == null)
             {
