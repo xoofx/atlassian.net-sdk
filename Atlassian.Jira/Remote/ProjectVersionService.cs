@@ -71,7 +71,8 @@ namespace Atlassian.Jira.Remote
             remoteVersion.ProjectKey = projectVersion.ProjectKey;
             var version = new ProjectVersion(_jira, remoteVersion);
 
-            _jira.Cache.Versions.TryAdd(version);
+            // invalidate the cache
+            _jira.Cache.Versions.Clear();
 
             return version;
         }
@@ -102,6 +103,9 @@ namespace Atlassian.Jira.Remote
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var versionJson = JsonConvert.SerializeObject(version.RemoteVersion, serializerSettings);
             var remoteVersion = await _jira.RestClient.ExecuteRequestAsync<RemoteVersion>(Method.PUT, resource, versionJson, token).ConfigureAwait(false);
+
+            // invalidate the cache
+            _jira.Cache.Versions.Clear();
 
             return new ProjectVersion(_jira, remoteVersion);
         }
