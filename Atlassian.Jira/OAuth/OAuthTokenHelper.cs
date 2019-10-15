@@ -19,7 +19,7 @@ namespace Atlassian.Jira.OAuth
         /// <param name="oAuthRequestTokenSettings"> The request token settings.</param>
         /// <param name="cancellationToken">Cancellation token for this operation.</param>
         /// <returns>The <see cref="OAuthRequestToken" /> containing the request token, the consumer token and the authorize url.</returns>
-        public static async Task<OAuthRequestToken> GenerateRequestToken(OAuthRequestTokenSettings oAuthRequestTokenSettings, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<OAuthRequestToken> GenerateRequestTokenAsync(OAuthRequestTokenSettings oAuthRequestTokenSettings, CancellationToken cancellationToken = default(CancellationToken))
         {
             var authenticator = OAuth1Authenticator.ForRequestToken(
                 oAuthRequestTokenSettings.ConsumerKey,
@@ -43,19 +43,23 @@ namespace Atlassian.Jira.OAuth
             var requestTokenQuery = HttpUtility.ParseQueryString(requestTokenResponse.Content.Trim());
 
             var oauthToken = requestTokenQuery["oauth_token"];
-            var oauthTokenSecret = requestTokenQuery["oauth_token_secret"];
             var authorizeUri = $"{oAuthRequestTokenSettings.Url}/{oAuthRequestTokenSettings.AuthorizeTokenUrl}?oauth_token={oauthToken}";
 
-            return new OAuthRequestToken(authorizeUri, oauthToken, oauthTokenSecret);
+            return new OAuthRequestToken(
+                authorizeUri,
+                oauthToken,
+                requestTokenQuery["oauth_token_secret"],
+                requestTokenQuery["oauth_callback_confirmed"]);
         }
 
         /// <summary>
         /// Obtain the access token from an authorized request token.
         /// </summary>
         /// <param name="oAuthAccessTokenSettings">The settings to obtain the access token.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The access token from Jira.
         /// Return null if the token was not returned by Jira or the token secret for the request token and the access token don't match.</returns>
-        public static string ObtainAccessToken(OAuthAccessTokenSettings oAuthAccessTokenSettings)
+        public static async Task<string> ObtainAccessTokenAsync(OAuthAccessTokenSettings oAuthAccessTokenSettings, CancellationToken cancellationToken)
         {
             var client = new RestClient(oAuthAccessTokenSettings.Url)
             {
@@ -67,7 +71,7 @@ namespace Atlassian.Jira.OAuth
                     ConvertToRestSharpSignatureMethod(oAuthAccessTokenSettings.SignatureMethod))
             };
 
-            var accessTokenResponse = client.Post(new RestRequest(oAuthAccessTokenSettings.AccessTokenUrl));
+            var accessTokenResponse = await client.ExecutePostTaskAsync(new RestRequest(oAuthAccessTokenSettings.AccessTokenUrl), cancellationToken);
 
             if (accessTokenResponse.StatusCode != HttpStatusCode.OK)
             {

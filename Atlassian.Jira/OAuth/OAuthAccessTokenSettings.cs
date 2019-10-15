@@ -45,7 +45,7 @@
         /// Creates a Access token settings to obtain the access token.
         /// </summary>
         /// <param name="oAuthRequestTokenSettings">The settings used to generate the request token.</param>
-        /// <param name="oAuthRequestToken">The request token object returned by <see cref="OAuthTokenHelper.GenerateRequestToken"/>.</param>
+        /// <param name="oAuthRequestToken">The request token object returned by <see cref="OAuthTokenHelper.GenerateRequestTokenAsync"/>.</param>
         /// <param name="accessTokenUrl">The relative path to the url to request the access token to Jira.</param>
         public OAuthAccessTokenSettings(
             OAuthRequestTokenSettings oAuthRequestTokenSettings,

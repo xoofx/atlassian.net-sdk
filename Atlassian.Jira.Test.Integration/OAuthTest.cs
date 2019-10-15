@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Atlassian.Jira.OAuth;
 using Xunit;
@@ -20,7 +21,7 @@ namespace Atlassian.Jira.Test.Integration
                 JiraProvider.OAUTHCONSUMERSECRET);
 
             // Act
-            var oAuthRequestToken = await OAuthTokenHelper.GenerateRequestToken(oAuthTokenSettings);
+            var oAuthRequestToken = await OAuthTokenHelper.GenerateRequestTokenAsync(oAuthTokenSettings);
 
             // Assert
             Assert.NotNull(oAuthRequestToken);
@@ -34,11 +35,11 @@ namespace Atlassian.Jira.Test.Integration
                 JiraProvider.HOST,
                 JiraProvider.OAUTHCONSUMERKEY,
                 JiraProvider.OAUTHCONSUMERSECRET);
-            var oAuthRequestToken = await OAuthTokenHelper.GenerateRequestToken(oAuthTokenSettings);
+            var oAuthRequestToken = await OAuthTokenHelper.GenerateRequestTokenAsync(oAuthTokenSettings);
             var oAuthAccessTokenSettings = new OAuthAccessTokenSettings(oAuthTokenSettings, oAuthRequestToken);
 
             // Act
-            var accessToken = OAuthTokenHelper.ObtainAccessToken(oAuthAccessTokenSettings);
+            var accessToken = await OAuthTokenHelper.ObtainAccessTokenAsync(oAuthAccessTokenSettings, CancellationToken.None);
 
             // Assert
             Assert.Null(accessToken);

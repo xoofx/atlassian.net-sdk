@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using Atlassian.Jira.Linq;
 using Atlassian.Jira.OAuth;
@@ -65,7 +66,7 @@ namespace Atlassian.Jira
             ConfigureDefaultServices(services, jira, jiraClient);
             return jira;
         }
-        
+
         /// <summary>
         /// Creates a JIRA rest client using OAuth authentication protocol.
         /// </summary>
@@ -75,6 +76,7 @@ namespace Atlassian.Jira
         /// <param name="oAuthAccessToken">The access token provided by Jira after the request token has been authorize.</param>
         /// <param name="oAuthTokenSecret">The token secret provided by Jira when asking for a request token.</param>
         /// <param name="oAuthSignatureMethod">The signature method used to generate the request token.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>Jira object configured to use REST API.</returns>
         public static async Task<Jira> CreateOAuthRestClientAsync(
             string url,
@@ -82,7 +84,8 @@ namespace Atlassian.Jira
             string consumerSecret,
             string oAuthAccessToken,
             string oAuthTokenSecret,
-            JiraOAuthSignatureMethod oAuthSignatureMethod = JiraOAuthSignatureMethod.RsaSha1)
+            JiraOAuthSignatureMethod oAuthSignatureMethod = JiraOAuthSignatureMethod.RsaSha1,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             var services = new ServiceLocator();
             var settings = new JiraRestClientSettings();
@@ -98,7 +101,7 @@ namespace Atlassian.Jira
 
             ConfigureDefaultServices(services, jira, restClient);
 
-            var currentUser = await jira.Users.GetMyselfAsync();
+            var currentUser = await jira.Users.GetMyselfAsync(cancellationToken);
 
             jira._credentials = new JiraCredentials(currentUser.Username);
 
