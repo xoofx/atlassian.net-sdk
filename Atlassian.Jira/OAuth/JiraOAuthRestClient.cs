@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Atlassian.Jira.Remote;
@@ -54,35 +52,12 @@ namespace Atlassian.Jira.OAuth
             // If there no parameters, we do nothing
             if (!string.IsNullOrEmpty(fullPath.Query))
             {
-                request.Parameters.AddRange(GetQueryParametersFromPath(fullPath.Query));
+                request.Parameters.AddRange(QueryParametersHelper.GetQueryParametersFromPath(fullPath.Query));
 
                 request.Resource = request.Resource.Replace(fullPath.Query, "");
             }
 
             return await base.ExecuteRawResquestAsync(request, token);
-        }
-
-        /// <summary>
-        /// Gets the parameters from a full query string.
-        /// </summary>
-        /// <param name="query">The url query.</param>
-        /// <returns>List of all parameters within the query.</returns>
-        private static IEnumerable<Parameter> GetQueryParametersFromPath(string query)
-        {
-            var parameters = query.TrimStart('?')
-                .Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s =>
-                {
-                    var p = s.Split('=');
-                    return new Parameter
-                    {
-                        Name = p[0],
-                        Value = p[1],
-                        Type = ParameterType.QueryString
-                    };
-                });
-
-            return parameters;
         }
     }
 }
