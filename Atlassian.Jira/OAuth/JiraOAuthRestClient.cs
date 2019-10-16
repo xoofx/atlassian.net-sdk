@@ -29,15 +29,16 @@ namespace Atlassian.Jira.OAuth
             string oAuthAccessToken,
             string oAuthTokenSecret,
             JiraOAuthSignatureMethod oAuthSignatureMethod = JiraOAuthSignatureMethod.RsaSha1,
-            JiraRestClientSettings settings = null) : base(
-            url,
-            OAuth1Authenticator.ForProtectedResource(
-                consumerKey,
-                consumerSecret,
-                oAuthAccessToken,
-                oAuthTokenSecret,
-                OAuthTokenHelper.ConvertToRestSharpSignatureMethod(oAuthSignatureMethod)),
-            settings)
+            JiraRestClientSettings settings = null)
+            : base(
+                url,
+                OAuth1Authenticator.ForProtectedResource(
+                    consumerKey,
+                    consumerSecret,
+                    oAuthAccessToken,
+                    oAuthTokenSecret,
+                    OAuthTokenHelper.ConvertToRestSharpSignatureMethod(oAuthSignatureMethod)),
+                settings)
         {
         }
 
@@ -45,7 +46,7 @@ namespace Atlassian.Jira.OAuth
         /// <summary>
         /// Replace the request query with a collection of parameters.
         /// </summary>
-        protected override async Task<IRestResponse> ExecuteRawResquestAsync(IRestRequest request, CancellationToken token)
+        protected override Task<IRestResponse> ExecuteRawResquestAsync(IRestRequest request, CancellationToken token)
         {
             Uri fullPath = new Uri(RestSharpClient.BaseUrl, request.Resource);
 
@@ -57,7 +58,7 @@ namespace Atlassian.Jira.OAuth
                 request.Resource = request.Resource.Replace(fullPath.Query, "");
             }
 
-            return await base.ExecuteRawResquestAsync(request, token).ConfigureAwait(false);
+            return base.ExecuteRawResquestAsync(request, token);
         }
     }
 }

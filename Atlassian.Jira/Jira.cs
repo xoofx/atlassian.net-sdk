@@ -43,27 +43,23 @@ namespace Atlassian.Jira
         /// <returns>Jira object configured to use REST API.</returns>
         public static Jira CreateRestClient(string url, string username = null, string password = null, JiraRestClientSettings settings = null)
         {
-            var services = new ServiceLocator();
             settings = settings ?? new JiraRestClientSettings();
-            var jira = new Jira(services, new JiraCredentials(username, password), settings.Cache);
             var restClient = new JiraRestClient(url, username, password, settings);
 
-            ConfigureDefaultServices(services, jira, restClient);
-
-            return jira;
+            return CreateRestClient(restClient, new JiraCredentials(username, password), settings.Cache);
         }
 
         /// <summary>
         /// Creates a JIRA client with the given rest client implementation.
         /// </summary>
-        /// <param name="jiraClient">Rest client to use.</param>
+        /// <param name="restClient">Rest client to use.</param>
         /// <param name="credentials">Credentials to use.</param>
         /// <param name="cache">Cache to use.</param>
-        public static Jira CreateRestClient(IJiraRestClient jiraClient, JiraCredentials credentials = null, JiraCache cache = null)
+        public static Jira CreateRestClient(IJiraRestClient restClient, JiraCredentials credentials = null, JiraCache cache = null)
         {
             var services = new ServiceLocator();
             var jira = new Jira(services, credentials, cache);
-            ConfigureDefaultServices(services, jira, jiraClient);
+            ConfigureDefaultServices(services, jira, restClient);
             return jira;
         }
 
@@ -76,6 +72,7 @@ namespace Atlassian.Jira
         /// <param name="oAuthAccessToken">The access token provided by Jira after the request token has been authorize.</param>
         /// <param name="oAuthTokenSecret">The token secret provided by Jira when asking for a request token.</param>
         /// <param name="oAuthSignatureMethod">The signature method used to generate the request token.</param>
+        /// <param name="settings">Settings to configure the rest client.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>Jira object configured to use REST API.</returns>
         public static async Task<Jira> CreateOAuthRestClientAsync(
@@ -85,11 +82,10 @@ namespace Atlassian.Jira
             string oAuthAccessToken,
             string oAuthTokenSecret,
             JiraOAuthSignatureMethod oAuthSignatureMethod = JiraOAuthSignatureMethod.RsaSha1,
+            JiraRestClientSettings settings = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var services = new ServiceLocator();
-            var settings = new JiraRestClientSettings();
-            var jira = new Jira(services, new JiraCredentials(null), settings.Cache);
+            settings = settings ?? new JiraRestClientSettings();
             var restClient = new JiraOAuthRestClient(
                 url,
                 consumerKey,
@@ -98,6 +94,24 @@ namespace Atlassian.Jira
                 oAuthTokenSecret,
                 oAuthSignatureMethod,
                 settings);
+
+            return await CreateOAuthRestClientAsync(restClient, settings.Cache, cancellationToken);
+        }
+
+        /// <summary>
+        /// Creates a JIRA OAuth rest client with the given rest client implementation.
+        /// </summary>
+        /// <param name="restClient">Rest client to use.</param>
+        /// <param name="cache">Cache to use.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>Jira object configured to use REST API.</returns>
+        public static async Task<Jira> CreateOAuthRestClientAsync(
+            IJiraRestClient restClient,
+            JiraCache cache = null,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var services = new ServiceLocator();
+            var jira = new Jira(services, new JiraCredentials(null), cache);
 
             ConfigureDefaultServices(services, jira, restClient);
 
