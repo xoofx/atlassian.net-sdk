@@ -33,7 +33,7 @@ namespace Atlassian.Jira.OAuth
                 Authenticator = authenticator
             };
 
-            var requestTokenResponse = await client.ExecutePostTaskAsync(new RestRequest(oAuthRequestTokenSettings.RequestTokenUrl), cancellationToken);
+            var requestTokenResponse = await client.ExecutePostTaskAsync(new RestRequest(oAuthRequestTokenSettings.RequestTokenUrl), cancellationToken).ConfigureAwait(false);
 
             if (requestTokenResponse.StatusCode != HttpStatusCode.OK)
             {
@@ -71,7 +71,7 @@ namespace Atlassian.Jira.OAuth
                     ConvertToRestSharpSignatureMethod(oAuthAccessTokenSettings.SignatureMethod))
             };
 
-            var accessTokenResponse = await client.ExecutePostTaskAsync(new RestRequest(oAuthAccessTokenSettings.AccessTokenUrl), cancellationToken);
+            var accessTokenResponse = await client.ExecutePostTaskAsync(new RestRequest(oAuthAccessTokenSettings.AccessTokenUrl), cancellationToken).ConfigureAwait(false);
 
             if (accessTokenResponse.StatusCode != HttpStatusCode.OK)
             {

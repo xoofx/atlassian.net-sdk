@@ -101,13 +101,12 @@ namespace Atlassian.Jira
 
             ConfigureDefaultServices(services, jira, restClient);
 
-            var currentUser = await jira.Users.GetMyselfAsync(cancellationToken);
+            var currentUser = await jira.Users.GetMyselfAsync(cancellationToken).ConfigureAwait(false);
 
             jira._credentials = new JiraCredentials(currentUser.Username);
 
             return jira;
         }
-
 
         /// <summary>
         /// Gets the service locator for this jira instance.

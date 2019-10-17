@@ -57,7 +57,7 @@ namespace Atlassian.Jira.OAuth
                 request.Resource = request.Resource.Replace(fullPath.Query, "");
             }
 
-            return await base.ExecuteRawResquestAsync(request, token);
+            return await base.ExecuteRawResquestAsync(request, token).ConfigureAwait(false);
         }
     }
 }
