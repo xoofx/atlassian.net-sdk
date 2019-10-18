@@ -95,7 +95,7 @@ namespace Atlassian.Jira
                 oAuthSignatureMethod,
                 settings);
 
-            return await CreateOAuthRestClientAsync(restClient, settings.Cache, cancellationToken);
+            return await CreateOAuthRestClientAsync(restClient, settings.Cache, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
