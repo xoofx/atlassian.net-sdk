@@ -40,7 +40,7 @@ the assembly, however it has the following limitations:
   to the official  [RestSharp](https://www.nuget.org/packages/RestSharpSigned) package.
 - It only supports net452 framework (does not support .netcore).
 
-# Documentation
+## Documentation
 
 The documentation is placed under the [docs](/docs) folder.
 
