@@ -74,7 +74,7 @@ namespace Atlassian.Jira
         /// <param name="settings">Settings to configure the rest client.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>Jira object configured to use REST API.</returns>
-        public static async Task<Jira> CreateOAuthRestClientAsync(
+        public static Task<Jira> CreateOAuthRestClientAsync(
             string url,
             string consumerKey,
             string consumerSecret,
@@ -92,7 +92,7 @@ namespace Atlassian.Jira
                 oAuthSignatureMethod,
                 settings);
 
-            return await CreateOAuthRestClientAsync(restClient, settings.Cache, cancellationToken).ConfigureAwait(false);
+            return CreateOAuthRestClientAsync(restClient, settings.Cache, cancellationToken);
         }
 
         /// <summary>
