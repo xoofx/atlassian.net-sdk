@@ -90,8 +90,7 @@ namespace Atlassian.Jira.Test.Integration
 
             var jira = Jira.CreateRestClient("http://farmasXXX.atlassian.net");
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => jira.Issues.GetIssueAsync("TST-1"));
-            Assert.Contains("404", exception.Message);
+            var exception = await Assert.ThrowsAsync<ResourceNotFoundException>(() => jira.Issues.GetIssueAsync("TST-1"));
         }
     }
 }

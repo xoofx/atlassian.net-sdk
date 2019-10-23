@@ -1022,6 +1022,62 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Fetches the requested properties and their mapping.
+        /// </summary>
+        /// <remarks>
+        /// Property keys yielded by <paramref name="propertyKeys"/> must have a length between 0 and 256 (both exclusive).
+        /// </remarks>
+        /// <param name="propertyKeys">Enumeration of requested property keys.</param>
+        /// <param name="token">Asynchronous operation control token.</param>
+        /// <returns>A dictionary of property values mapped to their keys.</returns>
+        public Task<ReadOnlyDictionary<string, JToken>> GetPropertiesAsync(IEnumerable<string> propertyKeys, CancellationToken token = default)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to fetch issue properties, issue has not been saved to server.");
+            }
+
+            return _jira.Issues.GetPropertiesAsync(_originalIssue.key, propertyKeys, token);
+        }
+
+        /// <summary>
+        /// Sets the value of the specified property key. The key is created if it didn't already exist.
+        /// </summary>
+        /// <remarks>
+        /// The property key (<paramref name="propertyKey"/>) must have a length between 0 and 256 (both exclusive).
+        /// </remarks>
+        /// <param name="propertyKey">The property key.</param>
+        /// <param name="obj">The value to store.</param>
+        /// <param name="token">Asynchronous operation control token.</param>
+        public Task SetPropertyAsync(string propertyKey, JToken obj, CancellationToken token = default)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to add issue properties, issue has not been saved to server.");
+            }
+
+            return _jira.Issues.SetPropertyAsync(_originalIssue.key, propertyKey, obj, token);
+        }
+
+        /// <summary>
+        /// Remove the specified property key and its stored value.
+        /// </summary>
+        /// <remarks>
+        /// The property key (<paramref name="propertyKey"/>) must have a length between 0 and 256 (both exclusive).
+        /// </remarks>
+        /// <param name="propertyKey">The property key.</param>
+        /// <param name="token">Asynchronous operation control token.</param>
+        public Task DeletePropertyAsync(string propertyKey, CancellationToken token = default)
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to remove issue properties, issue has not been saved to server.");
+            }
+
+            return _jira.Issues.DeletePropertyAsync(_originalIssue.key, propertyKey, token);
+        }
+
+        /// <summary>
         /// Gets the RemoteFields representing the fields that were updated
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>
@@ -1181,62 +1237,6 @@ namespace Atlassian.Jira
             {
                 return value != null ? value.ToString() : null;
             }
-        }
-
-        /// <summary>
-        /// Fetches the requested properties and their mapping.
-        /// </summary>
-        /// <remarks>
-        /// Property keys yielded by <paramref name="propertyKeys"/> must have a length between 0 and 256 (both exclusive).
-        /// </remarks>
-        /// <param name="propertyKeys">Enumeration of requested property keys.</param>
-        /// <param name="token">Asynchronous operation control token.</param>
-        /// <returns>A dictionary of property values mapped to their keys.</returns>
-        public Task<ReadOnlyDictionary<string, JToken>> GetPropertiesAsync(IEnumerable<string> propertyKeys, CancellationToken token = default)
-        {
-            if (String.IsNullOrEmpty(_originalIssue.key))
-            {
-                throw new InvalidOperationException("Unable to fetch issue properties, issue has not been saved to server.");
-            }
-
-            return _jira.Issues.GetPropertiesAsync(_originalIssue.key, propertyKeys, token);
-        }
-
-        /// <summary>
-        /// Sets the value of the specified property key. The key is created if it didn't already exist.
-        /// </summary>
-        /// <remarks>
-        /// The property key (<paramref name="propertyKey"/>) must have a length between 0 and 256 (both exclusive).
-        /// </remarks>
-        /// <param name="propertyKey">The property key.</param>
-        /// <param name="obj">The value to store.</param>
-        /// <param name="token">Asynchronous operation control token.</param>
-        public Task SetPropertyAsync(string propertyKey, JToken obj, CancellationToken token = default)
-        {
-            if (String.IsNullOrEmpty(_originalIssue.key))
-            {
-                throw new InvalidOperationException("Unable to add issue properties, issue has not been saved to server.");
-            }
-
-            return _jira.Issues.SetPropertyAsync(_originalIssue.key, propertyKey, obj, token);
-        }
-
-        /// <summary>
-        /// Remove the specified property key and its stored value.
-        /// </summary>
-        /// <remarks>
-        /// The property key (<paramref name="propertyKey"/>) must have a length between 0 and 256 (both exclusive).
-        /// </remarks>
-        /// <param name="propertyKey">The property key.</param>
-        /// <param name="token">Asynchronous operation control token.</param>
-        public Task DeletePropertyAsync(string propertyKey, CancellationToken token = default)
-        {
-            if (String.IsNullOrEmpty(_originalIssue.key))
-            {
-                throw new InvalidOperationException("Unable to remove issue properties, issue has not been saved to server.");
-            }
-
-            return _jira.Issues.DeletePropertyAsync(_originalIssue.key, propertyKey, token);
         }
     }
 }

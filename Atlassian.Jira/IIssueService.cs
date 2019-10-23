@@ -300,8 +300,7 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="issueKey">Identifier of the issue.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        /// <returns></returns>
-        Task<List<string>> GetPropertyKeysAsync(string issueKey, CancellationToken token = default);
+        Task<IEnumerable<string>> GetPropertyKeysAsync(string issueKey, CancellationToken token = default);
 
         /// <summary>
         /// Fetch requested entity properties attached to the issue.

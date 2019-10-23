@@ -578,55 +578,53 @@ namespace Atlassian.Jira.Remote
             return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, new { name = assignee }, token);
         }
 
-        public async Task<List<string>> GetPropertyKeysAsync(string issueKey, CancellationToken token = default)
+        public async Task<IEnumerable<string>> GetPropertyKeysAsync(string issueKey, CancellationToken token = default)
         {
-            if (string.IsNullOrEmpty(issueKey))
-            {
-                throw new InvalidOperationException("Unable to interact with the issue properties, make sure the issue has been created.");
-            }
-
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var serializer = JsonSerializer.Create(serializerSettings);
 
             var resource = $"rest/api/2/issue/{issueKey}/properties";
             var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
             var propertyRefsJson = response["keys"];
-            var propertyRefs = propertyRefsJson.ToObject<IList<RemoteEntityPropertyReference>>(serializer);
-            return propertyRefs.Select(x => x.key).ToList();
+            var propertyRefs = propertyRefsJson.ToObject<IEnumerable<RemoteEntityPropertyReference>>(serializer);
+            return propertyRefs.Select(x => x.key);
         }
 
         public async Task<ReadOnlyDictionary<string, JToken>> GetPropertiesAsync(string issueKey, IEnumerable<string> propertyKeys, CancellationToken token = default)
         {
-            if (string.IsNullOrEmpty(issueKey))
-            {
-                throw new InvalidOperationException("Unable to interact with the issue properties, make sure the issue has been created.");
-            }
-
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var serializer = JsonSerializer.Create(serializerSettings);
 
-            var requestTasks = propertyKeys.Select(async (propertyKey) =>
+            var requestTasks = propertyKeys.Select((propertyKey) =>
             {
                 // NOTE; There are no character limits on property keys
                 var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
                 var resource = $"rest/api/2/issue/{issueKey}/properties/{urlEncodedKey}";
 
-                try
-                {
-                    // NOTE; Response includes the key and value
-                    var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
-                    return response.ToObject<RemoteEntityProperty>(serializer);
-                }
-                catch (ResourceNotFoundException)
-                {
-                    // WARN; Null result needs to be filtered out during processing!
-                    return null;
-                }
+                return _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith<JToken>(t =>
+                 {
+                     if (!t.IsFaulted)
+                     {
+                         return t.Result;
+                     }
+                     else if (t.Exception != null && t.Exception.InnerException is ResourceNotFoundException)
+                     {
+                         // WARN; Null result needs to be filtered out during processing!
+                         return null;
+                     }
+                     else
+                     {
+                         throw t.Exception;
+                     }
+                 });
             });
 
             var responses = await Task.WhenAll(requestTasks).ConfigureAwait(false);
+
+            // NOTE; Response includes the key and value
             var transformedResponses = responses
                 .Where(x => x != null)
+                .Select(x => x.ToObject<RemoteEntityProperty>(serializer))
                 .ToDictionary(x => x.key, x => x.value);
 
             return new ReadOnlyDictionary<string, JToken>(transformedResponses);
@@ -634,14 +632,9 @@ namespace Atlassian.Jira.Remote
 
         public Task SetPropertyAsync(string issueKey, string propertyKey, JToken obj, CancellationToken token = default)
         {
-            if (string.IsNullOrEmpty(issueKey))
-            {
-                throw new InvalidOperationException("Unable to interact with the issue properties, make sure the issue has been created.");
-            }
-
             if (propertyKey.Length <= 0 || propertyKey.Length >= 256)
             {
-                throw new ArgumentOutOfRangeException(nameof(propertyKey), "PropertyKey length must be between 0 and 256 (both exclusive)");
+                throw new ArgumentOutOfRangeException(nameof(propertyKey), "PropertyKey length must be between 0 and 256 (both exclusive).");
             }
 
             var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
@@ -651,17 +644,16 @@ namespace Atlassian.Jira.Remote
 
         public async Task DeletePropertyAsync(string issueKey, string propertyKey, CancellationToken token = default)
         {
-            if (string.IsNullOrEmpty(issueKey))
-            {
-                throw new InvalidOperationException("Unable to interact with the issue properties, make sure the issue has been created.");
-            }
+            var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
+            var resource = $"rest/api/2/issue/{issueKey}/properties/{urlEncodedKey}";
 
-            var existingKeys = await GetPropertyKeysAsync(issueKey, token);
-            if (existingKeys.Contains(propertyKey))
+            try
             {
-                var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
-                var resource = $"rest/api/2/issue/{issueKey}/properties/{urlEncodedKey}";
-                await _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
+                await _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token).ConfigureAwait(false);
+            }
+            catch (ResourceNotFoundException)
+            {
+                // No-op. The resource that we are trying to delete doesn't exist anyway.
             }
         }
     }
