@@ -205,6 +205,10 @@ namespace Atlassian.Jira.Remote
             {
                 throw new System.Security.Authentication.AuthenticationException(string.Format("Response Content: {0}", content));
             }
+            else if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new ResourceNotFoundException($"Response Content: {content}");
+            }
             else if ((int)response.StatusCode >= 400)
             {
                 throw new InvalidOperationException($"Response Status Code: {(int)response.StatusCode}. Response Content: {content}");

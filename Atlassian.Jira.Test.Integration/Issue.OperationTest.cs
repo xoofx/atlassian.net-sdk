@@ -1,4 +1,6 @@
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -619,6 +621,201 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.DeleteWorklogAsync(worklog).Wait();
             Assert.Empty(issue.GetWorklogsAsync().Result);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task AddAndRemovePropertyAndVerifyProperties(Jira jira)
+        {
+            var issue = new Issue(jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue with properties",
+                Assignee = "admin",
+            };
+
+            issue.SaveChanges();
+
+            // Verify no properties exist
+            var propertyKeys = await jira.Issues.GetPropertyKeysAsync(issue.Key.Value);
+            Assert.Empty(propertyKeys);
+
+            // Set new property on issue
+            var keyString = "test-property";
+            var keyValue = JToken.FromObject("test-string");
+            await issue.SetPropertyAsync(keyString, keyValue);
+
+            // Verify one property exists.
+            propertyKeys = await jira.Issues.GetPropertyKeysAsync(issue.Key.Value);
+            Assert.True(propertyKeys.SequenceEqual(new List<string>() { keyString }));
+
+            // Verify the property key returns the exact value
+            var issueProperties = await issue.GetPropertiesAsync(new[] { keyString, "non-existent-property" });
+
+            var truth = new Dictionary<string, JToken>()
+            {
+                { keyString, keyValue },
+            };
+
+            Assert.True(issueProperties.Keys.SequenceEqual(truth.Keys));
+            Assert.True(issueProperties.Values.SequenceEqual(truth.Values, new JTokenEqualityComparer()));
+
+            // Delete the property
+            await issue.DeletePropertyAsync(keyString);
+
+            // Verify dictionary is empty
+            issueProperties = await issue.GetPropertiesAsync(new[] { keyString });
+            Assert.False(issueProperties.Any());
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task RemoveInexistantPropertyAndVerifyNoOp(Jira jira)
+        {
+            var issue = new Issue(jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue with properties",
+                Assignee = "admin",
+            };
+
+            issue.SaveChanges();
+
+            var keyString = "test-property-nonexist";
+            await issue.DeletePropertyAsync(keyString);
+
+            // Verify the property isn't returned by the service
+            var issueProperties = await issue.GetPropertiesAsync(new[] { keyString });
+            Assert.False(issueProperties.Any());
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task AddNullPropertyAndVerify(Jira jira)
+        {
+            var issue = new Issue(jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue with properties",
+                Assignee = "admin",
+            };
+
+            issue.SaveChanges();
+
+            // Set new property on issue
+            var keyString = "test-property-null";
+            JToken keyValue = JToken.Parse("null");
+            await issue.SetPropertyAsync(keyString, keyValue);
+
+            // Verify the property key returns the exact value
+            var issueProperties = await issue.GetPropertiesAsync(new[] { keyString });
+            var truth = new Dictionary<string, JToken>()
+            {
+                // WARN; JToken of null is effectively returned as null.
+                // This probably depends on the serializersettings!
+                { keyString, null },
+            };
+
+            Assert.True(issueProperties.Keys.SequenceEqual(truth.Keys));
+            Assert.True(issueProperties.Values.SequenceEqual(truth.Values, new JTokenEqualityComparer()));
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+
+        public async Task AddObjectPropertyAndVerify(Jira jira)
+        {
+            var issue = new Issue(jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue with properties",
+                Assignee = "admin",
+            };
+
+            issue.SaveChanges();
+
+            // Set new property on issue
+            var keyString = "test-property-object";
+            var valueObject = new
+            {
+                KeyName = "TestKey",
+            };
+            JToken keyValue = JToken.FromObject(valueObject);
+            await issue.SetPropertyAsync(keyString, keyValue);
+
+            // Verify the property key returns the exact value
+            var issueProperties = await issue.GetPropertiesAsync(new[] { keyString });
+
+            var truth = new Dictionary<string, JToken>()
+            {
+                { keyString, keyValue },
+            };
+
+            Assert.True(issueProperties.Keys.SequenceEqual(truth.Keys));
+            Assert.True(issueProperties.Values.SequenceEqual(truth.Values, new JTokenEqualityComparer()));
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+
+        public async Task AddBoolPropertyAndVerify(Jira jira)
+        {
+            var issue = new Issue(jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue with properties",
+                Assignee = "admin",
+            };
+
+            issue.SaveChanges();
+
+            // Set new property on issue
+            var keyString = "test-property-bool";
+            JToken keyValue = JToken.FromObject(true);
+            await issue.SetPropertyAsync(keyString, keyValue);
+
+            // Verify the property key returns the exact value
+            var issueProperties = await issue.GetPropertiesAsync(new[] { keyString });
+
+            var truth = new Dictionary<string, JToken>()
+            {
+                { keyString, keyValue },
+            };
+
+            Assert.True(issueProperties.Keys.SequenceEqual(truth.Keys));
+            Assert.True(issueProperties.Values.SequenceEqual(truth.Values, new JTokenEqualityComparer()));
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+
+        public async Task AddListPropertyAndVerify(Jira jira)
+        {
+            var issue = new Issue(jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue with properties",
+                Assignee = "admin",
+            };
+
+            issue.SaveChanges();
+
+            // Set new property on issue
+            var keyString = "test-property-list";
+            var valueObject = new List<string>() { "One", "Two", "Three" };
+            JToken keyValue = JToken.FromObject(valueObject);
+            await issue.SetPropertyAsync(keyString, keyValue);
+
+            // Verify the property key returns the exact value
+            var issueProperties = await issue.GetPropertiesAsync(new[] { keyString });
+
+            var truth = new Dictionary<string, JToken>()
+            {
+                { keyString, keyValue },
+            };
+
+            Assert.True(issueProperties.Keys.SequenceEqual(truth.Keys));
+            Assert.True(issueProperties.Values.SequenceEqual(truth.Values, new JTokenEqualityComparer()));
         }
     }
 }

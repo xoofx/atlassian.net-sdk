@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Atlassian.Jira.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Atlassian.Jira
 {
@@ -292,5 +294,41 @@ namespace Atlassian.Jira
         /// <param name="assignee">The username of the user to assign the issue to.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task AssignIssueAsync(string issueKey, string assignee, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
+        /// Fetch all entity properties attached to the issue.
+        /// </summary>
+        /// <param name="issueKey">Identifier of the issue.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<string>> GetPropertyKeysAsync(string issueKey, CancellationToken token = default);
+
+        /// <summary>
+        /// Fetch requested entity properties attached to the issue.
+        /// </summary>
+        /// <param name="issueKey">Identifier of the issue.</param>
+        /// <param name="propertyKeys">The property keys to fetch.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        /// <returns>A mapping between requested property keys and stored values.</returns>
+        Task<ReadOnlyDictionary<string, JToken>> GetPropertiesAsync(string issueKey, IEnumerable<string> propertyKeys, CancellationToken token = default);
+
+        /// <summary>
+        /// Adds an entity property to the specified issue.
+        /// </summary>
+        /// <remarks>
+        /// This method overwrites any already existing property values with the same key!
+        /// </remarks>
+        /// <param name="issueKey">Identifier of the issue.</param>
+        /// <param name="propertyKey">The property key to identify the value.</param>
+        /// <param name="obj">The JSON construct to store as property value.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task SetPropertyAsync(string issueKey, string propertyKey, JToken obj, CancellationToken token = default);
+
+        /// <summary>
+        /// Removes the entity property from the specified issue.
+        /// </summary>
+        /// <param name="issueKey">Identifier of the issue.</param>
+        /// <param name="propertyKey">The property key to identify the value.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task DeletePropertyAsync(string issueKey, string propertyKey, CancellationToken token = default);
     }
 }

@@ -1,13 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Atlassian.Jira.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Atlassian.Jira.Remote
 {
@@ -574,6 +576,85 @@ namespace Atlassian.Jira.Remote
             var resource = $"/rest/api/2/issue/{issueKey}/assignee";
 
             return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, new { name = assignee }, token);
+        }
+
+        public async Task<IEnumerable<string>> GetPropertyKeysAsync(string issueKey, CancellationToken token = default)
+        {
+            var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+            var serializer = JsonSerializer.Create(serializerSettings);
+
+            var resource = $"rest/api/2/issue/{issueKey}/properties";
+            var response = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
+            var propertyRefsJson = response["keys"];
+            var propertyRefs = propertyRefsJson.ToObject<IEnumerable<RemoteEntityPropertyReference>>(serializer);
+            return propertyRefs.Select(x => x.key);
+        }
+
+        public async Task<ReadOnlyDictionary<string, JToken>> GetPropertiesAsync(string issueKey, IEnumerable<string> propertyKeys, CancellationToken token = default)
+        {
+            var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+            var serializer = JsonSerializer.Create(serializerSettings);
+
+            var requestTasks = propertyKeys.Select((propertyKey) =>
+            {
+                // NOTE; There are no character limits on property keys
+                var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
+                var resource = $"rest/api/2/issue/{issueKey}/properties/{urlEncodedKey}";
+
+                return _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ContinueWith<JToken>(t =>
+                 {
+                     if (!t.IsFaulted)
+                     {
+                         return t.Result;
+                     }
+                     else if (t.Exception != null && t.Exception.InnerException is ResourceNotFoundException)
+                     {
+                         // WARN; Null result needs to be filtered out during processing!
+                         return null;
+                     }
+                     else
+                     {
+                         throw t.Exception;
+                     }
+                 });
+            });
+
+            var responses = await Task.WhenAll(requestTasks).ConfigureAwait(false);
+
+            // NOTE; Response includes the key and value
+            var transformedResponses = responses
+                .Where(x => x != null)
+                .Select(x => x.ToObject<RemoteEntityProperty>(serializer))
+                .ToDictionary(x => x.key, x => x.value);
+
+            return new ReadOnlyDictionary<string, JToken>(transformedResponses);
+        }
+
+        public Task SetPropertyAsync(string issueKey, string propertyKey, JToken obj, CancellationToken token = default)
+        {
+            if (propertyKey.Length <= 0 || propertyKey.Length >= 256)
+            {
+                throw new ArgumentOutOfRangeException(nameof(propertyKey), "PropertyKey length must be between 0 and 256 (both exclusive).");
+            }
+
+            var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
+            var resource = $"rest/api/2/issue/{issueKey}/properties/{urlEncodedKey}";
+            return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, obj, token);
+        }
+
+        public async Task DeletePropertyAsync(string issueKey, string propertyKey, CancellationToken token = default)
+        {
+            var urlEncodedKey = WebUtility.UrlEncode(propertyKey);
+            var resource = $"rest/api/2/issue/{issueKey}/properties/{urlEncodedKey}";
+
+            try
+            {
+                await _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token).ConfigureAwait(false);
+            }
+            catch (ResourceNotFoundException)
+            {
+                // No-op. The resource that we are trying to delete doesn't exist anyway.
+            }
         }
     }
 }
