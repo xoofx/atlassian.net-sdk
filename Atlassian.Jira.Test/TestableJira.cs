@@ -22,8 +22,8 @@ namespace Atlassian.Jira.Test
 
         internal static readonly CultureInfo TestCulture = CultureInfo.InvariantCulture;
 
-        private TestableJira(JiraCredentials credentials = null)
-            : base(new ServiceLocator(), credentials)
+        private TestableJira()
+            : base(new ServiceLocator())
         {
             RestService = new Mock<IJiraRestClient>();
             FileSystem = new Mock<IFileSystem>();
@@ -48,13 +48,13 @@ namespace Atlassian.Jira.Test
             Translator.Setup(t => t.Process(It.IsAny<Expression>())).Returns(new JqlData() { Expression = "dummy expression" });
         }
 
-        public static TestableJira Create(JiraCredentials credentials = null)
+        public static TestableJira Create()
         {
             // switch thread locale to avoid "2016/01/01 does not equal 2016.01.01" errors
             Thread.CurrentThread.CurrentCulture = TestCulture;
             Thread.CurrentThread.CurrentUICulture = TestCulture;
 
-            return new TestableJira(credentials);
+            return new TestableJira();
         }
 
         public void SetupIssues(params RemoteIssue[] remoteIssues)

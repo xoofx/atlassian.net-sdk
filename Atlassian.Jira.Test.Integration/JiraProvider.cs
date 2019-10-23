@@ -23,12 +23,12 @@ namespace Atlassian.Jira.Test.Integration
         static JiraProvider()
         {
             _jiraWithCredentials = Jira.CreateRestClient(HOST, USERNAME, PASSWORD);
-            _jiraWithOAuth = Jira.CreateOAuthRestClientAsync(
+            _jiraWithOAuth = Jira.CreateOAuthRestClient(
                 HOST,
                 OAUTHCONSUMERKEY,
                 OAUTHCONSUMERSECRET,
                 OAUTHACCESSTOKEN,
-                OAUTHTOKENSECRET).Result;
+                OAUTHTOKENSECRET);
         }
 
         public JiraProvider()

@@ -8,6 +8,7 @@ namespace Atlassian.Jira
     /// </summary>
     public class JiraCache
     {
+        public JiraUser CurrentUser { get; set; }
         public JiraEntityDictionary<IssueType> IssueTypes { get; } = new JiraEntityDictionary<IssueType>();
         public JiraEntityDictionary<ProjectComponent> Components { get; } = new JiraEntityDictionary<ProjectComponent>();
         public JiraEntityDictionary<ProjectVersion> Versions { get; } = new JiraEntityDictionary<ProjectVersion>();

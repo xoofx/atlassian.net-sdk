@@ -738,16 +738,11 @@ namespace Atlassian.Jira
         /// </summary>
         /// <param name="comment">Comment text to add.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task<Comment> AddCommentAsync(string comment, CancellationToken token = default(CancellationToken))
+        public async Task<Comment> AddCommentAsync(string comment, CancellationToken token = default(CancellationToken))
         {
-            var credentials = _jira.Credentials;
+            var jiraUser = await this.Jira.Users.GetMyselfAsync(token);
 
-            if (credentials == null)
-            {
-                throw new InvalidOperationException("Unable to add comment to issue, user credentials have not been set.");
-            }
-
-            return this.AddCommentAsync(new Comment() { Author = credentials.UserName, Body = comment }, token);
+            return await this.AddCommentAsync(new Comment() { Author = jiraUser.Username, Body = comment }, token);
         }
 
         /// <summary>

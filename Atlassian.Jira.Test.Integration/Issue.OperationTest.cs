@@ -502,7 +502,7 @@ namespace Atlassian.Jira.Test.Integration
             // Add a comment
             var comment = new Comment()
             {
-                Author = jira.Credentials.UserName,
+                Author = jira.Users.GetMyselfAsync().Result.Username,
                 Body = "New comment",
                 Visibility = new CommentVisibility("Developers")
             };

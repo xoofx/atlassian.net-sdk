@@ -17,17 +17,15 @@ namespace Atlassian.Jira
         internal const string DEFAULT_DATE_TIME_FORMAT = DEFAULT_DATE_FORMAT + " HH:mm";
         internal static CultureInfo DefaultCultureInfo = CultureInfo.GetCultureInfo("en-us");
 
-        private JiraCredentials _credentials;
         private readonly JiraCache _cache;
         private readonly ServiceLocator _services;
 
         /// <summary>
         /// Create a client that connects with a JIRA server with specified dependencies.
         /// </summary>
-        public Jira(ServiceLocator services, JiraCredentials credentials = null, JiraCache cache = null)
+        public Jira(ServiceLocator services, JiraCache cache = null)
         {
             _services = services;
-            _credentials = credentials;
             _cache = cache ?? new JiraCache();
 
             this.Debug = false;
@@ -46,21 +44,7 @@ namespace Atlassian.Jira
             settings = settings ?? new JiraRestClientSettings();
             var restClient = new JiraRestClient(url, username, password, settings);
 
-            return CreateRestClient(restClient, new JiraCredentials(username, password), settings.Cache);
-        }
-
-        /// <summary>
-        /// Creates a JIRA client with the given rest client implementation.
-        /// </summary>
-        /// <param name="restClient">Rest client to use.</param>
-        /// <param name="credentials">Credentials to use.</param>
-        /// <param name="cache">Cache to use.</param>
-        public static Jira CreateRestClient(IJiraRestClient restClient, JiraCredentials credentials = null, JiraCache cache = null)
-        {
-            var services = new ServiceLocator();
-            var jira = new Jira(services, credentials, cache);
-            ConfigureDefaultServices(services, jira, restClient);
-            return jira;
+            return CreateRestClient(restClient, settings.Cache);
         }
 
         /// <summary>
@@ -73,17 +57,15 @@ namespace Atlassian.Jira
         /// <param name="oAuthTokenSecret">The token secret provided by Jira when asking for a request token.</param>
         /// <param name="oAuthSignatureMethod">The signature method used to generate the request token.</param>
         /// <param name="settings">Settings to configure the rest client.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>Jira object configured to use REST API.</returns>
-        public static Task<Jira> CreateOAuthRestClientAsync(
+        public static Jira CreateOAuthRestClient(
             string url,
             string consumerKey,
             string consumerSecret,
             string oAuthAccessToken,
             string oAuthTokenSecret,
             JiraOAuthSignatureMethod oAuthSignatureMethod = JiraOAuthSignatureMethod.RsaSha1,
-            JiraRestClientSettings settings = null,
-            CancellationToken cancellationToken = default(CancellationToken))
+            JiraRestClientSettings settings = null)
         {
             settings = settings ?? new JiraRestClientSettings();
             var restClient = new JiraOAuthRestClient(
@@ -95,30 +77,19 @@ namespace Atlassian.Jira
                 oAuthSignatureMethod,
                 settings);
 
-            return CreateOAuthRestClientAsync(restClient, settings.Cache, cancellationToken);
+            return CreateRestClient(restClient, settings.Cache);
         }
 
         /// <summary>
-        /// Creates a JIRA OAuth rest client with the given rest client implementation.
+        /// Creates a JIRA client with the given rest client implementation.
         /// </summary>
         /// <param name="restClient">Rest client to use.</param>
         /// <param name="cache">Cache to use.</param>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns>Jira object configured to use REST API.</returns>
-        public static async Task<Jira> CreateOAuthRestClientAsync(
-            IJiraRestClient restClient,
-            JiraCache cache = null,
-            CancellationToken cancellationToken = default(CancellationToken))
+        public static Jira CreateRestClient(IJiraRestClient restClient, JiraCache cache = null)
         {
             var services = new ServiceLocator();
-            var jira = new Jira(services, new JiraCredentials(null), cache);
-
+            var jira = new Jira(services, cache);
             ConfigureDefaultServices(services, jira, restClient);
-
-            var currentUser = await jira.Users.GetMyselfAsync(cancellationToken).ConfigureAwait(false);
-
-            jira._credentials = new JiraCredentials(currentUser.Username);
-
             return jira;
         }
 
@@ -336,17 +307,6 @@ namespace Atlassian.Jira
         public string Url
         {
             get { return RestClient.Url; }
-        }
-
-        /// <summary>
-        /// Gets the credentials to use to interact with server resources.
-        /// </summary>
-        public JiraCredentials Credentials
-        {
-            get
-            {
-                return _credentials;
-            }
         }
 
         internal IFileSystem FileSystem
