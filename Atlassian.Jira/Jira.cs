@@ -70,6 +70,7 @@ namespace Atlassian.Jira
         /// <param name="consumerKey">The consumer key provided by the Jira application link.</param>
         /// <param name="consumerSecret">The consumer public key in XML format.</param>
         /// <param name="oAuthAccessToken">The access token provided by Jira after the request token has been authorize.</param>
+        /// <param name="oAuthTokenSecret">The token secret provided by Jira when asking for a request token.</param>
         /// <param name="oAuthSignatureMethod">The signature method used to generate the request token.</param>
         /// <param name="settings">Settings to configure the rest client.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -79,6 +80,7 @@ namespace Atlassian.Jira
             string consumerKey,
             string consumerSecret,
             string oAuthAccessToken,
+            string oAuthTokenSecret,
             JiraOAuthSignatureMethod oAuthSignatureMethod = JiraOAuthSignatureMethod.RsaSha1,
             JiraRestClientSettings settings = null,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -89,6 +91,7 @@ namespace Atlassian.Jira
                 consumerKey,
                 consumerSecret,
                 oAuthAccessToken,
+                oAuthTokenSecret,
                 oAuthSignatureMethod,
                 settings);
 

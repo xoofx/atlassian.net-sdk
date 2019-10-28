@@ -27,7 +27,8 @@ namespace Atlassian.Jira.Test.Integration
                 HOST,
                 OAUTHCONSUMERKEY,
                 OAUTHCONSUMERSECRET,
-                OAUTHACCESSTOKEN).Result;
+                OAUTHACCESSTOKEN,
+                OAUTHTOKENSECRET).Result;
         }
 
         public JiraProvider()
