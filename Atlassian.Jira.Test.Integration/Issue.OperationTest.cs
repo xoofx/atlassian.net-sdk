@@ -76,6 +76,44 @@ namespace Atlassian.Jira.Test.Integration
 
         [Theory]
         [ClassData(typeof(JiraProvider))]
+        void AddAndRemoveWatchersToIssueWithEmailAsUsername(Jira jira)
+        {
+            // Create issue.
+            var issue = jira.CreateIssue("TST");
+            issue.Type = "1";
+            issue.Summary = "Test issue with watchers" + _random.Next(int.MaxValue);
+            issue.SaveChanges();
+
+            // Create user with e-mail as username.
+            var rand = _random.Next(int.MaxValue);
+            var userInfo = new JiraUserCreationInfo()
+            {
+                Username = $"test{rand}@user.com",
+                DisplayName = $"Test User {rand}",
+                Email = $"test{rand}@user.com",
+                Password = $"MyPass{rand}",
+            };
+
+            jira.Users.CreateUserAsync(userInfo).Wait();
+
+            // Add the user as a watcher on the issue.
+            issue.AddWatcherAsync(userInfo.Email).Wait();
+            Assert.Equal(2, issue.GetWatchersAsync().Result.Count());
+
+            // Delete "admin" user.
+            issue.DeleteWatcherAsync("admin").Wait();
+            Assert.Single(issue.GetWatchersAsync().Result);
+
+            // Verify the lasting user is the one with the e-mail.
+            var user = issue.GetWatchersAsync().Result.First();
+            Assert.Equal(userInfo.Username, user.Username);
+
+            // Delete user.
+            jira.Users.DeleteUserAsync(userInfo.Username).Wait();
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
         void GetSubTasks(Jira jira)
         {
             var parentTask = jira.CreateIssue("TST");

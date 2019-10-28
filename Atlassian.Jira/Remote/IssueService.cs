@@ -406,7 +406,7 @@ namespace Atlassian.Jira.Remote
                 throw new InvalidOperationException("Unable to interact with the watchers resource, make sure the issue has been created.");
             }
 
-            var resourceUrl = String.Format("rest/api/2/issue/{0}/watchers?username={1}", issueKey, System.Uri.EscapeDataString(username));
+            var resourceUrl = String.Format("rest/api/2/issue/{0}/watchers?username={1}", issueKey, System.Uri.EscapeUriString(username));
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resourceUrl, null, token);
         }
 

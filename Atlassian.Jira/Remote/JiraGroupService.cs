@@ -19,7 +19,7 @@ namespace Atlassian.Jira.Remote
 
         public Task AddUserAsync(string groupname, string username, CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/group/user?groupname={0}", Uri.EscapeDataString(groupname));
+            var resource = String.Format("rest/api/2/group/user?groupname={0}", Uri.EscapeUriString(groupname));
             var requestBody = JToken.FromObject(new { name = username });
             return _jira.RestClient.ExecuteRequestAsync(Method.POST, resource, requestBody, token);
         }
@@ -34,11 +34,11 @@ namespace Atlassian.Jira.Remote
 
         public Task DeleteGroupAsync(string groupName, string swapGroupName = null, CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/group?groupname={0}", Uri.EscapeDataString(groupName));
+            var resource = String.Format("rest/api/2/group?groupname={0}", Uri.EscapeUriString(groupName));
 
             if (!String.IsNullOrEmpty(swapGroupName))
             {
-                resource += String.Format("&swapGroup={0}", Uri.EscapeDataString(swapGroupName));
+                resource += String.Format("&swapGroup={0}", Uri.EscapeUriString(swapGroupName));
             }
 
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
@@ -48,7 +48,7 @@ namespace Atlassian.Jira.Remote
         {
             var resource = String.Format(
                 "rest/api/2/group/member?groupname={0}&includeInactiveUsers={1}&startAt={2}&maxResults={3}",
-                Uri.EscapeDataString(groupname),
+                Uri.EscapeUriString(groupname),
                 includeInactiveUsers,
                 startAt,
                 maxResults);
@@ -65,8 +65,8 @@ namespace Atlassian.Jira.Remote
         public Task RemoveUserAsync(string groupname, string username, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format("rest/api/2/group/user?groupname={0}&username={1}",
-                Uri.EscapeDataString(groupname),
-                Uri.EscapeDataString(username));
+                Uri.EscapeUriString(groupname),
+                Uri.EscapeUriString(username));
 
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
 

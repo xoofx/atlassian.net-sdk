@@ -51,26 +51,32 @@ namespace Atlassian.Jira.Test.Integration
 
         [Theory]
         [ClassData(typeof(JiraProvider))]
-        public void AddAndRemoveUserFromGroup(Jira jira)
+        public void CreateGetAndDeleteUsersWithEmailAsUsername(Jira jira)
         {
-            // Create the group.
-            var groupName = "test-group-" + _random.Next(int.MaxValue);
-            jira.Groups.CreateGroupAsync(groupName).Wait();
+            var userInfo = BuildUserInfo();
+            userInfo.Username = userInfo.Email;
 
-            // add user to group
-            jira.Groups.AddUserAsync(groupName, "admin").Wait();
+            // verify create a user.
+            var user = jira.Users.CreateUserAsync(userInfo).Result;
+            Assert.Equal(user.Email, userInfo.Email);
+            Assert.Equal(user.DisplayName, userInfo.DisplayName);
+            Assert.Equal(user.Username, userInfo.Username);
+            Assert.Equal(user.Key, userInfo.Username);
+            Assert.True(user.IsActive);
+            Assert.False(String.IsNullOrEmpty(user.Locale));
 
-            // get users from group.
-            var users = jira.Groups.GetUsersAsync(groupName).Result;
-            Assert.Equal("admin", users.First().Username);
+            // verify retrieve a user.
+            user = jira.Users.GetUserAsync(userInfo.Username).Result;
+            Assert.Equal(user.DisplayName, userInfo.DisplayName);
 
-            // delete user from group.
-            jira.Groups.RemoveUserAsync(groupName, "admin").Wait();
-            users = jira.Groups.GetUsersAsync(groupName).Result;
+            // verify search for a user
+            var users = jira.Users.SearchUsersAsync("test").Result;
+            Assert.Contains(users, u => u.Username == userInfo.Username);
+
+            // verify delete a user
+            jira.Users.DeleteUserAsync(userInfo.Username).Wait();
+            users = jira.Users.SearchUsersAsync(userInfo.Username).Result;
             Assert.Empty(users);
-
-            // delete group
-            jira.Groups.DeleteGroupAsync(groupName).Wait();
         }
     }
 }
