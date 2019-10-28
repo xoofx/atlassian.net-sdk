@@ -1,11 +1,7 @@
 # How to run the integration tests
 
-It is possible to run the integration tests using the [official Atlassian Docker images](https://hub.docker.com/r/atlassian/jira-software),
-which makes it easy to run the tests on both Jira v7 and v8. For now, integration tests have to be run manually.
-
-Since Atlassian SDK needs specific data for each version, it supports one version per major version:
-* v7.13
-* v8.5
+Integration tests run checks against a live JIRA server that has been pre-populated with test data. JIRA can be run using the [official Atlassian Docker images](https://hub.docker.com/r/atlassian/jira-software) 
+which makes it easy to run the tests on both Jira v7 and v8.
 
 By default the tests are run against Jira 7.13.
 
@@ -20,12 +16,26 @@ The only dependency to run the integration tests are a tiny bit of knowledge of 
 
 ## Prepare the Jira instance
 
-To prepare the Jira instance, there is a batch file that runs Docker and restore the test data:
+### Automated Setup ###
+
+- Automated setup uses Selenion WebDriver to automate the Chrome browser to run through the JIRA setup wizard. It requires the machine to have Chrome installed.
+- To prepare the Jira instance, there is a batch file that runs Docker and restore the test data:
 ```
 $ start-jira-with-data.bat
 ```
 
-Wait until the Chrome window is closed. If successful, the console should show `--- Finished setting up Jira ---`.
+- Wait until the Chrome window is closed. If successful, the console should show `--- Finished setting up Jira ---`.
+
+### Manual Setup ###
+- Launch the docker container.
+```
+$ docker-compose up -d
+```
+- Navigate to http://localhost:8080.
+- Once the setup wizard loads click on “I’ll set it up myself” and “Next”.
+- On the next screen Keep “Built in” selected and click on “Next” (wait until database is setup).
+- On the next screen click on the “import your data” link at the top.
+- Enter “TestData.zip” in the “File Name” field and click on “Import” (wait until the test data is imported).
 
 ## Run the integration tests
 
