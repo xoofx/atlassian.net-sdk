@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Atlassian.Jira.Test.Integration
@@ -51,13 +52,13 @@ namespace Atlassian.Jira.Test.Integration
 
         [Theory]
         [ClassData(typeof(JiraProvider))]
-        public void CreateGetAndDeleteUsersWithEmailAsUsername(Jira jira)
+        public async Task CreateGetAndDeleteUsersWithEmailAsUsername(Jira jira)
         {
             var userInfo = BuildUserInfo();
             userInfo.Username = userInfo.Email;
 
             // verify create a user.
-            var user = jira.Users.CreateUserAsync(userInfo).Result;
+            var user = await jira.Users.CreateUserAsync(userInfo);
             Assert.Equal(user.Email, userInfo.Email);
             Assert.Equal(user.DisplayName, userInfo.DisplayName);
             Assert.Equal(user.Username, userInfo.Username);
@@ -66,16 +67,16 @@ namespace Atlassian.Jira.Test.Integration
             Assert.False(String.IsNullOrEmpty(user.Locale));
 
             // verify retrieve a user.
-            user = jira.Users.GetUserAsync(userInfo.Username).Result;
+            user = await jira.Users.GetUserAsync(userInfo.Username);
             Assert.Equal(user.DisplayName, userInfo.DisplayName);
 
             // verify search for a user
-            var users = jira.Users.SearchUsersAsync("test").Result;
+            var users = await jira.Users.SearchUsersAsync("test");
             Assert.Contains(users, u => u.Username == userInfo.Username);
 
             // verify delete a user
-            jira.Users.DeleteUserAsync(userInfo.Username).Wait();
-            users = jira.Users.SearchUsersAsync(userInfo.Username).Result;
+            await jira.Users.DeleteUserAsync(userInfo.Username);
+            users = await jira.Users.SearchUsersAsync(userInfo.Username);
             Assert.Empty(users);
         }
     }
