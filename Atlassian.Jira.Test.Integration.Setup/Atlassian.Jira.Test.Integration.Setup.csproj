@@ -13,7 +13,7 @@
     <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Selenium.Chrome.WebDriver" Version="2.38.0" />
+    <PackageReference Include="Selenium.Chrome.WebDriver" Version="77.0.0" />
     <PackageReference Include="Selenium.Support" Version="3.11.2" />
     <PackageReference Include="Selenium.WebDriver" Version="3.11.2" />
   </ItemGroup>
