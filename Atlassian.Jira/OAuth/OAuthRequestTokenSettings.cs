@@ -20,7 +20,7 @@
         /// </summary>
         /// <param name="url">The URL of the Jira instance to request to.</param>
         /// <param name="consumerKey">The consumer key provided by the Jira application link.</param>
-        /// <param name="consumerSecret">The consumer public key in XML format.</param>
+        /// <param name="consumerSecret">The consumer private key in XML format.</param>
         /// <param name="callbackUrl">The callback url for the request token.</param>
         /// <param name="signatureMethod">The signature method used to sign the request.</param>
         /// <param name="requestTokenUrl">The relative URL to request the token.</param>
@@ -54,7 +54,7 @@
         public string ConsumerKey { get; }
 
         /// <summary>
-        /// Gets the consumer public key in XML format.
+        /// Gets the consumer private key in XML format.
         /// </summary>
         public string ConsumerSecret { get; }
 
