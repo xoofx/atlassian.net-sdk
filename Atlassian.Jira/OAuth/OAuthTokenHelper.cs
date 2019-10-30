@@ -95,8 +95,8 @@ namespace Atlassian.Jira.OAuth
 
             return ObtainAccessTokenAsync(
                 restClient,
-                oAuthAccessTokenSettings.AccessTokenUrl,
                 oAuthAccessTokenSettings.OAuthTokenSecret,
+                oAuthAccessTokenSettings.AccessTokenUrl,
                 cancellationToken);
         }
 

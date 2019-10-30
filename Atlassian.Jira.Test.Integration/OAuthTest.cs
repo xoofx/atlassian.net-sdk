@@ -1,7 +1,10 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Atlassian.Jira.OAuth;
+using LTAF;
 using Xunit;
+using UniTestAssert = Xunit.Assert;
 
 namespace Atlassian.Jira.Test.Integration
 {
@@ -20,7 +23,7 @@ namespace Atlassian.Jira.Test.Integration
             var oAuthRequestToken = await OAuthTokenHelper.GenerateRequestTokenAsync(oAuthTokenSettings);
 
             // Assert
-            Assert.NotNull(oAuthRequestToken);
+            UniTestAssert.NotNull(oAuthRequestToken);
         }
 
         [Fact]
@@ -38,7 +41,37 @@ namespace Atlassian.Jira.Test.Integration
             var accessToken = await OAuthTokenHelper.ObtainAccessTokenAsync(oAuthAccessTokenSettings, CancellationToken.None);
 
             // Assert
-            Assert.Null(accessToken);
+            UniTestAssert.Null(accessToken);
+        }
+
+        [Fact]
+        public async Task CanGenerateAccesToken()
+        {
+            // Arrange
+            var oAuthTokenSettings = new OAuthRequestTokenSettings(
+                JiraProvider.HOST,
+                JiraProvider.OAUTHCONSUMERKEY,
+                JiraProvider.OAUTHCONSUMERSECRET);
+            var oAuthRequestToken = await OAuthTokenHelper.GenerateRequestTokenAsync(oAuthTokenSettings);
+
+            // Login to Jira
+            var page = new HtmlPage(new Uri(JiraProvider.HOST));
+            page.Navigate("/login.jsp");
+            var elements = page.RootElement.ChildElements;
+            elements.Find("username").SetText(JiraProvider.USERNAME);
+            elements.Find("password").SetText(JiraProvider.PASSWORD);
+            elements.Find("submit").Click();
+
+            // Authorize token
+            page.Navigate(oAuthRequestToken.AuthorizeUri);
+            page.RootElement.ChildElements.Find("approve").Click();
+
+            // Act
+            var oAuthAccessTokenSettings = new OAuthAccessTokenSettings(oAuthTokenSettings, oAuthRequestToken);
+            var accessToken = await OAuthTokenHelper.ObtainAccessTokenAsync(oAuthAccessTokenSettings, CancellationToken.None);
+
+            // Assert
+            UniTestAssert.NotNull(accessToken);
         }
     }
 }

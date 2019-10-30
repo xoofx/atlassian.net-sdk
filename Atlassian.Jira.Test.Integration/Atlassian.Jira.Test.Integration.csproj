@@ -9,6 +9,7 @@
     <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="LTAF.Navigator" Version="0.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="RestSharp" Version="106.2.2" />
     <PackageReference Include="xunit" Version="2.3.1" />

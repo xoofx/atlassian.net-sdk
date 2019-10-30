@@ -53,6 +53,7 @@
             SignatureMethod = oAuthRequestTokenSettings.SignatureMethod;
             OAuthRequestToken = oAuthRequestToken.OAuthToken;
             OAuthTokenSecret = oAuthRequestToken.OAuthTokenSecret;
+            AccessTokenUrl = DefaultAccessTokenUrl;
         }
 
         /// <summary>
