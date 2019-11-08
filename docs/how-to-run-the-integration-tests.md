@@ -18,7 +18,7 @@ The only dependency to run the integration tests are a tiny bit of knowledge of 
 
 ### Automated Setup ###
 
-- Automated setup uses Selenion WebDriver to automate the Chrome browser to run through the JIRA setup wizard. It requires the machine to have Chrome installed.
+- Automated setup uses Selenium WebDriver to automate the Chrome browser to run through the JIRA setup wizard. It requires the machine to have Chrome installed.
 - To prepare the Jira instance, there is a batch file that runs Docker and restore the test data:
 ```
 $ start-jira-with-data.bat
@@ -27,6 +27,9 @@ $ start-jira-with-data.bat
 - Wait until the Chrome window is closed. If successful, the console should show `--- Finished setting up Jira ---`.
 
 ### Manual Setup ###
+
+Useful if anything fails with the automated setup above.
+
 - Launch the docker container.
 ```
 $ docker-compose up -d
