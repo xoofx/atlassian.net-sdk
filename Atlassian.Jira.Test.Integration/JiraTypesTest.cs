@@ -73,6 +73,26 @@ namespace Atlassian.Jira.Test.Integration
 
         [Theory]
         [ClassData(typeof(JiraProvider))]
+        public async Task GetIssueStatusById(Jira jira)
+        {
+            var status = await jira.Statuses.GetStatusAsync("1");
+
+            Assert.NotNull(status);
+            Assert.Equal("1", status.Id);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetIssueStatusByName(Jira jira)
+        {
+            var status = await jira.Statuses.GetStatusAsync("Open");
+
+            Assert.NotNull(status);
+            Assert.Equal("Open", status.Name);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
         public void GetCustomFields(Jira jira)
         {
             var fields = jira.Fields.GetCustomFieldsAsync().Result;

@@ -15,6 +15,7 @@ namespace Atlassian.Jira.Remote
         {
             _jira = jira;
         }
+
         public async Task<IEnumerable<IssueStatus>> GetStatusesAsync(CancellationToken token = default(CancellationToken))
         {
             var cache = _jira.Cache;
@@ -26,6 +27,22 @@ namespace Atlassian.Jira.Remote
             }
 
             return cache.Statuses.Values;
+        }
+
+        public async Task<IssueStatus> GetStatusAsync(string idOrName, CancellationToken token = default(CancellationToken))
+        {
+            var cache = _jira.Cache;
+
+            var status = cache.Statuses.FirstOrDefault(s => s.Value.Id == idOrName || s.Value.Name == idOrName).Value;
+            if (status == null)
+            {
+                var resource = $"rest/api/2/status/{idOrName}";
+                var result = await _jira.RestClient.ExecuteRequestAsync<RemoteStatus>(Method.GET, resource, null, token).ConfigureAwait(false);
+                status = new IssueStatus(result);
+                cache.Statuses.TryAdd(status);
+            }
+
+            return status;
         }
     }
 }
