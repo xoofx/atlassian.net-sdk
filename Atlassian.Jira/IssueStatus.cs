@@ -17,15 +17,20 @@ namespace Atlassian.Jira
         /// <summary>
         /// Creates an instance of the IssueStatus based on a remote entity.
         /// </summary>
-        public IssueStatus(RemoteStatus remoteEntity)
-            : base(remoteEntity)
+        public IssueStatus(RemoteStatus remoteStatus)
+            : base(remoteStatus)
         {
+            StatusCategory = remoteStatus.statusCategory != null ?
+                new IssueStatusCategory(remoteStatus.statusCategory) :
+                null;
         }
 
         internal IssueStatus(string id, string name = null)
             : base(id, name)
         {
         }
+
+        public IssueStatusCategory StatusCategory { get; }
 
         protected override async Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {

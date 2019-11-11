@@ -67,8 +67,14 @@ namespace Atlassian.Jira.Test.Integration
         {
             var statuses = jira.Statuses.GetStatusesAsync().Result;
 
-            Assert.Contains(statuses, i => i.Name == "Open");
-            Assert.NotNull(statuses.First().IconUrl);
+            var status = statuses.FirstOrDefault(i => i.Name == "Open");
+            Assert.NotNull(status);
+            Assert.NotNull(status.IconUrl);
+            Assert.NotNull(status.StatusCategory);
+            Assert.Equal("2", status.StatusCategory.Id);
+            Assert.Equal("new", status.StatusCategory.Key);
+            Assert.Equal("To Do", status.StatusCategory.Name);
+            Assert.Equal("blue-gray", status.StatusCategory.ColorName);
         }
 
         [Theory]
