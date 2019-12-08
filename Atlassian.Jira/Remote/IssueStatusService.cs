@@ -33,13 +33,15 @@ namespace Atlassian.Jira.Remote
         {
             var cache = _jira.Cache;
 
-            var status = cache.Statuses.FirstOrDefault(s => s.Value.Id == idOrName || s.Value.Name == idOrName).Value;
+            var status = cache.Statuses
+                .FirstOrDefault(s => idOrName.Equals(s.Value.Id, StringComparison.InvariantCulture) || idOrName.Equals(s.Value.Name, StringComparison.InvariantCulture))
+                .Value;
+
             if (status == null)
             {
                 var resource = $"rest/api/2/status/{idOrName}";
                 var result = await _jira.RestClient.ExecuteRequestAsync<RemoteStatus>(Method.GET, resource, null, token).ConfigureAwait(false);
                 status = new IssueStatus(result);
-                cache.Statuses.TryAdd(status);
             }
 
             return status;

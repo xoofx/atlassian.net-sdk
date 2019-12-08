@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Atlassian.Jira.Remote;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,6 +90,13 @@ namespace Atlassian.Jira.Test.Integration
 
             Assert.NotNull(status);
             Assert.Equal("Open", status.Name);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async void GetIssueStatusByInvalidNameShouldThrowException(Jira jira)
+        {
+            await Assert.ThrowsAsync<ResourceNotFoundException>(async () => await jira.Statuses.GetStatusAsync("InvalidName"));
         }
 
         [Theory]

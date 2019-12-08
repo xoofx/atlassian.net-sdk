@@ -21,7 +21,7 @@ namespace Atlassian.Jira
         /// Returns a full representation of the status having the given id or name.
         /// </summary>
         /// <param name="idOrName">The status identifier or name.</param>
-        /// <param name="token">The token.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
         Task<IssueStatus> GetStatusAsync(string idOrName, CancellationToken token = default(CancellationToken));
     }
 }
