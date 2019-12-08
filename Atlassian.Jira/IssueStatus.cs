@@ -30,13 +30,16 @@ namespace Atlassian.Jira
         {
         }
 
-        public IssueStatusCategory StatusCategory { get; }
-
         protected override async Task<IEnumerable<JiraNamedEntity>> GetEntitiesAsync(Jira jira, CancellationToken token)
         {
             var results = await jira.Statuses.GetStatusesAsync(token).ConfigureAwait(false);
             return results as IEnumerable<JiraNamedEntity>;
         }
+
+        /// <summary>
+        /// The category assigned to this issue status.
+        /// </summary>
+        public IssueStatusCategory StatusCategory { get; }
 
         /// <summary>
         /// Allows assignation by name
