@@ -17,9 +17,12 @@ namespace Atlassian.Jira
         /// <summary>
         /// Creates an instance of the IssueStatus based on a remote entity.
         /// </summary>
-        public IssueStatus(RemoteStatus remoteEntity)
-            : base(remoteEntity)
+        public IssueStatus(RemoteStatus remoteStatus)
+            : base(remoteStatus)
         {
+            StatusCategory = remoteStatus.statusCategory != null ?
+                new IssueStatusCategory(remoteStatus.statusCategory) :
+                null;
         }
 
         internal IssueStatus(string id, string name = null)
@@ -32,6 +35,11 @@ namespace Atlassian.Jira
             var results = await jira.Statuses.GetStatusesAsync(token).ConfigureAwait(false);
             return results as IEnumerable<JiraNamedEntity>;
         }
+
+        /// <summary>
+        /// The category assigned to this issue status.
+        /// </summary>
+        public IssueStatusCategory StatusCategory { get; }
 
         /// <summary>
         /// Allows assignation by name

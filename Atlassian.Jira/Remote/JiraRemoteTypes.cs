@@ -1950,6 +1950,15 @@ namespace Atlassian.Jira.Remote
         public string iconUrl { get; set; }
     }
 
+    public class RemoteStatusCategory : AbstractNamedRemoteEntity
+    {
+        [JsonProperty("key")]
+        public string Key { get; set; }
+
+        [JsonProperty("colorName")]
+        public string ColorName { get; set; }
+    }
+
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
     [System.SerializableAttribute()]
@@ -1958,6 +1967,29 @@ namespace Atlassian.Jira.Remote
     [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
     public partial class RemoteStatus : AbstractRemoteConstant
     {
+        private RemoteStatusCategory statusCategoryField;
+
+        [JsonIgnore]
+        public RemoteStatusCategory statusCategory
+        {
+            get
+            {
+                return this.statusCategoryField;
+            }
+            set
+            {
+                this.statusCategoryField = value;
+            }
+        }
+
+        [JsonProperty("statusCategory")]
+        public RemoteStatusCategory statusCategoryDeserializer
+        {
+            set
+            {
+                this.statusCategoryField = value;
+            }
+        }
     }
 
     /// <remarks/>
