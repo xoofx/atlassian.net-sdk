@@ -251,6 +251,24 @@ namespace Atlassian.Jira.Test.Integration
 
         [Theory]
         [ClassData(typeof(JiraProvider))]
+        public async Task TransitionIssueByIdAsync(Jira jira)
+        {
+            var issue = jira.CreateIssue("TST");
+            issue.Summary = "Issue to resolve with async" + _random.Next(int.MaxValue);
+            issue.Type = "Bug";
+            issue.SaveChanges();
+
+            var transitions = await issue.GetAvailableActionsAsync();
+            var transition = transitions.Single(t => t.Name.Equals("Resolve Issue", StringComparison.OrdinalIgnoreCase));
+
+            await issue.WorkflowTransitionAsync(transition.Id);
+
+            Assert.Equal("Resolved", issue.Status.Name);
+            Assert.Equal("Fixed", issue.Resolution.Name);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
         public async Task TransitionIssueAsyncWithCommentAndFields(Jira jira)
         {
             var issue = jira.CreateIssue("TST");

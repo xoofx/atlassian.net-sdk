@@ -98,10 +98,10 @@ namespace Atlassian.Jira
         /// Transition an issue through a workflow action.
         /// </summary>
         /// <param name="issue">Issue to transition.</param>
-        /// <param name="actionName">The workflow action name to transition to.</param>
+        /// <param name="actionNameOrId">The workflow action name or id to transition to.</param>
         /// <param name="updates">Additional updates to perform when transitioning the issue.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task ExecuteWorkflowActionAsync(Issue issue, string actionName, WorkflowTransitionUpdates updates, CancellationToken token = default(CancellationToken));
+        Task ExecuteWorkflowActionAsync(Issue issue, string actionNameOrId, WorkflowTransitionUpdates updates, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Gets time tracking information for an issue.

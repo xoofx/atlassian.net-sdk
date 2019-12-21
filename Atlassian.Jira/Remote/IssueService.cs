@@ -196,14 +196,24 @@ namespace Atlassian.Jira.Remote
             return updateFields;
         }
 
-        public async Task ExecuteWorkflowActionAsync(Issue issue, string actionName, WorkflowTransitionUpdates updates, CancellationToken token = default(CancellationToken))
+        public async Task ExecuteWorkflowActionAsync(Issue issue, string actionNameOrId, WorkflowTransitionUpdates updates, CancellationToken token = default(CancellationToken))
         {
-            var actions = await this.GetActionsAsync(issue.Key.Value, token).ConfigureAwait(false);
-            var action = actions.FirstOrDefault(a => a.Name.Equals(actionName, StringComparison.OrdinalIgnoreCase));
-
-            if (action == null)
+            string actionId;
+            if (int.TryParse(actionNameOrId, out int actionIdInt))
             {
-                throw new InvalidOperationException(String.Format("Workflow action with name '{0}' not found.", actionName));
+                actionId = actionNameOrId;
+            }
+            else
+            {
+                var actions = await this.GetActionsAsync(issue.Key.Value, token).ConfigureAwait(false);
+                var action = actions.FirstOrDefault(a => a.Name.Equals(actionNameOrId, StringComparison.OrdinalIgnoreCase));
+
+                if (action == null)
+                {
+                    throw new InvalidOperationException(String.Format("Workflow action with name '{0}' not found.", actionNameOrId));
+                }
+
+                actionId = action.Id;
             }
 
             updates = updates ?? new WorkflowTransitionUpdates();
@@ -228,7 +238,7 @@ namespace Atlassian.Jira.Remote
             {
                 transition = new
                 {
-                    id = action.Id
+                    id = actionId
                 },
                 update = updatesObject,
                 fields = fields
