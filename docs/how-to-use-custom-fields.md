@@ -1,0 +1,68 @@
+# Custom Field 'Name' vs 'Id' #
+The API exposed to clients uses the 'name' of the custom field instead of the 'id'. The 'name' of a custom field can be viewed directly on the web UI so it is easier to discover.
+
+Internally, the SDK looks up the 'id' of the custom field by querying the metadata of custom fields from JIRA.
+
+
+# Custom Serialization #
+The SDK has serializers for the built in custom field types available by JIRA Core. Users can register their own serializers to handle other custom field types:
+
+### 1. Implement ICustomFieldValueSerializer ###
+This class will handle serializing between JSON (used by JIRA) and a string[] (used internally by the SDK).
+
+```
+#!c#
+public class MyCustomFieldValueSerializer : ICustomFieldValueSerializer
+{
+    public string[] FromJson(JToken json)
+    {
+        // your code
+    }
+
+    public JToken ToJson(string[] values)
+    {
+        // your code
+    }
+}
+```
+
+### 2. Discover the custom field type ###
+In order to register a custom field serializer the custom field type must be known. One way to do this is to use the SDK to call Jira.Fields.GetCustomFieldsAsync(). Make sure to turn on request tracing as described [here](https://bitbucket.org/farmas/atlassian.net-sdk/wiki/How%20to%20Debug%20Problems) which will print the response into trace and you will be able to see the custom field metadata from JIRA. You can see the custom field type in the returned JSON
+
+```
+#!c#
+[GET] Response for Url: rest/api/2/field
+[
+...
+  {
+    "clauseNames": [
+      "cf[10311]",
+      "Custom Url Field"
+    ],
+    "custom": true,
+    "id": "customfield_10311",
+    "key": "customfield_10311",
+    "name": "Custom Url Field",
+    "navigable": true,
+    "orderable": true,
+    "schema": {
+      "custom": "com.atlassian.jira.plugin.system.customfieldtypes:url",  <-- CUSTOM FIELD TYPE
+      "customId": 10311,
+      "type": "string"
+    },
+    "searchable": true
+  }
+...
+]
+
+```
+
+### 3. Register the new serializer ###
+
+```
+#!c#
+var settings = new JiraRestClientSettings();
+settings.CustomFieldSerializers.Add("com.atlassian.jira.plugin.system.customfieldtypes:url", new MyCustomFieldValueSerializer());
+return Jira.CreateRestClient(<url>, <user>, <pass>, settings);
+
+```

@@ -10,7 +10,7 @@ Contains utilities for interacting with  [Atlassian JIRA](http://www.atlassian.c
 
 ## License
 
-This project is licensed under  [BSD](https://bitbucket.org/farmas/atlassian.net-sdk/wiki/License).
+This project is licensed under  [BSD](/LICENSE.md).
 
 ## Dependencies & Requirements
 
@@ -20,7 +20,7 @@ This project is licensed under  [BSD](https://bitbucket.org/farmas/atlassian.net
 
 ## History
 
-- For a description changes, check out the [Change History Page](https://bitbucket.org/farmas/atlassian.net-sdk/wiki/Change%20History).
+- For a description changes, check out the [Change History Page](/docs/change-history.md).
 
 - This project began in 2010 during a [ShipIt](https://www.atlassian.com/company/shipit) day at Atlassian with provider
   to query Jira issues using LINQ syntax. Over time it grew to add many more operations on top of the JIRA SOAP API.

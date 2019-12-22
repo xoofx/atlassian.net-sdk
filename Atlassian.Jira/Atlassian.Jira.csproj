@@ -8,10 +8,11 @@
     <Product>Atlassian.SDK</Product>
     <Copyright>https://bitbucket.org/farmas/atlassian.net-sdk</Copyright>
     <PackageTags>Atlassian JIRA LINQ</PackageTags>
-    <PackageReleaseNotes>For change history, visit: https://bitbucket.org/farmas/atlassian.net-sdk/wiki/Change%20History</PackageReleaseNotes>
+    <PackageReleaseNotes>For change history, visit: https://bitbucket.org/farmas/atlassian.net-sdk/src/master/docs/change-history.md</PackageReleaseNotes>
     <Description>Utilities to interact with Atlassian products. Contains LinqToJira provider for querying JIRA Issue tracker (http://www.atlassian.com/software/jira).</Description>
     <PackageIconUrl>http://i1207.photobucket.com/albums/bb473/fsilva_armas/AtlassianIcon.png</PackageIconUrl>
     <PackageProjectUrl>https://bitbucket.org/farmas/atlassian.net-sdk</PackageProjectUrl>
+    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <FileVersion>$(Version)</FileVersion>
