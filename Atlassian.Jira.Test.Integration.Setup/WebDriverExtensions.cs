@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,24 @@ namespace Atlassian.Jira.Test.Integration.Setup
 {
     public static class WebDriverExtensions
     {
+        public static bool UrlContains(this IWebDriver webDriver, string text)
+        {
+            var url = webDriver.Url;
+            return CultureInfo.InvariantCulture.CompareInfo.IndexOf(url, text, CompareOptions.IgnoreCase) >= 0;
+        }
+
+        public static void WaitForUrlToContain(this IWebDriver webDriver, string text)
+        {
+            WaitForUrlToContain(webDriver, text, TimeSpan.FromMinutes(1));
+        }
+
+        public static void WaitForUrlToContain(this IWebDriver webDriver, string text, TimeSpan timeout)
+        {
+            var wait = new WebDriverWait(webDriver, timeout);
+            
+            wait.Until(wd => wd.UrlContains(text));
+        }
+
         public static IWebElement WaitForElement(this IWebDriver webDriver, By locator)
         {
             return WaitForElement(webDriver, locator, TimeSpan.FromSeconds(10));
