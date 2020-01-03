@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
@@ -1530,7 +1531,7 @@ namespace Atlassian.Jira.Remote
             {
                 this.keyField = value;
             }
-        }       
+        }
 
         [JsonProperty("priority")]
         public RemotePriority priority { get; set; }
@@ -1932,6 +1933,12 @@ namespace Atlassian.Jira.Remote
 
         [JsonProperty("type")]
         public string Type { get; set; }
+
+        [JsonProperty("items")]
+        public string Items { get; set; }
+
+        [JsonProperty("system")]
+        public string System { get; set; }
     }
 
     /// <remarks/>
@@ -2009,6 +2016,28 @@ namespace Atlassian.Jira.Remote
         public bool isGlobal { get; set; }
         public bool isInitial { get; set; }
         public bool isConditional { get; set; }
+        public IDictionary<string, RemoteIssueField> fields { get; set; }
+    }
+
+    public partial class RemoteIssueField : AbstractRemoteConstant
+    {
+        [JsonProperty("required")]
+        public bool Required { get; set; }
+
+        [JsonProperty("autoCompleteUrl")]
+        public string AutoCompleteUrl { get; set; }
+
+        [JsonProperty("operations", ItemConverterType = typeof(StringEnumConverter))]
+        public IssueFieldEditMetadataOperation[] Operations { get; set; }
+
+        [JsonProperty("allowedValues")]
+        public JArray AllowedValues { get; set; }
+
+        [JsonProperty("hasDefaultValue")]
+        public bool HasDefaultValue { get; set; }
+
+        [JsonProperty("schema")]
+        public RemoteFieldSchema Schema { get; set; }
     }
 
     /// <remarks/>

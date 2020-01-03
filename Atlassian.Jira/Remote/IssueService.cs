@@ -281,7 +281,7 @@ namespace Atlassian.Jira.Remote
             foreach (var prop in fields.Properties())
             {
                 var fieldName = (prop.Value["name"] ?? prop.Name).ToString();
-                dict.Add(fieldName, prop.Value.ToObject<IssueFieldEditMetadata>(serializer));
+                dict.Add(fieldName, new IssueFieldEditMetadata(prop.Value.ToObject<RemoteIssueField>(serializer)));
             }
 
             return dict;
@@ -335,7 +335,17 @@ namespace Atlassian.Jira.Remote
 
         public async Task<IEnumerable<IssueTransition>> GetActionsAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/issue/{0}/transitions", issueKey);
+            return await this.GetActionsAsync(issueKey, false, token);
+        }
+
+        public async Task<IEnumerable<IssueTransition>> GetActionsAsync(string issueKey, bool expandTransitionFields, CancellationToken token = default(CancellationToken))
+        {
+            var resource = $"rest/api/2/issue/{issueKey}/transitions";
+            if (expandTransitionFields)
+            {
+                resource += "?expand=transitions.fields";
+            }
+
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var result = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
             var remoteTransitions = JsonConvert.DeserializeObject<RemoteTransition[]>(result["transitions"].ToString(), serializerSettings);

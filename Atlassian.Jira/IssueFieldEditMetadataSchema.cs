@@ -1,5 +1,5 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {
@@ -8,6 +8,22 @@ namespace Atlassian.Jira
     /// </summary>
     public class IssueFieldEditMetadataSchema
     {
+        /// <summary>
+        /// Creates a new instance of IssueFieldSchema based on a remote Entity
+        /// </summary>
+        /// <param name="remoteEntity">The remote field schema entity</param>
+        public IssueFieldEditMetadataSchema(RemoteFieldSchema remoteEntity)
+        {
+            Type = remoteEntity.Type;
+            Items = remoteEntity.Items;
+            System = remoteEntity.System;
+            Custom = remoteEntity.Custom;
+            if (int.TryParse(remoteEntity.CustomId, out int value))
+            {
+                CustomId = value;
+            }
+        }
+
         /// <summary>
         /// Type of the field ( for example array ).
         /// </summary>

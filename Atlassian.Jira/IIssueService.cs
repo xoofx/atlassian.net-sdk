@@ -173,6 +173,14 @@ namespace Atlassian.Jira
         Task<IEnumerable<IssueTransition>> GetActionsAsync(string issueKey, CancellationToken token = default(CancellationToken));
 
         /// <summary>
+        /// Returns the workflow actions that an issue can be transitioned to.
+        /// </summary>
+        /// <param name="issueKey">The issue key</param>
+        /// <param name="expandTransitionFields">Whether to show the transition fields</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<IssueTransition>> GetActionsAsync(string issueKey, bool expandTransitionFields, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
         /// Retrieve attachment metadata from server for this issue
         /// </summary>
         /// <param name="issueKey">The issue key to get attachments from.</param>

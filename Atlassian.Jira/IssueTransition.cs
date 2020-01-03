@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
@@ -23,6 +20,7 @@ namespace Atlassian.Jira
             IsGlobal = remoteEntity.isGlobal;
             IsInitial = remoteEntity.isInitial;
             IsConditional = remoteEntity.isConditional;
+            Fields = remoteEntity.fields?.ToDictionary(x => x.Key, x => new IssueFieldEditMetadata(x.Value));
         }
 
         /// <summary>
@@ -42,5 +40,7 @@ namespace Atlassian.Jira
         public bool IsInitial { get; private set; }
 
         public bool IsConditional { get; private set; }
+
+        public Dictionary<string, IssueFieldEditMetadata> Fields { get; private set; }
     }
 }
