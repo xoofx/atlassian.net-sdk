@@ -2016,10 +2016,10 @@ namespace Atlassian.Jira.Remote
         public bool isGlobal { get; set; }
         public bool isInitial { get; set; }
         public bool isConditional { get; set; }
-        public IDictionary<string, RemoteIssueField> fields { get; set; }
+        public IDictionary<string, RemoteIssueFieldMetadata> fields { get; set; }
     }
 
-    public partial class RemoteIssueField : AbstractRemoteConstant
+    public partial class RemoteIssueFieldMetadata : AbstractRemoteConstant
     {
         [JsonProperty("required")]
         public bool Required { get; set; }

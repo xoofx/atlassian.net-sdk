@@ -281,7 +281,7 @@ namespace Atlassian.Jira.Remote
             foreach (var prop in fields.Properties())
             {
                 var fieldName = (prop.Value["name"] ?? prop.Name).ToString();
-                dict.Add(fieldName, new IssueFieldEditMetadata(prop.Value.ToObject<RemoteIssueField>(serializer)));
+                dict.Add(fieldName, new IssueFieldEditMetadata(prop.Value.ToObject<RemoteIssueFieldMetadata>(serializer)));
             }
 
             return dict;
@@ -333,9 +333,9 @@ namespace Atlassian.Jira.Remote
             return PagedQueryResult<Comment>.FromJson((JObject)result, comments);
         }
 
-        public async Task<IEnumerable<IssueTransition>> GetActionsAsync(string issueKey, CancellationToken token = default(CancellationToken))
+        public Task<IEnumerable<IssueTransition>> GetActionsAsync(string issueKey, CancellationToken token = default(CancellationToken))
         {
-            return await this.GetActionsAsync(issueKey, false, token);
+            return this.GetActionsAsync(issueKey, false, token);
         }
 
         public async Task<IEnumerable<IssueTransition>> GetActionsAsync(string issueKey, bool expandTransitionFields, CancellationToken token = default(CancellationToken))

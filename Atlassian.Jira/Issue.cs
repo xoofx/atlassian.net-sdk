@@ -938,6 +938,20 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets the workflow actions that the issue can be transitioned to including the fields that are required per action.
+        /// </summary>
+        /// <param name="token">Cancellation token for this operation.</param>
+        public Task<IEnumerable<IssueTransition>> GetAvailableActionsAsync(bool expandTransitionFields, CancellationToken token = default(CancellationToken))
+        {
+            if (String.IsNullOrEmpty(_originalIssue.key))
+            {
+                throw new InvalidOperationException("Unable to retrieve actions, issue has not been saved to server.");
+            }
+
+            return this._jira.Issues.GetActionsAsync(_originalIssue.key, expandTransitionFields, token);
+        }
+
+        /// <summary>
         /// Gets time tracking information for this issue.
         /// </summary>
         /// <remarks>

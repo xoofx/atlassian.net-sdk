@@ -214,15 +214,20 @@ namespace Atlassian.Jira.Test.Integration
 
         [Theory]
         [ClassData(typeof(JiraProvider))]
-        public async Task GetTransitionsAsync(Jira jira)
+        public async Task GetActionsAsync(Jira jira)
         {
-            var issue = jira.CreateIssue("TST");
-            issue.Summary = "Issue with transitions " + _random.Next(int.MaxValue);
-            issue.Type = "Bug";
-            issue.SaveChanges();
-
+            var issue = await jira.Issues.GetIssueAsync("TST-1");
             var transitions = await issue.GetAvailableActionsAsync();
-            Assert.True(transitions.Count() > 1);
+            var resolveTransition = transitions.ElementAt(1);
+            var resolveIssueStatus = resolveTransition.To;
+
+            // assert
+            Assert.Equal(3, transitions.Count());
+            Assert.Equal("5", resolveTransition.Id);
+            Assert.Equal("Resolve Issue", resolveTransition.Name);
+            Assert.Equal("Resolved", resolveIssueStatus.Name);
+            Assert.Equal("5", resolveIssueStatus.Id);
+            Assert.Null(resolveTransition.Fields);
 
             var transition = transitions.Single(t => t.Name.Equals("Resolve Issue", StringComparison.OrdinalIgnoreCase));
             Assert.False(transition.HasScreen);
@@ -230,6 +235,33 @@ namespace Atlassian.Jira.Test.Integration
             Assert.False(transition.IsInitial);
             Assert.False(transition.IsGlobal);
             Assert.Equal("Resolved", transition.To.Name);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task GetActionsWithFields(Jira jira)
+        {
+            var issue = await jira.Issues.GetIssueAsync("TST-1");
+            var transitions = await issue.GetAvailableActionsAsync(true);
+            var resolveTransition = transitions.ElementAt(1);
+            var fields = resolveTransition.Fields;
+            var resolution = fields["resolution"];
+            var allowedValues = resolution.AllowedValues.ToString();
+
+            // assert
+            Assert.Equal(3, fields.Count());
+            Assert.Equal("Resolution", resolution.Name);
+            Assert.True(resolution.IsRequired);
+            Assert.Single(resolution.Operations);
+            Assert.Equal(IssueFieldEditMetadataOperation.SET, resolution.Operations.ElementAt(0));
+            Assert.Contains("Fixed", allowedValues);
+            Assert.Contains("Won't Fix", allowedValues);
+            Assert.Contains("Duplicate", allowedValues);
+            Assert.Contains("Incomplete", allowedValues);
+            Assert.Contains("Cannot Reproduce", allowedValues);
+            Assert.Contains("Done", allowedValues);
+            Assert.Contains("Won't Do", allowedValues);
+            Assert.False(resolution.HasDefaultValue);
         }
 
         [Theory]

@@ -11,10 +11,10 @@ namespace Atlassian.Jira
     public class IssueFieldEditMetadata
     {
         /// <summary>
-        /// Creates a new instance of IssueField based on a remote Entity
+        /// Creates a new instance of IssueFieldEditMetadata based on a remote Entity
         /// </summary>
         /// <param name="remoteEntity">The remote field entity</param>
-        public IssueFieldEditMetadata(RemoteIssueField remoteEntity)
+        public IssueFieldEditMetadata(RemoteIssueFieldMetadata remoteEntity)
         {
             IsRequired = remoteEntity.Required;
             Schema = remoteEntity.Schema == null ? null : new IssueFieldEditMetadataSchema(remoteEntity.Schema);
