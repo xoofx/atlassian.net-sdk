@@ -259,6 +259,17 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
+        /// Gets an object to interact with the server information.
+        /// </summary>
+        public IServerInfoService ServerInfo
+        {
+            get
+            {
+                return Services.Get<IServerInfoService>();
+            }
+        }
+
+        /// <summary>
         /// Gets the cache for frequently retrieved server items from JIRA.
         /// </summary>
         public JiraCache Cache
@@ -359,6 +370,7 @@ namespace Atlassian.Jira
             services.Register<IJiraUserService>(() => new JiraUserService(jira));
             services.Register<IJiraGroupService>(() => new JiraGroupService(jira));
             services.Register<IProjectService>(() => new ProjectService(jira));
+            services.Register<IServerInfoService>(() => new ServerInfoService(jira));
             services.Register<IJqlExpressionVisitor>(() => new JqlExpressionVisitor());
             services.Register<IFileSystem>(() => new FileSystem());
             services.Register(() => restClient);

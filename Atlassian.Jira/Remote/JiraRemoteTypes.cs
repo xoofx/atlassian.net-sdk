@@ -8,10 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace Atlassian.Jira.Remote
 {
@@ -2159,154 +2160,6 @@ namespace Atlassian.Jira.Remote
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
     [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
-    public partial class RemoteTimeInfo
-    {
-
-        private string serverTimeField;
-
-        private string timeZoneIdField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string serverTime
-        {
-            get
-            {
-                return this.serverTimeField;
-            }
-            set
-            {
-                this.serverTimeField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string timeZoneId
-        {
-            get
-            {
-                return this.timeZoneIdField;
-            }
-            set
-            {
-                this.timeZoneIdField = value;
-            }
-        }
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
-    public partial class RemoteServerInfo
-    {
-
-        private string baseUrlField;
-
-        private System.Nullable<System.DateTime> buildDateField;
-
-        private string buildNumberField;
-
-        private string editionField;
-
-        private RemoteTimeInfo serverTimeField;
-
-        private string versionField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string baseUrl
-        {
-            get
-            {
-                return this.baseUrlField;
-            }
-            set
-            {
-                this.baseUrlField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public System.Nullable<System.DateTime> buildDate
-        {
-            get
-            {
-                return this.buildDateField;
-            }
-            set
-            {
-                this.buildDateField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string buildNumber
-        {
-            get
-            {
-                return this.buildNumberField;
-            }
-            set
-            {
-                this.buildNumberField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string edition
-        {
-            get
-            {
-                return this.editionField;
-            }
-            set
-            {
-                this.editionField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public RemoteTimeInfo serverTime
-        {
-            get
-            {
-                return this.serverTimeField;
-            }
-            set
-            {
-                this.serverTimeField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string version
-        {
-            get
-            {
-                return this.versionField;
-            }
-            set
-            {
-                this.versionField = value;
-            }
-        }
-    }
-
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
     public partial class RemoteConfiguration
     {
 
@@ -2461,7 +2314,29 @@ namespace Atlassian.Jira.Remote
         }
     }
 
-    public partial class RemoteVotes
+    public class RemoteHealthCheck
+    {
+        public string name { get; set; }
+        public string description { get; set; }
+        public bool passed { get; set; }
+    }
+
+    public class RemoteServerInfo
+    {
+        public string baseUrl { get; set; }
+        public string version { get; set; }
+        public int[] versionNumbers { get; set; }
+        public string deploymentType { get; set; }
+        public int buildNumber { get; set; }
+        public DateTimeOffset? buildDate { get; set; }
+        public DateTimeOffset? serverTime { get; set; }
+        public string scmInfo { get; set; }
+        public string buildPartnerName { get; set; }
+        public string serverTitle { get; set; }
+        public RemoteHealthCheck[] healthChecks { get; set; }
+    }
+
+    public class RemoteVotes
     {
         public long votes { get; set; }
 
