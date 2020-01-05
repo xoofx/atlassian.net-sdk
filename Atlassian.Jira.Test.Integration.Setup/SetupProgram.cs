@@ -15,13 +15,27 @@ namespace Atlassian.Jira.Test.Integration.Setup
         {
             WaitForJira().Wait();
 
-            using (var webDriver = new ChromeDriver())
+            var chromeService = ChromeDriverService.CreateDefaultService();
+            var options = new ChromeOptions();
+            options.LeaveBrowserRunning = true;
+            options.AddArgument("no-sandbox");
+            using (var webDriver = new ChromeDriver(chromeService, options, TimeSpan.FromSeconds(180)))
             {
                 webDriver.Url = URL;
 
-                SetupJira(webDriver);
-
-                webDriver.Quit();
+                try
+                {
+                    SetupJira(webDriver, args);
+                    webDriver.Quit();
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("-- Setup Failed. Browser will be kept running. -- ");
+                    Console.ResetColor();
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.StackTrace);
+                }
             };
         }
 
@@ -73,13 +87,12 @@ namespace Atlassian.Jira.Test.Integration.Setup
             }
         }
 
-        private static void SetupJira(ChromeDriver webDriver)
+        private static void SetupJira(ChromeDriver webDriver, string[] args)
         {
             Console.WriteLine("--- Starting to setup Jira ---");
             webDriver.WaitForElement(By.Id("logo"), TimeSpan.FromMinutes(5));
             var step = GetStep(webDriver);
 
-   
             if (step <= 1)
             {
                 Console.WriteLine("Choose to manually setup jira.");
@@ -106,13 +119,19 @@ namespace Atlassian.Jira.Test.Integration.Setup
 
             if (step <= 4)
             {
-                Console.WriteLine("Wait for the import data page and import the test data.");
-                webDriver.WaitForElement(By.Name("filename")).SendKeys("TestData.zip");
-                webDriver.WaitForElement(By.Id("jira-setupwizard-outgoing-mailfalse")).Click();
+                var testDataFile = "TestData.zip";
+                if (args != null && args.Length > 0 && !String.IsNullOrWhiteSpace(args[0]))
+                {
+                    testDataFile = $"TestData_{args[0]}.zip";
+                }
+
+                Console.WriteLine($"Wait for the import data page and import the test data. Using data file: {testDataFile}");
+
+                webDriver.WaitForElement(By.Name("filename")).SendKeys(testDataFile);
                 webDriver.WaitForElement(By.Id("jira-setupwizard-submit")).Click();
 
-                Console.WriteLine("Wait until restore is complete.");
-                webDriver.WaitForElement(By.Id("login-form-username"), TimeSpan.FromMinutes(10));
+                Console.WriteLine("Wait until restore is complete (may take up to 20 minutes).");
+                webDriver.WaitForElement(By.Id("login-form-username"), TimeSpan.FromMinutes(20));
             }
 
             Console.WriteLine("--- Finished setting up Jira ---");

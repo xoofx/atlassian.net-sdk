@@ -2,4 +2,4 @@
 *
 
 !.gitignore
-!TestData.zip
+!TestData*.zip

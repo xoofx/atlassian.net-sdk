@@ -25,7 +25,6 @@ namespace Atlassian.Jira.Test.Integration.Setup
         public static void WaitForUrlToContain(this IWebDriver webDriver, string text, TimeSpan timeout)
         {
             var wait = new WebDriverWait(webDriver, timeout);
-            
             wait.Until(wd => wd.UrlContains(text));
         }
 
@@ -47,6 +46,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
         public static IWebElement WaitForElement(this IWebDriver webDriver, TimeSpan timeout, Func<IWebDriver, IWebElement> func)
         {
             var wait = new WebDriverWait(webDriver, timeout);
+            wait.PollingInterval = TimeSpan.FromSeconds(1);
             wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException));
             wait.IgnoreExceptionTypes(typeof(NoSuchElementException));
             return wait.Until(func);
