@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
 using Atlassian.Jira.Linq;
 using Atlassian.Jira.OAuth;
 using Atlassian.Jira.Remote;
@@ -258,6 +256,16 @@ namespace Atlassian.Jira
             }
         }
 
+        /// Gets an object to interact with the Jira screens.
+        /// </summary>
+        public IScreenService Screens
+        {
+            get
+            {
+                return Services.Get<IScreenService>();
+            }
+        }
+
         /// <summary>
         /// Gets an object to interact with the server information.
         /// </summary>
@@ -370,6 +378,7 @@ namespace Atlassian.Jira
             services.Register<IJiraUserService>(() => new JiraUserService(jira));
             services.Register<IJiraGroupService>(() => new JiraGroupService(jira));
             services.Register<IProjectService>(() => new ProjectService(jira));
+            services.Register<IScreenService>(() => new ScreenService(jira));
             services.Register<IServerInfoService>(() => new ServerInfoService(jira));
             services.Register<IJqlExpressionVisitor>(() => new JqlExpressionVisitor());
             services.Register<IFileSystem>(() => new FileSystem());

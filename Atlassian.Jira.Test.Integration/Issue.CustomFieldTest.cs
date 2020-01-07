@@ -27,7 +27,7 @@ namespace Atlassian.Jira.Test.Integration
             var options = new CustomFieldFetchOptions();
             options.ProjectKeys.Add("TST");
             var results = await jira.Fields.GetCustomFieldsAsync(options);
-            Assert.Equal(19, results.Count());
+            Assert.Equal(21, results.Count());
         }
 
         /// <summary>

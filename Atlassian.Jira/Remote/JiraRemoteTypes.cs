@@ -2360,4 +2360,13 @@ namespace Atlassian.Jira.Remote
         public string self { get; set; }
         public string key { get; set; }
     }
+
+    public class RemoteScreenTab : AbstractNamedRemoteEntity
+    {
+    }
+
+    public class RemoteScreenField : AbstractNamedRemoteEntity
+    {
+        public string type { get; set; }
+    }
 }
