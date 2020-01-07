@@ -1,5 +1,11 @@
 # Change History
 
+## Version 11.2.0 (01/06/2020) ##
+- [PR #77](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/77): Adds option to expand transition fields.
+- [PR #78](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/78): Adds Screen service.
+- [PR #79](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/79): Adds ServerInfo service.
+- [Issue #477](https://bitbucket.org/farmas/atlassian.net-sdk/issues/477): Allow integration tests to run against Jira 8.x
+
 ## Version 11.1.0 (12/21/2019) ##
 * [PR #75](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/75): Adds ability to retrieve an issue status by its id.
 * [PR #76](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/76): Adds ability to retrieve data for issue status category.
@@ -9,6 +15,8 @@
 ## Version 11.0.0 (11/08/2019) ##
 * Jira.CreateOAuthRestClient() has been added to be able to interact with Jira using OAuth tokens instead of user/password.
 * JiraOAuthTokenHelper class has been added to help consumers generate request/access tokens to use with OAuth.
+* Special thanks to [Romain Failliot
+](https://www.linkedin.com/in/romainfailliot) and Ubisoft for contributing the OAuth feature.
 
 __Breaking Changes__:
 * JiraCredentials type has been removed.
