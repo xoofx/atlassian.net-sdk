@@ -4,7 +4,8 @@
 
 A LinqToJIRA provider allows to query a JIRA server using Linq syntax:
 
-```cs
+```
+#!c#
 // create a connection to JIRA using the Rest client
 var jira = Jira.CreateRestClient("http://<your_jira_server>", "<user>", "<password>");
 
@@ -18,7 +19,8 @@ var issues = from i in jira.Issues.Queryable
 By default, string comparisons are translated using the JIRA contains operator ('~'). A literal match can be forced by
 wrapping the string with the LiteralMatch class:
 
-```cs
+```
+#!c#
 var issues = from i in jira.Issues.Queryable
              where i.Summary == new LiteralMatch("My Title")
              select i;
@@ -29,7 +31,8 @@ operators.
 
 ## Create Issue
 
-```cs
+```
+#!c#
 var issue = jira.CreateIssue("My Project");
 issue.Type = "Bug";
 issue.Priority = "Major";
@@ -40,7 +43,8 @@ await issue.SaveChangesAsync();
 
 ## Update Issue
 
-```cs
+```
+#!c#
 var issue = await jira.Issues.GetIssueAsync("TST-5");
 issue.Summary = "Updated Summary";
 
@@ -59,7 +63,8 @@ Console.WriteLine(issue["My CustomField"]);  // returns the string of the custom
 
 ## Custom Fields
 
-```cs
+```
+#!c#
 var issue = (from i in jira.Issues.Queryable
              where i["My CustomField"] == "Custom Field Value"
              select i).First();
@@ -78,7 +83,8 @@ page.
 
 ## Attachments
 
-```cs
+```
+#!c#
 var issue = await jira.Issues.GetIssueAsync("TST-5");
 
 // get attachments
@@ -95,7 +101,8 @@ await issue.AddAttachmentsAsync("fileToAdd.txt");
 
 ## Comments
 
-```cs
+```
+#!c#
 var issue = await jira.Issues.GetIssueAsync("TST-5");
 
 // get comments
@@ -108,7 +115,8 @@ await issue.AddCommentAsync("new comment");
 
 ## Worklogs
 
-```cs
+```
+#!c#
 var issue = await jira.Issues.GetIssueAsync("TST-5");
 
 // add a worklog
@@ -123,7 +131,8 @@ var worklogs = await issue.GetWorklogsAsync();
 
 ## Create Sub-Task
 
-```cs
+```
+#!c#
 var issue = jira.CreateIssue("My Project", "PARENTISSUE-1");
 issue.Type = "5"; // the id of the sub-task issue type
 issue.Summary = "A sub task";
@@ -132,11 +141,25 @@ await issue.SaveChangesAsync();
 ```
 
 ## Workflow transitions
+Workflowtransitions can be used to update the status of an issue. 
 
-```cs
+You can either use one of the pre-set functions such as:
+```
+#!c#
 var issue = await jira.Issues.GetIssueAsync("TST-5");
 issue.Resolution = "Won't Fix";
 
 await issue.WorkflowTransitionAsync(WorkflowActions.Resolve);
+```
+
+Or you can pretty much have a lookout for the button which executes the function which you are looking for:
+```
+#!c#
+// Sets the ticket status to Pending
+issue.WorkflowTransitionAsync("Pending");
+
+// Removes status Pending
+issue.WorkflowTransitionAsync("Back to open");
+
 ```
 
