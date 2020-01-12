@@ -40,6 +40,17 @@ $ docker-compose up -d
 - On the next screen click on the “import your data” link at the top.
 - Enter “TestData.zip” in the “File Name” field and click on “Import” (wait until the test data is imported).
 
+### Setup a different version of Jira
+The `.env` file in the root directory contains the version of Jira that is setup by default. However, you can setup a different version by running:
+```
+$ start-jira-with-data.bat <version>
+```
+
+Note: Each Jira version requires a different test data file, look in the `Atlassian.Jira.Test.Integration.Setup/import/` folder for the versions that are available. For example, if there is a file `Atlassian.Jira.Test.Integration.Setup/import/TestData_8.5.0.zip` then can run:
+```
+$ start-jira-with-data.bat 8.5.0
+```
+
 ## Run the integration tests
 
 Once the image is up and running you can run the integration tests within your IDE.
