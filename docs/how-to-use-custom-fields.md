@@ -10,8 +10,7 @@ The SDK has serializers for the built in custom field types available by JIRA Co
 ### 1. Implement ICustomFieldValueSerializer ###
 This class will handle serializing between JSON (used by JIRA) and a string[] (used internally by the SDK).
 
-```
-#!c#
+```csharp
 public class MyCustomFieldValueSerializer : ICustomFieldValueSerializer
 {
     public string[] FromJson(JToken json)
@@ -29,8 +28,7 @@ public class MyCustomFieldValueSerializer : ICustomFieldValueSerializer
 ### 2. Discover the custom field type ###
 In order to register a custom field serializer the custom field type must be known. One way to do this is to use the SDK to call Jira.Fields.GetCustomFieldsAsync(). Make sure to turn on request tracing as described [here](https://bitbucket.org/farmas/atlassian.net-sdk/wiki/How%20to%20Debug%20Problems) which will print the response into trace and you will be able to see the custom field metadata from JIRA. You can see the custom field type in the returned JSON
 
-```
-#!c#
+```csharp
 [GET] Response for Url: rest/api/2/field
 [
 ...
@@ -59,8 +57,7 @@ In order to register a custom field serializer the custom field type must be kno
 
 ### 3. Register the new serializer ###
 
-```
-#!c#
+```csharp
 var settings = new JiraRestClientSettings();
 settings.CustomFieldSerializers.Add("com.atlassian.jira.plugin.system.customfieldtypes:url", new MyCustomFieldValueSerializer());
 return Jira.CreateRestClient(<url>, <user>, <pass>, settings);
