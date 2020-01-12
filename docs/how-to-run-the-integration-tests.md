@@ -8,11 +8,11 @@ By default the tests are run against Jira 7.13.
 ## Prerequisites
 
 The only dependency to run the integration tests are a tiny bit of knowledge of the command line, and Docker:
-* Install Docker for Linux ([Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/),
+- Install Docker for Linux ([Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/),
   [Fedora](https://docs.docker.com/install/linux/docker-ce/fedora/), and
   [others](https://docs.docker.com/install/#supported-platforms)...)
-* [Install Docker for Windows](https://docs.docker.com/docker-for-windows/install/)
-* [Install Docker for Mac](https://docs.docker.com/docker-for-mac/install/)
+- [Install Docker for Windows](https://docs.docker.com/docker-for-windows/install/)
+- [Install Docker for Mac](https://docs.docker.com/docker-for-mac/install/)
 
 ## Prepare the Jira instance
 
