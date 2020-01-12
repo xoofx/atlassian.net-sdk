@@ -1,8 +1,34 @@
-# Custom Field 'Name' vs 'Id' #
+# Use Custom Field 'Name' instead of 'Id' #
 The API exposed to clients uses the 'name' of the custom field instead of the 'id'. The 'name' of a custom field can be viewed directly on the web UI so it is easier to discover.
 
 Internally, the SDK looks up the 'id' of the custom field by querying the metadata of custom fields from JIRA.
 
+# Accessing custom fields #
+
+```csharp
+// Accessing a custom field with single value.
+var singleValue = issue["My Field Name"]; 
+
+//  Accessing a custom field with multiple values.
+var multiValue = issue.CustomFields["My Field Name"].Values; 
+```
+
+# Writing to a custom field
+```csharp
+
+// Set a single value custom field
+issue["My CustomField"] = "Updated Field";
+
+// Set a multi-value custom field
+issue.CustomFields.AddArray("Custom Labels Field", "label1", "label2");
+
+// Set a cascading-select custom field.
+issue.CustomFields.AddCascadingSelectField("Custom Cascading Select Field", "Option3");
+
+// Save all your changes to the server.
+await issue.SaveChangesAsync();
+
+```
 
 # Custom Serialization #
 The SDK has serializers for the built in custom field types available by JIRA Core. Users can register their own serializers to handle other custom field types:
