@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
-    <LangVersion>7.1</LangVersion>
     <PackageId>Atlassian.SDK</PackageId>
     <Version>$(Version)</Version>
     <Authors>Federico Silva Armas</Authors>

@@ -33,10 +33,16 @@ namespace Atlassian.Jira.Remote
             return _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/issueLink", bodyObject, token);
         }
 
-        public async Task<IEnumerable<IssueLink>> GetLinksForIssueAsync(string issueKey, CancellationToken token, Issue iIssue = null, List<string> LinkTypeNames = null)
+        public async Task<IEnumerable<IssueLink>> GetLinksForIssueAsync(string issueKey, CancellationToken token = default(CancellationToken))
+        {
+            var issue = await _jira.Issues.GetIssueAsync(issueKey, token);
+            return await GetLinksForIssueAsync(issue, null, token);
+        }
+
+        public async Task<IEnumerable<IssueLink>> GetLinksForIssueAsync(Issue issue, IEnumerable<string> linkTypeNames = null, CancellationToken token = default(CancellationToken))
         {
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
-            var resource = String.Format("rest/api/2/issue/{0}?fields=issuelinks,created", issueKey);
+            var resource = String.Format("rest/api/2/issue/{0}?fields=issuelinks,created", issue.Key.Value);
             var issueLinksResult = await _jira.RestClient.ExecuteRequestAsync(Method.GET, resource, null, token).ConfigureAwait(false);
             var issueLinksJson = issueLinksResult["fields"]["issuelinks"];
 
@@ -46,36 +52,23 @@ namespace Atlassian.Jira.Remote
             }
 
             var issueLinks = issueLinksJson.Cast<JObject>();
-            List<JObject> resolvedIssueLinks;
-            if (LinkTypeNames != null)
+            var filteredIssueLinks = issueLinks;
+
+            if (linkTypeNames != null)
             {
-                resolvedIssueLinks = new List<JObject>();
-                foreach (var issueLink in issueLinks)
-                {
-                    if (LinkTypeNames.Exists(LinkTypeName => LinkTypeName.ToLower() == issueLink["type"]["name"].ToString().ToLower()))
-                    {
-                        resolvedIssueLinks.Add(issueLink);
-                    }
-                }
-            }
-            else
-            {
-                resolvedIssueLinks = issueLinks.ToList();
+                filteredIssueLinks = issueLinks.Where(link => linkTypeNames.Contains(link["type"]["name"].ToString(), StringComparer.InvariantCultureIgnoreCase));
             }
 
-            var issuesToGet = resolvedIssueLinks.Select(issueLink =>
+            var issuesToGet = filteredIssueLinks.Select(issueLink =>
             {
                 var issueJson = issueLink["outwardIssue"] ?? issueLink["inwardIssue"];
                 return issueJson["key"].Value<string>();
             }).ToList();
 
-            if (iIssue == null) issuesToGet.Add(issueKey);
-
             var issuesMap = await _jira.Issues.GetIssuesAsync(issuesToGet, token).ConfigureAwait(false);
-            if (iIssue != null) issuesMap.Add(iIssue.Key.ToString(), iIssue);
-            var issue = issuesMap[issueKey];
+            issuesMap.Add(issue.Key.ToString(), issue);
 
-            return resolvedIssueLinks.Select(issueLink =>
+            return filteredIssueLinks.Select(issueLink =>
             {
                 var linkType = JsonConvert.DeserializeObject<IssueLinkType>(issueLink["type"].ToString(), serializerSettings);
                 var outwardIssue = issueLink["outwardIssue"];

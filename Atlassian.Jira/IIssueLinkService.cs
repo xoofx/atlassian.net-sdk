@@ -29,8 +29,16 @@ namespace Atlassian.Jira
         /// <summary>
         /// Returns all issue links associated with a given issue.
         /// </summary>
-        /// <param name="issueKey">The issue to retrieve links for.</param>
+        /// <param name="issueKey">The issue key to retrieve links for.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<IEnumerable<IssueLink>> GetLinksForIssueAsync(string issueKey, CancellationToken token, Issue iIssue = null, List<string> LinkTypeNames = null);
+        Task<IEnumerable<IssueLink>> GetLinksForIssueAsync(string issueKey, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
+        /// Returns all issue links associated with a given issue.
+        /// </summary>
+        /// <param name="issue">The issue to retrieve links for.</param>
+        /// <param name="linkTypeNames">Optional subset of link types to retrieve.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<IssueLink>> GetLinksForIssueAsync(Issue issue, IEnumerable<string> linkTypeNames = null, CancellationToken token = default(CancellationToken));
     }
 }

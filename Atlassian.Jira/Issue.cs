@@ -516,21 +516,22 @@ namespace Atlassian.Jira
                 throw new InvalidOperationException("Unable to get issue links issues, issue has not been created.");
             }
 
-            return this.Jira.Links.GetLinksForIssueAsync(_originalIssue.key, token, this);
+            return this.Jira.Links.GetLinksForIssueAsync(this, null, token);
         }
 
         /// <summary>
         /// Gets the issue links associated with this issue.
         /// </summary>
+        /// <param name="linkTypeNames">Optional subset of link types to retrieve.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task<IEnumerable<IssueLink>> GetIssueLinksOfTypeAsync(List<string> LinkTypeNames, CancellationToken token = default(CancellationToken))
+        public Task<IEnumerable<IssueLink>> GetIssueLinksAsync(IEnumerable<string> linkTypeNames, CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to get issue links issues, issue has not been created.");
             }
 
-            return this.Jira.Links.GetLinksForIssueAsync(_originalIssue.key, token, this, LinkTypeNames);
+            return this.Jira.Links.GetLinksForIssueAsync(this, linkTypeNames, token);
         }
 
         /// <summary>
