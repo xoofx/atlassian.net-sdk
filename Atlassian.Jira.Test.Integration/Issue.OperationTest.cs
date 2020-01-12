@@ -157,11 +157,30 @@ namespace Atlassian.Jira.Test.Integration
             issue3.Type = "Bug";
             issue3.SaveChanges();
 
-            // link the first issue to the second.
+            var issue4 = jira.CreateIssue("TST");
+            issue4.Summary = "Issue to link to " + _random.Next(int.MaxValue);
+            issue4.Type = "Bug";
+            issue4.SaveChanges();
+
+            var issue5 = jira.CreateIssue("TST");
+            issue5.Summary = "Issue to link to " + _random.Next(int.MaxValue);
+            issue5.Type = "Bug";
+            issue5.SaveChanges();
+
+            var issue6 = jira.CreateIssue("TST");
+            issue6.Summary = "Issue to link to " + _random.Next(int.MaxValue);
+            issue6.Type = "Bug";
+            issue6.SaveChanges();
+
+            // link the 1st issue to 2 and 3.
             issue1.LinkToIssueAsync(issue2.Key.Value, "Duplicate").Wait();
             issue1.LinkToIssueAsync(issue3.Key.Value, "Duplicate").Wait();
 
-            // Verify links of first issue.
+            // link the 4th issue to 5 and 6.
+            issue4.LinkToIssueAsync(issue5.Key.Value, "Duplicate").Wait();
+            issue4.LinkToIssueAsync(issue6.Key.Value, "Related").Wait();
+
+            // Verify links of 1st issue.
             var issueLinks = issue1.GetIssueLinksAsync().Result;
             Assert.Equal(2, issueLinks.Count());
             Assert.True(issueLinks.All(l => l.OutwardIssue.Key.Value == issue1.Key.Value));
@@ -169,17 +188,47 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Contains(issueLinks, l => l.InwardIssue.Key.Value == issue2.Key.Value);
             Assert.Contains(issueLinks, l => l.InwardIssue.Key.Value == issue3.Key.Value);
 
-            // Verify link of second issue.
+            // Verify link of 2nd issue.
             var issueLink = issue2.GetIssueLinksAsync().Result.Single();
             Assert.Equal("Duplicate", issueLink.LinkType.Name);
             Assert.Equal(issue1.Key.Value, issueLink.OutwardIssue.Key.Value);
             Assert.Equal(issue2.Key.Value, issueLink.InwardIssue.Key.Value);
 
-            // Verify link of third issue.
+            // Verify link of 3rd issue.
             issueLink = issue3.GetIssueLinksAsync().Result.Single();
             Assert.Equal("Duplicate", issueLink.LinkType.Name);
             Assert.Equal(issue1.Key.Value, issueLink.OutwardIssue.Key.Value);
             Assert.Equal(issue3.Key.Value, issueLink.InwardIssue.Key.Value);
+
+            // Verify links of 4th issue.
+            issueLinks = issue4.GetIssueLinksAsync().Result;
+            Assert.Equal(2, issueLinks.Count());
+            Assert.True(issueLinks.All(l => l.OutwardIssue.Key.Value == issue4.Key.Value));
+            Assert.False(issueLinks.All(l => l.LinkType.Name == "Duplicate"));
+            Assert.False(issueLinks.All(l => l.LinkType.Name == "Related"));
+            Assert.Contains(issueLinks, l => l.InwardIssue.Key.Value == issue5.Key.Value);
+            Assert.Contains(issueLinks, l => l.InwardIssue.Key.Value == issue6.Key.Value);
+            var issueLinkOfType = issue4.GetIssueLinksOfTypeAsync(new List<string>() { "Duplicate" }).Result.Single();
+            Assert.Equal("Duplicate", issueLinkOfType.LinkType.Name);
+            Assert.Equal(issue4.Key.Value, issueLinkOfType.OutwardIssue.Key.Value);
+            Assert.Equal(issue5.Key.Value, issueLinkOfType.InwardIssue.Key.Value);
+            issueLinkOfType = issue4.GetIssueLinksOfTypeAsync(new List<string>() { "Related" }).Result.Single();
+            Assert.Equal("Related", issueLinkOfType.LinkType.Name);
+            Assert.Equal(issue4.Key.Value, issueLinkOfType.OutwardIssue.Key.Value);
+            Assert.Equal(issue6.Key.Value, issueLinkOfType.InwardIssue.Key.Value);
+
+            // Verify link of 5th issue.
+            issueLink = issue5.GetIssueLinksAsync().Result.Single();
+            Assert.Equal("Duplicate", issueLink.LinkType.Name);
+            Assert.Equal(issue4.Key.Value, issueLink.OutwardIssue.Key.Value);
+            Assert.Equal(issue5.Key.Value, issueLink.InwardIssue.Key.Value);
+
+            // Verify link of 6th issue.
+            issueLink = issue6.GetIssueLinksAsync().Result.Single();
+            Assert.Equal("Related", issueLink.LinkType.Name);
+            Assert.Equal(issue4.Key.Value, issueLink.OutwardIssue.Key.Value);
+            Assert.Equal(issue6.Key.Value, issueLink.InwardIssue.Key.Value);
+
         }
 
         [Theory]

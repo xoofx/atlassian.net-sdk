@@ -33,7 +33,7 @@ namespace Atlassian.Jira.Remote
             return _jira.RestClient.ExecuteRequestAsync(Method.POST, "rest/api/2/issueLink", bodyObject, token);
         }
 
-        public async Task<IEnumerable<IssueLink>> GetLinksForIssueAsync(string issueKey, CancellationToken token)
+        public async Task<IEnumerable<IssueLink>> GetLinksForIssueAsync(string issueKey, CancellationToken token, Issue iIssue = null, List<string> LinkTypeNames = null)
         {
             var serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
             var resource = String.Format("rest/api/2/issue/{0}?fields=issuelinks,created", issueKey);
@@ -46,16 +46,36 @@ namespace Atlassian.Jira.Remote
             }
 
             var issueLinks = issueLinksJson.Cast<JObject>();
-            var issuesToGet = issueLinks.Select(issueLink =>
+            List<JObject> resolvedIssueLinks;
+            if (LinkTypeNames != null)
+            {
+                resolvedIssueLinks = new List<JObject>();
+                foreach (var issueLink in issueLinks)
+                {
+                    if (LinkTypeNames.Exists(LinkTypeName => LinkTypeName.ToLower() == issueLink["type"]["name"].ToString().ToLower()))
+                    {
+                        resolvedIssueLinks.Add(issueLink);
+                    }
+                }
+            }
+            else
+            {
+                resolvedIssueLinks = issueLinks.ToList();
+            }
+
+            var issuesToGet = resolvedIssueLinks.Select(issueLink =>
             {
                 var issueJson = issueLink["outwardIssue"] ?? issueLink["inwardIssue"];
                 return issueJson["key"].Value<string>();
             }).ToList();
-            issuesToGet.Add(issueKey);
+
+            if (iIssue == null) issuesToGet.Add(issueKey);
 
             var issuesMap = await _jira.Issues.GetIssuesAsync(issuesToGet, token).ConfigureAwait(false);
+            if (iIssue != null) issuesMap.Add(iIssue.Key.ToString(), iIssue);
             var issue = issuesMap[issueKey];
-            return issueLinks.Select(issueLink =>
+
+            return resolvedIssueLinks.Select(issueLink =>
             {
                 var linkType = JsonConvert.DeserializeObject<IssueLinkType>(issueLink["type"].ToString(), serializerSettings);
                 var outwardIssue = issueLink["outwardIssue"];
