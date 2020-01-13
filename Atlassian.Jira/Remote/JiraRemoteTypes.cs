@@ -2369,4 +2369,10 @@ namespace Atlassian.Jira.Remote
     {
         public string type { get; set; }
     }
+
+    public class RemoteIssueTypeWithStatus : AbstractRemoteConstant
+    {
+        public bool subTask { get; set; }
+        public RemoteStatus[] statuses { get; set; }
+    }
 }
