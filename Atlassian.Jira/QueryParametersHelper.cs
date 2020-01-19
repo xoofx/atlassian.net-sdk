@@ -15,16 +15,11 @@ namespace Atlassian.Jira
         public static IEnumerable<Parameter> GetQueryParametersFromPath(string query)
         {
             var parameters = query.TrimStart('?')
-                .Split(new char[] {'&'}, StringSplitOptions.RemoveEmptyEntries)
+                .Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s =>
                 {
-                    var p = s.Split(new[] {'='}, 2);
-                    return new Parameter
-                    {
-                        Name = p[0],
-                        Value = p.Length > 1 ? p[1] : "",
-                        Type = ParameterType.QueryString
-                    };
+                    var p = s.Split(new[] { '=' }, 2);
+                    return new Parameter(name: p[0], value: p.Length > 1 ? p[1] : "", type: ParameterType.QueryString);
                 });
 
             return parameters;

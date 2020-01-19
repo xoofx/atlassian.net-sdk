@@ -108,12 +108,7 @@ namespace Atlassian.Jira.Remote
 
             if (requestBody is string)
             {
-                request.AddParameter(new Parameter
-                {
-                    Name = "application/json",
-                    Type = ParameterType.RequestBody,
-                    Value = requestBody
-                });
+                request.AddParameter(new Parameter(name: "application/json", value: requestBody, type: ParameterType.RequestBody));
             }
             else if (requestBody != null)
             {
