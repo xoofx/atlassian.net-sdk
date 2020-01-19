@@ -45,6 +45,8 @@ namespace Atlassian.Jira.Linq
             _jqlWhere = new StringBuilder();
             _jqlOrderBy = new StringBuilder();
             _whereExpressions = new List<Expression>();
+            _numberOfResults = null;
+            _skipResults = null;
 
             this.Visit(expression);
             return new JqlData { Expression = Jql, NumberOfResults = _numberOfResults, SkipResults = _skipResults };

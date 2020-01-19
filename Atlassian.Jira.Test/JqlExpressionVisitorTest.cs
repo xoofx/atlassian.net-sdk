@@ -431,6 +431,23 @@ namespace Atlassian.Jira.Test
         }
 
         [Fact]
+        public void SkipAndTakeShouldResetOnEveryProcessOperation()
+        {
+            var queryable = CreateQueryable();
+
+            var issues = (from i in queryable
+                          where i.Assignee == "foo"
+                          select i).Skip(25).Take(50).ToArray();
+
+            var issues2 = (from i in queryable
+                           where i.Assignee == "foo"
+                           select i).ToArray();
+
+            Assert.Null(_translator.SkipResults);
+            Assert.Null(_translator.NumberOfResults);
+        }
+
+        [Fact]
         public void TakeWithLocalVariable()
         {
             var queryable = CreateQueryable();
