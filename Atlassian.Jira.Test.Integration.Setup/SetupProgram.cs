@@ -19,7 +19,7 @@ namespace Atlassian.Jira.Test.Integration.Setup
             var options = new ChromeOptions();
             options.LeaveBrowserRunning = true;
             options.AddArgument("no-sandbox");
-            using (var webDriver = new ChromeDriver(chromeService, options, TimeSpan.FromSeconds(180)))
+            using (var webDriver = new ChromeDriver(chromeService, options, TimeSpan.FromMinutes(5)))
             {
                 webDriver.Url = URL;
 
@@ -30,11 +30,14 @@ namespace Atlassian.Jira.Test.Integration.Setup
                 }
                 catch (Exception ex)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("-- Setup Failed. Browser will be kept running. -- ");
-                    Console.ResetColor();
                     Console.WriteLine(ex.Message);
                     Console.WriteLine(ex.StackTrace);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("-- Setup Failed. Browser will be kept running until you press a key. -- ");
+                    Console.ResetColor();
+
+                    Console.ReadKey();
+                    webDriver.Quit();
                 }
             };
         }
