@@ -66,7 +66,11 @@ namespace Atlassian.Jira.Remote
             }).ToList();
 
             var issuesMap = await _jira.Issues.GetIssuesAsync(issuesToGet, token).ConfigureAwait(false);
-            issuesMap.Add(issue.Key.ToString(), issue);
+            if(!issuesMap.Keys.Contains(issue.Key.ToString()))
+            {
+                issuesMap.Add(issue.Key.ToString(), issue);
+            }
+
 
             return filteredIssueLinks.Select(issueLink =>
             {
