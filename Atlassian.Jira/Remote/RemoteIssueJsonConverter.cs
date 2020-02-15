@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -8,40 +10,21 @@ namespace Atlassian.Jira.Remote
 {
     public class RemoteIssueWrapper
     {
-        private readonly RemoteIssue _remoteIssue;
-        private readonly string _parentIssueKey;
-
         public RemoteIssueWrapper(RemoteIssue remoteIssue, string parentIssueKey = null)
         {
-            _remoteIssue = remoteIssue;
-            _parentIssueKey = parentIssueKey;
+            RemoteIssue = remoteIssue;
+            ParentIssueKey = parentIssueKey;
         }
 
-        public RemoteIssue RemoteIssue
-        {
-            get
-            {
-                return _remoteIssue;
-            }
-        }
+        public RemoteIssue RemoteIssue { get; private set; }
 
-        public string ParentIssueKey
-        {
-            get
-            {
-                return this._parentIssueKey;
-            }
-        }
+        public string ParentIssueKey { get; private set; }
     }
 
     public class RemoteIssueJsonConverter : JsonConverter
     {
         private readonly IEnumerable<RemoteField> _remoteFields;
         private readonly IDictionary<string, ICustomFieldValueSerializer> _customFieldSerializers;
-        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings()
-        {
-            NullValueHandling = NullValueHandling.Ignore
-        };
 
         public RemoteIssueJsonConverter(IEnumerable<RemoteField> remoteFields, IDictionary<string, ICustomFieldValueSerializer> customFieldSerializers)
         {
@@ -60,7 +43,8 @@ namespace Atlassian.Jira.Remote
             var fields = issueObj["fields"] as JObject;
 
             // deserialize the RemoteIssue from the fields json.
-            var remoteIssue = JsonConvert.DeserializeObject<RemoteIssue>(fields.ToString(), this._serializerSettings);
+            var textReader = new JsonTextReader(new StringReader(fields.ToString()));
+            var remoteIssue = serializer.Deserialize<RemoteIssue>(textReader);
 
             // set the id and key of the remoteissue.
             remoteIssue.id = (string)issueObj["id"];
@@ -87,7 +71,11 @@ namespace Atlassian.Jira.Remote
             var issue = issueWrapper.RemoteIssue;
 
             // Round trip the remote issue to get a JObject that has all the fields in the proper format.
-            var issueJson = JsonConvert.SerializeObject(issue, _serializerSettings);
+            var issueJsonBuilder = new StringBuilder();
+            var textWriter = new JsonTextWriter(new StringWriter(issueJsonBuilder));
+            serializer.Serialize(textWriter, issue);
+
+            var issueJson = issueJsonBuilder.ToString();
             var fields = JObject.Parse(issueJson);
 
             // Add the custom fields as additional JProperties.

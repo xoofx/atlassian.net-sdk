@@ -52,11 +52,10 @@ namespace Atlassian.Jira.Remote
                 var customFields = await fieldService.GetCustomFieldsAsync(token).ConfigureAwait(false);
                 var remoteFields = customFields.Select(f => f.RemoteField);
 
-                var serializers = new Dictionary<string, ICustomFieldValueSerializer>(this._restSettings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
+                var customFieldSerializers = new Dictionary<string, ICustomFieldValueSerializer>(this._restSettings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
 
-                this._serializerSettings = new JsonSerializerSettings();
-                this._serializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(remoteFields, serializers));
+                this._serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+                this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(remoteFields, customFieldSerializers));
             }
 
             return this._serializerSettings;
