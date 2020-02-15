@@ -1,5 +1,13 @@
 # Change History
 
+## Version 12.0.0 (02/15/2020)
+
+- PR #80: Allows user to specify which issue links to get.
+- [Issue #503](https://bitbucket.org/farmas/atlassian.net-sdk/issues/503): Skip and Take should reset with each query execution
+- [Issue #499](https://bitbucket.org/farmas/atlassian.net-sdk/issues/499): Updated RestSharp to 106.10.1 (from 106.2.2)
+
+__Breaking Changes__: RestSharp library has breaking changes between version 106.2.2 and 106.10.1
+
 ## Version 11.2.0 (01/06/2020) ##
 - [PR #77](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/77): Adds option to expand transition fields.
 - [PR #78](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/78): Adds Screen service.
