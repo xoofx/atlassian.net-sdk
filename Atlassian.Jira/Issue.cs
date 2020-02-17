@@ -757,7 +757,9 @@ namespace Atlassian.Jira
         {
             var jiraUser = await this.Jira.Users.GetMyselfAsync(token);
 
-            return await this.AddCommentAsync(new Comment() { Author = jiraUser.Username, Body = comment }, token);
+            var author = this.Jira.RestClient.Settings.UserPrivacyEnabled ? jiraUser.AccountId : jiraUser.Username;
+
+            return await this.AddCommentAsync(new Comment() { Author = author, Body = comment }, token);
         }
 
         /// <summary>
@@ -987,16 +989,16 @@ namespace Atlassian.Jira
         /// <summary>
         /// Adds a user to the watchers of the issue.
         /// </summary>
-        /// <param name="username">Username of the user to add.</param>
+        /// <param name="usernameOrAccountId">Username or account id of the user to add as a watcher.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task AddWatcherAsync(string username, CancellationToken token = default(CancellationToken))
+        public Task AddWatcherAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to add watcher, issue has not been saved to server.");
             }
 
-            return _jira.Issues.AddWatcherAsync(_originalIssue.key, username, token);
+            return _jira.Issues.AddWatcherAsync(_originalIssue.key, usernameOrAccountId, token);
         }
 
         /// <summary>
@@ -1016,22 +1018,22 @@ namespace Atlassian.Jira
         /// <summary>
         /// Removes a user from the watchers of the issue.
         /// </summary>
-        /// <param name="username">Username of the user to add.</param>
+        /// <param name="usernameOrAccountId">Username or account id of the user to remove as a watcher.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task DeleteWatcherAsync(string username, CancellationToken token = default(CancellationToken))
+        public Task DeleteWatcherAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to remove watcher, issue has not been saved to server.");
             }
 
-            return _jira.Issues.DeleteWatcherAsync(_originalIssue.key, username, token);
+            return _jira.Issues.DeleteWatcherAsync(_originalIssue.key, usernameOrAccountId, token);
         }
 
         /// <summary>
         /// Assigns this issue to the specified user.
         /// </summary>
-        /// <param name="assignee">The username of the user to assign this issue to.</param>
+        /// <param name="assignee">The username or account id of the user to assign this issue to.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         public async Task AssignAsync(string assignee, CancellationToken token = default(CancellationToken))
         {

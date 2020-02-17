@@ -13,16 +13,16 @@ namespace Atlassian.Jira
         /// <summary>
         /// Retrieve user specified by username.
         /// </summary>
-        /// <param name="username">The username of the user to get.</param>
+        /// <param name="usernameOrAccountId">The username or account id of the user to get.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task<JiraUser> GetUserAsync(string username, CancellationToken token = default(CancellationToken));
+        Task<JiraUser> GetUserAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Deletes a user by the given username.
         /// </summary>
-        /// <param name="username">User name to delete.</param>
+        /// <param name="usernameOrAccountId">User name or account id of user to delete.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task DeleteUserAsync(string username, CancellationToken token = default(CancellationToken));
+        Task DeleteUserAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Returns a list of users that match the search string.

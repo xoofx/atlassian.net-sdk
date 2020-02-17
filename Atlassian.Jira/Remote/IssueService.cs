@@ -425,7 +425,8 @@ namespace Atlassian.Jira.Remote
                 throw new InvalidOperationException("Unable to interact with the watchers resource, make sure the issue has been created.");
             }
 
-            var resourceUrl = String.Format("rest/api/2/issue/{0}/watchers?username={1}", issueKey, System.Uri.EscapeUriString(username));
+            var queryString = _jira.RestClient.Settings.UserPrivacyEnabled ? "accountId" : "username";
+            var resourceUrl = String.Format($"rest/api/2/issue/{issueKey}/watchers?{queryString}={System.Uri.EscapeUriString(username)}");
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resourceUrl, null, token);
         }
 
@@ -594,7 +595,12 @@ namespace Atlassian.Jira.Remote
         {
             var resource = $"/rest/api/2/issue/{issueKey}/assignee";
 
-            return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, new { name = assignee }, token);
+            object body = new { name = assignee };
+            if (_jira.RestClient.Settings.UserPrivacyEnabled)
+            {
+                body = new { accountId = assignee };
+            }
+            return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, body, token);
         }
 
         public async Task<IEnumerable<string>> GetPropertyKeysAsync(string issueKey, CancellationToken token = default)

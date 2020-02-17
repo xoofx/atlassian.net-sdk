@@ -1,4 +1,4 @@
-﻿using Atlassian.Jira.Remote;
+using Atlassian.Jira.Remote;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;

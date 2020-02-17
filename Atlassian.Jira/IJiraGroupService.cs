@@ -38,16 +38,16 @@ namespace Atlassian.Jira
         /// Adds a user to a the group specified.
         /// </summary>
         /// <param name="groupName">Name of group to add the user to.</param>
-        /// <param name="userName">Name of user to add.</param>
+        /// <param name="usernameOrAccountId">User name or account id of user to add.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task AddUserAsync(string groupName, string userName, CancellationToken token = default(CancellationToken));
+        Task AddUserAsync(string groupName, string usernameOrAccountId, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Removes a user from the group specified.
         /// </summary>
         /// <param name="groupName">Name of the group to remove the user from.</param>
-        /// <param name="userName">Name of user to remove.</param>
+        /// <param name="usernameOrAccountId">Username or account id of user to remove.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task RemoveUserAsync(string groupName, string userName, CancellationToken token = default(CancellationToken));
+        Task RemoveUserAsync(string groupName, string usernameOrAccountId, CancellationToken token = default(CancellationToken));
     }
 }
