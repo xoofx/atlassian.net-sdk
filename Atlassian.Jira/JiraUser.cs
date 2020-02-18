@@ -9,6 +9,12 @@ namespace Atlassian.Jira
     public class JiraUser
     {
         /// <summary>
+        /// The Atlassian account identifier for this user.
+        /// </summary>
+        [JsonProperty("accountId")]
+        public string AccountId { get; set; }
+
+        /// <summary>
         /// The identifier for the user as defined by JIRA.
         /// </summary>
         [JsonProperty("key")]
