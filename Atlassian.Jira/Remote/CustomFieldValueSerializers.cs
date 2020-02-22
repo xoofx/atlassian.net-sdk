@@ -17,7 +17,7 @@ namespace Atlassian.Jira.Remote
 
         public string[] FromJson(JToken json)
         {
-            return new string[1] { json[this._propertyName].ToString() };
+            return new string[1] { json[this._propertyName]?.ToString() };
         }
 
         public JToken ToJson(string[] values)
