@@ -27,6 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		docs\change-history.md = docs\change-history.md
 		docs\how-to-connect-using-oauth.md = docs\how-to-connect-using-oauth.md
 		docs\how-to-debug-problems.md = docs\how-to-debug-problems.md
+		docs\how-to-handle-gdpr-changes.md = docs\how-to-handle-gdpr-changes.md
 		docs\how-to-run-the-integration-tests.md = docs\how-to-run-the-integration-tests.md
 		docs\how-to-use-custom-fields.md = docs\how-to-use-custom-fields.md
 		docs\how-to-use-the-sdk.md = docs\how-to-use-the-sdk.md

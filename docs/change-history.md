@@ -1,5 +1,9 @@
 # Change History
 
+## Version 12.1.0 (??/??/????)
+
+- [Issue #509](https://bitbucket.org/farmas/atlassian.net-sdk/issues/503): Allows client to handle changes due to user privacy updates (GDPR).
+ 
 ## Version 12.0.0 (02/15/2020)
 
 - PR #80: Allows user to specify which issue links to get.
