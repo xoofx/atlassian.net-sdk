@@ -12,9 +12,15 @@ namespace Atlassian.Jira
     public class JiraRestClientSettings
     {
         private bool _userPrivacyEnabled;
+
+        private static IEnumerable<JsonConverter> _defaultJsonConverters = new List<JsonConverter>()
+        {
+            new JiraUserJsonConverter()
+        };
+
         private static IEnumerable<JsonConverter> _gdprJsonConverters = new List<JsonConverter>()
         {
-            new JiraRemoteTypeJsonConverter<RemoteIssue, GdprRemoteIssue>(),
+            new JiraUserJsonConverter() { UserPrivacyEnabled = true },
             new JiraRemoteTypeJsonConverter<RemoteComment, GdprRemoteComment>(),
             new JiraRemoteTypeJsonConverter<RemoteWorklog, GdprRemoteWorklog>(),
             new JiraRemoteTypeJsonConverter<RemoteProject, GdprRemoteProject>(),
@@ -61,14 +67,7 @@ namespace Atlassian.Jira
             {
                 _userPrivacyEnabled = value;
 
-                AddCoreCustomFieldValueSerializers();
-                RemoveGdprJsonConverters();
-
-                if (_userPrivacyEnabled)
-                {
-                    AddGdprCustomFieldValueSerializers();
-                    AddGdprJsonConverters();
-                }
+                UpdateSerializers();
             }
         }
 
@@ -81,6 +80,23 @@ namespace Atlassian.Jira
             JsonSerializerSettings.NullValueHandling = NullValueHandling.Ignore;
 
             AddCoreCustomFieldValueSerializers();
+            AddDefaultJsonConverters();
+        }
+
+        private void UpdateSerializers()
+        {
+            AddCoreCustomFieldValueSerializers();
+            RemoveKnownJsonConverters();
+
+            if (_userPrivacyEnabled)
+            {
+                AddGdprCustomFieldValueSerializers();
+                AddGdprJsonConverters();
+            }
+            else
+            {
+                AddDefaultJsonConverters();
+            }
         }
 
         private void AddGdprJsonConverters()
@@ -91,9 +107,22 @@ namespace Atlassian.Jira
             }
         }
 
-        private void RemoveGdprJsonConverters()
+        private void AddDefaultJsonConverters()
+        {
+            foreach (var converter in _defaultJsonConverters)
+            {
+                JsonSerializerSettings.Converters.Add(converter);
+            }
+        }
+
+        private void RemoveKnownJsonConverters()
         {
             foreach (var converter in _gdprJsonConverters)
+            {
+                JsonSerializerSettings.Converters.Remove(converter);
+            }
+
+            foreach (var converter in _defaultJsonConverters)
             {
                 JsonSerializerSettings.Converters.Remove(converter);
             }

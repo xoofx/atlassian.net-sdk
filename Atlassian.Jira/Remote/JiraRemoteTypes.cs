@@ -613,6 +613,18 @@ namespace Atlassian.Jira.Remote
         }
     }
 
+    public class RemoteJiraUser
+    {
+        public string accountId { get; set; }
+        public string key { get; set; }
+        public string name { get; set; }
+        public string displayName { get; set; }
+        public string emailAddress { get; set; }
+        public bool active { get; set; }
+        public string locale { get; set; }
+        public string self { get; set; }
+    }
+
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
     [System.SerializableAttribute()]
@@ -1318,8 +1330,6 @@ namespace Atlassian.Jira.Remote
 
         private RemoteVersion[] affectsVersionsField;
 
-        private string assigneeField;
-
         private string[] attachmentNamesField;
 
         private RemoteComponent[] componentsField;
@@ -1339,8 +1349,6 @@ namespace Atlassian.Jira.Remote
         private string keyField;
 
         private string projectField;
-
-        private string reporterField;
 
         private string summaryField;
 
@@ -1391,21 +1399,6 @@ namespace Atlassian.Jira.Remote
 
         [JsonIgnore]
         public IDictionary<string, JToken> fieldsReadOnly { get; set; }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string assignee
-        {
-            get
-            {
-                return this.assigneeField;
-            }
-            set
-            {
-                this.assigneeField = value;
-            }
-        }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -1552,21 +1545,17 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string reporter
-        {
-            get
-            {
-                return this.reporterField;
-            }
-            set
-            {
-                this.reporterField = value;
-            }
-        }
+        [JsonIgnore]
+        public string reporter { get; set; }
 
+        [JsonProperty("reporter")]
+        public JiraUser reporterJiraUser { get; set; }
+
+        [JsonIgnore]
+        public string assignee { get; set; }
+
+        [JsonProperty("assignee")]
+        public JiraUser assigneeJiraUser { get; set; }
 
         public RemoteResolution resolution { get; set; }
 

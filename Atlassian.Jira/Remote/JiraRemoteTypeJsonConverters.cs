@@ -2,15 +2,6 @@
 
 namespace Atlassian.Jira.Remote
 {
-    internal class GdprRemoteIssue : RemoteIssue
-    {
-        [JsonConverter(typeof(NestedValueJsonConverter), "accountId")]
-        public new string reporter { get; set; }
-
-        [JsonConverter(typeof(NestedValueJsonConverter), "accountId")]
-        public new string assignee { get; set; }
-    }
-
     internal class GdprRemoteComment : RemoteComment
     {
         [JsonConverter(typeof(NestedValueJsonConverter), "accountId")]

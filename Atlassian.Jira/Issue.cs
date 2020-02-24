@@ -84,9 +84,11 @@ namespace Atlassian.Jira
 
             TimeTrackingData = remoteIssue.timeTracking;
             Assignee = remoteIssue.assignee;
+            AssigneeUser = remoteIssue.assigneeJiraUser;
             Description = remoteIssue.description;
             Environment = remoteIssue.environment;
             Reporter = remoteIssue.reporter;
+            ReporterUser = remoteIssue.reporterJiraUser;
             Summary = remoteIssue.summary;
             Votes = remoteIssue.votesData?.votes;
             HasUserVoted = remoteIssue.votesData != null ? remoteIssue.votesData.hasVoted : false;
@@ -199,9 +201,14 @@ namespace Atlassian.Jira
         public string Environment { get; set; }
 
         /// <summary>
-        /// Person to whom the issue is currently assigned.
+        /// Username or account id of user to whom the issue is currently assigned.
         /// </summary>
         public string Assignee { get; set; }
+
+        /// <summary>
+        /// User object of user to whom the issue is currently assigned.
+        /// </summary>
+        public JiraUser AssigneeUser { get; private set; }
 
         /// <summary>
         /// Time tracking data for this issue.
@@ -252,9 +259,14 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Person who entered the issue into the system
+        /// Username or account id of user who created the issue in Jira.
         /// </summary>
         public string Reporter { get; set; }
+
+        /// <summary>
+        /// User object of user who created the issue in Jira.
+        /// </summary>
+        public JiraUser ReporterUser { get; private set; }
 
         /// <summary>
         /// Record of the issue's resolution, if the issue has been resolved or closed

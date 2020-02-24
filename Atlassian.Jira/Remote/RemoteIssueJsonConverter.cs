@@ -50,6 +50,10 @@ namespace Atlassian.Jira.Remote
             remoteIssue.id = (string)issueObj["id"];
             remoteIssue.key = (string)issueObj["key"];
 
+            // load identifiers of JiraUsers
+            remoteIssue.assignee = remoteIssue.assigneeJiraUser?.InternalIdentifier;
+            remoteIssue.reporter = remoteIssue.reporterJiraUser?.InternalIdentifier;
+
             // load the custom fields
             var customFields = GetCustomFieldValuesFromObject(fields);
             remoteIssue.customFieldValues = customFields.Any() ? customFields.ToArray() : null;
@@ -69,6 +73,10 @@ namespace Atlassian.Jira.Remote
             }
 
             var issue = issueWrapper.RemoteIssue;
+
+            // prepare the JiraUser identifiers
+            issue.assigneeJiraUser = String.IsNullOrEmpty(issue.assignee) ? null : new JiraUser() { InternalIdentifier = issue.assignee };
+            issue.reporterJiraUser = String.IsNullOrEmpty(issue.reporter) ? null : new JiraUser() { InternalIdentifier = issue.reporter };
 
             // Round trip the remote issue to get a JObject that has all the fields in the proper format.
             var issueJsonBuilder = new StringBuilder();
