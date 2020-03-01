@@ -570,9 +570,13 @@ namespace Atlassian.Jira.Test.Integration
             };
             var newComment = await issue.AddCommentAsync(comment);
 
-            // Verify visibility.
+            // Verify
             Assert.Equal("role", newComment.Visibility.Type);
             Assert.Equal("Developers", newComment.Visibility.Value);
+            Assert.Equal("admin", newComment.Author);
+            Assert.Equal("admin", newComment.AuthorUser.DisplayName);
+            Assert.Equal("admin", newComment.UpdateAuthor);
+            Assert.Equal("admin", newComment.UpdateAuthorUser.DisplayName);
 
             // Update the comment
             newComment.Visibility.Value = "Users";

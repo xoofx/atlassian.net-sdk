@@ -25,8 +25,6 @@ namespace Atlassian.Jira.Remote
     public partial class RemoteComment
     {
 
-        private string authorField;
-
         private string bodyField;
 
         private System.Nullable<System.DateTime> createdField;
@@ -37,24 +35,13 @@ namespace Atlassian.Jira.Remote
 
         private string roleLevelField;
 
-        private string updateAuthorField;
-
         private System.Nullable<System.DateTime> updatedField;
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string author
-        {
-            get
-            {
-                return this.authorField;
-            }
-            set
-            {
-                this.authorField = value;
-            }
-        }
+        [JsonIgnore]
+        public string author { get; set; }
+
+        [JsonProperty("author")]
+        public JiraUser authorUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -126,20 +113,11 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string updateAuthor
-        {
-            get
-            {
-                return this.updateAuthorField;
-            }
-            set
-            {
-                this.updateAuthorField = value;
-            }
-        }
+        [JsonIgnore]
+        public string updateAuthor { get; set; }
+
+        [JsonProperty("updateAuthor")]
+        public JiraUser updateAuthorUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
