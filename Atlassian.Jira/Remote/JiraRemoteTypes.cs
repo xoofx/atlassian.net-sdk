@@ -1203,8 +1203,6 @@ namespace Atlassian.Jira.Remote
     public partial class RemoteAttachment : AbstractRemoteEntity
     {
 
-        private string authorField;
-
         private System.Nullable<System.DateTime> createdField;
 
         private string filenameField;
@@ -1213,20 +1211,11 @@ namespace Atlassian.Jira.Remote
 
         private string mimetypeField;
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string author
-        {
-            get
-            {
-                return this.authorField;
-            }
-            set
-            {
-                this.authorField = value;
-            }
-        }
+        [JsonIgnore]
+        public string author { get; set; }
+
+        [JsonProperty("author")]
+        public JiraUser authorUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]

@@ -22,7 +22,6 @@ namespace Atlassian.Jira
         {
             new JiraUserJsonConverter() { UserPrivacyEnabled = true },
             new JiraRemoteTypeJsonConverter<RemoteWorklog, GdprRemoteWorklog>(),
-            new JiraRemoteTypeJsonConverter<RemoteAttachment, GdprRemoteAttachment>()
         };
 
         /// <summary>

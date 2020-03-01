@@ -440,7 +440,8 @@ namespace Atlassian.Jira.Test.Integration
 
             // verify properties of an attachment
             var attachment = attachments.First();
-            Assert.NotEmpty(attachment.Author);
+            Assert.Equal("admin", attachment.Author);
+            Assert.Equal("admin", attachment.AuthorUser.DisplayName);
             Assert.NotNull(attachment.CreatedDate);
             Assert.True(attachment.FileSize > 0);
             Assert.NotEmpty(attachment.MimeType);
