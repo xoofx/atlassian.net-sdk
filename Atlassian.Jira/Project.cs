@@ -64,7 +64,18 @@ namespace Atlassian.Jira
         {
             get
             {
-                return _remoteProject.lead;
+                return _remoteProject.leadUser?.InternalIdentifier;
+            }
+        }
+
+        /// <summary>
+        /// User object of the project lead.
+        /// </summary>
+        public JiraUser LeadUser
+        {
+            get
+            {
+                return _remoteProject.leadUser;
             }
         }
 

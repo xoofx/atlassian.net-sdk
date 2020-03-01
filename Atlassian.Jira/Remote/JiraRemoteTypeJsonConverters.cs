@@ -20,12 +20,6 @@ namespace Atlassian.Jira.Remote
         public new string updateAuthor { get; set; }
     }
 
-    internal class GdprRemoteProject : RemoteProject
-    {
-        [JsonConverter(typeof(NestedValueJsonConverter), "accountId")]
-        public new string lead { get; set; }
-    }
-
     internal class GdprRemoteAttachment : RemoteAttachment
     {
         [JsonConverter(typeof(NestedValueJsonConverter), "accountId")]

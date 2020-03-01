@@ -120,6 +120,7 @@ namespace Atlassian.Jira.Test.Integration
             var projects = jira.Projects.GetProjectsAsync().Result;
             Assert.True(projects.Count() > 0);
             Assert.Equal("admin", projects.First().Lead);
+            Assert.Equal("admin", projects.First().LeadUser.DisplayName);
         }
 
         [Theory]
@@ -128,6 +129,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var project = jira.Projects.GetProjectAsync("TST").Result;
             Assert.Equal("admin", project.Lead);
+            Assert.Equal("admin", project.LeadUser.DisplayName);
             Assert.Equal("Test Project", project.Name);
         }
 

@@ -837,8 +837,6 @@ namespace Atlassian.Jira.Remote
 
         private string keyField;
 
-        private string leadField;
-
         private RemoteScheme notificationSchemeField;
 
         private RemotePermissionScheme permissionSchemeField;
@@ -891,20 +889,11 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string lead
-        {
-            get
-            {
-                return this.leadField;
-            }
-            set
-            {
-                this.leadField = value;
-            }
-        }
+        [JsonIgnore]
+        public string lead { get; set; }
+
+        [JsonProperty("lead")]
+        public JiraUser leadUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
