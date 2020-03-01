@@ -21,7 +21,6 @@ namespace Atlassian.Jira
         private static IEnumerable<JsonConverter> _gdprJsonConverters = new List<JsonConverter>()
         {
             new JiraUserJsonConverter() { UserPrivacyEnabled = true },
-            new JiraRemoteTypeJsonConverter<RemoteWorklog, GdprRemoteWorklog>(),
         };
 
         /// <summary>

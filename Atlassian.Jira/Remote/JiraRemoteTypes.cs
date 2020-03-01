@@ -149,8 +149,6 @@ namespace Atlassian.Jira.Remote
     public partial class RemoteWorklog
     {
 
-        private string authorField;
-
         private string commentField;
 
         private System.Nullable<System.DateTime> createdField;
@@ -171,20 +169,11 @@ namespace Atlassian.Jira.Remote
 
         private System.Nullable<System.DateTime> updatedField;
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string author
-        {
-            get
-            {
-                return this.authorField;
-            }
-            set
-            {
-                this.authorField = value;
-            }
-        }
+        [JsonIgnore]
+        public string author { get; set; }
+
+        [JsonProperty("author")]
+        public JiraUser authorUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]

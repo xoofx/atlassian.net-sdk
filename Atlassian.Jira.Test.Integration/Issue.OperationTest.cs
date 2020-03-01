@@ -701,6 +701,8 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(4, logs.Count());
             Assert.Equal("comment", logs.ElementAt(3).Comment);
             Assert.Equal(new DateTime(2012, 1, 1), logs.ElementAt(3).StartDate);
+            Assert.Equal("admin", logs.First().Author);
+            Assert.Equal("admin", logs.First().AuthorUser.DisplayName);
         }
 
         [Theory]
