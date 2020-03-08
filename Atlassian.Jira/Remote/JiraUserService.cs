@@ -26,14 +26,14 @@ namespace Atlassian.Jira.Remote
 
         public Task DeleteUserAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken))
         {
-            var queryString = _jira.RestClient.Settings.UserPrivacyEnabled ? "accountId" : "username";
+            var queryString = _jira.RestClient.Settings.EnableUserPrivacyMode ? "accountId" : "username";
             var resource = String.Format($"rest/api/2/user?{queryString}={Uri.EscapeUriString(usernameOrAccountId)}");
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
         }
 
         public Task<JiraUser> GetUserAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken))
         {
-            var queryString = _jira.RestClient.Settings.UserPrivacyEnabled ? "accountId" : "username";
+            var queryString = _jira.RestClient.Settings.EnableUserPrivacyMode ? "accountId" : "username";
             var resource = String.Format($"rest/api/2/user?{queryString}={Uri.EscapeUriString(usernameOrAccountId)}");
             return _jira.RestClient.ExecuteRequestAsync<JiraUser>(Method.GET, resource, null, token);
         }
@@ -42,7 +42,7 @@ namespace Atlassian.Jira.Remote
         {
             var resource = String.Format(
                 "rest/api/2/user/search?{0}={1}&includeActive={2}&includeInactive={3}&startAt={4}&maxResults={5}",
-                _jira.RestClient.Settings.UserPrivacyEnabled ? "query" : "username",
+                _jira.RestClient.Settings.EnableUserPrivacyMode ? "query" : "username",
                 Uri.EscapeUriString(query),
                 userStatus.HasFlag(JiraUserStatus.Active),
                 userStatus.HasFlag(JiraUserStatus.Inactive),

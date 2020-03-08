@@ -50,9 +50,9 @@ namespace Atlassian.Jira
         public IWebProxy Proxy { get; set; }
 
         /// <summary>
-        /// Whether the Jira server has user privacy enabled (also known as GDPR mode).
+        /// Whether to enable user privacy mode when interacting with Jira server (also known as GDPR mode).
         /// </summary>
-        public bool UserPrivacyEnabled
+        public bool EnableUserPrivacyMode
         {
             get
             {

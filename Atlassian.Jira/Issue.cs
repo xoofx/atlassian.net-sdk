@@ -769,7 +769,7 @@ namespace Atlassian.Jira
         {
             var jiraUser = await this.Jira.Users.GetMyselfAsync(token);
 
-            var author = this.Jira.RestClient.Settings.UserPrivacyEnabled ? jiraUser.AccountId : jiraUser.Username;
+            var author = this.Jira.RestClient.Settings.EnableUserPrivacyMode ? jiraUser.AccountId : jiraUser.Username;
 
             return await this.AddCommentAsync(new Comment() { Author = author, Body = comment }, token);
         }

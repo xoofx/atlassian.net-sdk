@@ -21,7 +21,7 @@ namespace Atlassian.Jira.Remote
         {
             var resource = String.Format("rest/api/2/group/user?groupname={0}", Uri.EscapeUriString(groupname));
             object body = new { name = username };
-            if (_jira.RestClient.Settings.UserPrivacyEnabled)
+            if (_jira.RestClient.Settings.EnableUserPrivacyMode)
             {
                 body = new { accountId = username };
             }
@@ -72,7 +72,7 @@ namespace Atlassian.Jira.Remote
         {
             var resource = String.Format("rest/api/2/group/user?groupname={0}&{1}={2}",
                 Uri.EscapeUriString(groupname),
-                _jira.RestClient.Settings.UserPrivacyEnabled ? "accountId" : "username",
+                _jira.RestClient.Settings.EnableUserPrivacyMode ? "accountId" : "username",
                 Uri.EscapeUriString(username));
 
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);

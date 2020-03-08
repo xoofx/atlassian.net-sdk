@@ -8,7 +8,7 @@ Jira Cloud users that are affected by this change need to configure the library 
 
 ```
 var settings = new JiraRestClientSettings();
-settings.UserPrivacyEnabled = true;
+settings.EnableUserPrivacyMode = true;
 
 var jira = Jira.CreateRestClient("jira-url", "username", "api-token", settings);
 ```
