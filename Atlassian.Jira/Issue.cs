@@ -106,7 +106,7 @@ namespace Atlassian.Jira
 
             // collections
             _customFields = _originalIssue.customFieldValues == null ? new CustomFieldValueCollection(this)
-                : new CustomFieldValueCollection(this, _originalIssue.customFieldValues.Select(f => new CustomFieldValue(f.customfieldId, this) { Values = f.values }).ToList());
+                : new CustomFieldValueCollection(this, _originalIssue.customFieldValues.Select(f => new CustomFieldValue(f.customfieldId, this) { Values = f.values, RawValue = f.rawValue }).ToList());
 
             var affectsVersions = _originalIssue.affectsVersions ?? Enumerable.Empty<RemoteVersion>();
             _affectsVersions = new ProjectVersionCollection("versions", _jira, Project, affectsVersions.Select(v =>

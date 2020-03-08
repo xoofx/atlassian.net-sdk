@@ -152,7 +152,8 @@ namespace Atlassian.Jira.Remote
                     var customFieldType = GetCustomFieldType(field.Name);
                     var remoteCustomFieldValue = new RemoteCustomFieldValue()
                     {
-                        customfieldId = field.Name
+                        customfieldId = field.Name,
+                        rawValue = field.Value
                     };
 
                     if (this._customFieldSerializers.ContainsKey(customFieldType))

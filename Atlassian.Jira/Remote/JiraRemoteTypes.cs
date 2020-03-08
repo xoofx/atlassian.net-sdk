@@ -1682,65 +1682,17 @@ namespace Atlassian.Jira.Remote
         public string ProjectKey { get; set; }
     }
 
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
     public partial class RemoteCustomFieldValue
     {
-
-        private string customfieldIdField;
-
-        private string keyField;
-
-        private string[] valuesField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string customfieldId
-        {
-            get
-            {
-                return this.customfieldIdField;
-            }
-            set
-            {
-                this.customfieldIdField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string key
-        {
-            get
-            {
-                return this.keyField;
-            }
-            set
-            {
-                this.keyField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string[] values
-        {
-            get
-            {
-                return this.valuesField;
-            }
-            set
-            {
-                this.valuesField = value;
-            }
-        }
+        public string customfieldId { get; set; }
+        public string key { get; set; }
+        public string[] values { get; set; }
 
         [JsonIgnore]
         public ICustomFieldValueSerializer serializer { get; set; }
+
+        [JsonIgnore]
+        public JToken rawValue { get; set; }
     }
 
     /// <remarks/>
