@@ -1,8 +1,10 @@
 # Change History
 
-## Version 12.1.0 (??/??/????)
+## Version 12.1.0 (03/08/2020)
 
-- [Issue #509](https://bitbucket.org/farmas/atlassian.net-sdk/issues/503): Allows client to handle changes due to user privacy updates (GDPR).
+- [Issue #509](https://bitbucket.org/farmas/atlassian.net-sdk/issues/503): Allows users to handle changes due to user privacy updates (GDPR).
+- Exposes JiraUser object for Issue.Reporter, Issue.Assignee, Comment.Author, Attachment.Author, Worklog.Author and Project.Lead.
+- Allows users to deserialize custom fields to .NET types. Makes it possible to read JiraUser objects from 'user-picker' custom fields.
  
 ## Version 12.0.0 (02/15/2020)
 

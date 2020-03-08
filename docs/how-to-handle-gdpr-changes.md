@@ -2,8 +2,6 @@
 
 Atlassian announced changes to [Jira Cloud REST APIs to improve user privacy](https://developer.atlassian.com/cloud/jira/platform/deprecation-notice-user-privacy-api-migration-guide/) that is incompatible with the way this library handles responses from Jira.
 
-**Currently available as a pre-release: 12.1.0-beta.**
-
 Jira Cloud users that are affected by this change need to configure the library to enable user privacy mode:
 
 ```
