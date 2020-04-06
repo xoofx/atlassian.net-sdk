@@ -6,7 +6,7 @@ By default, when an issue is downloaded from the server the library will fetch a
 
 In this case, the client is interested in only retrieving a sub-set of the fields that populate the public properties of the Issue class. In the sample below only `issue.Summary` will be available, all other properties will be null or empty.
 
-```
+```csharp
 var options = new IssueSearchOptions("key = TST-1")
 {
     FetchBasicFields = false,
@@ -20,7 +20,7 @@ var issues = await jira.Issues.GetIssuesFromJqlAsync(options);
 
 In this case, the client wants all the public properties of the Issue class to be populated, but is also interested in pre-fetching all the attachments of each issue. Note that the attachments of each fields are available in the `Issue.AdditionalFields` property.
 
-```
+```csharp
 var options = new IssueSearchOptions("key = TST-1")
 {
     FetchBasicFields = true,
@@ -35,7 +35,7 @@ var attachemnts = issues.First().AdditionalFields.Attachments;
 
 In this case, the client is not interested in any of the public properties of the Issue class, but wants only the comments and the worklogs of each issue.
 
-```
+```csharp
 var options = new IssueSearchOptions($"key = {issue.Key.Value}")
 {
     FetchBasicFields = false,
@@ -51,7 +51,7 @@ var comments = issues.First().AdditionalFields.Comments;
 
 In cases where a class doesn't exist to represent the field value, a client can get a JToken directly.
 
-```
+```csharp
 var options = new IssueSearchOptions($"key = {issue.Key.Value}")
 {
     FetchBasicFields = false,
