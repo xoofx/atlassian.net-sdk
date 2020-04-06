@@ -10,5 +10,6 @@
     1. [How to debug problems](/docs/how-to-debug-problems.md)
     1. [How to work with custom fields](/docs/how-to-use-custom-fields.md)
     1. [How to handle changes due to GDPR](/docs/how-to-handle-gdpr-changes.md)
+    1. [How to configure fields to download when querying issues](how-to-configure-issue-fields-to-fetch.md)
 1. Reference
     1. [JQL Supported Operators](/docs/reference-jql.md)
