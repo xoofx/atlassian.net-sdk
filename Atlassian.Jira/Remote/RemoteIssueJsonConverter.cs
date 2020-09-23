@@ -106,7 +106,7 @@ namespace Atlassian.Jira.Remote
         {
             var remoteField = this._remoteFields.FirstOrDefault(f => f.id.Equals(customFieldId, StringComparison.InvariantCultureIgnoreCase));
 
-            return remoteField != null ? remoteField.Schema.Custom : "SDK-Unknown-Field-Type";
+            return remoteField != null && remoteField.Schema.Custom != null ? remoteField.Schema.Custom : "SDK-Unknown-Field-Type";
         }
 
         private void AddCustomFieldValuesToObject(RemoteIssue remoteIssue, JObject jObject)
