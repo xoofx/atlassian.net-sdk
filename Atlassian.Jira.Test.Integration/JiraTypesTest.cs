@@ -119,8 +119,15 @@ namespace Atlassian.Jira.Test.Integration
         {
             var projects = jira.Projects.GetProjectsAsync().Result;
             Assert.True(projects.Count() > 0);
-            Assert.Equal("admin", projects.First().Lead);
-            Assert.Equal("admin", projects.First().LeadUser.DisplayName);
+
+            var project = projects.First();
+            Assert.Equal("admin", project.Lead);
+            Assert.Equal("admin", project.LeadUser.DisplayName);
+            Assert.NotNull(project.AvatarUrls);
+            Assert.NotNull(project.AvatarUrls.XSmall);
+            Assert.NotNull(project.AvatarUrls.Small);
+            Assert.NotNull(project.AvatarUrls.Medium);
+            Assert.NotNull(project.AvatarUrls.Large);
         }
 
         [Theory]

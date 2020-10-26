@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Atlassian.Jira.Remote;
-using System.Net;
-using System.IO;
 
 namespace Atlassian.Jira
 {
@@ -97,10 +95,11 @@ namespace Atlassian.Jira
         /// </summary>
         public AvatarUrls AvatarUrls
         {
-            get { return _remoteProject.avatarUrls; } 
+            get
+            {
+                return _remoteProject.avatarUrls;
+            }
         }
-
-
 
         /// <summary>
         /// Gets the issue types for the current project.

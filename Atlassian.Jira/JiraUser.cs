@@ -45,17 +45,12 @@
         /// </summary>
         public string Self { get; internal set; }
 
-        internal string InternalIdentifier { get; set; }
-
-
         /// <summary>
         /// The list of the Avatar URL's for this user
         /// </summary>
-        [JsonProperty("avatarUrls")]
-        public Remote.AvatarUrls AvatarUrls
-        {
-            get;set;
-        }
+        public AvatarUrls AvatarUrls { get; internal set; }
+
+        internal string InternalIdentifier { get; set; }
 
         public override string ToString()
         {

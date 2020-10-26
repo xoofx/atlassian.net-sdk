@@ -35,6 +35,7 @@ namespace Atlassian.Jira.Remote
                 Locale = remoteUser.locale,
                 Self = remoteUser.self,
                 Username = remoteUser.name,
+                AvatarUrls = remoteUser.avatarUrls,
                 InternalIdentifier = UserPrivacyEnabled ? remoteUser.accountId : remoteUser.name
             };
         }

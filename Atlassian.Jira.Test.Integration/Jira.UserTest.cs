@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -78,6 +77,18 @@ namespace Atlassian.Jira.Test.Integration
             await jira.Users.DeleteUserAsync(userInfo.Username);
             users = await jira.Users.SearchUsersAsync(userInfo.Username);
             Assert.Empty(users);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task CanAccessAvatarUrls(Jira jira)
+        {
+            var user = await jira.Users.GetUserAsync("admin");
+            Assert.NotNull(user.AvatarUrls);
+            Assert.NotNull(user.AvatarUrls.XSmall);
+            Assert.NotNull(user.AvatarUrls.Small);
+            Assert.NotNull(user.AvatarUrls.Medium);
+            Assert.NotNull(user.AvatarUrls.Large);
         }
     }
 }

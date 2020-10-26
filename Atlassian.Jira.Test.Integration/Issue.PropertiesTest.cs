@@ -24,6 +24,18 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("admin", issue.Assignee);
             Assert.Equal("admin@example.com", issue.AssigneeUser.Email);
 
+            Assert.NotNull(issue.ReporterUser.AvatarUrls);
+            Assert.NotNull(issue.ReporterUser.AvatarUrls.XSmall);
+            Assert.NotNull(issue.ReporterUser.AvatarUrls.Small);
+            Assert.NotNull(issue.ReporterUser.AvatarUrls.Medium);
+            Assert.NotNull(issue.ReporterUser.AvatarUrls.Large);
+
+            Assert.NotNull(issue.AssigneeUser.AvatarUrls);
+            Assert.NotNull(issue.AssigneeUser.AvatarUrls.XSmall);
+            Assert.NotNull(issue.AssigneeUser.AvatarUrls.Small);
+            Assert.NotNull(issue.AssigneeUser.AvatarUrls.Medium);
+            Assert.NotNull(issue.AssigneeUser.AvatarUrls.Large);
+
             issue.Assignee = "test";
             issue = await issue.SaveChangesAsync();
             Assert.Equal("test", issue.Assignee);
