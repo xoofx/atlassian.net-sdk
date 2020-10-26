@@ -1,5 +1,9 @@
 # Change History
 
+## Version 12.2.0 (10/25/2020)
+
+- [Issue 253](https://bitbucket.org/farmas/atlassian.net-sdk/issues/253) Exposes the avatar url's for projects and users.
+
 ## Version 12.1.0 (03/08/2020)
 
 - [Issue #509](https://bitbucket.org/farmas/atlassian.net-sdk/issues/503): Allows users to handle changes due to user privacy updates (GDPR).
