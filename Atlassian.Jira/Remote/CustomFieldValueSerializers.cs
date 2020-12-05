@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Newtonsoft.Json;
@@ -151,5 +152,43 @@ namespace Atlassian.Jira.Remote
 
             return val;
         }
+    }
+
+    public class GreenhopperSprintJsonCustomFieldValueSerialiser : ICustomFieldValueSerializer
+    {
+        // Sprint field is malformed
+        // See https://ecosystem.atlassian.net/browse/ACJIRA-918 for more information
+        public string[] FromJson(JToken json)
+        {
+            return JsonConvert
+                .DeserializeObject<List<Sprint>>(json.ToString())
+                .OrderByDescending(x => x.endDate)
+                .Select(x => x.name)
+                .ToArray();
+        }
+
+        public JToken ToJson(string[] values)
+        {
+            var val = values?.FirstOrDefault();
+
+            if (int.TryParse(val, out var id))
+            {
+                return id;
+            }
+
+            return val;
+        }
+    }
+
+    public class Sprint
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+        public string state { get; set; }
+        public int boardId { get; set; }
+        public string goal { get; set; }
+        public DateTime startDate { get; set; }
+        public DateTime endDate { get; set; }
+        public DateTime completeDate { get; set; }
     }
 }
