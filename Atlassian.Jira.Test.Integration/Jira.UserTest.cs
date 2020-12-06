@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -72,6 +73,9 @@ namespace Atlassian.Jira.Test.Integration
             // verify search for a user
             var users = await jira.Users.SearchUsersAsync("test");
             Assert.Contains(users, u => u.Username == userInfo.Username);
+
+            // verify equality override (see https://bitbucket.org/farmas/atlassian.net-sdk/issues/570)
+            Assert.True(users.First().Equals(users.First()));
 
             // verify delete a user
             await jira.Users.DeleteUserAsync(userInfo.Username);

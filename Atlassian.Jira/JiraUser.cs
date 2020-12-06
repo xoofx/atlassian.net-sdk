@@ -54,18 +54,18 @@
 
         public override string ToString()
         {
-            return Username;
+            return InternalIdentifier;
         }
 
         public override bool Equals(object other)
         {
             var otherAsThisType = other as JiraUser;
-            return otherAsThisType != null && Username.Equals(otherAsThisType.Username);
+            return otherAsThisType != null && InternalIdentifier.Equals(otherAsThisType.InternalIdentifier);
         }
 
         public override int GetHashCode()
         {
-            return Username.GetHashCode();
+            return InternalIdentifier.GetHashCode();
         }
     }
 }
