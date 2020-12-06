@@ -95,5 +95,17 @@ In order to register a custom field serializer the custom field type must be kno
 var settings = new JiraRestClientSettings();
 settings.CustomFieldSerializers.Add("com.atlassian.jira.plugin.system.customfieldtypes:url", new MyCustomFieldValueSerializer());
 return Jira.CreateRestClient(<url>, <user>, <pass>, settings);
+```
 
+
+# Built-in Custom Serialization #
+
+## Sprint serializer ##
+
+The format of the sprint changed in Jira, depending on the Jira version that you target you may need to switch to the new serializer:
+
+```
+var settings = new JiraRestClientSettings();
+settings.CustomFieldSerializers["com.pyxis.greenhopper.jira:gh-sprint"] = new new GreenhopperSprintJsonCustomFieldValueSerialiser();
+var jira = new Jira("url", "user", "password", settings);
 ```
