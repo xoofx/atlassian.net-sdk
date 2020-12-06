@@ -150,7 +150,7 @@ namespace Atlassian.Jira
 
             CustomFieldSerializers[GetBuiltInType("cascadingselect")] = new CascadingSelectCustomFieldValueSerializer();
 
-            CustomFieldSerializers[GetGreenhopperType("gh-sprint")] = new GreenhopperSprintJsonCustomFieldValueSerialiser();
+            CustomFieldSerializers[GetGreenhopperType("gh-sprint")] = new GreenhopperSprintCustomFieldValueSerialiser("name");
         }
 
         private static string GetBuiltInType(string name)

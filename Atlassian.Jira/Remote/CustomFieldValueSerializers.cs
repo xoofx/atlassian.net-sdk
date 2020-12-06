@@ -156,8 +156,6 @@ namespace Atlassian.Jira.Remote
 
     public class GreenhopperSprintJsonCustomFieldValueSerialiser : ICustomFieldValueSerializer
     {
-        // Sprint field is malformed
-        // See https://ecosystem.atlassian.net/browse/ACJIRA-918 for more information
         public string[] FromJson(JToken json)
         {
             return JsonConvert
@@ -180,7 +178,7 @@ namespace Atlassian.Jira.Remote
         }
     }
 
-    public class Sprint
+    internal class Sprint
     {
         public int id { get; set; }
         public string name { get; set; }
