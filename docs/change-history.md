@@ -1,8 +1,9 @@
 # Change History
 
-## Version 12.3.0
+## Version 12.3.0 (12/05/2020)
 
 - [Issue 562](https://bitbucket.org/farmas/atlassian.net-sdk/issues/562) Adds a new sprint serializer that can handle the new sprint format.
+- [Issue 570](https://bitbucket.org/farmas/atlassian.net-sdk/issues/570) Fixes exception in JiraUser when using comparisons.
 
 To register the new sprint serialiser:
 ```
