@@ -263,8 +263,9 @@ namespace Atlassian.Jira.Test.Integration
             var dateTime = new DateTime(2016, 11, 11, 11, 11, 0);
             var dateTimeStr = dateTime.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffzzz");
             dateTimeStr = dateTimeStr.Remove(dateTimeStr.LastIndexOf(":"), 1);
-
             var summaryValue = "Test issue with lots of custom fields (Created)" + _random.Next(int.MaxValue);
+
+            // Create issue with no custom fields set
             var issue = new Issue(jira, "TST")
             {
                 Type = "1",
@@ -274,6 +275,7 @@ namespace Atlassian.Jira.Test.Integration
 
             issue.SaveChanges();
 
+            // Retrieve the issue, set all custom fields and save the changes.
             var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             newIssue["Custom Text Field"] = "My new value";
@@ -296,6 +298,7 @@ namespace Atlassian.Jira.Test.Integration
 
             newIssue.SaveChanges();
 
+            // Retrieve the issue again and verify fields
             var updatedIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
 
             Assert.Equal("My new value", updatedIssue["Custom Text Field"]);
@@ -322,6 +325,16 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal("Option2", cascadingSelect.ParentOption);
             Assert.Equal("Option2.2", cascadingSelect.ChildOption);
             Assert.Equal("Custom Cascading Select Field", cascadingSelect.Name);
+
+            // Update custom fields again and save
+            updatedIssue["Custom Text Field"] = "My newest value";
+            updatedIssue["Custom Date Field"] = "2019-10-03";
+            updatedIssue["Custom Number Field"] = "9999";
+            updatedIssue.SaveChanges();
+
+            // Retrieve the issue one last time and verify custom fields.
+            var updatedIssue2 = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal("9999", updatedIssue2["Custom Number Field"]);
         }
 
         [Theory]
