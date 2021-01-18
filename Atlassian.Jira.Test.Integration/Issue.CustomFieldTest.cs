@@ -330,11 +330,15 @@ namespace Atlassian.Jira.Test.Integration
             updatedIssue["Custom Text Field"] = "My newest value";
             updatedIssue["Custom Date Field"] = "2019-10-03";
             updatedIssue["Custom Number Field"] = "9999";
+            updatedIssue.CustomFields["Custom Labels Field"].Values = new string[] { "label3" };
             updatedIssue.SaveChanges();
 
             // Retrieve the issue one last time and verify custom fields.
             var updatedIssue2 = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal("My newest value", updatedIssue["Custom Text Field"]);
+            Assert.Equal("2019-10-03", updatedIssue["Custom Date Field"]);
             Assert.Equal("9999", updatedIssue2["Custom Number Field"]);
+            Assert.Equal(new string[1] { "label3" }, updatedIssue.CustomFields["Custom Labels Field"].Values);
         }
 
         [Theory]
