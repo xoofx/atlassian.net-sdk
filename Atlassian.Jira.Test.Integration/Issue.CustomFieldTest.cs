@@ -140,6 +140,24 @@ namespace Atlassian.Jira.Test.Integration
 
         [Theory]
         [ClassData(typeof(JiraProvider))]
+        public void CreateAndQueryIssueWithLargeNumberCustomField(Jira jira)
+        {
+            var issue = new Issue(jira, "TST")
+            {
+                Type = "1",
+                Summary = "Test issue with large custom field number" + _random.Next(int.MaxValue),
+                Assignee = "admin"
+            };
+
+            issue["Custom Number Field"] = "10000000000";
+            issue.SaveChanges();
+
+            var newIssue = jira.Issues.GetIssueAsync(issue.Key.Value).Result;
+            Assert.Equal("10000000000", newIssue["Custom Number Field"]);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
         public void CreateAndQueryIssueWithComplexCustomFields(Jira jira)
         {
             var dateTime = new DateTime(2016, 11, 11, 11, 11, 0);
