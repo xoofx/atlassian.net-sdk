@@ -11,6 +11,13 @@ namespace Atlassian.Jira
     public interface IIssueFilterService
     {
         /// <summary>
+        /// Returns a filter with the specified id.
+        /// </summary>
+        /// <param name="filterId">Identifier of the filter to fetch.</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<JiraFilter> GetFilterAsync(string filterId, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
         /// Returns the favourite filters for the user.
         /// </summary>
         /// <param name="token">Cancellation token for this operation.</param>

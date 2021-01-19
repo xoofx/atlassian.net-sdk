@@ -11,12 +11,15 @@ namespace Atlassian.Jira.Test.Integration
     {
         [Theory]
         [ClassData(typeof(JiraProvider))]
-        public void GetFilters(Jira jira)
+        public async Task GetFilters(Jira jira)
         {
-            var filters = jira.Filters.GetFavouritesAsync().Result;
+            var filters = await jira.Filters.GetFavouritesAsync();
 
             Assert.True(filters.Count() >= 1);
             Assert.Contains(filters, f => f.Name == "One Issue Filter");
+
+            var filter = await jira.Filters.GetFilterAsync(filters.First().Id);
+            Assert.NotNull(filter);
         }
 
         [Theory]
