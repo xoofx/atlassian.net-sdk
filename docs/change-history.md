@@ -1,5 +1,9 @@
 # Change History
 
+## Version 12.4.0 (01/18/2021)
+
+- [Issue 480](https://bitbucket.org/farmas/atlassian.net-sdk/issues/480) Adds ability to get an issue filter by id.
+
 ## Version 12.3.0 (12/05/2020)
 
 - [Issue 562](https://bitbucket.org/farmas/atlassian.net-sdk/issues/562) Adds a new sprint serializer that can handle the new sprint format.
