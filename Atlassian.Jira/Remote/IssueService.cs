@@ -52,11 +52,10 @@ namespace Atlassian.Jira.Remote
                 var customFields = await fieldService.GetCustomFieldsAsync(token).ConfigureAwait(false);
                 var remoteFields = customFields.Select(f => f.RemoteField);
 
-                var serializers = new Dictionary<string, ICustomFieldValueSerializer>(this._restSettings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
+                var customFieldSerializers = new Dictionary<string, ICustomFieldValueSerializer>(this._restSettings.CustomFieldSerializers, StringComparer.InvariantCultureIgnoreCase);
 
-                this._serializerSettings = new JsonSerializerSettings();
-                this._serializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(remoteFields, serializers));
+                this._serializerSettings = _jira.RestClient.Settings.JsonSerializerSettings;
+                this._serializerSettings.Converters.Add(new RemoteIssueJsonConverter(remoteFields, customFieldSerializers));
             }
 
             return this._serializerSettings;
@@ -426,7 +425,8 @@ namespace Atlassian.Jira.Remote
                 throw new InvalidOperationException("Unable to interact with the watchers resource, make sure the issue has been created.");
             }
 
-            var resourceUrl = String.Format("rest/api/2/issue/{0}/watchers?username={1}", issueKey, System.Uri.EscapeUriString(username));
+            var queryString = _jira.RestClient.Settings.EnableUserPrivacyMode ? "accountId" : "username";
+            var resourceUrl = String.Format($"rest/api/2/issue/{issueKey}/watchers?{queryString}={System.Uri.EscapeUriString(username)}");
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resourceUrl, null, token);
         }
 
@@ -595,7 +595,12 @@ namespace Atlassian.Jira.Remote
         {
             var resource = $"/rest/api/2/issue/{issueKey}/assignee";
 
-            return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, new { name = assignee }, token);
+            object body = new { name = assignee };
+            if (_jira.RestClient.Settings.EnableUserPrivacyMode)
+            {
+                body = new { accountId = assignee };
+            }
+            return _jira.RestClient.ExecuteRequestAsync(Method.PUT, resource, body, token);
         }
 
         public async Task<IEnumerable<string>> GetPropertyKeysAsync(string issueKey, CancellationToken token = default)

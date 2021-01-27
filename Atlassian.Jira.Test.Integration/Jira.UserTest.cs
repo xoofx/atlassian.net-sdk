@@ -74,10 +74,25 @@ namespace Atlassian.Jira.Test.Integration
             var users = await jira.Users.SearchUsersAsync("test");
             Assert.Contains(users, u => u.Username == userInfo.Username);
 
+            // verify equality override (see https://bitbucket.org/farmas/atlassian.net-sdk/issues/570)
+            Assert.True(users.First().Equals(users.First()));
+
             // verify delete a user
             await jira.Users.DeleteUserAsync(userInfo.Username);
             users = await jira.Users.SearchUsersAsync(userInfo.Username);
             Assert.Empty(users);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task CanAccessAvatarUrls(Jira jira)
+        {
+            var user = await jira.Users.GetUserAsync("admin");
+            Assert.NotNull(user.AvatarUrls);
+            Assert.NotNull(user.AvatarUrls.XSmall);
+            Assert.NotNull(user.AvatarUrls.Small);
+            Assert.NotNull(user.AvatarUrls.Medium);
+            Assert.NotNull(user.AvatarUrls.Large);
         }
     }
 }

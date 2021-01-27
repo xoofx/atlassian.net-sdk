@@ -84,9 +84,11 @@ namespace Atlassian.Jira
 
             TimeTrackingData = remoteIssue.timeTracking;
             Assignee = remoteIssue.assignee;
+            AssigneeUser = remoteIssue.assigneeJiraUser;
             Description = remoteIssue.description;
             Environment = remoteIssue.environment;
             Reporter = remoteIssue.reporter;
+            ReporterUser = remoteIssue.reporterJiraUser;
             Summary = remoteIssue.summary;
             Votes = remoteIssue.votesData?.votes;
             HasUserVoted = remoteIssue.votesData != null ? remoteIssue.votesData.hasVoted : false;
@@ -104,7 +106,7 @@ namespace Atlassian.Jira
 
             // collections
             _customFields = _originalIssue.customFieldValues == null ? new CustomFieldValueCollection(this)
-                : new CustomFieldValueCollection(this, _originalIssue.customFieldValues.Select(f => new CustomFieldValue(f.customfieldId, this) { Values = f.values }).ToList());
+                : new CustomFieldValueCollection(this, _originalIssue.customFieldValues.Select(f => new CustomFieldValue(f.customfieldId, this) { Values = f.values, RawValue = f.rawValue }).ToList());
 
             var affectsVersions = _originalIssue.affectsVersions ?? Enumerable.Empty<RemoteVersion>();
             _affectsVersions = new ProjectVersionCollection("versions", _jira, Project, affectsVersions.Select(v =>
@@ -199,9 +201,14 @@ namespace Atlassian.Jira
         public string Environment { get; set; }
 
         /// <summary>
-        /// Person to whom the issue is currently assigned.
+        /// Username or account id of user to whom the issue is currently assigned.
         /// </summary>
         public string Assignee { get; set; }
+
+        /// <summary>
+        /// User object of user to whom the issue is currently assigned.
+        /// </summary>
+        public JiraUser AssigneeUser { get; private set; }
 
         /// <summary>
         /// Time tracking data for this issue.
@@ -252,9 +259,14 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Person who entered the issue into the system
+        /// Username or account id of user who created the issue in Jira.
         /// </summary>
         public string Reporter { get; set; }
+
+        /// <summary>
+        /// User object of user who created the issue in Jira.
+        /// </summary>
+        public JiraUser ReporterUser { get; private set; }
 
         /// <summary>
         /// Record of the issue's resolution, if the issue has been resolved or closed
@@ -757,7 +769,9 @@ namespace Atlassian.Jira
         {
             var jiraUser = await this.Jira.Users.GetMyselfAsync(token);
 
-            return await this.AddCommentAsync(new Comment() { Author = jiraUser.Username, Body = comment }, token);
+            var author = this.Jira.RestClient.Settings.EnableUserPrivacyMode ? jiraUser.AccountId : jiraUser.Username;
+
+            return await this.AddCommentAsync(new Comment() { Author = author, Body = comment }, token);
         }
 
         /// <summary>
@@ -987,16 +1001,16 @@ namespace Atlassian.Jira
         /// <summary>
         /// Adds a user to the watchers of the issue.
         /// </summary>
-        /// <param name="username">Username of the user to add.</param>
+        /// <param name="usernameOrAccountId">Username or account id of the user to add as a watcher.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task AddWatcherAsync(string username, CancellationToken token = default(CancellationToken))
+        public Task AddWatcherAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to add watcher, issue has not been saved to server.");
             }
 
-            return _jira.Issues.AddWatcherAsync(_originalIssue.key, username, token);
+            return _jira.Issues.AddWatcherAsync(_originalIssue.key, usernameOrAccountId, token);
         }
 
         /// <summary>
@@ -1016,22 +1030,22 @@ namespace Atlassian.Jira
         /// <summary>
         /// Removes a user from the watchers of the issue.
         /// </summary>
-        /// <param name="username">Username of the user to add.</param>
+        /// <param name="usernameOrAccountId">Username or account id of the user to remove as a watcher.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        public Task DeleteWatcherAsync(string username, CancellationToken token = default(CancellationToken))
+        public Task DeleteWatcherAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken))
         {
             if (String.IsNullOrEmpty(_originalIssue.key))
             {
                 throw new InvalidOperationException("Unable to remove watcher, issue has not been saved to server.");
             }
 
-            return _jira.Issues.DeleteWatcherAsync(_originalIssue.key, username, token);
+            return _jira.Issues.DeleteWatcherAsync(_originalIssue.key, usernameOrAccountId, token);
         }
 
         /// <summary>
         /// Assigns this issue to the specified user.
         /// </summary>
-        /// <param name="assignee">The username of the user to assign this issue to.</param>
+        /// <param name="assignee">The username or account id of the user to assign this issue to.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         public async Task AssignAsync(string assignee, CancellationToken token = default(CancellationToken))
         {

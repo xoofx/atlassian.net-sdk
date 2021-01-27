@@ -11,12 +11,15 @@ namespace Atlassian.Jira.Test.Integration
     {
         [Theory]
         [ClassData(typeof(JiraProvider))]
-        public void GetFilters(Jira jira)
+        public async Task GetFilters(Jira jira)
         {
-            var filters = jira.Filters.GetFavouritesAsync().Result;
+            var filters = await jira.Filters.GetFavouritesAsync();
 
             Assert.True(filters.Count() >= 1);
             Assert.Contains(filters, f => f.Name == "One Issue Filter");
+
+            var filter = await jira.Filters.GetFilterAsync(filters.First().Id);
+            Assert.NotNull(filter);
         }
 
         [Theory]
@@ -119,7 +122,15 @@ namespace Atlassian.Jira.Test.Integration
         {
             var projects = jira.Projects.GetProjectsAsync().Result;
             Assert.True(projects.Count() > 0);
-            Assert.Equal("admin", projects.First().Lead);
+
+            var project = projects.First();
+            Assert.Equal("admin", project.Lead);
+            Assert.Equal("admin", project.LeadUser.DisplayName);
+            Assert.NotNull(project.AvatarUrls);
+            Assert.NotNull(project.AvatarUrls.XSmall);
+            Assert.NotNull(project.AvatarUrls.Small);
+            Assert.NotNull(project.AvatarUrls.Medium);
+            Assert.NotNull(project.AvatarUrls.Large);
         }
 
         [Theory]
@@ -128,6 +139,7 @@ namespace Atlassian.Jira.Test.Integration
         {
             var project = jira.Projects.GetProjectAsync("TST").Result;
             Assert.Equal("admin", project.Lead);
+            Assert.Equal("admin", project.LeadUser.DisplayName);
             Assert.Equal("Test Project", project.Name);
         }
 

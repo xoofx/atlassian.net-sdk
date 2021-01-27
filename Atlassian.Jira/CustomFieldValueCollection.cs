@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Atlassian.Jira.Remote;
+using Newtonsoft.Json;
 
 namespace Atlassian.Jira
 {
@@ -117,6 +118,24 @@ namespace Atlassian.Jira
                 var childOption = fieldValue.Values.Length > 1 ? fieldValue.Values[1] : null;
 
                 result = new CascadingSelectCustomField(fieldName, parentOption, childOption);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Deserializes the custom field value to the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to deserialize to.</typeparam>
+        /// <param name="fieldName">Name of the custom field as defined in JIRA.</param>
+        public T GetAs<T>(string fieldName)
+        {
+            var result = default(T);
+            var fieldValue = this[fieldName];
+
+            if (fieldValue != null && fieldValue.RawValue != null)
+            {
+                result = JsonConvert.DeserializeObject<T>(fieldValue.RawValue.ToString(), _issue.Jira.RestClient.Settings.JsonSerializerSettings);
             }
 
             return result;

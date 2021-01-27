@@ -28,12 +28,14 @@ namespace Atlassian.Jira
         public Comment(RemoteComment remoteComment)
         {
             Id = remoteComment.id;
-            Author = remoteComment.author;
+            Author = remoteComment.authorUser?.InternalIdentifier;
+            AuthorUser = remoteComment.authorUser;
             Body = remoteComment.body;
             CreatedDate = remoteComment.created;
             GroupLevel = remoteComment.groupLevel;
             RoleLevel = remoteComment.roleLevel;
-            UpdateAuthor = remoteComment.updateAuthor;
+            UpdateAuthor = remoteComment.updateAuthorUser?.InternalIdentifier;
+            UpdateAuthorUser = remoteComment.updateAuthorUser;
             UpdatedDate = remoteComment.updated;
             Visibility = remoteComment.visibility;
             _properties = remoteComment.properties;
@@ -44,6 +46,8 @@ namespace Atlassian.Jira
 
         public string Author { get; set; }
 
+        public JiraUser AuthorUser { get; private set; }
+
         public string Body { get; set; }
 
         public string GroupLevel { get; set; }
@@ -53,6 +57,8 @@ namespace Atlassian.Jira
         public DateTime? CreatedDate { get; private set; }
 
         public string UpdateAuthor { get; private set; }
+
+        public JiraUser UpdateAuthorUser { get; private set; }
 
         public DateTime? UpdatedDate { get; private set; }
 
@@ -85,7 +91,7 @@ namespace Atlassian.Jira
         {
             return new RemoteComment
             {
-                author = this.Author,
+                authorUser = this.Author == null ? null : new JiraUser() { InternalIdentifier = this.Author },
                 body = this.Body,
                 groupLevel = this.GroupLevel,
                 roleLevel = this.RoleLevel,

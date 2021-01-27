@@ -14,6 +14,7 @@ var issues = from i in jira.Issues.Queryable
              orderby i.Created
              select i;
 ```
+Some Jira server URLs need HTTPS for authentication to work.
 
 By default, string comparisons are translated using the JIRA contains operator ('~'). A literal match can be forced by
 wrapping the string with the LiteralMatch class:

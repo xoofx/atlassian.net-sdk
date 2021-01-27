@@ -24,22 +24,25 @@ namespace Atlassian.Jira.Remote
             return await _jira.RestClient.ExecuteRequestAsync<JiraUser>(Method.POST, resource, requestBody, token).ConfigureAwait(false);
         }
 
-        public Task DeleteUserAsync(string username, CancellationToken token = default(CancellationToken))
+        public Task DeleteUserAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/user?username={0}", Uri.EscapeUriString(username));
+            var queryString = _jira.RestClient.Settings.EnableUserPrivacyMode ? "accountId" : "username";
+            var resource = String.Format($"rest/api/2/user?{queryString}={Uri.EscapeUriString(usernameOrAccountId)}");
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
         }
 
-        public Task<JiraUser> GetUserAsync(string username, CancellationToken token = default(CancellationToken))
+        public Task<JiraUser> GetUserAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/user?username={0}", Uri.EscapeUriString(username));
+            var queryString = _jira.RestClient.Settings.EnableUserPrivacyMode ? "accountId" : "username";
+            var resource = String.Format($"rest/api/2/user?{queryString}={Uri.EscapeUriString(usernameOrAccountId)}");
             return _jira.RestClient.ExecuteRequestAsync<JiraUser>(Method.GET, resource, null, token);
         }
 
         public Task<IEnumerable<JiraUser>> SearchUsersAsync(string query, JiraUserStatus userStatus = JiraUserStatus.Active, int maxResults = 50, int startAt = 0, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format(
-                "rest/api/2/user/search?username={0}&includeActive={1}&includeInactive={2}&startAt={3}&maxResults={4}",
+                "rest/api/2/user/search?{0}={1}&includeActive={2}&includeInactive={3}&startAt={4}&maxResults={5}",
+                _jira.RestClient.Settings.EnableUserPrivacyMode ? "query" : "username",
                 Uri.EscapeUriString(query),
                 userStatus.HasFlag(JiraUserStatus.Active),
                 userStatus.HasFlag(JiraUserStatus.Inactive),

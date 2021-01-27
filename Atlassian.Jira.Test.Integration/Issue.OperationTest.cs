@@ -440,7 +440,8 @@ namespace Atlassian.Jira.Test.Integration
 
             // verify properties of an attachment
             var attachment = attachments.First();
-            Assert.NotEmpty(attachment.Author);
+            Assert.Equal("admin", attachment.Author);
+            Assert.Equal("admin", attachment.AuthorUser.DisplayName);
             Assert.NotNull(attachment.CreatedDate);
             Assert.True(attachment.FileSize > 0);
             Assert.NotEmpty(attachment.MimeType);
@@ -570,9 +571,13 @@ namespace Atlassian.Jira.Test.Integration
             };
             var newComment = await issue.AddCommentAsync(comment);
 
-            // Verify visibility.
+            // Verify
             Assert.Equal("role", newComment.Visibility.Type);
             Assert.Equal("Developers", newComment.Visibility.Value);
+            Assert.Equal("admin", newComment.Author);
+            Assert.Equal("admin", newComment.AuthorUser.DisplayName);
+            Assert.Equal("admin", newComment.UpdateAuthor);
+            Assert.Equal("admin", newComment.UpdateAuthorUser.DisplayName);
 
             // Update the comment
             newComment.Visibility.Value = "Users";
@@ -696,6 +701,8 @@ namespace Atlassian.Jira.Test.Integration
             Assert.Equal(4, logs.Count());
             Assert.Equal("comment", logs.ElementAt(3).Comment);
             Assert.Equal(new DateTime(2012, 1, 1), logs.ElementAt(3).StartDate);
+            Assert.Equal("admin", logs.First().Author);
+            Assert.Equal("admin", logs.First().AuthorUser.DisplayName);
         }
 
         [Theory]

@@ -8,35 +8,19 @@ namespace Atlassian.Jira
     /// </summary>
     public class Worklog
     {
-        private readonly DateTime? _created;
-        private readonly string _id;
-        private readonly long _timeSpentInSeconds;
-        private readonly DateTime? _updated;
-
         public string Author { get; set; }
+        public JiraUser AuthorUser { get; private set; }
         public string Comment { get; set; }
         public DateTime? StartDate { get; set; }
         public string TimeSpent { get; set; }
 
-        public string Id
-        {
-            get { return _id; }
-        }
+        public string Id { get; private set; }
 
-        public long TimeSpentInSeconds
-        {
-            get { return _timeSpentInSeconds; }
-        }
+        public long TimeSpentInSeconds { get; private set; }
 
-        public DateTime? CreateDate
-        {
-            get { return _created; }
-        }
+        public DateTime? CreateDate { get; private set; }
 
-        public DateTime? UpdateDate
-        {
-            get { return _updated; }
-        }
+        public DateTime? UpdateDate { get; private set; }
 
         /// <summary>
         /// Creates a new worklog instance
@@ -55,14 +39,15 @@ namespace Atlassian.Jira
         {
             if (remoteWorklog != null)
             {
-                this.Author = remoteWorklog.author;
+                this.Author = remoteWorklog.authorUser?.InternalIdentifier;
+                this.AuthorUser = remoteWorklog.authorUser;
                 this.Comment = remoteWorklog.comment;
                 this.StartDate = remoteWorklog.startDate;
                 this.TimeSpent = remoteWorklog.timeSpent;
-                _id = remoteWorklog.id;
-                _created = remoteWorklog.created;
-                _timeSpentInSeconds = remoteWorklog.timeSpentInSeconds;
-                _updated = remoteWorklog.updated;
+                Id = remoteWorklog.id;
+                CreateDate = remoteWorklog.created;
+                TimeSpentInSeconds = remoteWorklog.timeSpentInSeconds;
+                UpdateDate = remoteWorklog.updated;
             }
         }
 
@@ -70,7 +55,7 @@ namespace Atlassian.Jira
         {
             return new RemoteWorklog()
             {
-                author = this.Author,
+                authorUser = this.Author == null ? null : new JiraUser() { InternalIdentifier = this.Author },
                 comment = this.Comment,
                 startDate = this.StartDate,
                 timeSpent = this.TimeSpent

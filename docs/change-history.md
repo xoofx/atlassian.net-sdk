@@ -1,5 +1,39 @@
 # Change History
 
+## Version 12.4.0 (01/18/2021)
+
+- [Issue 480](https://bitbucket.org/farmas/atlassian.net-sdk/issues/480) Adds ability to get an issue filter by id.
+
+## Version 12.3.0 (12/05/2020)
+
+- [Issue 562](https://bitbucket.org/farmas/atlassian.net-sdk/issues/562) Adds a new sprint serializer that can handle the new sprint format.
+- [Issue 570](https://bitbucket.org/farmas/atlassian.net-sdk/issues/570) Fixes exception in JiraUser when using comparisons.
+
+To register the new sprint serialiser:
+```
+var settings = new JiraRestClientSettings();
+settings.CustomFieldSerializers["com.pyxis.greenhopper.jira:gh-sprint"] = new new GreenhopperSprintJsonCustomFieldValueSerialiser();
+var jira = new Jira("url", "user", "password", settings);
+```
+
+## Version 12.2.0 (10/25/2020)
+
+- [Issue 253](https://bitbucket.org/farmas/atlassian.net-sdk/issues/253) Exposes the avatar url's for projects and users.
+
+## Version 12.1.0 (03/08/2020)
+
+- [Issue #509](https://bitbucket.org/farmas/atlassian.net-sdk/issues/503): Allows users to handle changes due to user privacy updates (GDPR).
+- Exposes JiraUser object for Issue.Reporter, Issue.Assignee, Comment.Author, Attachment.Author, Worklog.Author and Project.Lead.
+- Allows users to deserialize custom fields to .NET types. Makes it possible to read JiraUser objects from 'user-picker' custom fields.
+ 
+## Version 12.0.0 (02/15/2020)
+
+- PR #80: Allows user to specify which issue links to get.
+- [Issue #503](https://bitbucket.org/farmas/atlassian.net-sdk/issues/503): Skip and Take should reset with each query execution
+- [Issue #499](https://bitbucket.org/farmas/atlassian.net-sdk/issues/499): Updated RestSharp to 106.10.1 (from 106.2.2)
+
+__Breaking Changes__: RestSharp library has breaking changes between version 106.2.2 and 106.10.1
+
 ## Version 11.2.0 (01/06/2020) ##
 - [PR #77](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/77): Adds option to expand transition fields.
 - [PR #78](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/78): Adds Screen service.

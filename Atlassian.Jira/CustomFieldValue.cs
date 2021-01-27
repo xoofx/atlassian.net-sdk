@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Linq;
 
 namespace Atlassian.Jira
@@ -8,13 +9,12 @@ namespace Atlassian.Jira
     /// </summary>
     public class CustomFieldValue
     {
-        private readonly string _id;
         private readonly Issue _issue;
         private string _name;
 
         internal CustomFieldValue(string id, Issue issue)
         {
-            _id = id;
+            Id = id;
             _issue = issue;
         }
 
@@ -27,19 +27,14 @@ namespace Atlassian.Jira
         /// <summary>
         /// The values of the custom field
         /// </summary>
-        public string[] Values
-        {
-            get;
-            set;
-        }
+        public string[] Values { get; set; }
 
         /// <summary>
         /// Id of the custom field as defined in JIRA
         /// </summary>
-        public string Id
-        {
-            get { return _id; }
-        }
+        public string Id { get; private set; }
+
+        internal JToken RawValue { get; set; }
 
         internal ICustomFieldValueSerializer Serializer { get; set; }
 
@@ -52,10 +47,10 @@ namespace Atlassian.Jira
             {
                 if (String.IsNullOrEmpty(_name))
                 {
-                    var customField = _issue.Jira.Fields.GetCustomFieldsAsync().Result.FirstOrDefault(f => f.Id == _id);
+                    var customField = _issue.Jira.Fields.GetCustomFieldsAsync().Result.FirstOrDefault(f => f.Id == Id);
                     if (customField == null)
                     {
-                        throw new InvalidOperationException(String.Format("Custom field with id '{0}' was not found.", _id));
+                        throw new InvalidOperationException(String.Format("Custom field with id '{0}' was not found.", Id));
                     }
 
                     _name = customField.Name;

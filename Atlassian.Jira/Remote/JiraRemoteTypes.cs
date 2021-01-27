@@ -25,8 +25,6 @@ namespace Atlassian.Jira.Remote
     public partial class RemoteComment
     {
 
-        private string authorField;
-
         private string bodyField;
 
         private System.Nullable<System.DateTime> createdField;
@@ -37,24 +35,13 @@ namespace Atlassian.Jira.Remote
 
         private string roleLevelField;
 
-        private string updateAuthorField;
-
         private System.Nullable<System.DateTime> updatedField;
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string author
-        {
-            get
-            {
-                return this.authorField;
-            }
-            set
-            {
-                this.authorField = value;
-            }
-        }
+        [JsonIgnore]
+        public string author { get; set; }
+
+        [JsonProperty("author")]
+        public JiraUser authorUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -126,20 +113,11 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string updateAuthor
-        {
-            get
-            {
-                return this.updateAuthorField;
-            }
-            set
-            {
-                this.updateAuthorField = value;
-            }
-        }
+        [JsonIgnore]
+        public string updateAuthor { get; set; }
+
+        [JsonProperty("updateAuthor")]
+        public JiraUser updateAuthorUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -171,8 +149,6 @@ namespace Atlassian.Jira.Remote
     public partial class RemoteWorklog
     {
 
-        private string authorField;
-
         private string commentField;
 
         private System.Nullable<System.DateTime> createdField;
@@ -193,20 +169,11 @@ namespace Atlassian.Jira.Remote
 
         private System.Nullable<System.DateTime> updatedField;
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string author
-        {
-            get
-            {
-                return this.authorField;
-            }
-            set
-            {
-                this.authorField = value;
-            }
-        }
+        [JsonIgnore]
+        public string author { get; set; }
+
+        [JsonProperty("author")]
+        public JiraUser authorUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -613,6 +580,19 @@ namespace Atlassian.Jira.Remote
         }
     }
 
+    public class RemoteJiraUser
+    {
+        public string accountId { get; set; }
+        public string key { get; set; }
+        public string name { get; set; }
+        public string displayName { get; set; }
+        public string emailAddress { get; set; }
+        public bool active { get; set; }
+        public string locale { get; set; }
+        public string self { get; set; }
+        public AvatarUrls avatarUrls { get; set; }
+    }
+
     /// <remarks/>
     [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
     [System.SerializableAttribute()]
@@ -825,8 +805,6 @@ namespace Atlassian.Jira.Remote
 
         private string keyField;
 
-        private string leadField;
-
         private RemoteScheme notificationSchemeField;
 
         private RemotePermissionScheme permissionSchemeField;
@@ -836,6 +814,8 @@ namespace Atlassian.Jira.Remote
         private string urlField;
 
         public ProjectCategory projectCategory { get; set; }
+
+        public AvatarUrls avatarUrls { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -879,20 +859,11 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string lead
-        {
-            get
-            {
-                return this.leadField;
-            }
-            set
-            {
-                this.leadField = value;
-            }
-        }
+        [JsonIgnore]
+        public string lead { get; set; }
+
+        [JsonProperty("lead")]
+        public JiraUser leadUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -1224,8 +1195,6 @@ namespace Atlassian.Jira.Remote
     public partial class RemoteAttachment : AbstractRemoteEntity
     {
 
-        private string authorField;
-
         private System.Nullable<System.DateTime> createdField;
 
         private string filenameField;
@@ -1234,20 +1203,11 @@ namespace Atlassian.Jira.Remote
 
         private string mimetypeField;
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string author
-        {
-            get
-            {
-                return this.authorField;
-            }
-            set
-            {
-                this.authorField = value;
-            }
-        }
+        [JsonIgnore]
+        public string author { get; set; }
+
+        [JsonProperty("author")]
+        public JiraUser authorUser { get; set; }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -1318,8 +1278,6 @@ namespace Atlassian.Jira.Remote
 
         private RemoteVersion[] affectsVersionsField;
 
-        private string assigneeField;
-
         private string[] attachmentNamesField;
 
         private RemoteComponent[] componentsField;
@@ -1339,8 +1297,6 @@ namespace Atlassian.Jira.Remote
         private string keyField;
 
         private string projectField;
-
-        private string reporterField;
 
         private string summaryField;
 
@@ -1391,21 +1347,6 @@ namespace Atlassian.Jira.Remote
 
         [JsonIgnore]
         public IDictionary<string, JToken> fieldsReadOnly { get; set; }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string assignee
-        {
-            get
-            {
-                return this.assigneeField;
-            }
-            set
-            {
-                this.assigneeField = value;
-            }
-        }
 
         /// <remarks/>
         [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
@@ -1552,21 +1493,17 @@ namespace Atlassian.Jira.Remote
             }
         }
 
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        [JsonConverter(typeof(NestedValueJsonConverter), "name")]
-        public string reporter
-        {
-            get
-            {
-                return this.reporterField;
-            }
-            set
-            {
-                this.reporterField = value;
-            }
-        }
+        [JsonIgnore]
+        public string reporter { get; set; }
 
+        [JsonProperty("reporter")]
+        public JiraUser reporterJiraUser { get; set; }
+
+        [JsonIgnore]
+        public string assignee { get; set; }
+
+        [JsonProperty("assignee")]
+        public JiraUser assigneeJiraUser { get; set; }
 
         public RemoteResolution resolution { get; set; }
 
@@ -1748,65 +1685,17 @@ namespace Atlassian.Jira.Remote
         public string ProjectKey { get; set; }
     }
 
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
     public partial class RemoteCustomFieldValue
     {
-
-        private string customfieldIdField;
-
-        private string keyField;
-
-        private string[] valuesField;
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string customfieldId
-        {
-            get
-            {
-                return this.customfieldIdField;
-            }
-            set
-            {
-                this.customfieldIdField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string key
-        {
-            get
-            {
-                return this.keyField;
-            }
-            set
-            {
-                this.keyField = value;
-            }
-        }
-
-        /// <remarks/>
-        [System.Xml.Serialization.SoapElementAttribute(IsNullable = true)]
-        public string[] values
-        {
-            get
-            {
-                return this.valuesField;
-            }
-            set
-            {
-                this.valuesField = value;
-            }
-        }
+        public string customfieldId { get; set; }
+        public string key { get; set; }
+        public string[] values { get; set; }
 
         [JsonIgnore]
         public ICustomFieldValueSerializer serializer { get; set; }
+
+        [JsonIgnore]
+        public JToken rawValue { get; set; }
     }
 
     /// <remarks/>

@@ -13,7 +13,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{680E73AB-49DF-4A17-B7EB-107F273A2E0E}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		.env = .env
 		.gitignore = .gitignore
 		docker-compose.yml = docker-compose.yml
 		LICENSE.md = LICENSE.md
@@ -25,8 +24,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{A7546F7E-EF28-4B2B-9F85-CD104DEE61F7}"
 	ProjectSection(SolutionItems) = preProject
 		docs\change-history.md = docs\change-history.md
+		docs\how-to-configure-issue-fields-to-fetch.md = docs\how-to-configure-issue-fields-to-fetch.md
 		docs\how-to-connect-using-oauth.md = docs\how-to-connect-using-oauth.md
 		docs\how-to-debug-problems.md = docs\how-to-debug-problems.md
+		docs\how-to-handle-gdpr-changes.md = docs\how-to-handle-gdpr-changes.md
 		docs\how-to-run-the-integration-tests.md = docs\how-to-run-the-integration-tests.md
 		docs\how-to-use-custom-fields.md = docs\how-to-use-custom-fields.md
 		docs\how-to-use-the-sdk.md = docs\how-to-use-the-sdk.md

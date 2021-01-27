@@ -3,19 +3,27 @@ The API exposed to clients uses the 'name' of the custom field instead of the 'i
 
 Internally, the SDK looks up the 'id' of the custom field by querying the metadata of custom fields from JIRA.
 
-# Accessing custom fields #
+# Reading custom fields #
 
 ```csharp
-// Accessing a custom field with single value.
+// Get a custom field with single value.
 var singleValue = issue["My Field Name"]; 
 
-//  Accessing a custom field with multiple values.
+//  Get a custom field with multiple values.
 var multiValue = issue.CustomFields["My Field Name"].Values; 
+
+// Get a cascading select custom field.
+var cascadingSelect = issue.CustomFields.GetCascadingSelectField("My Field Name");
+
+// Deserialize the custom field value to a type (ie. user picker)
+ var user = issue.CustomFields.GetAs<JiraUser>("User Field");
+ var users = issue.CustomFields.GetAs<JiraUser[]>("Users Field");
+
 ```
 
 # Writing to a custom field
-```csharp
 
+```csharp
 // Set a single value custom field
 issue["My CustomField"] = "Updated Field";
 
@@ -87,5 +95,17 @@ In order to register a custom field serializer the custom field type must be kno
 var settings = new JiraRestClientSettings();
 settings.CustomFieldSerializers.Add("com.atlassian.jira.plugin.system.customfieldtypes:url", new MyCustomFieldValueSerializer());
 return Jira.CreateRestClient(<url>, <user>, <pass>, settings);
+```
 
+
+# Built-in Custom Serialization #
+
+## Sprint serializer ##
+
+The format of the sprint changed in Jira, depending on the Jira version that you target you may need to switch to the new serializer:
+
+```
+var settings = new JiraRestClientSettings();
+settings.CustomFieldSerializers["com.pyxis.greenhopper.jira:gh-sprint"] = new new GreenhopperSprintJsonCustomFieldValueSerialiser();
+var jira = new Jira("url", "user", "password", settings);
 ```

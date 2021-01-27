@@ -215,17 +215,17 @@ namespace Atlassian.Jira
         /// Removes a user from the watcher list of an issue.
         /// </summary>
         /// <param name="issueKey">The issue key to remove the watcher from.</param>
-        /// <param name="username">User name of user to remove.</param>
+        /// <param name="usernameOrAccountId">User name or account id of user to remove.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task DeleteWatcherAsync(string issueKey, string username, CancellationToken token = default(CancellationToken));
+        Task DeleteWatcherAsync(string issueKey, string usernameOrAccountId, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Adds a user to the watcher list of an issue.
         /// </summary>
         /// <param name="issueKey">The issue key to add the watcher to.</param>
-        /// <param name="username">User name of user to add.</param>
+        /// <param name="usernameOrAccountId">User name or account id of user to add.</param>
         /// <param name="token">Cancellation token for this operation.</param>
-        Task AddWatcherAsync(string issueKey, string username, CancellationToken token = default(CancellationToken));
+        Task AddWatcherAsync(string issueKey, string usernameOrAccountId, CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Retrieve the change logs from server for the issue specified.
@@ -299,7 +299,7 @@ namespace Atlassian.Jira
         /// Assigns an issue to the specified user.
         /// </summary>
         /// <param name="issueKey">Identifier of the issue to assign.</param>
-        /// <param name="assignee">The username of the user to assign the issue to.</param>
+        /// <param name="assignee">The username or account id of the user to assign the issue to.</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task AssignIssueAsync(string issueKey, string assignee, CancellationToken token = default(CancellationToken));
 

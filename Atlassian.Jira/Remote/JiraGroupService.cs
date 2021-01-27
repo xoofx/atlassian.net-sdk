@@ -20,7 +20,13 @@ namespace Atlassian.Jira.Remote
         public Task AddUserAsync(string groupname, string username, CancellationToken token = default(CancellationToken))
         {
             var resource = String.Format("rest/api/2/group/user?groupname={0}", Uri.EscapeUriString(groupname));
-            var requestBody = JToken.FromObject(new { name = username });
+            object body = new { name = username };
+            if (_jira.RestClient.Settings.EnableUserPrivacyMode)
+            {
+                body = new { accountId = username };
+            }
+
+            var requestBody = JToken.FromObject(body);
             return _jira.RestClient.ExecuteRequestAsync(Method.POST, resource, requestBody, token);
         }
 
@@ -64,8 +70,9 @@ namespace Atlassian.Jira.Remote
 
         public Task RemoveUserAsync(string groupname, string username, CancellationToken token = default(CancellationToken))
         {
-            var resource = String.Format("rest/api/2/group/user?groupname={0}&username={1}",
+            var resource = String.Format("rest/api/2/group/user?groupname={0}&{1}={2}",
                 Uri.EscapeUriString(groupname),
+                _jira.RestClient.Settings.EnableUserPrivacyMode ? "accountId" : "username",
                 Uri.EscapeUriString(username));
 
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);

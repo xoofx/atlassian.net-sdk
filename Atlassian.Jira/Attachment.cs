@@ -10,12 +10,6 @@ namespace Atlassian.Jira
     public class Attachment
     {
         private readonly Jira _jira;
-        private readonly string _author;
-        private readonly DateTime? _created;
-        private readonly string _fileName;
-        private readonly string _mimeType;
-        private readonly long? _fileSize;
-        private readonly string _id;
 
         /// <summary>
         /// Creates a new instance of an Attachment from a remote entity.
@@ -25,61 +19,55 @@ namespace Atlassian.Jira
         public Attachment(Jira jira, RemoteAttachment remoteAttachment)
         {
             _jira = jira;
-            _author = remoteAttachment.author;
-            _created = remoteAttachment.created;
-            _fileName = remoteAttachment.filename;
-            _mimeType = remoteAttachment.mimetype;
-            _fileSize = remoteAttachment.filesize;
-            _id = remoteAttachment.id;
+
+            AuthorUser = remoteAttachment.authorUser;
+            CreatedDate = remoteAttachment.created;
+            FileName = remoteAttachment.filename;
+            MimeType = remoteAttachment.mimetype;
+            FileSize = remoteAttachment.filesize;
+            Id = remoteAttachment.id;
         }
 
         /// <summary>
         /// Id of attachment
         /// </summary>
-        public string Id
-        {
-            get { return _id; }
-        }
+        public string Id { get; private set; }
 
         /// <summary>
         /// Author of attachment (user that uploaded the file)
         /// </summary>
         public string Author
         {
-            get { return _author; }
+            get
+            {
+                return AuthorUser?.InternalIdentifier;
+            }
         }
+
+        /// <summary>
+        /// User object of the author of attachment.
+        /// </summary>
+        public JiraUser AuthorUser { get; private set; }
 
         /// <summary>
         /// Date of creation
         /// </summary>
-        public DateTime? CreatedDate
-        {
-            get { return _created; }
-        }
+        public DateTime? CreatedDate { get; private set; }
 
         /// <summary>
         /// File name of the attachment
         /// </summary>
-        public string FileName
-        {
-            get { return _fileName; }
-        }
+        public string FileName { get; private set; }
 
         /// <summary>
         /// Mime type
         /// </summary>
-        public string MimeType
-        {
-            get { return _mimeType; }
-        }
+        public string MimeType { get; private set; }
 
         /// <summary>
         /// File size
         /// </summary>
-        public long? FileSize
-        {
-            get { return _fileSize; }
-        }
+        public long? FileSize { get; private set; }
 
         /// <summary>
         /// Downloads attachment as a byte array.
