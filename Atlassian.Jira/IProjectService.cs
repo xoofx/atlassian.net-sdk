@@ -22,13 +22,5 @@ namespace Atlassian.Jira
         /// <param name="projectKey">Project key for the single project to load</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<Project> GetProjectAsync(string projectKey, CancellationToken token = default(CancellationToken));
-
-        /// <summary>
-        /// Returns all the issue statuses within the given project, grouped by the issue types
-        /// which uses them in their workflow.
-        /// </summary>
-        /// <param name="projectKey">Key of the project to retrieve the statuses from.</param>
-        /// <param name="token">Cancellation token for this operation.</param>
-        Task<IEnumerable<IssueTypeWithStatus>> GetProjectStatusesAsync(string projectKey, CancellationToken token = default(CancellationToken));
     }
 }

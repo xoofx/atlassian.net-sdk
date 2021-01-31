@@ -22,6 +22,7 @@ namespace Atlassian.Jira
             : base(remoteIssueType)
         {
             IsSubTask = remoteIssueType.subTask;
+            Statuses = remoteIssueType.statuses?.Select(x => new IssueStatus(x)).ToArray();
         }
 
         /// <summary>
@@ -40,6 +41,11 @@ namespace Atlassian.Jira
         /// Whether this issue type represents a sub-task.
         /// </summary>
         public bool IsSubTask { get; private set; }
+
+        /// <summary>
+        /// The list of valid status values for this issue type.
+        /// </summary>
+        public IssueStatus[] Statuses { get; private set; }
 
         public bool SearchByProjectOnly { get; set; }
 

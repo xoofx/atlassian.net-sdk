@@ -147,14 +147,14 @@ namespace Atlassian.Jira.Test.Integration
         [ClassData(typeof(JiraProvider))]
         public async Task GetProjectStatusesAsync(Jira jira)
         {
-            Predicate<IssueTypeWithStatus> filter = x => x.Name == "Improvement" && x.Statuses.Any(s => s.Name == "Resolved");
+            Predicate<IssueType> filter = x => x.Name == "Improvement" && x.Statuses.Any(s => s.Name == "Resolved");
 
             // Validate that issue types are returned with the valid statuses
-            var issueTypes = await jira.Projects.GetProjectStatusesAsync("TST");
+            var issueTypes = await jira.IssueTypes.GetIssueTypesForProjectAsync("TST");
             Assert.Contains(issueTypes, filter);
 
             // Validate that different projects return different info
-            issueTypes = await jira.Projects.GetProjectStatusesAsync("SCRUM");
+            issueTypes = await jira.IssueTypes.GetIssueTypesForProjectAsync("SCRUM");
             Assert.DoesNotContain(issueTypes, filter);
         }
 
