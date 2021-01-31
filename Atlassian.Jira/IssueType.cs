@@ -16,7 +16,7 @@ namespace Atlassian.Jira
     public class IssueType : JiraNamedConstant
     {
         /// <summary>
-        /// Creates an instance of the IssuePriority based on a remote entity.
+        /// Creates an instance of the IssueType based on a remote entity.
         /// </summary>
         public IssueType(RemoteIssueType remoteIssueType)
             : base(remoteIssueType)
@@ -25,7 +25,7 @@ namespace Atlassian.Jira
         }
 
         /// <summary>
-        /// Creates an instance of the IssuePriority with given id and name.
+        /// Creates an instance of the IssueType with given id and name.
         /// </summary>
         /// <param name="id">Identifiers of the issue type.</param>
         /// <param name="name">Name of the issue type.</param>

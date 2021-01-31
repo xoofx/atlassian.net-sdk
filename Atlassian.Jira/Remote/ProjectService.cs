@@ -34,5 +34,12 @@ namespace Atlassian.Jira.Remote
             var remoteProject = await _jira.RestClient.ExecuteRequestAsync<RemoteProject>(Method.GET, resource, null, token).ConfigureAwait(false);
             return new Project(_jira, remoteProject);
         }
+
+        public async Task<IEnumerable<IssueTypeWithStatus>> GetProjectStatusesAsync(string projectIdOrKey, CancellationToken token = default(CancellationToken))
+        {
+            var resource = $"rest/api/2/project/{projectIdOrKey}/statuses";
+            var results = await _jira.RestClient.ExecuteRequestAsync<RemoteIssueTypeWithStatus[]>(Method.GET, resource, null, token).ConfigureAwait(false);
+            return results.Select(x => new IssueTypeWithStatus(x));
+        }
     }
 }
