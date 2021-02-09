@@ -1,10 +1,38 @@
-﻿namespace Atlassian.Jira
+﻿using Atlassian.Jira.Remote;
+
+namespace Atlassian.Jira
 {
     /// <summary>
     /// Represents a JIRA user.
     /// </summary>
     public class JiraUser
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JiraUser"/> class based on its remote counterpart.
+        /// </summary>
+        /// <param name="remoteUser">The remote user.</param>
+        /// <param name="userPrivacyEnabled">if set to <c>true</c> enable user privacy mode (use 'accountId' insead of 'name' for serialization).</param>
+        public JiraUser(RemoteJiraUser remoteUser, bool userPrivacyEnabled = false)
+        {
+            AccountId = remoteUser.accountId;
+            DisplayName = remoteUser.displayName;
+            Email = remoteUser.emailAddress;
+            IsActive = remoteUser.active;
+            Key = remoteUser.key;
+            Locale = remoteUser.locale;
+            Self = remoteUser.self;
+            Username = remoteUser.name;
+            AvatarUrls = remoteUser.avatarUrls;
+            InternalIdentifier = userPrivacyEnabled ? remoteUser.accountId : remoteUser.name;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JiraUser"/> class.
+        /// </summary>
+        internal JiraUser()
+        {
+        }
+
         /// <summary>
         /// The Atlassian account identifier for this user.
         /// </summary>
