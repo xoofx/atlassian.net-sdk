@@ -94,5 +94,84 @@ namespace Atlassian.Jira.Test.Integration
             Assert.NotNull(user.AvatarUrls.Medium);
             Assert.NotNull(user.AvatarUrls.Large);
         }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task SearchAssignableUsersForIssue(Jira jira)
+        {
+            var userInfo = BuildUserInfo();
+            userInfo.Username = userInfo.Email;
+
+            // verify create a user.
+            var user = await jira.Users.CreateUserAsync(userInfo);
+            Assert.NotNull(user);
+
+            // any user can be assigned to SCRUM issues.
+            var users = await jira.Users.SearchAssignableUsersForIssueAsync("test", "SCRUM-1");
+            Assert.NotNull(users.FirstOrDefault(u => u.Username == user.Username));
+
+            // only developers can be assigned to TST issues.
+            users = await jira.Users.SearchAssignableUsersForIssueAsync("test", "TST-1");
+            Assert.Null(users.FirstOrDefault(u => u.Username == user.Username));
+
+            // verify delete a user
+            await jira.Users.DeleteUserAsync(userInfo.Username);
+            users = await jira.Users.SearchUsersAsync(userInfo.Username);
+            Assert.Empty(users);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task SearchAssignableUsersForProject(Jira jira)
+        {
+            var userInfo = BuildUserInfo();
+            userInfo.Username = userInfo.Email;
+
+            // verify create a user.
+            var user = await jira.Users.CreateUserAsync(userInfo);
+            Assert.NotNull(user);
+
+            // any user can be assigned to SCRUM issues.
+            var users = await jira.Users.SearchAssignableUsersForProjectAsync("test", "SCRUM");
+            Assert.NotNull(users.FirstOrDefault(u => u.Username == user.Username));
+
+            // only developers can be assigned to TST issues.
+            users = await jira.Users.SearchAssignableUsersForProjectAsync("test", "TST");
+            Assert.Null(users.FirstOrDefault(u => u.Username == user.Username));
+
+            // verify delete a user
+            await jira.Users.DeleteUserAsync(userInfo.Username);
+            users = await jira.Users.SearchUsersAsync(userInfo.Username);
+            Assert.Empty(users);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public async Task SearchAssignableUsersForProjects(Jira jira)
+        {
+            var userInfo = BuildUserInfo();
+            userInfo.Username = userInfo.Email;
+
+            // verify create a user.
+            var user = await jira.Users.CreateUserAsync(userInfo);
+            Assert.NotNull(user);
+
+            // test user is assignable because any user can be assigned to SCRUM issues.
+            var users = await jira.Users.SearchAssignableUsersForProjectsAsync("test", new[] { "SCRUM" });
+            Assert.NotNull(users.FirstOrDefault(u => u.Username == user.Username));
+
+            // test user is not assignable because only developers can be assigned to TST issues.
+            users = await jira.Users.SearchAssignableUsersForProjectsAsync("test", new[] { "TST" });
+            Assert.Null(users.FirstOrDefault(u => u.Username == user.Username));
+
+            // test user is not assignable because only developers can be assigned to both SCRUM and TST issues.
+            users = await jira.Users.SearchAssignableUsersForProjectsAsync("test", new[] { "SCRUM", "TST" });
+            Assert.Null(users.FirstOrDefault(u => u.Username == user.Username));
+
+            // verify delete a user
+            await jira.Users.DeleteUserAsync(userInfo.Username);
+            users = await jira.Users.SearchUsersAsync(userInfo.Username);
+            Assert.Empty(users);
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -50,6 +51,47 @@ namespace Atlassian.Jira.Remote
                 maxResults);
 
             return _jira.RestClient.ExecuteRequestAsync<IEnumerable<JiraUser>>(Method.GET, resource, null, token);
+        }
+
+        public Task<IEnumerable<JiraUser>> SearchAssignableUsersForIssueAsync(
+            string username,
+            string issueKey,
+            int startAt = 0,
+            int maxResults = 50,
+            CancellationToken token = default(CancellationToken))
+        {
+            var resourceSb = new StringBuilder($"rest/api/2/user/assignable/search", 200);
+            resourceSb.Append($"?username={Uri.EscapeDataString(username)}&issueKey={Uri.EscapeDataString(issueKey)}");
+            resourceSb.Append($"&startAt={startAt}&maxResults={maxResults}");
+
+            return _jira.RestClient.ExecuteRequestAsync<IEnumerable<JiraUser>>(Method.GET, resourceSb.ToString(), null, token);
+        }
+
+        public Task<IEnumerable<JiraUser>> SearchAssignableUsersForProjectAsync(
+            string username,
+            string projectKey,
+            int startAt = 0,
+            int maxResults = 50,
+            CancellationToken token = default(CancellationToken))
+        {
+            var resourceSb = new StringBuilder($"rest/api/2/user/assignable/search", 200);
+            resourceSb.Append($"?username={Uri.EscapeDataString(username)}&project={Uri.EscapeDataString(projectKey)}");
+            resourceSb.Append($"&startAt={startAt}&maxResults={maxResults}");
+
+            return _jira.RestClient.ExecuteRequestAsync<IEnumerable<JiraUser>>(Method.GET, resourceSb.ToString(), null, token);
+        }
+
+        public Task<IEnumerable<JiraUser>> SearchAssignableUsersForProjectsAsync(
+            string username,
+            IEnumerable<string> projectKeys,
+            int startAt = 0,
+            int maxResults = 50,
+            CancellationToken token = default(CancellationToken))
+        {
+            var resourceSb = new StringBuilder("rest/api/2/user/assignable/multiProjectSearch", 200);
+            resourceSb.Append($"?username={username}&projectKeys={string.Join(",", projectKeys)}&startAt={startAt}&maxResults={maxResults}");
+
+            return _jira.RestClient.ExecuteRequestAsync<IEnumerable<JiraUser>>(Method.GET, resourceSb.ToString(), null, token);
         }
 
         public async Task<JiraUser> GetMyselfAsync(CancellationToken token = default(CancellationToken))
