@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Atlassian.Jira
+﻿namespace Atlassian.Jira
 {
     public interface IFileSystem
     {

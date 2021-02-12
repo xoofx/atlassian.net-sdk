@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Atlassian.Jira
+﻿namespace Atlassian.Jira
 {
     /// <summary>
     /// Information about an attachment to be uploaded

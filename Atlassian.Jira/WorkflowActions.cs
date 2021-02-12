@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Atlassian.Jira
+﻿namespace Atlassian.Jira
 {
     /// <summary>
     /// Default workflow actions for a standard JIRA install.

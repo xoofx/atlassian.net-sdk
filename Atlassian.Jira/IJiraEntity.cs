@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Atlassian.Jira
+﻿namespace Atlassian.Jira
 {
     /// <summary>
     /// Represents a Jira entity with a unique identifier.
