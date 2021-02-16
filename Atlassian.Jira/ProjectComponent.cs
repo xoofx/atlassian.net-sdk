@@ -1,5 +1,4 @@
-﻿using System;
-using Atlassian.Jira.Remote;
+﻿using Atlassian.Jira.Remote;
 
 namespace Atlassian.Jira
 {

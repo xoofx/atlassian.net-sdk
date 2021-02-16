@@ -1,5 +1,4 @@
-﻿using System;
-namespace Atlassian.Jira.Linq
+﻿namespace Atlassian.Jira.Linq
 {
     /// <summary>
     /// Abstracts the translation of an Expression tree into JQL

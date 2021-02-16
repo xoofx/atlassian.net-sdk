@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Atlassian.Jira
+﻿namespace Atlassian.Jira
 {
     /// <summary>
     /// Additional data to update when executing a workflow transition.

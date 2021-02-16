@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Atlassian.Jira.Linq
+﻿namespace Atlassian.Jira.Linq
 {
     public class JqlData
     {

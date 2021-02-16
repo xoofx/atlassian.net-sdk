@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Atlassian.Jira.Linq;
 using Atlassian.Jira.Remote;
 using Xunit;
