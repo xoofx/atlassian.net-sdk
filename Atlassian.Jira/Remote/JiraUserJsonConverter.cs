@@ -23,19 +23,7 @@ namespace Atlassian.Jira.Remote
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var remoteUser = serializer.Deserialize<RemoteJiraUser>(reader);
-            return new JiraUser()
-            {
-                AccountId = remoteUser.accountId,
-                DisplayName = remoteUser.displayName,
-                Email = remoteUser.emailAddress,
-                IsActive = remoteUser.active,
-                Key = remoteUser.key,
-                Locale = remoteUser.locale,
-                Self = remoteUser.self,
-                Username = remoteUser.name,
-                AvatarUrls = remoteUser.avatarUrls,
-                InternalIdentifier = UserPrivacyEnabled ? remoteUser.accountId : remoteUser.name
-            };
+            return new JiraUser(remoteUser, UserPrivacyEnabled);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
