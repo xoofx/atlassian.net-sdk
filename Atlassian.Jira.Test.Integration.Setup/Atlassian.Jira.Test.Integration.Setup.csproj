@@ -13,9 +13,9 @@
     <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Selenium.Support" Version="3.11.2" />
-    <PackageReference Include="Selenium.WebDriver" Version="3.11.2" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="86.0.4240.2200" />
+    <PackageReference Include="Selenium.Support" Version="3.141.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="88.0.4324.9600" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Net.Http" />
