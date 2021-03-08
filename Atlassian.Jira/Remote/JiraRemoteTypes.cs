@@ -1856,37 +1856,10 @@ namespace Atlassian.Jira.Remote
         public string ColorName { get; set; }
     }
 
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("svcutil", "3.0.4506.2152")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.SoapTypeAttribute(Namespace = "http://beans.soap.rpc.jira.atlassian.com")]
     public partial class RemoteStatus : AbstractRemoteConstant
     {
-        private RemoteStatusCategory statusCategoryField;
-
-        [JsonIgnore]
-        public RemoteStatusCategory statusCategory
-        {
-            get
-            {
-                return this.statusCategoryField;
-            }
-            set
-            {
-                this.statusCategoryField = value;
-            }
-        }
-
         [JsonProperty("statusCategory")]
-        public RemoteStatusCategory statusCategoryDeserializer
-        {
-            set
-            {
-                this.statusCategoryField = value;
-            }
-        }
+        public RemoteStatusCategory statusCategory { get; set; }
     }
 
     /// <remarks/>
@@ -1985,7 +1958,7 @@ namespace Atlassian.Jira.Remote
         }
 
         [JsonProperty("statuses")]
-        public RemoteStatus[] statuses { get; private set; }
+        public RemoteStatus[] statuses { get; set; }
     }
 
     /// <remarks/>
