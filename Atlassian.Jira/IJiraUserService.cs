@@ -34,7 +34,7 @@ namespace Atlassian.Jira
         Task<IEnumerable<JiraUser>> SearchUsersAsync(string query, JiraUserStatus userStatus = JiraUserStatus.Active, int maxResults = 50, int startAt = 0, CancellationToken token = default(CancellationToken));
 
         /// <summary>
-        /// Searches assignable users for a project or an issue.
+        /// Searches assignable users for an issue.
         /// </summary>
         /// <param name="username">The username.</param>
         /// <param name="issueKey">The issue key.</param>
@@ -44,7 +44,7 @@ namespace Atlassian.Jira
         Task<IEnumerable<JiraUser>> SearchAssignableUsersForIssueAsync(string username, string issueKey, int startAt = 0, int maxResults = 50, CancellationToken token = default(CancellationToken));
 
         /// <summary>
-        /// Searches assignable users for a project or an issue.
+        /// Searches assignable users for a project.
         /// </summary>
         /// <param name="username">The username.</param>
         /// <param name="projectKey">The project key.</param>
@@ -54,7 +54,7 @@ namespace Atlassian.Jira
         Task<IEnumerable<JiraUser>> SearchAssignableUsersForProjectAsync(string username, string projectKey, int startAt = 0, int maxResults = 50, CancellationToken token = default(CancellationToken));
 
         /// <summary>
-        /// Searches the assignable users asynchronous.
+        /// Searches the assignable users for a list of projects.
         /// </summary>
         /// <param name="username">The username.</param>
         /// <param name="projectKeys">The project keys.</param>
