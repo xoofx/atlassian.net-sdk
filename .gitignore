@@ -29,6 +29,7 @@ ipch/
 obj/
 .vs/
 .nuget/
+.vscode/
 [Bb]in
 [Dd]ebug*/
 [Rr]elease*/
