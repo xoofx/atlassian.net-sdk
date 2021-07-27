@@ -53,7 +53,7 @@ namespace Atlassian.Jira.OAuth
             string authorizeTokenUrl,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var requestTokenResponse = await restClient.ExecutePostTaskAsync(
+            var requestTokenResponse = await restClient.ExecutePostAsync(
                 new RestRequest(requestTokenUrl),
                 cancellationToken).ConfigureAwait(false);
 
@@ -115,7 +115,7 @@ namespace Atlassian.Jira.OAuth
             string oAuthTokenSecret,
             CancellationToken cancellationToken)
         {
-            var accessTokenResponse = await restClient.ExecutePostTaskAsync(
+            var accessTokenResponse = await restClient.ExecutePostAsync(
                 new RestRequest(accessTokenUrl, Method.POST),
                 cancellationToken).ConfigureAwait(false);
 

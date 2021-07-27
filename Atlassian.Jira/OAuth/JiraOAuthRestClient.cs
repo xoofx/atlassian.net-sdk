@@ -53,7 +53,10 @@ namespace Atlassian.Jira.OAuth
             // Move the query parameters to the request parameters.
             if (!string.IsNullOrEmpty(fullPath.Query))
             {
-                request.Parameters.AddRange(QueryParametersHelper.GetQueryParametersFromPath(fullPath.Query));
+                foreach (var parameter in QueryParametersHelper.GetParametersFromPath(fullPath.Query))
+                {
+                    request.AddParameter(name: parameter.Name, value: parameter.Value, type: parameter.Type);
+                }
 
                 request.Resource = request.Resource.Replace(fullPath.Query, string.Empty);
             }

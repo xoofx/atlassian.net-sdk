@@ -23,12 +23,12 @@ namespace Atlassian.Jira.Test.Integration
 
         protected override async Task<IRestResponse> ExecuteRawResquestAsync(IRestRequest request, CancellationToken token)
         {
-            var response = await this.RestSharpClient.ExecuteTaskAsync(request, token).ConfigureAwait(false);
+            var response = await RestSharpClient.ExecuteAsync(request, token).ConfigureAwait(false);
 
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 RestSharpClient.Authenticator = _authenticator;
-                response = await this.RestSharpClient.ExecuteTaskAsync(request, token).ConfigureAwait(false);
+                response = await RestSharpClient.ExecuteAsync(request, token).ConfigureAwait(false);
                 RestSharpClient.Authenticator = null;
             }
 
