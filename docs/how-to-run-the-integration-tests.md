@@ -17,24 +17,32 @@ The only dependency to run the integration tests are a tiny bit of knowledge of 
 
 ## Prepare the Jira instance
 
-### Automated Setup (Windows) ###
+### Automated Setup
 
-- Automated setup uses Selenium WebDriver to automate the Chrome browser to run through the JIRA setup wizard. It requires the machine to have Chrome installed.
-- To prepare the Jira instance, there is a batch file that runs Docker and restore the test data:
-```
-start-jira-with-data.bat
-```
+Automated setup uses Selenium WebDriver to automate the Chrome browser to run through the JIRA setup wizard. It requires the machine to have Chrome installed.
 
-- Wait until the Chrome window is closed. If successful, the console should show `--- Finished setting up Jira ---`.
-
-### Automated Setup (MacOS)
+1. Set environment variable `JIRA_VERSION`
 
 ```bash
-JIRA_VERSION=8.5.2 docker-compose up -d
+// WINDOWS
+SET JIRA_VERSION=8.5.2
+```
+
+2. Run docker container
+```cmd
+docker-compose up -d
+```
+
+3. Setup Jira test data
+
+```cmd
 dotnet Atlassian.Jira.Test.Integration.Setup/bin/netcoreapp3.1/JiraSetup.dll 8.5.2
 ```
 
-### Manual Setup (Windows) ###
+After running the commands wait until the Chrome window is closed. If successful, the console should show `--- Finished setting up Jira ---`.
+
+
+### Manual Setup (Windows)
 
 Useful if anything fails with the automated setup above.
 
@@ -50,15 +58,7 @@ docker-compose up -d
 - Enter “TestData_8.5.2.zip” in the “File Name” field and click on “Import” (wait until the test data is imported).
 
 ### Setup a different version of Jira
-You can setup a different version by running:
-```
-$ start-jira-with-data.bat <version>
-```
-
-Note: Each Jira version requires a different test data file, look in the `Atlassian.Jira.Test.Integration.Setup/import/` folder for the versions that are available. For example, if there is a file `Atlassian.Jira.Test.Integration.Setup/import/TestData_8.5.0.zip` then can run:
-```
-$ start-jira-with-data.bat 8.5.0
-```
+Each Jira version requires a different test data file, look in the `Atlassian.Jira.Test.Integration.Setup/import/` folder for the versions that are available. For example, if there is a file `Atlassian.Jira.Test.Integration.Setup/import/TestData_8.5.0.zip` then you can setup version `8.5.0` using the same commands.
 
 ## Run the integration tests
 

@@ -17,8 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 		LICENSE.md = LICENSE.md
 		README.md = README.md
-		start-jira-with-data.bat = start-jira-with-data.bat
-		stop-jira.bat = stop-jira.bat
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{A7546F7E-EF28-4B2B-9F85-CD104DEE61F7}"
