@@ -22,7 +22,7 @@ This project is licensed under  [BSD](/LICENSE.md).
 
 - [RestSharp](https://www.nuget.org/packages/RestSharp)
 - [Newtonsoft.Json](https://www.nuget.org/packages/Newtonsoft.Json)
-- Tested with JIRA v7.13.
+- Tested with JIRA v8.5.2
 
 ## History
 
