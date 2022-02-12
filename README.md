@@ -2,6 +2,12 @@
 
 Contains utilities for interacting with  [Atlassian JIRA](http://www.atlassian.com/software/jira).
 
+## Support Notice
+
+All features tested on JIRA v8.5.2
+
+Due to time constraints, this project is no longer mantained. Thank you for all the support during these past years.
+
 ## Download
 
 - [Get the latest via NuGet](http://nuget.org/List/Packages/Atlassian.SDK).
@@ -52,12 +58,3 @@ An alternative to using the Atlassian.SDK.Signed package is to use the [StrongNa
 The documentation is placed under the [docs](/docs) folder.
 
 As a first user, here is the documentation on [how to use the SDK](/docs/how-to-use-the-sdk.md).
-
-## Support
-
-All features tested on JIRA v7.13. If you run into problems using a previous version of JIRA let me know.
-
-Please open an issue if you encounter a bug, have suggestions or feature requests. I'll do my best to address them.
-
-Federico Silva Armas
-[http://federicosilva.net](http://federicosilva.net/)
