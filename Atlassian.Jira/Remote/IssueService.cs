@@ -106,7 +106,7 @@ namespace Atlassian.Jira.Remote
             }
             else
             {
-                fields.AddRange(options.AdditionalFields.Select(field => field.Trim().ToLowerInvariant()));
+                fields.AddRange(options.AdditionalFields.Select(field => field.Trim()));
             }
 
             var parameters = new
