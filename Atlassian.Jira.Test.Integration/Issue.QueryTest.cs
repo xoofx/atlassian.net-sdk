@@ -123,9 +123,19 @@ namespace Atlassian.Jira.Test.Integration
 
         [Theory]
         [ClassData(typeof(JiraProvider))]
-        public void GetIssuesFromFilter(Jira jira)
+        public void GetIssuesFromFilterByName(Jira jira)
         {
             var issues = jira.Filters.GetIssuesFromFavoriteAsync("One Issue Filter").Result;
+
+            Assert.Single(issues);
+            Assert.Equal("TST-1", issues.First().Key.Value);
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssuesFromFilterById(Jira jira)
+        {
+            var issues = jira.Filters.GetIssuesFromFilterAsync("10000").Result;
 
             Assert.Single(issues);
             Assert.Equal("TST-1", issues.First().Key.Value);

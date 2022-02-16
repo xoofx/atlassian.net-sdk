@@ -38,5 +38,17 @@ namespace Atlassian.Jira.Remote
 
             return await _jira.Issues.GetIssuesFromJqlAsync(filter.Jql, maxIssues, startAt, token).ConfigureAwait(false);
         }
+
+        public async Task<IPagedQueryResult<Issue>> GetIssuesFromFilterAsync(string filterId, int? maxIssues = default, int startAt = 0, CancellationToken token = default(CancellationToken))
+        {
+            var filter = await GetFilterAsync(filterId, token);
+
+            if (filter == null)
+            {
+                throw new InvalidOperationException(String.Format("Filter with ID '{0}' was not found.", filterId));
+            }
+
+            return await _jira.Issues.GetIssuesFromJqlAsync(filter.Jql, maxIssues, startAt, token).ConfigureAwait(false);
+        }
     }
 }
