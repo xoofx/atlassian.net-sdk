@@ -12,7 +12,7 @@ namespace Atlassian.Jira.Test
             var url = "?field1=9&field2=Test";
 
             // Act
-            var parameters =  QueryParametersHelper.GetQueryParametersFromPath(url);
+            var parameters =  QueryParametersHelper.GetParametersFromPath(url);
 
             // Assert
             Assert.NotNull(parameters);
@@ -32,7 +32,7 @@ namespace Atlassian.Jira.Test
             var url = "?field1";
 
             // Act
-            var parameters = QueryParametersHelper.GetQueryParametersFromPath(url);
+            var parameters = QueryParametersHelper.GetParametersFromPath(url);
 
             // Assert
             Assert.NotNull(parameters);
@@ -49,7 +49,7 @@ namespace Atlassian.Jira.Test
             var url = "?field1=value=string==";
 
             // Act
-            var parameters = QueryParametersHelper.GetQueryParametersFromPath(url);
+            var parameters = QueryParametersHelper.GetParametersFromPath(url);
 
             // Assert
             Assert.NotNull(parameters);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +8,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
-using RestSharp.Extensions;
 
 namespace Atlassian.Jira.Remote
 {
@@ -108,7 +108,7 @@ namespace Atlassian.Jira.Remote
 
             if (requestBody is string)
             {
-                request.AddParameter(new Parameter(name: "application/json", value: requestBody, type: ParameterType.RequestBody));
+                request.AddParameter(name: "application/json", value: requestBody, type: ParameterType.RequestBody);
             }
             else if (requestBody != null)
             {
@@ -137,7 +137,7 @@ namespace Atlassian.Jira.Remote
         /// </summary>
         protected virtual Task<IRestResponse> ExecuteRawResquestAsync(IRestRequest request, CancellationToken token)
         {
-            return _restClient.ExecuteTaskAsync(request, token);
+            return _restClient.ExecuteAsync(request, token);
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Atlassian.Jira.Remote
         /// <param name="fullFileName">Full file name where the file will be downloaded.</param>
         public void Download(string url, string fullFileName)
         {
-            _restClient.DownloadData(new RestRequest(url, Method.GET)).SaveAs(fullFileName);
+            File.WriteAllBytes(fullFileName, _restClient.DownloadData(new RestRequest(url, Method.GET)));
         }
 
         private void LogRequest(IRestRequest request, object body = null)
