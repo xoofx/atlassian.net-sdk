@@ -30,5 +30,14 @@ namespace Atlassian.Jira
         /// <param name="startAt">Index of the first issue to return (0-based)</param>
         /// <param name="token">Cancellation token for this operation.</param>
         Task<IPagedQueryResult<Issue>> GetIssuesFromFavoriteAsync(string filterName, int? maxIssues = null, int startAt = 0, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
+        /// Returns issues that match the filter with the specified id.
+        /// </summary>
+        /// <param name="filterId">Identifier of the filter to fetch.</param>
+        /// <param name="maxIssues">Maximum number of issues to return (defaults to 50). The maximum allowable value is dictated by the JIRA property 'jira.search.views.default.max'. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="startAt">Index of the first issue to return (0-based)</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IPagedQueryResult<Issue>> GetIssuesFromFilterAsync(string filterId, int? maxIssues = null, int startAt = 0, CancellationToken token = default(CancellationToken));
     }
 }
