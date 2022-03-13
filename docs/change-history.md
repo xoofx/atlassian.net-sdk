@@ -1,5 +1,18 @@
 # Change History
 
+## Version 13.0.0 (03/12/2022)
+
+- [PR 85](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/85) Allows to fetch a project issue types, and the statuses of each issue type.
+- [PR 95](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/95) Convert test projects to .NET Core 3.1.
+- [PR 96](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/96) Add methods to search for assignable users.
+- [PR 97](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/97) Add ctor to create JiraUser from a RemoteJiraUser.
+- [PR 98](https://bitbucket.org/farmas/atlassian.net-sdk/pull-requests/98) Allow to set RemoteIssue.statuses.
+- [Issue 598](https://bitbucket.org/farmas/atlassian.net-sdk/issues/598) Updates RestSharp to v106.12.0.
+- [Issue 611](https://bitbucket.org/farmas/atlassian.net-sdk/issues/611) Fixes ability to retrieve Fix Version/s via additional fields.
+- [Issue 612](https://bitbucket.org/farmas/atlassian.net-sdk/issues/612) Allow fetching filter contents via ID alone.
+
+__Breaking Changes__: RestSharp may have breaking changes between version 106.10.1 and 106.12.0.
+
 ## Version 12.4.0 (01/18/2021)
 
 - [Issue 480](https://bitbucket.org/farmas/atlassian.net-sdk/issues/480) Adds ability to get an issue filter by id.
