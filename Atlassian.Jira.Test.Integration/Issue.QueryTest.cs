@@ -123,12 +123,28 @@ namespace Atlassian.Jira.Test.Integration
 
         [Theory]
         [ClassData(typeof(JiraProvider))]
-        public void GetIssuesFromFilterByName(Jira jira)
+        public void GetIssuesFromFilterWithByName(Jira jira)
         {
             var issues = jira.Filters.GetIssuesFromFavoriteAsync("One Issue Filter").Result;
 
             Assert.Single(issues);
-            Assert.Equal("TST-1", issues.First().Key.Value);
+            var issue = issues.First();
+            Assert.Equal("TST-1", issue.Key.Value);
+            Assert.NotNull(issue.Summary);
+            Assert.False(issue.AdditionalFields.ContainsKey("watches"), "Watches should be excluded by default.");
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssuesFromFilterWithByNameWithFields(Jira jira)
+        {
+            var issues = jira.Filters.GetIssuesFromFavoriteWithFieldsAsync("One Issue Filter", fields: new List<string> { "watches" }).Result;
+
+            Assert.Single(issues);
+            var issue = issues.First();
+            Assert.Equal("TST-1", issue.Key.Value);
+            Assert.Null(issue.Summary);
+            Assert.True(issue.AdditionalFields.ContainsKey("watches"), "Watches should be included by query.");
         }
 
         [Theory]
@@ -138,7 +154,23 @@ namespace Atlassian.Jira.Test.Integration
             var issues = jira.Filters.GetIssuesFromFilterAsync("10000").Result;
 
             Assert.Single(issues);
-            Assert.Equal("TST-1", issues.First().Key.Value);
+            var issue = issues.First();
+            Assert.Equal("TST-1", issue.Key.Value);
+            Assert.NotNull(issue.Summary);
+            Assert.False(issue.AdditionalFields.ContainsKey("watches"), "Watches should be excluded by default.");
+        }
+
+        [Theory]
+        [ClassData(typeof(JiraProvider))]
+        public void GetIssuesFromFilterByIdWithFields(Jira jira)
+        {
+            var issues = jira.Filters.GetIssuesFromFilterWithFieldsAsync("10000", fields: new List<string> { "watches" }).Result;
+
+            Assert.Single(issues);
+            var issue = issues.First();
+            Assert.Equal("TST-1", issue.Key.Value);
+            Assert.Null(issue.Summary);
+            Assert.True(issue.AdditionalFields.ContainsKey("watches"), "Watches should be included by query.");
         }
 
         [Theory]
