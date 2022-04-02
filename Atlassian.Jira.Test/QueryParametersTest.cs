@@ -41,7 +41,7 @@ namespace Atlassian.Jira.Test
             Assert.Equal(parameters.First().Name, "field1");
             Assert.Equal(parameters.First().Value, "");
         }
-        
+
         [Fact]
         public void GetQueryParametersFromPathMultipleEquals()
         {
