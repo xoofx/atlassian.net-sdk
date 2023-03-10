@@ -10,6 +10,14 @@ namespace Atlassian.Jira
     public interface IJiraUserService
     {
         /// <summary>
+        /// Returns a list of all users, active and inactive.
+        /// </summary>
+        /// <param name="maxResults">Maximum number of users to return (defaults to 50). The maximum allowed value is 1000. If you specify a value that is higher than this number, your search results will be truncated.</param>
+        /// <param name="startAt">Index of the first user to return (0-based).</param>
+        /// <param name="token">Cancellation token for this operation.</param>
+        Task<IEnumerable<JiraUser>> GetAllUsers(int maxResults = 50, int startAt = 0, CancellationToken token = default(CancellationToken));
+
+        /// <summary>
         /// Retrieve user specified by username.
         /// </summary>
         /// <param name="usernameOrAccountId">The username or account id of the user to get.</param>

@@ -44,6 +44,10 @@ namespace Atlassian.Jira.Test.Integration
             var users = jira.Users.SearchUsersAsync("test").Result;
             Assert.Contains(users, u => u.Username == userInfo.Username);
 
+            // verify all users
+            var allUsers = jira.Users.GetAllUsers().Result;
+            Assert.Contains(allUsers, u => u.Username == userInfo.Username);
+
             // verify delete a user
             jira.Users.DeleteUserAsync(userInfo.Username).Wait();
             users = jira.Users.SearchUsersAsync(userInfo.Username).Result;

@@ -32,6 +32,15 @@ namespace Atlassian.Jira.Remote
             return _jira.RestClient.ExecuteRequestAsync(Method.DELETE, resource, null, token);
         }
 
+        public Task<IEnumerable<JiraUser>> GetAllUsers(int maxResults = 50, int startAt = 0, CancellationToken token = default(CancellationToken))
+        {
+            var resource = String.Format(
+                "/rest/api/3/users/search?startAt={0}&maxResults={1}",
+                startAt,
+                maxResults);
+            return _jira.RestClient.ExecuteRequestAsync<IEnumerable<JiraUser>>(Method.GET, resource, null, token);
+        }
+
         public Task<JiraUser> GetUserAsync(string usernameOrAccountId, CancellationToken token = default(CancellationToken))
         {
             var queryString = _jira.RestClient.Settings.EnableUserPrivacyMode ? "accountId" : "username";
